@@ -1,0 +1,97 @@
+---
+---
+<nav class="main-nav">
+  <div class="nav-content">
+    <a href="/" class="logo">T_T</a>
+    
+    <div class="nav-links">
+      <a href="/about" data-translate="about">About</a>
+      <a href="/game" data-translate="game">Game</a>
+      <a href="/blog" data-translate="blog">Blog</a>
+      <a href="/contact" data-translate="contact">Contact</a>
+      
+      <button class="lang-toggle">
+        <i class="fas fa-language"></i>
+        <span class="lang-text">日本語</span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<style>
+  .main-nav {
+    background: var(--color-nav-bg);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 1rem 0;
+    width: 100%;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    backdrop-filter: blur(10px);
+  }
+
+  .nav-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 2rem;
+  }
+
+  .logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--color-dark-green);
+    text-decoration: none;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+  }
+
+  .nav-links a {
+    color: var(--color-dark-green);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover {
+    color: var(--color-light-green);
+  }
+
+  .lang-toggle {
+    background: none;
+    border: 2px solid var(--color-dark-green);
+    color: var(--color-dark-green);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s;
+  }
+
+  .lang-toggle:hover {
+    background: var(--color-dark-green);
+    color: white;
+  }
+
+  @media (max-width: 768px) {
+    .nav-content {
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .nav-links {
+      flex-direction: column;
+      gap: 1rem;
+    }
+  }
+</style>

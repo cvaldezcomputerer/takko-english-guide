@@ -1,0 +1,104 @@
+/* Reset */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body,
+h1,
+h2,
+h3,
+h4,
+p,
+figure,
+blockquote,
+dl,
+dd {
+  margin: 0;
+}
+
+ul[role='list'],
+ol[role='list'] {
+  list-style: none;
+}
+
+html:focus-within {
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100vh;
+  text-rendering: optimizeSpeed;
+  line-height: 1.5;
+}
+
+a:not([class]) {
+  text-decoration-skip-ink: auto;
+}
+
+img,
+picture {
+  max-width: 100%;
+  display: block;
+}
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:focus-within {
+   scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Variables */
+:root {
+  /* Colors */
+  --color-primary: #557153; /* dark green */
+  --color-secondary: #94b49f; /* light green */
+  --color-accent: #ff7e33; /* kept from original, or maybe #ffd93d yellow from new palette? */
+  --color-text: #333;
+  --color-bg: #f8f3e6; /* light beige */
+  --color-white: #fff;
+  --color-nav-bg: rgba(255, 255, 255, 0.9);
+  --color-banner-overlay: rgba(47, 79, 47, 0.9);
+  
+  /* Palette from site */
+  --color-beige: #f8f3e6;
+  --color-dark-green: #557153;
+  --color-light-green: #94b49f;
+  --color-dark-teal: #2d3a3a;
+  --color-red: #ff6b6b;
+  --color-blue: #4ecdc4;
+  --color-yellow: #ffd93d;
+  --color-mint: #95e1d3;
+  --color-pink: #ff8b94;
+
+  /* Fonts */
+  --font-body: 'M PLUS Rounded 1c', 'Comic Sans MS', cursive, sans-serif;
+  --font-heading: var(--font-body);
+}
+
+body {
+  min-height: 100vh;
+  text-rendering: optimizeSpeed;
+  line-height: 1.5;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+}
+
