@@ -1,6 +1,7 @@
 ---
 // Game.astro - School Map Navigation Game
 import lilMeow from '../assets/game/lilMeow.png';
+import boomGif from '../assets/game/boom.gif';
 // Road images are now served from /public/game-roads/ for reliable dynamic access
 ---
 
@@ -29,12 +30,12 @@ import lilMeow from '../assets/game/lilMeow.png';
     height: 100vh;
     padding: 1vh 2vw;
     box-sizing: border-box;
-    background: #f0f0f0;
+    background: #b4f1ae;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   }
 
   .status-bar {
-    background: rgba(255, 255, 255, 0.95);
+    background: rgba(97, 78, 78, 0.95);
     padding: 1.5vh 3vw;
     border-radius: 12px;
     font-size: clamp(14px, 2.5vh, 24px);
@@ -69,13 +70,11 @@ import lilMeow from '../assets/game/lilMeow.png';
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   }
 
-  .cell {
-    background: white;
+  .grid :global(.cell) {
+    background: rgb(255, 0, 0);
     border-radius: 0;
     display: grid;
     place-items: center;
-    font-size: clamp(8px, 1.2vh, 12px);
-    text-align: center;
     position: relative;
     transition: all 0.2s ease;
     overflow: hidden;
@@ -88,7 +87,7 @@ import lilMeow from '../assets/game/lilMeow.png';
     padding: 0;
   }
 
-  .cell.location {
+  .grid :global(.cell.location) {
     padding: 0;
     background-color: transparent;
     background-size: contain;
@@ -96,37 +95,38 @@ import lilMeow from '../assets/game/lilMeow.png';
     background-repeat: no-repeat;
   }
 
-  .road-layer {
-    position: absolute !important;
-    top: 0 !important; 
-    left: 0 !important; 
-    width: 100% !important; 
-    height: 100% !important;
-    background-size: 80% 80% !important;
-    background-repeat: no-repeat !important;
-    background-position: center !important;
-    z-index: 5 !important;
+  .grid :global(.road-layer) {
+    position: absolute ;
+    top: 0 ; 
+    left: 0 ; 
+    width: 100% ; 
+    height: 100% ;
+    background-size: cover ;
+    background-repeat: no-repeat ;
+    background-position: center ;
+    z-index: 1 ;
     pointer-events: none;
-    display: block !important;
+    display: block;
+    transform-origin: center center;
+    image-rendering: pixelated;
   }
 
-  .cell.road {
-    background: rgba(160, 160, 160, 0.8);
-    border: 2px solid #666;
+  .grid :global(.cell.road) {
+    background-color: transparent;
     position: relative;
   }
 
-  .cell.has-player {
+  .grid :global(.cell.has-player) {
     background-color: rgba(76, 175, 80, 0.3);
     border: 2px solid #4caf50;
   }
 
-  .player {
+  .grid :global(.player) {
     grid-area: 1 / 1;
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 10;
+    z-index: 100;
     width: 100%;
     height: 100%;
     overflow: hidden;
@@ -135,7 +135,7 @@ import lilMeow from '../assets/game/lilMeow.png';
     left: 0;
   }
 
-  .player-image {
+  .grid :global(.player-image) {
     width: 80%;
     height: 80%;
     object-fit: contain;
@@ -147,10 +147,23 @@ import lilMeow from '../assets/game/lilMeow.png';
   .rotate-90 { transform: rotate(90deg); }
   .rotate-180 { transform: rotate(180deg); }
   .rotate-270 { transform: rotate(270deg); }
+
+  .grid :global(.explosion-effect) {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    z-index: 200;
+    pointer-events: none;
+    object-fit: fill;
+  }
 </style>
 
 <script is:inline define:vars={{
   playerImageSrc: lilMeow.src,
+  explosionSrc: boomGif.src,
   roadImages: {
     straight: '/game-roads/Straight.png',
     corner: '/game-roads/Corner.png',
@@ -180,7 +193,7 @@ import lilMeow from '../assets/game/lilMeow.png';
     { x: 5, y: 7, type: 'straight', variant: 'vertical' },
     
     // Turn left (corner: coming from south, going west)
-    { x: 5, y: 6, type: 'corner', variant: 'sw' },
+    { x: 5, y: 6, type: 't_shape', variant: 'left' },
     
     // Horizontal path going left
     { x: 4, y: 6, type: 'straight', variant: 'horizontal' },
@@ -208,11 +221,11 @@ import lilMeow from '../assets/game/lilMeow.png';
     
     // Cross branches
     { x: 4, y: 5, type: 'end', variant: 'west' },
-    { x: 6, y: 5, type: 'end', variant: 'east' },
+    { x: 6, y: 5, type: 'straight', variant: 'horizontal' },
     { x: 5, y: 4, type: 'straight', variant: 'vertical' },
     
     // Right side path
-    { x: 7, y: 5, type: 'corner', variant: 'se' },
+    { x: 7, y: 5, type: 't_shape', variant: '' },
     { x: 7, y: 6, type: 'straight', variant: 'vertical' },
     { x: 7, y: 7, type: 'end', variant: 'south' },
   ];
@@ -270,8 +283,6 @@ import lilMeow from '../assets/game/lilMeow.png';
   }
 
   function renderGrid() {
-    console.log('Rendering Grid...');
-    console.log('Total Roads defined:', roads.length);
     const grid = document.getElementById("grid");
     if (!grid) return;
     
@@ -285,11 +296,6 @@ import lilMeow from '../assets/game/lilMeow.png';
         const location = getLocationAt(x, y);
         const road = getRoadAt(x, y);
         
-        // Debug specific coordinate
-        if (x === 5 && y === 9) {
-             console.log(`Checking (5,9): Road=${JSON.stringify(road)}, Location=${JSON.stringify(location)}`);
-        }
-
         const isPlayerHere = playerPos.x === x && playerPos.y === y;
 
         if (location) {
@@ -302,36 +308,22 @@ import lilMeow from '../assets/game/lilMeow.png';
         } else if (road) {
           cell.classList.add("road");
           cell.style.position = "relative";
-          // Remove overflow: hidden to prevent clipping during rotation
           
           // Create a separate background div for the road image
           const roadBg = document.createElement("div");
-          roadBg.style.position = "absolute";
-          roadBg.style.top = "0";
-          roadBg.style.left = "0";
-          roadBg.style.width = "100%";
-          roadBg.style.height = "100%";
-          roadBg.style.zIndex = "1";
-          roadBg.style.pointerEvents = "none";
-          roadBg.style.transformOrigin = "center center";
+          roadBg.className = "road-layer";
           
           const imageSrc = roadImages[road.type];
           
           if (imageSrc) {
             // Apply background image to the separate div
             roadBg.style.backgroundImage = `url('${imageSrc}')`;
-            roadBg.style.backgroundSize = 'cover';
-            roadBg.style.backgroundRepeat = 'no-repeat';
-            roadBg.style.backgroundPosition = 'center';
-            roadBg.style.imageRendering = 'pixelated';
-            roadBg.style.imageRendering = 'crisp-edges';
           }
           
           const rotation = tileRotations[road.type][road.variant];
           if (rotation !== undefined) {
             // Apply rotation only to the background div, not the cell
             roadBg.style.transform = `rotate(${rotation}deg)`;
-            console.log(`Applied rotation ${rotation}deg to road background at (${x},${y})`);
           }
           
           cell.appendChild(roadBg);
@@ -341,9 +333,6 @@ import lilMeow from '../assets/game/lilMeow.png';
           cell.classList.add("has-player");
           const playerEl = document.createElement("div");
           playerEl.className = "player";
-          // Ensure player is above road with higher z-index
-          playerEl.style.zIndex = "100"; 
-          playerEl.style.position = "relative"; 
           
           const img = document.createElement("img");
           img.src = playerImageSrc;
@@ -393,6 +382,11 @@ import lilMeow from '../assets/game/lilMeow.png';
       playerPos = { x: newX, y: newY };
       renderGrid();
       updateStatus();
+
+      // Trigger explosion if player is NOT on a road AND NOT at a valid location
+      if (!getRoadAt(newX, newY) && !getLocationAt(newX, newY)) {
+        triggerExplosion(newX, newY);
+      }
     }
   }
 
@@ -402,6 +396,29 @@ import lilMeow from '../assets/game/lilMeow.png';
     renderGrid();
     updateStatus();
   }
+
+  // Function to play explosion effect at specific coordinates
+  window.triggerExplosion = function(x, y) {
+    const grid = document.getElementById("grid");
+    if (!grid) return;
+    
+    // Calculate cell index: y * width + x
+    const index = y * 11 + x;
+    const cell = grid.children[index];
+    
+    if (cell) {
+      const img = document.createElement("img");
+      // Add timestamp to force restart of GIF animation
+      img.src = explosionSrc + "?t=" + Date.now(); 
+      img.className = "explosion-effect";
+      cell.appendChild(img);
+      
+      // Remove after 1 second (adjust based on GIF duration)
+      setTimeout(() => {
+        img.remove();
+      }, 1000);
+    }
+  };
 
   // Initialize
   document.addEventListener("DOMContentLoaded", () => {
