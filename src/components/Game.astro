@@ -1,5 +1,7 @@
 ---
 // Game.astro - School Map Navigation Game
+import lilMeow from '../assets/game/lilMeow.png';
+// Road images are now served from /public/game-roads/ for reliable dynamic access
 ---
 
 <div class="game-container">
@@ -27,7 +29,7 @@
     height: 100vh;
     padding: 1vh 2vw;
     box-sizing: border-box;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #f0f0f0;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   }
 
@@ -55,25 +57,23 @@
 
   .grid {
     display: grid;
-    grid-template-columns: repeat(10, 1fr);
+    grid-template-columns: repeat(11, 1fr);
     grid-template-rows: repeat(10, 1fr);
-    gap: 2px;
-    aspect-ratio: 1;
-    width: min(65vh, 90vw);
-    height: min(65vh, 90vw);
-    background: rgba(255, 255, 255, 0.1);
-    padding: 4px;
-    border-radius: 12px;
+    gap: 0;
+    aspect-ratio: 11/10;
+    width: min(65vh * 11/10, 90vw);
+    height: min(65vh, 90vw * 10/11);
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   }
 
   .cell {
-    background: rgba(255, 255, 255, 0.85);
-    border-radius: 4px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    background: white;
+    border-radius: 0;
+    display: grid;
+    place-items: center;
     font-size: clamp(8px, 1.2vh, 12px);
     text-align: center;
     position: relative;
@@ -81,114 +81,144 @@
     overflow: hidden;
     min-width: 0;
     min-height: 0;
+    isolation: isolate;
+    box-sizing: border-box;
+    border: none;
+    margin: 0;
+    padding: 0;
   }
 
   .cell.location {
-    background: rgba(255, 223, 186, 0.95);
-    border: 2px solid #f5a623;
+    padding: 0;
+    background-color: transparent;
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+
+  .road-layer {
+    position: absolute !important;
+    top: 0 !important; 
+    left: 0 !important; 
+    width: 100% !important; 
+    height: 100% !important;
+    background-size: 80% 80% !important;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+    z-index: 5 !important;
+    pointer-events: none;
+    display: block !important;
   }
 
   .cell.road {
-    background: rgba(210, 210, 210, 0.6);
-    border: 1px solid #999;
-  }
-
-  .cell .icon {
-    font-size: clamp(12px, 2vh, 20px);
-  }
-
-  .cell .name {
-    font-size: clamp(6px, 0.9vh, 10px);
-    font-weight: 500;
-    color: #555;
-    line-height: 1.1;
-    padding: 0 2px;
+    background: rgba(160, 160, 160, 0.8);
+    border: 2px solid #666;
+    position: relative;
   }
 
   .cell.has-player {
-    background: rgba(76, 175, 80, 0.3);
+    background-color: rgba(76, 175, 80, 0.3);
     border: 2px solid #4caf50;
   }
 
   .player {
-    position: absolute;
+    grid-area: 1 / 1;
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 10;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    position: absolute;
+    top: 0;
+    left: 0;
   }
 
-  .player-arrow {
-    width: clamp(20px, 4vh, 32px);
-    height: clamp(20px, 4vh, 32px);
-    color: #2e7d32;
+  .player-image {
+    width: 80%;
+    height: 80%;
+    object-fit: contain;
+    transition: transform 0.2s ease;
   }
 
-  .controls {
-    display: flex;
-    gap: 2vw;
-    padding: 2vh 0;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-
-  .control-btn {
-    padding: 1.5vh 3vw;
-    font-size: clamp(14px, 2vh, 20px);
-    font-weight: 600;
-    border: none;
-    border-radius: 12px;
-    cursor: pointer;
-    background: rgba(255, 255, 255, 0.95);
-    color: #333;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    transition: all 0.2s ease;
-    min-width: 100px;
-  }
-
-  .control-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-  }
-
-  .control-btn:active {
-    transform: translateY(0);
-  }
-
-  .reset-btn {
-    background: #ff6b6b;
-    color: white;
-  }
-
-  .reset-btn:hover {
-    background: #ee5a5a;
-  }
+  /* Road Rotation Utilities */
+  .rotate-0 { transform: rotate(0deg); }
+  .rotate-90 { transform: rotate(90deg); }
+  .rotate-180 { transform: rotate(180deg); }
+  .rotate-270 { transform: rotate(270deg); }
 </style>
 
-<script is:inline>
+<script is:inline define:vars={{
+  playerImageSrc: lilMeow.src,
+  roadImages: {
+    straight: '/game-roads/Straight.png',
+    corner: '/game-roads/Corner.png',
+    t_shape: '/game-roads/T-Shape.png',
+    end: '/game-roads/End.png',
+    cross: '/game-roads/Cross.png'
+  }
+}}>
   // Location data
   const locations = [
-    { x: 2, y: 1, name: "Music Room", icon: "🎵" },
-    { x: 7, y: 1, name: "Library", icon: "📚" },
-    { x: 1, y: 3, name: "Art Room", icon: "🎨" },
-    { x: 5, y: 4, name: "Principal's Office", icon: "👔" },
-    { x: 8, y: 5, name: "Science Room", icon: "🔬" },
-    { x: 3, y: 7, name: "Gym", icon: "🏀" },
-    { x: 6, y: 8, name: "Nurse's Office", icon: "🏥" },
+    { x: 2, y: 1, name: "Music Room", image: "/images/yo2.jpg" },
+    { x: 7, y: 1, name: "Library", image: "/images/yo2.jpg" },
+    { x: 1, y: 3, name: "Art Room", image: "/images/yo2.jpg" },
+    { x: 5, y: 4, name: "Principal's Office", image: "/images/yo2.jpg" },
+    { x: 8, y: 5, name: "Science Room", image: "/images/yo2.jpg" },
+    { x: 3, y: 7, name: "Gym", image: "/images/yo2.jpg" },
+    { x: 6, y: 8, name: "Nurse's Office", image: "/images/yo2.jpg" },
   ];
 
-  // Roads/paths data - add your pathways here
+  // Mixed map with rotated and non-rotated tiles
   const roads = [
-    // Bottom row - main corridor
-    { x: 0, y: 9 }, { x: 1, y: 9 }, { x: 2, y: 9 }, { x: 3, y: 9 }, { x: 4, y: 9 },
-    { x: 5, y: 9 }, { x: 6, y: 9 }, { x: 7, y: 9 }, { x: 8, y: 9 }, { x: 9, y: 9 },
-    // Middle corridors (placeholders - add more as needed)
-    { x: 5, y: 5 }, { x: 5, y: 6 }, { x: 5, y: 7 }, { x: 5, y: 8 },
-    { x: 3, y: 5 }, { x: 3, y: 6 },
+    // Start area
+    { x: 5, y: 9, type: 'end', variant: 'south' },
+    
+    // Vertical path going up
+    { x: 5, y: 8, type: 'straight', variant: 'vertical' },
+    { x: 5, y: 7, type: 'straight', variant: 'vertical' },
+    
+    // Turn left (corner: coming from south, going west)
+    { x: 5, y: 6, type: 'corner', variant: 'sw' },
+    
+    // Horizontal path going left
+    { x: 4, y: 6, type: 'straight', variant: 'horizontal' },
+    { x: 3, y: 6, type: 'straight', variant: 'horizontal' },
+    
+    // Turn up again
+    { x: 2, y: 6, type: 'corner', variant: 'ne' },
+    
+    // Vertical path going up
+    { x: 2, y: 5, type: 'straight', variant: 'vertical' },
+    { x: 2, y: 4, type: 'straight', variant: 'vertical' },
+    
+    // T-junction (rotated to face right)
+    { x: 2, y: 3, type: 't_shape', variant: 'right' },
+    
+    // Branch going up from T
+    { x: 2, y: 2, type: 'end', variant: 'north' },
+    
+    // Branch going right from T
+    { x: 3, y: 3, type: 'straight', variant: 'horizontal' },
+    { x: 4, y: 3, type: 'straight', variant: 'horizontal' },
+    { x: 5, y: 3, type: 'corner', variant: 'sw' },
+    { x: 5, y: 4, type: 'straight', variant: 'vertical' },
+    { x: 5, y: 5, type: 'cross', variant: 'all' },
+    
+    // Cross branches
+    { x: 4, y: 5, type: 'end', variant: 'west' },
+    { x: 6, y: 5, type: 'end', variant: 'east' },
+    { x: 5, y: 4, type: 'straight', variant: 'vertical' },
+    
+    // Right side path
+    { x: 7, y: 5, type: 'corner', variant: 'se' },
+    { x: 7, y: 6, type: 'straight', variant: 'vertical' },
+    { x: 7, y: 7, type: 'end', variant: 'south' },
   ];
 
   // Game state
-  let playerPos = { x: 0, y: 9 };
+  let playerPos = { x: 5, y: 9 };
   let playerHeading = 0; // 0=North, 1=East, 2=South, 3=West
 
   // Direction vectors: [dx, dy] for each heading
@@ -199,58 +229,130 @@
     { dx: -1, dy: 0 },  // West (left)
   ];
 
-  // Heading to rotation degrees
+  // Heading to rotation degrees (Adjusted: 0=North faces Up)
   const headingToRotation = [0, 90, 180, 270];
+
+  // Tile rotation mapping (Maps logical direction to CSS rotation degrees)
+  const tileRotations = {
+    straight: {
+      horizontal: 90, // Need 90° rotation for horizontal
+      vertical: 0     // No rotation needed for vertical
+    },
+    corner: {
+      se: 0,    // Base: South-to-East └
+      sw: 90,   // South-to-East -> South-to-West  
+      nw: 180,  // South-to-East -> North-to-West
+      ne: 270   // South-to-East -> North-to-East
+    },
+    t_shape: {
+      down: 0,   // Base: South opening with West-East arms ┬
+      left: 90,  // Rotate 90° - West opening with North-South arms
+      up: 180,   // Rotate 180° - North opening with West-East arms
+      right: 270 // Rotate 270° - East opening with North-South arms
+    },
+    end: {
+      south: 180, // Base opens North, so South needs 180°
+      west: 270,  // South -> West (was 90, now 270)
+      north: 0,   // Base: Opens North ╵
+      east: 90    // South -> East (was 270, now 90)
+    },
+    cross: {
+      all: 0     // Source: + (Symmetrical)
+    }
+  };
 
   function getLocationAt(x, y) {
     return locations.find(loc => loc.x === x && loc.y === y);
   }
 
-  function isRoad(x, y) {
-    return roads.some(road => road.x === x && road.y === y);
+  function getRoadAt(x, y) {
+    return roads.find(r => r.x === x && r.y === y);
   }
 
-  // SVG arrows for each direction
-  const arrowSvgs = {
-    // North (up)
-    0: `<svg viewBox="0 0 24 24" fill="currentColor" class="player-arrow"><path d="M12 4l-8 8h5v8h6v-8h5z"/></svg>`,
-    // East (right)
-    1: `<svg viewBox="0 0 24 24" fill="currentColor" class="player-arrow"><path d="M20 12l-8-8v5H4v6h8v5z"/></svg>`,
-    // South (down)
-    2: `<svg viewBox="0 0 24 24" fill="currentColor" class="player-arrow"><path d="M12 20l8-8h-5V4h-6v8H4z"/></svg>`,
-    // West (left)
-    3: `<svg viewBox="0 0 24 24" fill="currentColor" class="player-arrow"><path d="M4 12l8 8v-5h8v-6h-8V4z"/></svg>`,
-  };
-
   function renderGrid() {
+    console.log('Rendering Grid...');
+    console.log('Total Roads defined:', roads.length);
     const grid = document.getElementById("grid");
     if (!grid) return;
     
     grid.innerHTML = "";
 
     for (let y = 0; y < 10; y++) {
-      for (let x = 0; x < 10; x++) {
+      for (let x = 0; x < 11; x++) {
         const cell = document.createElement("div");
         cell.className = "cell";
         
         const location = getLocationAt(x, y);
+        const road = getRoadAt(x, y);
+        
+        // Debug specific coordinate
+        if (x === 5 && y === 9) {
+             console.log(`Checking (5,9): Road=${JSON.stringify(road)}, Location=${JSON.stringify(location)}`);
+        }
+
         const isPlayerHere = playerPos.x === x && playerPos.y === y;
 
         if (location) {
           cell.classList.add("location");
-          cell.innerHTML = `
-            <span class="icon">${location.icon}</span>
-            <span class="name">${location.name}</span>
-          `;
-        } else if (isRoad(x, y)) {
+          cell.style.backgroundImage = `url('${location.image}')`;
+          cell.style.backgroundSize = 'contain';
+          cell.style.backgroundRepeat = 'no-repeat';
+          cell.style.backgroundPosition = 'center';
+          cell.title = location.name;
+        } else if (road) {
           cell.classList.add("road");
+          cell.style.position = "relative";
+          // Remove overflow: hidden to prevent clipping during rotation
+          
+          // Create a separate background div for the road image
+          const roadBg = document.createElement("div");
+          roadBg.style.position = "absolute";
+          roadBg.style.top = "0";
+          roadBg.style.left = "0";
+          roadBg.style.width = "100%";
+          roadBg.style.height = "100%";
+          roadBg.style.zIndex = "1";
+          roadBg.style.pointerEvents = "none";
+          roadBg.style.transformOrigin = "center center";
+          
+          const imageSrc = roadImages[road.type];
+          
+          if (imageSrc) {
+            // Apply background image to the separate div
+            roadBg.style.backgroundImage = `url('${imageSrc}')`;
+            roadBg.style.backgroundSize = 'cover';
+            roadBg.style.backgroundRepeat = 'no-repeat';
+            roadBg.style.backgroundPosition = 'center';
+            roadBg.style.imageRendering = 'pixelated';
+            roadBg.style.imageRendering = 'crisp-edges';
+          }
+          
+          const rotation = tileRotations[road.type][road.variant];
+          if (rotation !== undefined) {
+            // Apply rotation only to the background div, not the cell
+            roadBg.style.transform = `rotate(${rotation}deg)`;
+            console.log(`Applied rotation ${rotation}deg to road background at (${x},${y})`);
+          }
+          
+          cell.appendChild(roadBg);
         }
 
         if (isPlayerHere) {
           cell.classList.add("has-player");
-          const playerEl = document.createElement("span");
+          const playerEl = document.createElement("div");
           playerEl.className = "player";
-          playerEl.innerHTML = arrowSvgs[playerHeading];
+          // Ensure player is above road with higher z-index
+          playerEl.style.zIndex = "100"; 
+          playerEl.style.position = "relative"; 
+          
+          const img = document.createElement("img");
+          img.src = playerImageSrc;
+          img.className = "player-image";
+          
+          // Player rotation is now independent of cell/road rotation
+          img.style.transform = `rotate(${headingToRotation[playerHeading]}deg)`;
+          
+          playerEl.appendChild(img);
           cell.appendChild(playerEl);
         }
 
@@ -265,7 +367,7 @@
 
     const location = getLocationAt(playerPos.x, playerPos.y);
     if (location) {
-      statusBar.textContent = `You are at: ${location.icon} ${location.name}`;
+      statusBar.textContent = `You are at: ${location.name}`;
     } else {
       statusBar.textContent = `You are at: Hallway (${playerPos.x}, ${playerPos.y})`;
     }
@@ -287,7 +389,7 @@
     const newY = playerPos.y + dir.dy;
 
     // Bounds check
-    if (newX >= 0 && newX <= 9 && newY >= 0 && newY <= 9) {
+    if (newX >= 0 && newX <= 10 && newY >= 0 && newY <= 9) {
       playerPos = { x: newX, y: newY };
       renderGrid();
       updateStatus();
@@ -295,7 +397,7 @@
   }
 
   function reset() {
-    playerPos = { x: 0, y: 9 };
+    playerPos = { x: 5, y: 9 };
     playerHeading = 0;
     renderGrid();
     updateStatus();
