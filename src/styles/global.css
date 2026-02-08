@@ -106,7 +106,7 @@ select {
   --color-pink: #ff8b94;
 
   /* Fonts */
-  --font-body: 'M PLUS Rounded 1c', 'Comic Sans MS', cursive, sans-serif;
+  --font-body: 'Andika', 'M PLUS Rounded 1c', 'Comic Sans MS', cursive, sans-serif;
   --font-heading: var(--font-body);
 }
 

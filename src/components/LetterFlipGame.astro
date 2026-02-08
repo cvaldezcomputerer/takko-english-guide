@@ -178,7 +178,7 @@ const imagesFromGlob = {
     color: #1f2937;
     font-size: 1.1rem;
   }
-
+  
   .letter-game__letter-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
@@ -231,7 +231,7 @@ const imagesFromGlob = {
     gap: 2rem;
     align-items: start;
     flex: 1;
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
     width: 100%;
     position: relative;
@@ -260,18 +260,16 @@ const imagesFromGlob = {
     position: relative;
     display: grid;
     place-items: center;
-    height: 350px;
+    height: 500px;
     width: 100%;
     border: 4px solid rgba(255, 255, 255, 0.3);
     border-radius: 1.5rem;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    font-size: clamp(5rem, 12vw, 10rem);
+    background-color: var(--color-dark-teal);
+    font-size: clamp(5rem, 12vw, 12rem);
     font-weight: 700;
     font-family: var(--font-body);
     color: white;
-    text-shadow: 4px 4px 0px rgba(0, 0, 0, 0.5),
-      -2px -2px 0px rgba(0, 0, 0, 0.3),
-      2px 2px 0px rgba(0, 0, 0, 0.3);
+    text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.5);
     letter-spacing: 0.05em;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -472,7 +470,10 @@ const imagesFromGlob = {
     images: {
       food: [...imagesFromGlob.food],
       animals: [...imagesFromGlob.animals],
-      objects: [...imagesFromGlob.objects],
+      toys: [...imagesFromGlob.objects],
+      trains: [...imagesFromGlob.objects],
+      vehicles: [...imagesFromGlob.objects],
+      "funny-cats": ["API_REQUIRED"], // Placeholder to ensure it shows up in category rotation
     },
     randomize: true,
   };
@@ -491,6 +492,7 @@ const imagesFromGlob = {
       const randomize = JSON.parse(
         localStorage.getItem(LS_KEYS.randomize) || "null"
       );
+      
       return {
         ...cfg,
         letters,
@@ -581,6 +583,7 @@ const imagesFromGlob = {
     if (gameInitialized) return;
     initializeDOMElements();
     if (elRandomize) elRandomize.checked = config.randomize;
+
     if (elSettingsToggle && elSettingsPanel) {
       elSettingsToggle.addEventListener("click", () => {
         const isHidden = elSettingsPanel.hasAttribute("hidden");
@@ -624,25 +627,78 @@ const imagesFromGlob = {
     if (preloadedImages.length > 20) preloadedImages = preloadedImages.slice(-20);
   }
 
-  function generateNewPair() {
+  // --- API Fetching Logic ---
+  async function fetchUnsplashImage(query) {
+      try {
+          const res = await fetch(`/api/get-image?type=unsplash&query=${query}`);
+          if (!res.ok) return null;
+          const data = await res.json();
+          return data.url; 
+      } catch (e) {
+          console.warn("Unsplash fetch failed:", e);
+          return null;
+      }
+  }
+
+  async function fetchGiphyCat() {
+      try {
+          const res = await fetch(`/api/get-image?type=giphy-cat`);
+          if (!res.ok) return null;
+          const data = await res.json();
+          return data.url;
+      } catch (e) {
+          console.warn("Giphy fetch failed:", e);
+          return null;
+      }
+  }
+
+  async function generateNewPair() {
     currentLetters = generateLetterPair();
     const categories = Object.keys(config.images);
     const categoryWithImages = categories.filter(cat => config.images[cat].length >= 2);
-    if (categoryWithImages.length === 0) {
-      currentCategory = ""; currentPair = ["", ""]; return;
-    }
-    currentCategory = categoryWithImages[Math.floor(Math.random() * categoryWithImages.length)];
-    const imagesToUse = config.images[currentCategory].filter(img => !recentImages.includes(img)).length >= 2 
-      ? config.images[currentCategory].filter(img => !recentImages.includes(img))
-      : config.images[currentCategory];
     
-    const shuffled = config.randomize ? seededShuffle(imagesToUse, currentSeed + roundCount) : imagesToUse;
-    const image1 = shuffled[Math.floor(Math.random() * shuffled.length)];
-    let image2;
-    do { image2 = shuffled[Math.floor(Math.random() * shuffled.length)]; } while (image2 === image1 && shuffled.length > 1);
-    currentPair = [image1, image2];
+    if (categoryWithImages.length === 0) {
+      currentCategory = "Error"; currentPair = ["", ""]; return;
+    }
+
+    currentCategory = categoryWithImages[Math.floor(Math.random() * categoryWithImages.length)];
+    
+    let apiImage = null;
+    let apiImage2 = null;
+
+    // 1. Handle Funny Cats category specifically
+    if (currentCategory === 'funny-cats') {
+         apiImage = await fetchGiphyCat();
+         apiImage2 = await fetchGiphyCat(); // Fetch a second unique one
+         if (apiImage) currentCategory = "Funny Cats! 🐱";
+    }
+
+    // 2. Try Unsplash for General categories (if not funny-cats)
+    if (!apiImage && currentCategory !== 'funny-cats') {
+        const searchTerm = currentCategory; 
+        apiImage = await fetchUnsplashImage(searchTerm);
+        if (apiImage) {
+            apiImage2 = await fetchUnsplashImage(searchTerm);
+        }
+    }
+
+    if (apiImage) {
+        currentPair = [apiImage, apiImage2 || apiImage];
+    } else {
+        // Local Fallback
+        const imagesToUse = config.images[currentCategory].filter(img => !recentImages.includes(img)).length >= 2 
+          ? config.images[currentCategory].filter(img => !recentImages.includes(img))
+          : config.images[currentCategory];
+        
+        const shuffled = config.randomize ? seededShuffle(imagesToUse, currentSeed + roundCount) : imagesToUse;
+        const image1 = shuffled[Math.floor(Math.random() * shuffled.length)];
+        let image2;
+        do { image2 = shuffled[Math.floor(Math.random() * shuffled.length)]; } while (image2 === image1 && shuffled.length > 1);
+        currentPair = [image1, image2];
+    }
+
     preloadImages(currentPair);
-    recentImages.push(image1, image2);
+    recentImages.push(...currentPair);
     if (recentImages.length > 6) recentImages = recentImages.slice(-6);
   }
 
@@ -659,7 +715,9 @@ const imagesFromGlob = {
     if (typeof content === "string") card.textContent = content;
     else {
       card.appendChild(content);
-      if (content.tagName === "IMG") content.style.cssText = "width: 100%; height: 100%; object-fit: cover; border-radius: 1rem; position: absolute; top: 0; left: 0;";
+      if (content.tagName === "IMG") {
+          content.style.cssText = "width: 100%; height: 100%; object-fit: contain; border-radius: 1rem; position: absolute; top: 0; left: 0; background-color: white;";
+      }
     }
   }
 
@@ -667,7 +725,6 @@ const imagesFromGlob = {
     if (!elCards || elCards.length < 2) return;
     const [letter1, letter2] = currentLetters;
     elCards.forEach(card => {
-      card.style.background = cardColors[Math.floor(Math.random() * cardColors.length)];
       card.classList.remove("letter-game__card--flipped");
       card.disabled = false;
     });
@@ -675,7 +732,10 @@ const imagesFromGlob = {
     setCardContent(elCards[1], letter2);
     flippedCards = [false, false];
     if (elBoard) elBoard.classList.remove("both-flipped");
-    if (elNext) elNext.disabled = false;
+    if (elNext) {
+        elNext.disabled = false;
+        elNext.textContent = "Next";
+    }
   }
 
   function handleSelect(side) {
@@ -695,9 +755,13 @@ const imagesFromGlob = {
     img.src = imageUrl;
   }
 
-  function goNext() {
+  async function goNext() {
+    if (elNext) {
+        elNext.disabled = true;
+        elNext.textContent = "Loading...";
+    }
     roundCount++;
-    generateNewPair();
+    await generateNewPair();
     updateProgress();
     renderCurrentPair();
   }
@@ -705,8 +769,12 @@ const imagesFromGlob = {
   function resetGame() {
     flippedCards = [false, false]; roundCount = 0; recentImages = [];
     currentSeed = Math.floor(Math.random() * 1000000); preloadedImages = [];
-    generateNewPair(); updateProgress(); renderCurrentPair();
-    if (elToast) elToast.textContent = "";
+    (async () => {
+        await generateNewPair();
+        updateProgress();
+        renderCurrentPair();
+        if (elToast) elToast.textContent = "";
+    })();
   }
 
   function initializeEventListeners() {
