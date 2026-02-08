@@ -4,269 +4,351 @@ import Navbar from '../components/Navbar.astro';
 import T from '../components/T.astro';
 ---
 
-<Layout title="Takko Town English">
-  <div class="banner">
-    <div class="banner-content">
-      <h1>Takko Taco</h1>
-      <p data-translate="subtitle">
-        <T>
-          <span slot="en">Web Development & Japanese Learning</span>
-          <span slot="ja">ウェブ開発と日本語学習</span>
-        </T>
-      </p>
+<Layout title="Takko Machi - Town Guide">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Patrick+Hand&display=swap" rel="stylesheet">
+
+    <div class="town-guide-body">
+        <Navbar />
+
+        <!-- Hero Section -->
+        <header class="hero">
+            <div class="hero-content">
+                <span class="welcome-text">
+                    <T>
+                        <span slot="en">Welcome to</span>
+                        <span slot="ja">ようこそ</span>
+                    </T>
+                </span>
+                <h1 class="town-name">
+                    <T>
+                        <span slot="en">Takko Machi</span>
+                        <span slot="ja">田子町</span>
+                    </T>
+                </h1>
+                <p class="tagline">
+                    <T>
+                        <span slot="en">Garlic, Culture, & Community</span>
+                        <span slot="ja">にんにく・文化・コミュニティ</span>
+                    </T>
+                </p>
+                <a href="/game" class="cta-button">
+                    <T>
+                        <span slot="en">Play Game ↓</span>
+                        <span slot="ja">ゲームを遊ぶ ↓</span>
+                    </T>
+                </a>
+            </div>
+            <div class="hero-overlay"></div>
+        </header>
+
+        <!-- Main Navigation Grid -->
+        <!-- <section id="explore" class="town-grid">
+            <div class="grid-header">
+                <h2>Discover Our Town</h2>
+                <p>From historic shrines to the best garlic beef bowls.</p>
+            </div>
+            
+            <div class="category-cards">
+                <a href="#" class="cat-card">
+                    <div class="cat-icon">⛩️</div>
+                    <h3>Shrines & Temples</h3>
+                    <p>Tap into local history and spiritual spots.</p>
+                </a>
+                
+                <a href="#" class="cat-card">
+                    <div class="cat-icon">🍜</div>
+                    <h3>Local Eats</h3>
+                    <p>Garlic steak, ramen, and hidden cafes.</p>
+                </a>
+
+                <a href="#" class="cat-card">
+                    <div class="cat-icon">👺</div>
+                    <h3>Festivals</h3>
+                    <p>Experience the vibrant culture of Aomori.</p>
+                </a>
+
+                <a href="#" class="cat-card">
+                    <div class="cat-icon">🏸</div>
+                    <h3>Clubs & Activities</h3>
+                    <p>Join local sports teams and hobby groups.</p>
+                </a>
+            </div>
+        </section> -->
+
+        <!-- English Corner / Games -->
+        <!-- <section class="english-corner">
+            <div class="corner-content">
+                <h2>Takko English Corner</h2>
+                <p>Fun games to learn English while exploring Takko!</p>
+                <div class="game-links">
+                    <a href="/school-map-game" class="game-btn map-theme">
+                        <span class="emoji">🗺️</span> School Map Game
+                    </a>
+                    <a href="/letter-game" class="game-btn letter-theme">
+                        <span class="emoji">🅰️</span> Letter Flip
+                    </a>
+                </div>
+            </div>
+        </section> -->
+
+        <section class="community-board">
+            <div class="board-paper">
+                <div class="pin">📌</div>
+                <h2>
+                    <T>
+                        <span slot="en">Takko Bulletin</span>
+                        <span slot="ja">田子掲示板</span>
+                    </T>
+                </h2>
+                <p>
+                    <T>
+                        <span slot="en">This site is under construction! Please check out my <a href="https://bloggydoggy.com/">blog</a> in the meantime!</span>
+                        <span slot="ja">このサイトは現在制作中です！その間、私の<a href="https://bloggydoggy.com/">ブログ</a>をチェックしてください！</span>
+                    </T>
+                </p>
+            </div>
+        </section>
     </div>
-  </div>
-
-  <Navbar />
-
-  <div class="container">
-    <div class="title-section">
-      <h2 data-translate="about">
-        <T>
-          <span slot="en">ABOUT</span>
-          <span slot="ja">アバウト</span>
-        </T>
-      </h2>
-    </div>
-
-    <main class="main-content">
-      <aside class="sidebar">
-        <div class="profile-box">
-          <img src="/images/hi.png" alt="Cristian Valdez" />
-        </div>
-        
-        <div class="links-box">
-          <h2>
-            <T>
-              <span slot="en">LINKS</span>
-              <span slot="ja">リンク</span>
-            </T>
-          </h2>
-          <a href="https://youtube.com" class="link youtube" target="_blank" rel="noopener noreferrer">
-             <i class="fab fa-youtube"></i> YouTube
-          </a>
-          <a href="https://quizlet.com" class="link quizlet" target="_blank" rel="noopener noreferrer">
-             <i class="fas fa-sticky-note"></i> Quizlet
-          </a>
-        </div>
-      </aside>
-
-      <section class="content">
-        <h2>
-          <T>
-            <span slot="en">Hello!</span>
-            <span slot="ja">こんにちは！</span>
-          </T>
-        </h2>
-        <h3>
-          <T>
-            <span slot="en">Welcome to my Website.</span>
-            <span slot="ja">私のウェブサイトへようこそ。</span>
-          </T>
-        </h3>
-        <p>
-          <T>
-            <span slot="en">My name is Cristian Valdez. I created this website to share my passion for coding and languages.</span>
-            <span slot="ja">クリスティアン・バルデスと申します。コーディングと言語への情熱を共有するためにこのウェブサイトを作成しました。</span>
-          </T>
-        </p>
-        <p>
-          <T>
-            <span slot="en">Please feel free to look around and contact me if you have any questions!</span>
-            <span slot="ja">ご自由にご覧ください。ご質問があればお気軽にお問い合わせください！</span>
-          </T>
-        </p>
-      </section>
-    </main>
-  </div>
 </Layout>
 
 <style>
-  /* Banner */
-  .banner {
-    width: 100%;
-    height: 320px;
-    background-image: url("/images/yo2.jpg");
-    background-size: cover;
-    background-position: center;
-    position: relative;
-    margin-bottom: 1rem; /* Space before navbar */
-  }
+    /* Variables */
+    .town-guide-body {
+        --color-bg: #fffbf0; /* Warm paper white */
+        --color-primary: #4a7c59; /* Forest Green */
+        --color-secondary: #d4a373; /* Wood/Earth tone */
+        --color-accent: #e76f51; /* Terra cotta */
+        --font-main: 'Fredoka', sans-serif;
+        --font-hand: 'Patrick Hand', cursive;
 
-  .banner-content {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: var(--color-banner-overlay);
-    padding: 2rem 3.5rem;
-    border-radius: 20px;
-    text-align: center;
-    color: var(--color-white);
-    backdrop-filter: blur(8px);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.15);
-    border: 1px solid rgba(255,255,255,0.1);
-  }
-
-  .banner-content h1 {
-    margin: 0;
-    font-size: 3.5rem;
-    font-weight: 700;
-  }
-
-  .banner-content p {
-    margin: 0.8rem 0 0;
-    font-size: 1.3rem;
-    opacity: 0.95;
-  }
-
-  /* Container */
-  .container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 2rem;
-  }
-
-  /* Title Section */
-  .title-section {
-    background: var(--color-primary);
-    color: var(--color-white);
-    text-align: center;
-    padding: 2.5rem;
-    margin: 3rem 0;
-    border-radius: 25px;
-    box-shadow: 0 8px 20px rgba(85, 113, 83, 0.2);
-  }
-
-  .title-section h2 {
-    margin: 0;
-    font-size: 2.8rem;
-    letter-spacing: 4px;
-  }
-
-  /* Main Content Layout */
-  .main-content {
-    display: grid;
-    grid-template-columns: 320px 1fr;
-    gap: 4rem;
-    margin-bottom: 5rem;
-  }
-
-  /* Sidebar */
-  .sidebar {
-    display: flex;
-    flex-direction: column;
-    gap: 2.5rem;
-  }
-
-  .profile-box {
-    background: var(--color-white);
-    padding: 1.5rem;
-    border-radius: 25px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
-    border: 2px solid var(--color-beige);
-  }
-
-  .profile-box img {
-    width: 100%;
-    height: auto;
-    border-radius: 18px;
-    border: 4px solid var(--color-beige);
-  }
-
-  .links-box {
-    background: var(--color-white);
-    padding: 2rem;
-    border-radius: 25px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
-    border: 2px solid var(--color-beige);
-  }
-
-  .links-box h2 {
-    color: var(--color-primary);
-    border-bottom: 3px solid var(--color-beige);
-    padding-bottom: 0.8rem;
-    margin-bottom: 1.5rem;
-    font-size: 1.8rem;
-  }
-
-  .link {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 1rem;
-    border-radius: 12px;
-    text-decoration: none;
-    font-weight: bold;
-    margin-bottom: 0.8rem;
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  }
-
-  .link:hover {
-    transform: scale(1.05);
-    box-shadow: 0 6px 12px rgba(0,0,0,0.1);
-  }
-
-  .link.youtube {
-    background: #ff0000;
-    color: white;
-  }
-
-  .link.quizlet {
-    background: #4257b2;
-    color: white;
-  }
-
-  /* Content Section */
-  .content {
-    background: var(--color-white);
-    padding: 3.5rem;
-    border-radius: 30px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.04);
-    border: 2px solid var(--color-beige);
-  }
-
-  .content h2 {
-    color: var(--color-primary);
-    font-size: 2.5rem;
-    margin-bottom: 1rem;
-  }
-
-  .content h3 {
-    color: var(--color-text);
-    font-weight: 500;
-    margin-bottom: 2rem;
-    font-size: 1.4rem;
-    opacity: 0.8;
-  }
-
-  .content p {
-    margin-bottom: 1.5rem;
-    line-height: 1.9;
-    font-size: 1.1rem;
-  }
-
-  /* Responsive */
-  @media (max-width: 992px) {
-    .main-content {
-      grid-template-columns: 1fr;
-      gap: 3rem;
+        background-color: var(--color-bg);
+        font-family: var(--font-main);
+        color: #333;
     }
 
-    .sidebar {
-      order: 2;
-    }
-    
-    .content {
-      order: 1;
+    /* Typography Overrides */
+    h1, h2, h3 { font-family: var(--font-main); }
+
+    /* Hero */
+    .hero {
+        height: 70vh;
+        background-image: url('/images/yo2.jpg');
+        background-size: cover;
+        background-position: center;
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        color: white;
+        border-bottom: 8px solid var(--color-primary);
     }
 
-    .banner {
-      height: 280px;
+    .hero-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0,0,0,0.4); /* Solid semi-transparent overlay */
     }
 
-    .banner-content h1 {
-      font-size: 2.5rem;
+    .hero-content {
+        position: relative;
+        z-index: 2;
     }
-  }
+
+    .welcome-text {
+        font-family: var(--font-hand);
+        font-size: 2rem;
+        display: block;
+        margin-bottom: -1rem;
+        color: #f1f8e9;
+    }
+
+    .town-name {
+        font-size: 6rem;
+        margin: 0;
+        text-shadow: 4px 4px 0px var(--color-primary);
+    }
+
+    .tagline {
+        font-size: 1.5rem;
+        margin-bottom: 2rem;
+        opacity: 0.9;
+    }
+
+    .cta-button {
+        display: inline-block;
+        background: var(--color-accent);
+        color: white;
+        padding: 1rem 2rem;
+        border-radius: 50px;
+        text-decoration: none;
+        font-weight: bold;
+        transition: transform 0.2s;
+        box-shadow: 0 4px 0px #c05035;
+    }
+
+    .cta-button:active {
+        transform: translateY(4px);
+        box-shadow: none;
+    }
+
+    /* Town Grid */
+    .town-grid {
+        padding: 4rem 2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .grid-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .grid-header h2 {
+        font-size: 3rem;
+        color: var(--color-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .category-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+    }
+
+    .cat-card {
+        background: white;
+        border: 3px solid var(--color-secondary);
+        border-radius: 20px;
+        padding: 2rem;
+        text-align: center;
+        text-decoration: none;
+        color: inherit;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .cat-card:hover {
+        transform: translateY(-5px) rotate(1deg);
+        border-color: var(--color-primary);
+        box-shadow: 8px 8px 0px rgba(74, 124, 89, 0.2);
+    }
+
+    .cat-icon {
+        font-size: 3.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .cat-card h3 {
+        font-size: 1.5rem;
+        color: var(--color-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    /* English Corner */
+    .english-corner {
+        background: #e8f5e9;
+        padding: 4rem 2rem;
+        text-align: center;
+        border-top: 4px dashed var(--color-primary);
+        border-bottom: 4px dashed var(--color-primary);
+    }
+
+    .game-links {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        margin-top: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .game-btn {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem 2rem;
+        background: white;
+        border-radius: 15px;
+        text-decoration: none;
+        color: #333;
+        font-weight: bold;
+        font-size: 1.2rem;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        transition: transform 0.2s;
+    }
+
+    .game-btn:hover {
+        transform: scale(1.05);
+    }
+
+    .map-theme { border-bottom: 5px solid #4ecdc4; }
+    .letter-theme { border-bottom: 5px solid #ff6b6b; }
+
+    /* Community Board */
+    .community-board {
+        padding: 5rem 2rem;
+        display: flex;
+        justify-content: center;
+        background-color: var(--color-bg);
+    }
+
+    .board-paper {
+        background: white;
+        padding: 3rem;
+        max-width: 600px;
+        width: 100%;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        position: relative;
+        transform: rotate(-1deg);
+    }
+
+    .pin {
+        position: absolute;
+        top: -15px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 2rem;
+    }
+
+    .newsletter-form {
+        display: flex;
+        gap: 1rem;
+        margin: 2rem 0;
+    }
+
+    .newsletter-form input {
+        flex: 1;
+        padding: 0.8rem;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+    }
+
+    .newsletter-form button {
+        background: var(--color-primary);
+        color: white;
+        border: none;
+        padding: 0 1.5rem;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    .recent-updates ul {
+        list-style: none;
+        padding: 0;
+        text-align: left;
+    }
+
+    .recent-updates li {
+        padding: 0.8rem 0;
+        border-bottom: 1px dashed #eee;
+        font-family: var(--font-hand);
+        font-size: 1.2rem;
+    }
+
+    @media (max-width: 768px) {
+        .town-name { font-size: 4rem; }
+        .newsletter-form { flex-direction: column; }
+    }
 </style>
