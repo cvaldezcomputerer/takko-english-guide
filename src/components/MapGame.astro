@@ -2,11 +2,31 @@
 // MapGame.astro - School Map Navigation Game
 import lilMeow from '../assets/game/lilMeow.png';
 import boomGif from '../assets/game/boom.gif';
-// Road images are now served from /public/game-roads/ for reliable dynamic access
+
+// Optimized image loading from src/assets
+const roadImagesGlob = import.meta.glob<any>('../assets/game-roads/*.png', { eager: true });
+const roomImagesGlob = import.meta.glob<any>('../assets/game-rooms/*.png', { eager: true });
+
+const roadMap: Record<string, string> = {};
+for (const path in roadImagesGlob) {
+  const fileName = path.split('/').pop()?.replace('.png', '') || '';
+  // Map both kebab-case and CamelCase to be safe
+  const module = roadImagesGlob[path] as any;
+  roadMap[fileName.toLowerCase()] = module.default.src;
+}
+
+const roomMap: Record<string, string> = {};
+for (const path in roomImagesGlob) {
+  const fileName = path.split('/').pop()?.replace('.png', '') || '';
+  const module = roomImagesGlob[path] as any;
+  roomMap[fileName.toLowerCase()] = module.default.src;
+}
 ---
 
 <div class="game-container">
-  
+  <div class="status-display" id="status-display">
+    Coordinates: (2, 11) | Ready to explore!
+  </div>
   <div class="grid-container">
     <div class="grid" id="grid">
       <!-- Grid cells will be rendered by JavaScript -->
@@ -18,6 +38,7 @@ import boomGif from '../assets/game/boom.gif';
     <button class="control-btn" id="btn-straight">⬆️</button>
     <button class="control-btn" id="btn-right">➡️</button>
     <button class="control-btn reset-btn" id="btn-reset">🔄</button>
+    <button class="control-btn" id="btn-next-map" title="Next Map">🗺️</button>
   </div>
 </div>
 
@@ -32,6 +53,18 @@ import boomGif from '../assets/game/boom.gif';
     box-sizing: border-box;
     background: #b4f1ae;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+
+  .status-display {
+    background: white;
+    padding: 10px 20px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    font-weight: bold;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    font-size: 1.2rem;
+    min-width: 300px;
+    text-align: center;
   }
 
   .controls {
@@ -73,37 +106,41 @@ import boomGif from '../assets/game/boom.gif';
     grid-template-rows: repeat(12, 1fr);
     gap: 0;
     aspect-ratio: 21/12;
-    width: min(75vh * 21/12, 95vw);
-    height: min(75vh, 95vw * 12/21);
-    background: transparent;
+    width: min(60vh * 21/12, 95vw);
+    height: min(60vh, 95vw * 12/21);
+    background-color: #7ab371; /* Grass color for outside */
     padding: 0;
     border-radius: 0;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    overflow: visible; /* Allow borders to be seen clearly */
   }
 
   .grid :global(.cell) {
-    background: rgb(255, 0, 0);
-    border-radius: 0;
+    background: transparent;
     display: grid;
     place-items: center;
     position: relative;
-    transition: all 0.2s ease;
-    overflow: hidden;
-    min-width: 0;
-    min-height: 0;
-    isolation: isolate;
     box-sizing: border-box;
     border: none;
-    margin: 0;
-    padding: 0;
   }
 
+  /* Interior styling */
+  .grid :global(.cell.interior) {
+    background-color: #e3c099;
+  }
+
+  /* Thick Wall borders */
+  .grid :global(.wall-top) { border-top: 8px solid #2c3e50 !important; }
+  .grid :global(.wall-bottom) { border-bottom: 8px solid #2c3e50 !important; }
+  .grid :global(.wall-left) { border-left: 8px solid #2c3e50 !important; }
+  .grid :global(.wall-right) { border-right: 8px solid #2c3e50 !important; }
+
   .grid :global(.cell.location) {
-    padding: 0;
-    background-color: transparent;
-    background-size: contain;
-    background-position: center;
-    background-repeat: no-repeat;
+    z-index: 5;
+    border-radius: 8px;
+    border: 2px solid rgba(255, 255, 255, 0.6) !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    overflow: hidden;
   }
 
   .grid :global(.road-layer) {
@@ -122,14 +159,8 @@ import boomGif from '../assets/game/boom.gif';
     image-rendering: pixelated;
   }
 
-  .grid :global(.cell.road) {
-    background-color: transparent;
-    position: relative;
-  }
-
   .grid :global(.cell.has-player) {
-    background-color: rgba(76, 175, 80, 0.3);
-    border: 2px solid #4caf50;
+    background-color: rgba(76, 175, 80, 0.2);
   }
 
   .grid :global(.player) {
@@ -140,7 +171,6 @@ import boomGif from '../assets/game/boom.gif';
     z-index: 100;
     width: 100%;
     height: 100%;
-    overflow: hidden;
     position: absolute;
     top: 0;
     left: 0;
@@ -153,11 +183,19 @@ import boomGif from '../assets/game/boom.gif';
     transition: transform 0.2s ease;
   }
 
-  /* Road Rotation Utilities */
-  .rotate-0 { transform: rotate(0deg); }
-  .rotate-90 { transform: rotate(90deg); }
-  .rotate-180 { transform: rotate(180deg); }
-  .rotate-270 { transform: rotate(270deg); }
+  .grid :global(.location-label) {
+    font-size: 10px;
+    font-weight: bold;
+    color: #2c3e50;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 1px 3px;
+    border-radius: 3px;
+    pointer-events: none;
+    z-index: 10;
+    position: absolute;
+    bottom: 2px;
+    white-space: nowrap;
+  }
 
   .grid :global(.explosion-effect) {
     position: absolute;
@@ -175,139 +213,200 @@ import boomGif from '../assets/game/boom.gif';
 <script is:inline define:vars={{
   playerImageSrc: lilMeow.src,
   explosionSrc: boomGif.src,
-  roadImages: {
-    straight: '/game-roads/Straight.png',
-    corner: '/game-roads/Corner.png',
-    t_shape: '/game-roads/T-Shape.png',
-    end: '/game-roads/End.png',
-    cross: '/game-roads/Cross.png'
-  }
+  roadMap,
+  roomMap
 }}>
-  // Location data
-  const locations = [
-    { x: 5, y: 1, name: "Cafeteria", image: "/images/yo2.jpg" },
-    { x: 8, y: 4, name: "Library", image: "/images/yo2.jpg" },
-    { x: 8, y: 6, name: "Restrooms", image: "/images/yo2.jpg" },
-    { x: 12, y: 9, name: "Science Lab", image: "/images/yo2.jpg" },
-    { x: 16, y: 5, name: "Playground", image: "/images/yo2.jpg" },
+  // Level Configuration
+  const levels = [
+    {
+      name: "School Hallways",
+      startPos: { x: 2, y: 11 },
+      locations: [
+        { x: 2, y: 11, name: "Entrance", image: roomMap['entrance'] },
+        { x: 4, y: 1, name: "Staff Room", image: roomMap['staff-room'] },
+        { x: 8, y: 3, name: "Library", image: roomMap['library'] },
+        { x: 12, y: 1, name: "Music Room", image: roomMap['music-room'] },
+        { x: 16, y: 3, name: "Art Room", image: roomMap['art-room'] },
+        { x: 5, y: 6, name: "Lunch Room", image: roomMap['lunch-room'] },
+        { x: 10, y: 6, name: "Gym", image: roomMap['gym'] },
+        { x: 15, y: 6, name: "Science Lab", image: roomMap['science-lab'] },
+        { x: 15, y: 4, name: "Restroom", image: roomMap['rest-room'] },
+        { x: 18, y: 5, name: "Computer Lab", image: roomMap['computer-lab'] },
+        { x: 4, y: 9, name: "Nurse’s Office", image: roomMap['nurses-office'] },
+        { x: 6, y: 7, name: "Sumo Ring", image: roomMap['sumo-ring'] },
+        { x: 12, y: 9, name: "Home Ec Room", image: roomMap['home-ec-room'] },
+        { x: 14, y: 7, name: "Playground", image: roomMap['playground'] },
+        { x: 6, y: 1, name: "Class Room", image: roomMap['class-room'] },
+        { x: 4, y: 3, name: "Principals Office", image: roomMap['principals-office'] },
+      ],
+      roads: [
+        { x: 2, y: 10, image: 'straight-vertical' }, { x: 2, y: 9, image: 'straight-vertical' },
+        { x: 2, y: 8, image: 't-shape-right' }, { x: 2, y: 7, image: 'straight-vertical' },
+        { x: 2, y: 6, image: 'straight-vertical' }, { x: 2, y: 5, image: 't-shape-right' },
+        { x: 2, y: 4, image: 'straight-vertical' }, { x: 2, y: 3, image: 'straight-vertical' },
+        { x: 2, y: 2, image: 'corner-bot-right' }, 
+        { x: 3, y: 2, image: 'straight-horizontal' }, { x: 4, y: 2, image: 'cross' },    
+        { x: 5, y: 2, image: 'straight-horizontal' }, { x: 6, y: 2, image: 't-shape-up' },
+        { x: 7, y: 2, image: 'straight-horizontal' }, { x: 8, y: 2, image: 't-shape-down' }, 
+        { x: 9, y: 2, image: 'straight-horizontal' }, { x: 10, y: 2, image: 'straight-horizontal' },
+        { x: 11, y: 2, image: 'straight-horizontal' }, { x: 12, y: 2, image: 't-shape-up' },    
+        { x: 13, y: 2, image: 'straight-horizontal' }, { x: 14, y: 2, image: 'straight-horizontal' },
+        { x: 15, y: 2, image: 'straight-horizontal' }, { x: 16, y: 2, image: 't-shape-down' }, 
+        { x: 17, y: 2, image: 'end-left' },      
+        { x: 3, y: 5, image: 'straight-horizontal' }, { x: 4, y: 5, image: 'straight-horizontal' },
+        { x: 5, y: 5, image: 't-shape-down' }, { x: 6, y: 5, image: 'straight-horizontal' },
+        { x: 7, y: 5, image: 'straight-horizontal' }, { x: 8, y: 5, image: 'straight-horizontal' },
+        { x: 9, y: 5, image: 'straight-horizontal' }, { x: 10, y: 5, image: 't-shape-down' }, 
+        { x: 11, y: 5, image: 'straight-horizontal' }, { x: 12, y: 5, image: 'straight-horizontal' },
+        { x: 13, y: 5, image: 'straight-horizontal' }, { x: 14, y: 5, image: 'straight-horizontal' },
+        { x: 15, y: 5, image: 'cross' }, { x: 16, y: 5, image: 'straight-horizontal' },
+        { x: 17, y: 5, image: 'straight-horizontal' },
+        { x: 3, y: 8, image: 'straight-horizontal' }, { x: 4, y: 8, image: 't-shape-down' }, 
+        { x: 5, y: 8, image: 'straight-horizontal' }, { x: 6, y: 8, image: 't-shape-up' },    
+        { x: 7, y: 8, image: 'straight-horizontal' }, { x: 8, y: 8, image: 'straight-horizontal' },
+        { x: 9, y: 8, image: 'straight-horizontal' }, { x: 10, y: 8, image: 'straight-horizontal' },
+        { x: 11, y: 8, image: 'straight-horizontal' }, { x: 12, y: 8, image: 't-shape-down' }, 
+        { x: 13, y: 8, image: 'straight-horizontal' }, { x: 14, y: 8, image: 't-shape-up' },    
+        { x: 15, y: 8, image: 'end-left' },
+      ],
+      items: []
+    },
+    {
+      name: "The Maze",
+      startPos: { x: 2, y: 11 },
+      locations: [
+         { x: 2, y: 11, name: "Entrance", image: roomMap['entrance'] },
+         { x: 2, y: 1, name: "Staff Room", image: roomMap['staff-room'] },
+         { x: 3, y: 5, name: "Nurse’s Office", image: roomMap['nurses-office'] },
+         { x: 4, y: 4, name: "Lunch Room", image: roomMap['lunch-room'] },
+         { x: 6, y: 2, name: "Class Room", image: roomMap['class-room'] },
+         { x: 6, y: 9, name: "Sumo Ring", image: roomMap['sumo-ring'] },
+         { x: 10, y: 2, name: "Principals Office", image: roomMap['principals-office'] },
+         { x: 10, y: 9, name: "Home Ec Room", image: roomMap['home-ec-room'] },
+         { x: 12, y: 5, name: "Gym", image: roomMap['gym'] },
+         { x: 14, y: 2, name: "Library", image: roomMap['library'] },
+         { x: 14, y: 9, name: "Restroom", image: roomMap['rest-room'] },
+         { x: 18, y: 1, name: "Music Room", image: roomMap['music-room'] },
+         { x: 17, y: 4, name: "Science Lab", image: roomMap['science-lab'] },
+         { x: 17, y: 9, name: "Computer Lab", image: roomMap['computer-lab'] },
+         { x: 18, y: 11, name: "Art Room", image: roomMap['art-room'] },
+         { x: 8, y: 8, name: "Secret Room", image: roomMap['playground'] },
+         { x: 12, y: 11, name: "Playground", image: roomMap['playground'] }
+      ],
+      roads: [
+        // Trunk (Left)
+        { x: 2, y: 10, image: 'straight-vertical' }, { x: 2, y: 9, image: 'straight-vertical' },
+        { x: 2, y: 8, image: 'straight-vertical' }, { x: 2, y: 7, image: 'straight-vertical' },
+        { x: 2, y: 6, image: 't-shape-right' }, // Hub
+        { x: 2, y: 5, image: 't-shape-right' }, // To Nurse
+        { x: 2, y: 4, image: 'straight-vertical' }, { x: 2, y: 3, image: 'straight-vertical' }, 
+        { x: 2, y: 2, image: 'straight-vertical' }, // Leads to Staff (2,1)
+
+        // Main Horizontal Spine (Row 6)
+        { x: 3, y: 6, image: 'straight-horizontal' }, 
+        { x: 4, y: 6, image: 't-shape-up' }, // To Lunch (4,4)
+        { x: 5, y: 6, image: 'straight-horizontal' }, 
+        { x: 6, y: 6, image: 'cross' }, // Branch 1
+        { x: 7, y: 6, image: 'straight-horizontal' }, 
+        { x: 8, y: 6, image: 'cross' }, // To Secret and Money
+        { x: 9, y: 6, image: 'straight-horizontal' }, 
+        { x: 10, y: 6, image: 'cross' }, // Branch 2
+        { x: 11, y: 6, image: 'straight-horizontal' }, 
+        { x: 12, y: 6, image: 't-shape-up' }, // To Gym (12,5)
+        { x: 13, y: 6, image: 'straight-horizontal' }, 
+        { x: 14, y: 6, image: 'cross' }, // Branch 3
+        { x: 15, y: 6, image: 'straight-horizontal' }, 
+        { x: 16, y: 6, image: 't-shape-down' }, // To Dog
+        { x: 17, y: 6, image: 'straight-horizontal' }, 
+        { x: 18, y: 6, image: 't-shape-left' }, // Right End
+
+        // Branches
+        // Lunch Branch
+        { x: 4, y: 5, image: 'straight-vertical' }, // (4,4) is Lunch
+
+        // Branch 1 (Col 6)
+        { x: 6, y: 5, image: 'straight-vertical' }, { x: 6, y: 4, image: 'straight-vertical' }, { x: 6, y: 3, image: 'straight-vertical' }, // To Class (6,2)
+        { x: 6, y: 7, image: 'straight-vertical' }, { x: 6, y: 8, image: 'straight-vertical' }, // To Sumo (6,9)
+
+        // Money/Secret Branch
+        { x: 8, y: 5, image: 'cross' }, // Money is here
+        { x: 8, y: 7, image: 'straight-vertical' }, // To Secret (8,8)
+
+        // Branch 2 (Col 10)
+        { x: 10, y: 5, image: 'straight-vertical' }, { x: 10, y: 4, image: 'straight-vertical' }, { x: 10, y: 3, image: 'straight-vertical' }, // To Principal (10,2)
+        { x: 10, y: 7, image: 'straight-vertical' }, { x: 10, y: 8, image: 'cross' }, // To HomeEc (10,9) and Playground path
+
+        // Playground Path
+        { x: 11, y: 8, image: 'straight-horizontal' }, { x: 12, y: 8, image: 'corner-bot-left' },
+        { x: 12, y: 9, image: 'straight-vertical' }, { x: 12, y: 10, image: 'straight-vertical' }, // To Playground (12,11)
+
+        // Branch 3 (Col 14)
+        { x: 14, y: 5, image: 'straight-vertical' }, { x: 14, y: 4, image: 'straight-vertical' }, { x: 14, y: 3, image: 'straight-vertical' }, // To Library (14,2)
+        { x: 14, y: 7, image: 'straight-vertical' }, { x: 14, y: 8, image: 'straight-vertical' }, // To Restroom (14,9)
+
+        // Right Spine (Col 18)
+        { x: 18, y: 5, image: 'straight-vertical' }, { x: 18, y: 4, image: 't-shape-left' }, // To Science
+        { x: 18, y: 3, image: 'straight-vertical' }, { x: 18, y: 2, image: 'straight-vertical' }, // To Music (18,1)
+        { x: 18, y: 7, image: 'straight-vertical' }, { x: 18, y: 8, image: 'straight-vertical' }, 
+        { x: 18, y: 9, image: 't-shape-left' }, // To Comp
+        { x: 18, y: 10, image: 'straight-vertical' }, // To Art (18,11)
+      ],
+      items: [
+        { x: 8, y: 5, icon: "💰" },
+        { x: 16, y: 7, icon: "🐕" }
+      ]
+    }
   ];
 
-  // Map Layout: Long Hallway with Branches
-  const roads = [
-    // --- Main Hallway (Row 5) ---
-    { x: 0, y: 5, type: 'end', variant: 'west' }, // Start (Ends West, Opens East)
-    { x: 1, y: 5, type: 'straight', variant: 'horizontal' },
-    { x: 2, y: 5, type: 'straight', variant: 'horizontal' },
-    { x: 3, y: 5, type: 'straight', variant: 'horizontal' },
-    { x: 4, y: 5, type: 'straight', variant: 'horizontal' },
-    
-    // North Branch Junction
-    { x: 5, y: 5, type: 't_shape', variant: 'up' }, // Up, West, East
-    // Path to Cafeteria
-    { x: 5, y: 4, type: 'straight', variant: 'vertical' },
-    { x: 5, y: 3, type: 'straight', variant: 'vertical' },
-    { x: 5, y: 2, type: 'straight', variant: 'vertical' },
-    { x: 5, y: 1, type: 'end', variant: 'north' }, // Cafeteria
-    
-    { x: 6, y: 5, type: 'straight', variant: 'horizontal' },
-    { x: 7, y: 5, type: 'straight', variant: 'horizontal' },
-    
-    // Cross Junction
-    { x: 8, y: 5, type: 'cross', variant: 'all' },
-    // Library (North)
-    { x: 8, y: 4, type: 'end', variant: 'north' },
-    // Restrooms (South)
-    { x: 8, y: 6, type: 'end', variant: 'south' },
-    
-    { x: 9, y: 5, type: 'straight', variant: 'horizontal' },
-    { x: 10, y: 5, type: 'straight', variant: 'horizontal' },
-    
-    // South Winding Branch Junction
-    { x: 11, y: 5, type: 't_shape', variant: 'down' }, // Down, West, East
-    // Winding path to Science Lab
-    { x: 11, y: 6, type: 'corner', variant: 'ne' }, // North-East
-    { x: 12, y: 6, type: 'corner', variant: 'sw' }, // West-South
-    { x: 12, y: 7, type: 'straight', variant: 'vertical' },
-    { x: 12, y: 8, type: 'straight', variant: 'vertical' },
-    { x: 12, y: 9, type: 'end', variant: 'south' }, // Science Lab
-
-    { x: 12, y: 5, type: 'straight', variant: 'horizontal' },
-    { x: 13, y: 5, type: 'straight', variant: 'horizontal' },
-    { x: 14, y: 5, type: 'straight', variant: 'horizontal' },
-    { x: 15, y: 5, type: 'straight', variant: 'horizontal' },
-    
-    // East End
-    { x: 16, y: 5, type: 'end', variant: 'east' }, // Playground
-  ];
-
-  // Game state
-  let playerPos = { x: 0, y: 5 };
-  let playerHeading = 1; // 0=North, 1=East, 2=South, 3=West
-
-  // Direction vectors: [dx, dy] for each heading
-  const directions = [
-    { dx: 0, dy: -1 },  // North (up on grid)
-    { dx: 1, dy: 0 },   // East (right)
-    { dx: 0, dy: 1 },   // South (down on grid)
-    { dx: -1, dy: 0 },  // West (left)
-  ];
-
-  // Heading to rotation degrees (Adjusted: 0=North faces Up)
+  let currentLevelIdx = 0;
+  let playerPos = { ...levels[0].startPos };
+  let playerHeading = 0; 
+  const directions = [{ dx: 0, dy: -1 }, { dx: 1, dy: 0 }, { dx: 0, dy: 1 }, { dx: -1, dy: 0 }];
   const headingToRotation = [0, 90, 180, 270];
 
-  // Tile rotation mapping (Maps logical direction to CSS rotation degrees)
-  const tileRotations = {
-    straight: {
-      horizontal: 90, // Need 90° rotation for horizontal
-      vertical: 0     // No rotation needed for vertical
-    },
-    corner: {
-      se: 0,    // Base: South-to-East └
-      sw: 90,   // South-to-East -> South-to-West  
-      nw: 180,  // South-to-East -> North-to-West
-      ne: 270   // South-to-East -> North-to-East
-    },
-    t_shape: {
-      down: 0,   // Base: South opening with West-East arms ┬
-      left: 90,  // Rotate 90° - West opening with North-South arms
-      up: 180,   // Rotate 180° - North opening with West-East arms
-      right: 270 // Rotate 270° - East opening with North-South arms
-    },
-    end: {
-      // Variant name indicates the CLOSED side (Dead End direction)
-      south: 0,   // Dead End South -> Opens North (was 180)
-      west: 90,   // Dead End West -> Opens East (was 270)
-      north: 180, // Dead End North -> Opens South (was 0)
-      east: 270   // Dead End East -> Opens West (was 90)
-    },
-    cross: {
-      all: 0     // Source: + (Symmetrical)
-    }
-  };
-
-  function getLocationAt(x, y) {
-    return locations.find(loc => loc.x === x && loc.y === y);
-  }
-
-  function getRoadAt(x, y) {
-    return roads.find(r => r.x === x && r.y === y);
-  }
+  function getLocationAt(x, y) { return levels[currentLevelIdx].locations.find(loc => loc.x === x && loc.y === y); }
+  function getRoadAt(x, y) { return levels[currentLevelIdx].roads.find(r => r.x === x && r.y === y); }
+  function getItemAt(x, y) { return (levels[currentLevelIdx].items || []).find(i => i.x === x && i.y === y); }
 
   function renderGrid() {
     const grid = document.getElementById("grid");
     if (!grid) return;
-    
     grid.innerHTML = "";
+    
+    // Update status to show level name
+    const statusEl = document.getElementById("status-display");
+    if (statusEl) {
+      const location = getLocationAt(playerPos.x, playerPos.y);
+      statusEl.textContent = `${levels[currentLevelIdx].name} | Pos: (${playerPos.x}, ${playerPos.y})${location ? ' | At: ' + location.name : ''}`;
+    }
+
+    const minX = 2, maxX = 18, minY = 1, maxY = 11;
 
     for (let y = 0; y < 12; y++) {
       for (let x = 0; x < 21; x++) {
         const cell = document.createElement("div");
         cell.className = "cell";
-        
         const location = getLocationAt(x, y);
         const road = getRoadAt(x, y);
-        
+        const item = getItemAt(x, y);
         const isPlayerHere = playerPos.x === x && playerPos.y === y;
+
+        // Interior floor
+        if (x >= minX && x <= maxX && y >= minY && y <= maxY) cell.classList.add("interior");
+
+        // Walls
+        if (y === 0 && x >= minX && x <= maxX) cell.classList.add("wall-bottom"); // School Top
+        if (x === minX && y >= minY && y <= maxY && !(x === 2 && y === 11)) cell.classList.add("wall-left"); // School Left
+        if (x === maxX && y >= minY && y <= maxY) cell.classList.add("wall-right"); // School Right
+        if (y === maxY && x >= minX && x <= maxX && !(x === 2 && y === 11)) cell.classList.add("wall-bottom"); // School Bottom
+
+        if (road) {
+          const roadBg = document.createElement("div");
+          roadBg.className = "road-layer";
+          const roadSrc = roadMap[road.image.toLowerCase()];
+          if (roadSrc) roadBg.style.backgroundImage = `url('${roadSrc}')`;
+          cell.appendChild(roadBg);
+        }
 
         if (location) {
           cell.classList.add("location");
@@ -315,129 +414,92 @@ import boomGif from '../assets/game/boom.gif';
           cell.style.backgroundSize = 'contain';
           cell.style.backgroundRepeat = 'no-repeat';
           cell.style.backgroundPosition = 'center';
-          cell.title = location.name;
-        } else if (road) {
-          cell.classList.add("road");
-          cell.style.position = "relative";
-          
-          // Create a separate background div for the road image
-          const roadBg = document.createElement("div");
-          roadBg.className = "road-layer";
-          
-          const imageSrc = roadImages[road.type];
-          
-          if (imageSrc) {
-            // Apply background image to the separate div
-            roadBg.style.backgroundImage = `url('${imageSrc}')`;
-          }
-          
-          const rotation = tileRotations[road.type][road.variant];
-          if (rotation !== undefined) {
-            // Apply rotation only to the background div, not the cell
-            roadBg.style.transform = `rotate(${rotation}deg)`;
-          }
-          
-          cell.appendChild(roadBg);
+          cell.style.backgroundColor = 'rgba(255, 255, 255, 0.4)'; 
+          const label = document.createElement("span");
+          label.className = "location-label";
+          label.textContent = location.name;
+          cell.appendChild(label);
+        }
+
+        if (item) {
+          const itemEl = document.createElement("div");
+          itemEl.style.fontSize = "2rem";
+          itemEl.style.zIndex = "6";
+          itemEl.style.position = "absolute";
+          itemEl.textContent = item.icon;
+          cell.appendChild(itemEl);
         }
 
         if (isPlayerHere) {
-          cell.classList.add("has-player");
           const playerEl = document.createElement("div");
           playerEl.className = "player";
-          
           const img = document.createElement("img");
           img.src = playerImageSrc;
           img.className = "player-image";
-          
-          // Player rotation is now independent of cell/road rotation
           img.style.transform = `rotate(${headingToRotation[playerHeading]}deg)`;
-          
           playerEl.appendChild(img);
           cell.appendChild(playerEl);
         }
-
         grid.appendChild(cell);
       }
     }
   }
 
   function updateStatus() {
+     // Already handled in renderGrid, but kept for movement updates
     const location = getLocationAt(playerPos.x, playerPos.y);
-    
-    // Log coordinates and location to console
-    if (location) {
-      console.log(`Player at: (${playerPos.x}, ${playerPos.y}) - ${location.name}`);
-    } else {
-      console.log(`Player at: (${playerPos.x}, ${playerPos.y})`);
-    }
+    const item = getItemAt(playerPos.x, playerPos.y);
+    const statusEl = document.getElementById("status-display");
+    if (statusEl) statusEl.textContent = `${levels[currentLevelIdx].name} | Pos: (${playerPos.x}, ${playerPos.y})${location ? ' | At: ' + location.name : ''}${item ? ' | Found: ' + item.icon : ''}`;
   }
 
-  function turnLeft() {
-    playerHeading = (playerHeading + 3) % 4;
-    renderGrid();
-  }
-
-  function turnRight() {
-    playerHeading = (playerHeading + 1) % 4;
-    renderGrid();
-  }
-
+  function turnLeft() { playerHeading = (playerHeading + 3) % 4; renderGrid(); }
+  function turnRight() { playerHeading = (playerHeading + 1) % 4; renderGrid(); }
   function goStraight() {
     const dir = directions[playerHeading];
-    const newX = playerPos.x + dir.dx;
-    const newY = playerPos.y + dir.dy;
-
-    // Bounds check
+    const newX = playerPos.x + dir.dx, newY = playerPos.y + dir.dy;
     if (newX >= 0 && newX <= 20 && newY >= 0 && newY <= 11) {
       playerPos = { x: newX, y: newY };
       renderGrid();
-      updateStatus();
-
-      // Trigger explosion if player is NOT on a road AND NOT at a valid location
-      if (!getRoadAt(newX, newY) && !getLocationAt(newX, newY)) {
-        triggerExplosion(newX, newY);
-      }
+      // Status updated in renderGrid
+      if (!getRoadAt(newX, newY) && !getLocationAt(newX, newY) && !getItemAt(newX, newY)) triggerExplosion(newX, newY);
     }
   }
 
-  function reset() {
-    playerPos = { x: 0, y: 5 };
-    playerHeading = 1;
-    renderGrid();
-    updateStatus();
-  }
-
-  // Function to play explosion effect at specific coordinates
   window.triggerExplosion = function(x, y) {
+    // Play out-of-bounds sound
+    const meow = new Audio('/audio/meowDeep.mp3');
+    meow.play().catch(e => console.warn("Audio play blocked by browser:", e));
+
     const grid = document.getElementById("grid");
-    if (!grid) return;
-    
-    // Calculate cell index: y * width + x
     const index = y * 21 + x;
-    const cell = grid.children[index];
-    
+    const cell = grid?.children[index];
     if (cell) {
       const img = document.createElement("img");
-      // Add timestamp to force restart of GIF animation
       img.src = explosionSrc + "?t=" + Date.now(); 
       img.className = "explosion-effect";
       cell.appendChild(img);
-      
-      // Remove after 1 second (adjust based on GIF duration)
-      setTimeout(() => {
-        img.remove();
-      }, 1000);
+      setTimeout(() => img.remove(), 1000);
     }
   };
 
-  // Initialize
+  function resetGame() {
+    playerPos = { ...levels[currentLevelIdx].startPos }; 
+    playerHeading = 0; 
+    renderGrid(); 
+  }
+
+  function switchMap() {
+    currentLevelIdx = (currentLevelIdx + 1) % levels.length;
+    resetGame();
+  }
+
   document.addEventListener("DOMContentLoaded", () => {
     renderGrid();
-    updateStatus();
-
     document.getElementById("btn-left")?.addEventListener("click", turnLeft);
     document.getElementById("btn-right")?.addEventListener("click", turnRight);
     document.getElementById("btn-straight")?.addEventListener("click", goStraight);
-    document.getElementById("btn-reset")?.addEventListener("click", reset);
+    document.getElementById("btn-reset")?.addEventListener("click", resetGame);
+    document.getElementById("btn-next-map")?.addEventListener("click", switchMap);
   });
 </script>

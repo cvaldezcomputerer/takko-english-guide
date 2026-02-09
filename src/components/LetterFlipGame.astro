@@ -2,17 +2,17 @@
 // LetterFlipGame.astro
 
 // 1. Imports & Asset Loading
-const foodImages = import.meta.glob(
+const foodImages = import.meta.glob<string>(
   "../assets/letter-game/food/*.{jpg,jpeg,png,webp,gif,svg}",
   { eager: true, query: "?url", import: "default" }
 );
 
-const animalsImages = import.meta.glob(
+const animalsImages = import.meta.glob<string>(
   "../assets/letter-game/animals/*.{jpg,jpeg,png,webp,gif,svg}",
   { eager: true, query: "?url", import: "default" }
 );
 
-const objectsImages = import.meta.glob(
+const objectsImages = import.meta.glob<string>(
   "../assets/letter-game/objects/*.{jpg,jpeg,png,webp,gif,svg}",
   { eager: true, query: "?url", import: "default" }
 );
