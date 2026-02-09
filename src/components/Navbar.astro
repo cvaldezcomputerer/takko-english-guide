@@ -2,9 +2,14 @@
 ---
 <nav class="main-nav">
   <div class="nav-content">
-    <a href="/" class="logo">T_T</a>
+    <div class="nav-header">
+      <a href="/" class="logo">T_T</a>
+      <button class="menu-toggle" id="menu-toggle" aria-label="Toggle Menu" aria-expanded="false">
+        <i class="fas fa-bars"></i>
+      </button>
+    </div>
     
-    <div class="nav-links">
+    <div class="nav-links" id="nav-links">
       <a href="/about" data-translate="about">About</a>
       <a href="/game" data-translate="game">Game</a>
       <a href="https://bloggydoggy.com/" data-translate="blog">Blog</a>
@@ -19,29 +24,92 @@
 </nav>
 
 <script is:inline>
-  function updateLangUI(isJa) {
-    const langText = document.getElementById('lang-text');
-    if (langText) {
-      langText.textContent = isJa ? 'English' : '日本語';
-    }
-    if (isJa) {
-      document.body.classList.add('lang-ja');
-    } else {
-      document.body.classList.remove('lang-ja');
-    }
-  }
+  document.addEventListener('DOMContentLoaded', () => {
+      // Language Logic
+      function updateLangUI(isJa) {
+        const langText = document.getElementById('lang-text');
+        if (langText) {
+          langText.textContent = isJa ? 'English' : '日本語';
+        }
+        if (isJa) {
+          document.body.classList.add('lang-ja');
+        } else {
+          document.body.classList.remove('lang-ja');
+        }
+      }
+    
+      try {
+          const savedLang = localStorage.getItem('site-lang');
+          const isJa = savedLang === 'ja';
+          updateLangUI(isJa);
+      } catch (e) {
+          console.error("Language init error:", e);
+      }
+    
+      const langToggle = document.getElementById('lang-toggle');
+      if (langToggle) {
+          langToggle.addEventListener('click', () => {
+            const currentIsJa = document.body.classList.contains('lang-ja');
+            const newIsJa = !currentIsJa;
+            localStorage.setItem('site-lang', newIsJa ? 'ja' : 'en');
+            updateLangUI(newIsJa);
+          });
+      }
+    
+      // Mobile Menu Logic
+      const menuToggle = document.getElementById('menu-toggle');
+      const navLinks = document.getElementById('nav-links');
+      const icon = menuToggle ? menuToggle.querySelector('i') : null;
+    
+      if (menuToggle && navLinks) {
+          menuToggle.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent clicks from bubbling if necessary
+            const isExpanded = menuToggle.getAttribute('aria-expanded') === 'true';
+            menuToggle.setAttribute('aria-expanded', !isExpanded);
+            navLinks.classList.toggle('active');
+            
+            // Toggle icon
+            if (navLinks.classList.contains('active')) {
+              if (icon) {
+                  icon.classList.remove('fa-bars');
+                  icon.classList.add('fa-times');
+              }
+            } else {
+              if (icon) {
+                  icon.classList.remove('fa-times');
+                  icon.classList.add('fa-bars');
+              }
+            }
+          });
 
-  // Initial load
-  const savedLang = localStorage.getItem('site-lang');
-  const isJa = savedLang === 'ja';
-  updateLangUI(isJa);
-
-  // Toggle handler
-  document.getElementById('lang-toggle')?.addEventListener('click', () => {
-    const currentIsJa = document.body.classList.contains('lang-ja');
-    const newIsJa = !currentIsJa;
-    localStorage.setItem('site-lang', newIsJa ? 'ja' : 'en');
-    updateLangUI(newIsJa);
+          // Close menu when clicking outside
+          document.addEventListener('click', (e) => {
+              if (navLinks.classList.contains('active') && 
+                  !navLinks.contains(e.target) && 
+                  !menuToggle.contains(e.target)) {
+                  
+                  navLinks.classList.remove('active');
+                  menuToggle.setAttribute('aria-expanded', 'false');
+                  if (icon) {
+                      icon.classList.remove('fa-times');
+                      icon.classList.add('fa-bars');
+                  }
+              }
+          });
+          
+          // Close menu when clicking a link
+          const links = navLinks.querySelectorAll('a');
+          links.forEach(link => {
+              link.addEventListener('click', () => {
+                  navLinks.classList.remove('active');
+                  menuToggle.setAttribute('aria-expanded', 'false');
+                   if (icon) {
+                      icon.classList.remove('fa-times');
+                      icon.classList.add('fa-bars');
+                  }
+              });
+          });
+      }
   });
 </script>
 
@@ -54,6 +122,7 @@
     top: 0;
     z-index: 50;
     backdrop-filter: blur(10px);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
   }
 
   .nav-content {
@@ -65,11 +134,29 @@
     padding: 0 2rem;
   }
 
+  .nav-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: auto;
+  }
+
   .logo {
     font-size: 1.5rem;
     font-weight: bold;
     color: var(--color-dark-green);
     text-decoration: none;
+  }
+
+  /* Default Desktop Styles */
+  .menu-toggle {
+    display: none !important; /* Force hidden on desktop */
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--color-dark-green);
+    cursor: pointer;
+    padding: 0.5rem;
   }
 
   .nav-links {
@@ -83,6 +170,7 @@
     text-decoration: none;
     font-weight: 500;
     transition: color 0.2s;
+    font-size: 1.1rem;
   }
 
   .nav-links a:hover {
@@ -109,15 +197,52 @@
     color: white;
   }
 
+  /* Mobile Styles */
   @media (max-width: 768px) {
     .nav-content {
       flex-direction: column;
-      gap: 1rem;
+      align-items: stretch;
+      padding: 0 1.5rem;
+    }
+
+    .nav-header {
+      width: 100%;
+    }
+
+    .menu-toggle {
+      display: block !important; /* Force visible on mobile */
     }
 
     .nav-links {
+      display: none; /* Hidden by default on mobile */
       flex-direction: column;
-      gap: 1rem;
+      width: 100%;
+      padding: 1.5rem 0;
+      gap: 1.5rem;
+      border-top: 1px solid rgba(0,0,0,0.1);
+      margin-top: 1rem;
+      animation: slideDown 0.3s ease-out forwards;
     }
+
+    /* Active state for mobile menu */
+    .nav-links.active {
+      display: flex !important; /* Force flex when active */
+    }
+
+    .nav-links a {
+      width: 100%;
+      text-align: center;
+      padding: 0.5rem;
+    }
+
+    .lang-toggle {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 </style>
