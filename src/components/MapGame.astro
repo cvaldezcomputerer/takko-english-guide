@@ -1,5 +1,5 @@
 ---
-// Game.astro - School Map Navigation Game
+// MapGame.astro - School Map Navigation Game
 import lilMeow from '../assets/game/lilMeow.png';
 import boomGif from '../assets/game/boom.gif';
 // Road images are now served from /public/game-roads/ for reliable dynamic access
@@ -59,12 +59,12 @@ import boomGif from '../assets/game/boom.gif';
 
   .grid {
     display: grid;
-    grid-template-columns: repeat(11, 1fr);
+    grid-template-columns: repeat(17, 1fr);
     grid-template-rows: repeat(10, 1fr);
     gap: 0;
-    aspect-ratio: 11/10;
-    width: min(65vh * 11/10, 90vw);
-    height: min(65vh, 90vw * 10/11);
+    aspect-ratio: 17/10;
+    width: min(65vh * 17/10, 90vw);
+    height: min(65vh, 90vw * 10/17);
     background: transparent;
     padding: 0;
     border-radius: 0;
@@ -175,65 +175,64 @@ import boomGif from '../assets/game/boom.gif';
 }}>
   // Location data
   const locations = [
-    { x: 2, y: 1, name: "Music Room", image: "/images/yo2.jpg" },
-    { x: 7, y: 1, name: "Library", image: "/images/yo2.jpg" },
-    { x: 1, y: 3, name: "Art Room", image: "/images/yo2.jpg" },
-    { x: 5, y: 4, name: "Principal's Office", image: "/images/yo2.jpg" },
-    { x: 8, y: 5, name: "Science Room", image: "/images/yo2.jpg" },
-    { x: 3, y: 7, name: "Gym", image: "/images/yo2.jpg" },
-    { x: 6, y: 8, name: "Nurse's Office", image: "/images/yo2.jpg" },
+    { x: 5, y: 1, name: "Cafeteria", image: "/images/yo2.jpg" },
+    { x: 8, y: 4, name: "Library", image: "/images/yo2.jpg" },
+    { x: 8, y: 6, name: "Restrooms", image: "/images/yo2.jpg" },
+    { x: 12, y: 9, name: "Science Lab", image: "/images/yo2.jpg" },
+    { x: 16, y: 5, name: "Playground", image: "/images/yo2.jpg" },
   ];
 
-  // Mixed map with rotated and non-rotated tiles
+  // Map Layout: Long Hallway with Branches
   const roads = [
-    // Start area
-    { x: 5, y: 9, type: 'end', variant: 'south' },
+    // --- Main Hallway (Row 5) ---
+    { x: 0, y: 5, type: 'end', variant: 'west' }, // Start (Ends West, Opens East)
+    { x: 1, y: 5, type: 'straight', variant: 'horizontal' },
+    { x: 2, y: 5, type: 'straight', variant: 'horizontal' },
+    { x: 3, y: 5, type: 'straight', variant: 'horizontal' },
+    { x: 4, y: 5, type: 'straight', variant: 'horizontal' },
     
-    // Vertical path going up
-    { x: 5, y: 8, type: 'straight', variant: 'vertical' },
-    { x: 5, y: 7, type: 'straight', variant: 'vertical' },
-    
-    // Turn left (corner: coming from south, going west)
-    { x: 5, y: 6, type: 't_shape', variant: 'left' },
-    
-    // Horizontal path going left
-    { x: 4, y: 6, type: 'straight', variant: 'horizontal' },
-    { x: 3, y: 6, type: 'straight', variant: 'horizontal' },
-    
-    // Turn up again
-    { x: 2, y: 6, type: 'corner', variant: 'ne' },
-    
-    // Vertical path going up
-    { x: 2, y: 5, type: 'straight', variant: 'vertical' },
-    { x: 2, y: 4, type: 'straight', variant: 'vertical' },
-    
-    // T-junction (rotated to face right)
-    { x: 2, y: 3, type: 't_shape', variant: 'right' },
-    
-    // Branch going up from T
-    { x: 2, y: 2, type: 'end', variant: 'north' },
-    
-    // Branch going right from T
-    { x: 3, y: 3, type: 'straight', variant: 'horizontal' },
-    { x: 4, y: 3, type: 'straight', variant: 'horizontal' },
-    { x: 5, y: 3, type: 'corner', variant: 'sw' },
+    // North Branch Junction
+    { x: 5, y: 5, type: 't_shape', variant: 'up' }, // Up, West, East
+    // Path to Cafeteria
     { x: 5, y: 4, type: 'straight', variant: 'vertical' },
-    { x: 5, y: 5, type: 'cross', variant: 'all' },
+    { x: 5, y: 3, type: 'straight', variant: 'vertical' },
+    { x: 5, y: 2, type: 'straight', variant: 'vertical' },
+    { x: 5, y: 1, type: 'end', variant: 'north' }, // Cafeteria
     
-    // Cross branches
-    { x: 4, y: 5, type: 'end', variant: 'west' },
     { x: 6, y: 5, type: 'straight', variant: 'horizontal' },
-    { x: 5, y: 4, type: 'straight', variant: 'vertical' },
+    { x: 7, y: 5, type: 'straight', variant: 'horizontal' },
     
-    // Right side path
-    { x: 7, y: 5, type: 't_shape', variant: '' },
-    { x: 7, y: 6, type: 'straight', variant: 'vertical' },
-    { x: 7, y: 7, type: 'end', variant: 'south' },
+    // Cross Junction
+    { x: 8, y: 5, type: 'cross', variant: 'all' },
+    // Library (North)
+    { x: 8, y: 4, type: 'end', variant: 'north' },
+    // Restrooms (South)
+    { x: 8, y: 6, type: 'end', variant: 'south' },
+    
+    { x: 9, y: 5, type: 'straight', variant: 'horizontal' },
+    { x: 10, y: 5, type: 'straight', variant: 'horizontal' },
+    
+    // South Winding Branch Junction
+    { x: 11, y: 5, type: 't_shape', variant: 'down' }, // Down, West, East
+    // Winding path to Science Lab
+    { x: 11, y: 6, type: 'corner', variant: 'ne' }, // North-East
+    { x: 12, y: 6, type: 'corner', variant: 'sw' }, // West-South
+    { x: 12, y: 7, type: 'straight', variant: 'vertical' },
+    { x: 12, y: 8, type: 'straight', variant: 'vertical' },
+    { x: 12, y: 9, type: 'end', variant: 'south' }, // Science Lab
+
+    { x: 12, y: 5, type: 'straight', variant: 'horizontal' },
+    { x: 13, y: 5, type: 'straight', variant: 'horizontal' },
+    { x: 14, y: 5, type: 'straight', variant: 'horizontal' },
+    { x: 15, y: 5, type: 'straight', variant: 'horizontal' },
+    
+    // East End
+    { x: 16, y: 5, type: 'end', variant: 'east' }, // Playground
   ];
 
   // Game state
-  let playerPos = { x: 5, y: 9 };
-  let playerHeading = 0; // 0=North, 1=East, 2=South, 3=West
+  let playerPos = { x: 0, y: 5 };
+  let playerHeading = 1; // 0=North, 1=East, 2=South, 3=West
 
   // Direction vectors: [dx, dy] for each heading
   const directions = [
@@ -265,10 +264,11 @@ import boomGif from '../assets/game/boom.gif';
       right: 270 // Rotate 270° - East opening with North-South arms
     },
     end: {
-      south: 180, // Base opens North, so South needs 180°
-      west: 270,  // South -> West (was 90, now 270)
-      north: 0,   // Base: Opens North ╵
-      east: 90    // South -> East (was 270, now 90)
+      // Variant name indicates the CLOSED side (Dead End direction)
+      south: 0,   // Dead End South -> Opens North (was 180)
+      west: 90,   // Dead End West -> Opens East (was 270)
+      north: 180, // Dead End North -> Opens South (was 0)
+      east: 270   // Dead End East -> Opens West (was 90)
     },
     cross: {
       all: 0     // Source: + (Symmetrical)
@@ -290,7 +290,7 @@ import boomGif from '../assets/game/boom.gif';
     grid.innerHTML = "";
 
     for (let y = 0; y < 10; y++) {
-      for (let x = 0; x < 11; x++) {
+      for (let x = 0; x < 17; x++) {
         const cell = document.createElement("div");
         cell.className = "cell";
         
@@ -379,7 +379,7 @@ import boomGif from '../assets/game/boom.gif';
     const newY = playerPos.y + dir.dy;
 
     // Bounds check
-    if (newX >= 0 && newX <= 10 && newY >= 0 && newY <= 9) {
+    if (newX >= 0 && newX <= 16 && newY >= 0 && newY <= 9) {
       playerPos = { x: newX, y: newY };
       renderGrid();
       updateStatus();
@@ -392,8 +392,8 @@ import boomGif from '../assets/game/boom.gif';
   }
 
   function reset() {
-    playerPos = { x: 5, y: 9 };
-    playerHeading = 0;
+    playerPos = { x: 0, y: 5 };
+    playerHeading = 1;
     renderGrid();
     updateStatus();
   }
@@ -404,7 +404,7 @@ import boomGif from '../assets/game/boom.gif';
     if (!grid) return;
     
     // Calculate cell index: y * width + x
-    const index = y * 11 + x;
+    const index = y * 17 + x;
     const cell = grid.children[index];
     
     if (cell) {
