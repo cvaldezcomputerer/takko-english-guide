@@ -78,18 +78,8 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
                     </label>
                   ))}
                 </div>
-            </div>
 
-            <!-- Color Grid (Colors Mode) -->
-            <div class="settings-group" id="colors-settings" style="display: none;">
-                <h3>Select Colors</h3>
-                <div class="toggle-grid" id="lg-color-grid">
-                    <!-- Populated by JS -->
-                </div>
-            </div>
-
-             <div class="settings-group">
-                <div class="settings-row">
+                <div class="settings-row" style="margin-top: 1.5rem;">
                     <label class="switch-label">
                         <span>Randomize Order</span>
                         <div class="switch">
@@ -97,6 +87,14 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
                             <span class="slider round"></span>
                         </div>
                     </label>
+                </div>
+            </div>
+
+            <!-- Color Grid (Colors Mode) -->
+            <div class="settings-group" id="colors-settings" style="display: none;">
+                <h3>Select Colors</h3>
+                <div class="toggle-grid" id="lg-color-grid">
+                    <!-- Populated by JS -->
                 </div>
             </div>
             
@@ -318,7 +316,7 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
   /* Toggle Grids */
   .toggle-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+    grid-template-columns: repeat(auto-fill, 40px);
     gap: 0.5rem;
     margin-bottom: 1rem;
   }
@@ -336,6 +334,7 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
       justify-content: center;
       align-items: center;
       height: 40px;
+      width: 40px;
       background: #f0f0f0;
       border-radius: 0.5rem;
       font-weight: bold;
@@ -570,7 +569,8 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
       food: [...imagesFromGlob.food],
       animals: [...imagesFromGlob.animals],
       toys: [...imagesFromGlob.objects],
-      trains: [...imagesFromGlob.objects],
+      trucks: [...imagesFromGlob.objects],
+      insects: [...imagesFromGlob.animals],
       vehicles: [...imagesFromGlob.objects],
       "funny-cats": ["API_PLACEHOLDER_1", "API_PLACEHOLDER_2"], 
     },
