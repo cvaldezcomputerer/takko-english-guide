@@ -151,6 +151,11 @@ for (const path in roomImagesGlob) {
     position: relative;
     box-sizing: border-box;
     border: none;
+    --wall-top-shadow: inset 0 0 0 0 transparent;
+    --wall-bottom-shadow: inset 0 0 0 0 transparent;
+    --wall-left-shadow: inset 0 0 0 0 transparent;
+    --wall-right-shadow: inset 0 0 0 0 transparent;
+    box-shadow: var(--wall-top-shadow), var(--wall-bottom-shadow), var(--wall-left-shadow), var(--wall-right-shadow);
   }
 
   /* Interior styling */
@@ -158,17 +163,17 @@ for (const path in roomImagesGlob) {
     background-color: #e3c099;
   }
 
-  /* Thick Wall borders */
-  .grid :global(.wall-top) { border-top: 8px solid #2c3e50 !important; }
-  .grid :global(.wall-bottom) { border-bottom: 8px solid #2c3e50 !important; }
-  .grid :global(.wall-left) { border-left: 8px solid #2c3e50 !important; }
-  .grid :global(.wall-right) { border-right: 8px solid #2c3e50 !important; }
+  /* Wall lines via inset shadows (visual only; does not change content box) */
+  .grid :global(.wall-top) { --wall-top-shadow: inset 0 4px 0 0 #6b4f3a; }
+  .grid :global(.wall-bottom) { --wall-bottom-shadow: inset 0 -4px 0 0 #6b4f3a; }
+  .grid :global(.wall-left) { --wall-left-shadow: inset 4px 0 0 0 #6b4f3a; }
+  .grid :global(.wall-right) { --wall-right-shadow: inset -4px 0 0 0 #6b4f3a; }
 
   .grid :global(.cell.location) {
     z-index: 5;
     border-radius: 8px;
     border: 2px solid rgba(255, 255, 255, 0.6) !important;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    box-shadow: var(--wall-top-shadow), var(--wall-bottom-shadow), var(--wall-left-shadow), var(--wall-right-shadow), 0 2px 4px rgba(0,0,0,0.2);
     overflow: visible;
   }
 
@@ -250,11 +255,124 @@ for (const path in roomImagesGlob) {
   roadMap,
   roomMap
 }}>
+  /**
+   * TILE / GRID NOTES (quick reference)
+   *
+   * - Grid size is fixed: 21 columns (x=0..20) and 12 rows (y=0..11).
+   * - Coordinates: (0,0) is top-left. x increases → right, y increases ↓ down.
+  * - The "school" interior area is not a tilemap; it’s defined per-level as either:
+  *     - a rectangle (default for existing maps), or
+  *     - an irregular mask built from rects + holes (used for custom building shapes).
+  *   Cells inside the interior mask get the beige interior background; outside stays green.
+  * - Walls are derived from the interior mask: if a neighbor cell is outside the mask, a wall
+  *   border is drawn on that side. Entrances are just “open sides” where we skip drawing a wall.
+   * - Roads/locations/items are sparse overlays: only cells listed in arrays get a road sprite,
+   *   room image/label, or item icon.
+   * - IMPORTANT: A road entry can exist under a location image; it’s just visually covered.
+   *   If you see a “road on a room”, remove/move that road coordinate.
+   *
+   * ROAD TILE PIECES (how to choose images)
+   * - straight-horizontal / straight-vertical: simple segments.
+   * - corner-* : turn corners (e.g. corner-bot-right).
+   * - end-* : dead-end caps. Only use if you intentionally want a dead end.
+  * - t-shape-* : 3-way intersections. In this sprite set, the suffix indicates the “stem/open” direction:
+  *     - t-shape-up = connects UP + left/right (missing DOWN)
+  *     - t-shape-down = connects DOWN + left/right (missing UP)
+  *     - t-shape-left = connects LEFT + up/down (missing RIGHT)
+  *     - t-shape-right = connects RIGHT + up/down (missing LEFT)
+   * - cross: 4-way intersection.
+   */
+
   // Level Configuration
-  const levels = [
+  const SCHOOL_SHIFT_Y = -1;
+
+  const DEFAULT_INTERIOR = {
+    rects: [{ x1: 2, y1: 0, x2: 18, y2: 10 }],
+    holes: [],
+    // Bottom-left opening (keeps the classic entrance gap)
+    entrance: { x: 2, y: 10, open: ['left', 'bottom'] },
+  };
+
+  function shiftPosY(pos, dy) {
+    return { ...pos, y: pos.y + dy };
+  }
+
+  function shiftLevelY(level, dy) {
+    const interior = level.interior
+      ? {
+          ...level.interior,
+          rects: (level.interior.rects || []).map((r) => ({ ...r, y1: r.y1 + dy, y2: r.y2 + dy })),
+          holes: (level.interior.holes || []).map((h) => ({ ...h, y1: h.y1 + dy, y2: h.y2 + dy })),
+          entrance: level.interior.entrance
+            ? { ...level.interior.entrance, y: level.interior.entrance.y + dy }
+            : undefined,
+        }
+      : undefined;
+
+    return {
+      ...level,
+      startPos: shiftPosY(level.startPos, dy),
+      locations: (level.locations || []).map((loc) => ({ ...loc, y: loc.y + dy })),
+      roads: (level.roads || []).map((r) => ({ ...r, y: r.y + dy })),
+      items: (level.items || []).map((i) => ({ ...i, y: i.y + dy })),
+      interior,
+    };
+  }
+
+  function clamp(n, min, max) {
+    return Math.max(min, Math.min(max, n));
+  }
+
+  function keyFor(x, y) {
+    return `${x},${y}`;
+  }
+
+  function buildInteriorSet(level) {
+    const interior = level.interior || DEFAULT_INTERIOR;
+    const rects = interior.rects || [];
+    const holes = interior.holes || [];
+    const set = new Set();
+
+    for (const r of rects) {
+      const x1 = clamp(Math.min(r.x1, r.x2), 0, 20);
+      const x2 = clamp(Math.max(r.x1, r.x2), 0, 20);
+      const y1 = clamp(Math.min(r.y1, r.y2), 0, 11);
+      const y2 = clamp(Math.max(r.y1, r.y2), 0, 11);
+      for (let y = y1; y <= y2; y++) {
+        for (let x = x1; x <= x2; x++) {
+          set.add(keyFor(x, y));
+        }
+      }
+    }
+
+    for (const h of holes) {
+      const x1 = clamp(Math.min(h.x1, h.x2), 0, 20);
+      const x2 = clamp(Math.max(h.x1, h.x2), 0, 20);
+      const y1 = clamp(Math.min(h.y1, h.y2), 0, 11);
+      const y2 = clamp(Math.max(h.y1, h.y2), 0, 11);
+      for (let y = y1; y <= y2; y++) {
+        for (let x = x1; x <= x2; x++) {
+          set.delete(keyFor(x, y));
+        }
+      }
+    }
+
+    return set;
+  }
+
+  function getEntranceConfig(level) {
+    const interior = level.interior || DEFAULT_INTERIOR;
+    return interior.entrance || null;
+  }
+
+  // We keep authoring coordinates in `levelsRaw`, then apply a uniform shift so the school doesn't
+  // sit flush to the bottom of the viewport/grid. This preserves the grid size and just moves
+  // the school content (player + roads + locations + items) together.
+  const levelsRaw = [
     {
-      name: "Tappo ES",
+      name: "Mizu Gashira ES",
       startPos: { x: 2, y: 11 },
+      startHeading: 0,
       locations: [
         { x: 2, y: 11, name: "Entrance", image: roomMap['entrance'] },
         { x: 4, y: 1, name: "Staff Room", image: roomMap['staff-room'] },
@@ -281,25 +399,34 @@ for (const path in roomImagesGlob) {
         { x: 2, y: 2, image: 'corner-bot-right' }, 
         { x: 3, y: 2, image: 'straight-horizontal' }, { x: 4, y: 2, image: 'cross' },    
         { x: 5, y: 2, image: 'straight-horizontal' }, { x: 6, y: 2, image: 't-shape-up' },
-        { x: 7, y: 2, image: 'straight-horizontal' }, { x: 8, y: 2, image: 't-shape-down' }, 
+        { x: 7, y: 2, image: 't-shape-down' }, { x: 8, y: 2, image: 't-shape-down' }, 
         { x: 9, y: 2, image: 'straight-horizontal' }, { x: 10, y: 2, image: 'straight-horizontal' },
-        { x: 11, y: 2, image: 'straight-horizontal' }, { x: 12, y: 2, image: 't-shape-up' },    
+        { x: 11, y: 2, image: 'straight-horizontal' }, { x: 12, y: 2, image: 't-shape-down' },    
         { x: 13, y: 2, image: 'straight-horizontal' }, { x: 14, y: 2, image: 'straight-horizontal' },
         { x: 15, y: 2, image: 'straight-horizontal' }, { x: 16, y: 2, image: 't-shape-down' }, 
         { x: 17, y: 2, image: 'end-left' },      
+        // Connector paths between corridors (Row 2 <-> Row 5)
+        { x: 7, y: 3, image: 'straight-vertical' }, { x: 7, y: 4, image: 'straight-vertical' },
+        { x: 12, y: 3, image: 'straight-vertical' }, { x: 12, y: 4, image: 'straight-vertical' },
+
         { x: 3, y: 5, image: 'straight-horizontal' }, { x: 4, y: 5, image: 'straight-horizontal' },
         { x: 5, y: 5, image: 't-shape-down' }, { x: 6, y: 5, image: 'straight-horizontal' },
-        { x: 7, y: 5, image: 'straight-horizontal' }, { x: 8, y: 5, image: 'straight-horizontal' },
+        { x: 7, y: 5, image: 't-shape-up' }, { x: 8, y: 5, image: 't-shape-down' },
         { x: 9, y: 5, image: 'straight-horizontal' }, { x: 10, y: 5, image: 't-shape-down' }, 
-        { x: 11, y: 5, image: 'straight-horizontal' }, { x: 12, y: 5, image: 'straight-horizontal' },
+        { x: 11, y: 5, image: 't-shape-down' }, { x: 12, y: 5, image: 't-shape-up' },
         { x: 13, y: 5, image: 'straight-horizontal' }, { x: 14, y: 5, image: 'straight-horizontal' },
         { x: 15, y: 5, image: 'cross' }, { x: 16, y: 5, image: 'straight-horizontal' },
         { x: 17, y: 5, image: 'straight-horizontal' },
+
+        // Connector paths between corridors (Row 5 <-> Row 8)
+        { x: 8, y: 6, image: 'straight-vertical' }, { x: 8, y: 7, image: 'straight-vertical' },
+        { x: 11, y: 6, image: 'straight-vertical' }, { x: 11, y: 7, image: 'straight-vertical' },
+
         { x: 3, y: 8, image: 'straight-horizontal' }, { x: 4, y: 8, image: 't-shape-down' }, 
         { x: 5, y: 8, image: 'straight-horizontal' }, { x: 6, y: 8, image: 't-shape-up' },    
-        { x: 7, y: 8, image: 'straight-horizontal' }, { x: 8, y: 8, image: 'straight-horizontal' },
+        { x: 7, y: 8, image: 'straight-horizontal' }, { x: 8, y: 8, image: 't-shape-up' },
         { x: 9, y: 8, image: 'straight-horizontal' }, { x: 10, y: 8, image: 'straight-horizontal' },
-        { x: 11, y: 8, image: 'straight-horizontal' }, { x: 12, y: 8, image: 't-shape-down' }, 
+        { x: 11, y: 8, image: 't-shape-up' }, { x: 12, y: 8, image: 't-shape-down' }, 
         { x: 13, y: 8, image: 'straight-horizontal' }, { x: 14, y: 8, image: 't-shape-up' },    
         { x: 15, y: 8, image: 'end-left' },
       ],
@@ -308,6 +435,7 @@ for (const path in roomImagesGlob) {
     {
       name: "Kamogo ES 🦆",
       startPos: { x: 2, y: 11 },
+      startHeading: 0,
       locations: [
          { x: 2, y: 11, name: "Entrance", image: roomMap['entrance'] },
          { x: 2, y: 1, name: "Staff Room", image: roomMap['staff-room'] },
@@ -324,17 +452,26 @@ for (const path in roomImagesGlob) {
          { x: 17, y: 4, name: "Science Lab", image: roomMap['science-lab'] },
          { x: 17, y: 9, name: "Computer Lab", image: roomMap['computer-lab'] },
          { x: 18, y: 11, name: "Art Room", image: roomMap['art-room'] },
-         { x: 8, y: 8, name: "Secret Room", image: roomMap['playground'] },
          { x: 12, y: 11, name: "Playground", image: roomMap['playground'] }
       ],
       roads: [
         // Trunk (Left)
         { x: 2, y: 10, image: 'straight-vertical' }, { x: 2, y: 9, image: 'straight-vertical' },
-        { x: 2, y: 8, image: 'straight-vertical' }, { x: 2, y: 7, image: 'straight-vertical' },
+        { x: 2, y: 8, image: 'straight-vertical' }, { x: 2, y: 7, image: 't-shape-right' },
         { x: 2, y: 6, image: 't-shape-right' }, // Hub
         { x: 2, y: 5, image: 't-shape-right' }, // To Nurse
-        { x: 2, y: 4, image: 'straight-vertical' }, { x: 2, y: 3, image: 'straight-vertical' }, 
+        { x: 2, y: 4, image: 'straight-vertical' }, { x: 2, y: 3, image: 't-shape-right' }, 
         { x: 2, y: 2, image: 'straight-vertical' }, // Leads to Staff (2,1)
+
+        // Connector hall (Row 3): adds alternate routes and uses some empty space
+        { x: 3, y: 3, image: 'straight-horizontal' }, { x: 4, y: 3, image: 'straight-horizontal' },
+        { x: 5, y: 3, image: 'straight-horizontal' },
+        { x: 7, y: 3, image: 'straight-horizontal' }, { x: 8, y: 3, image: 'straight-horizontal' },
+        { x: 9, y: 3, image: 'straight-horizontal' },
+        { x: 11, y: 3, image: 'straight-horizontal' }, { x: 12, y: 3, image: 'straight-horizontal' },
+        { x: 13, y: 3, image: 'straight-horizontal' },
+        { x: 15, y: 3, image: 'straight-horizontal' }, { x: 16, y: 3, image: 'straight-horizontal' },
+        { x: 17, y: 3, image: 'straight-horizontal' },
 
         // Main Horizontal Spine (Row 6)
         { x: 3, y: 6, image: 'straight-horizontal' }, 
@@ -359,48 +496,262 @@ for (const path in roomImagesGlob) {
         { x: 4, y: 5, image: 'straight-vertical' }, // (4,4) is Lunch
 
         // Branch 1 (Col 6)
-        { x: 6, y: 5, image: 'straight-vertical' }, { x: 6, y: 4, image: 'straight-vertical' }, { x: 6, y: 3, image: 'straight-vertical' }, // To Class (6,2)
-        { x: 6, y: 7, image: 'straight-vertical' }, { x: 6, y: 8, image: 'straight-vertical' }, // To Sumo (6,9)
+        { x: 6, y: 5, image: 'straight-vertical' }, { x: 6, y: 4, image: 'straight-vertical' }, { x: 6, y: 3, image: 'cross' }, // To Class (6,2)
+        { x: 6, y: 7, image: 'cross' }, { x: 6, y: 8, image: 'straight-vertical' }, // To Sumo (6,9)
 
         // Money/Secret Branch
         { x: 8, y: 5, image: 'cross' }, // Money is here
-        { x: 8, y: 7, image: 'straight-vertical' }, // To Secret (8,8)
+        { x: 8, y: 7, image: 'cross' }, // To Secret (8,8)
 
         // Branch 2 (Col 10)
-        { x: 10, y: 5, image: 'straight-vertical' }, { x: 10, y: 4, image: 'straight-vertical' }, { x: 10, y: 3, image: 'straight-vertical' }, // To Principal (10,2)
-        { x: 10, y: 7, image: 'straight-vertical' }, { x: 10, y: 8, image: 'cross' }, // To HomeEc (10,9) and Playground path
+        { x: 10, y: 5, image: 'straight-vertical' }, { x: 10, y: 4, image: 'straight-vertical' }, { x: 10, y: 3, image: 'cross' }, // To Principal (10,2)
+        { x: 10, y: 7, image: 'cross' }, { x: 10, y: 8, image: 'cross' }, // To HomeEc (10,9) and Playground path
 
         // Playground Path
-        { x: 11, y: 8, image: 'straight-horizontal' }, { x: 12, y: 8, image: 'corner-bot-left' },
+        { x: 11, y: 8, image: 'straight-horizontal' }, { x: 12, y: 8, image: 't-shape-left' },
         { x: 12, y: 9, image: 'straight-vertical' }, { x: 12, y: 10, image: 'straight-vertical' }, // To Playground (12,11)
 
         // Branch 3 (Col 14)
-        { x: 14, y: 5, image: 'straight-vertical' }, { x: 14, y: 4, image: 'straight-vertical' }, { x: 14, y: 3, image: 'straight-vertical' }, // To Library (14,2)
-        { x: 14, y: 7, image: 'straight-vertical' }, { x: 14, y: 8, image: 'straight-vertical' }, // To Restroom (14,9)
+        { x: 14, y: 5, image: 'straight-vertical' }, { x: 14, y: 4, image: 'straight-vertical' }, { x: 14, y: 3, image: 'cross' }, // To Library (14,2)
+        { x: 14, y: 7, image: 'cross' }, { x: 14, y: 8, image: 'straight-vertical' }, // To Restroom (14,9)
 
         // Right Spine (Col 18)
         { x: 18, y: 5, image: 'straight-vertical' }, { x: 18, y: 4, image: 't-shape-left' }, // To Science
-        { x: 18, y: 3, image: 'straight-vertical' }, { x: 18, y: 2, image: 'straight-vertical' }, // To Music (18,1)
-        { x: 18, y: 7, image: 'straight-vertical' }, { x: 18, y: 8, image: 'straight-vertical' }, 
+        { x: 18, y: 3, image: 't-shape-left' }, { x: 18, y: 2, image: 'straight-vertical' }, // To Music (18,1)
+        { x: 18, y: 7, image: 't-shape-left' }, { x: 18, y: 8, image: 'straight-vertical' }, 
         { x: 18, y: 9, image: 't-shape-left' }, // To Comp
         { x: 18, y: 10, image: 'straight-vertical' }, // To Art (18,11)
+
+        // Connector hall (Row 7): bridges between branches (more routing options)
+        { x: 3, y: 7, image: 'straight-horizontal' }, { x: 4, y: 7, image: 'straight-horizontal' },
+        { x: 5, y: 7, image: 'straight-horizontal' },
+        { x: 7, y: 7, image: 'straight-horizontal' },
+        { x: 9, y: 7, image: 'straight-horizontal' },
+        { x: 11, y: 7, image: 'straight-horizontal' },
+        { x: 12, y: 7, image: 't-shape-down' },
+        { x: 13, y: 7, image: 'straight-horizontal' },
+        { x: 15, y: 7, image: 'straight-horizontal' }, { x: 16, y: 7, image: 'straight-horizontal' },
+        { x: 17, y: 7, image: 'straight-horizontal' },
       ],
       items: [
         { x: 8, y: 5, icon: "💰" },
         { x: 16, y: 7, icon: "🐕" }
       ]
+    },
+    {
+      name: "Taco ES 🌮",
+      // NOTE: all authored Y coords here get shifted by SCHOOL_SHIFT_Y (-1) for display.
+      // User-provided start "S" was (4,6) on the displayed grid → raw is y+1.
+      startPos: { x: 4, y: 7 },
+      startHeading: 1,
+      interior: {
+        // Approximate the photo: big "C" building with an open courtyard, plus a right-side rectangle.
+        // NOTE: interior drives the beige background + the border walls. Roads are independent.
+        rects: [
+          // Main building outer mass (expanded 1 row up + 1 row down)
+          { x1: 5, y1: 1, x2: 16, y2: 10 },
+
+          // Entrance/left vestibule expansion (connects to the main building)
+          { x1: 4, y1: 6, x2: 5, y2: 8 },
+
+          // Top-left “round” building (rough circle-ish blob) + a short connector into the main building
+          { x1: 1, y1: 1, x2: 4, y2: 4 },
+          { x1: 4, y1: 3, x2: 5, y2: 3 },
+
+          // Right-side building: big rectangle
+          { x1: 17, y1: 1, x2: 19, y2: 10 },
+        ],
+        // Courtyard + the C-opening (carved out of the main building mass)
+        holes: [
+          { x1: 8, y1: 4, x2: 16, y2: 7 },
+          // Bottom-right cutouts (your red X marks)
+          { x1: 17, y1: 10, x2: 18, y2: 10 },
+          // Make the top-right corner a touch rounder
+          { x1: 19, y1: 1, x2: 19, y2: 1 },
+          // Round-off the top-left blob corners a bit
+          { x1: 1, y1: 1, x2: 1, y2: 1 },
+          { x1: 4, y1: 1, x2: 4, y2: 1 },
+          { x1: 1, y1: 4, x2: 1, y2: 4 },
+          { x1: 4, y1: 4, x2: 4, y2: 4 },
+        ],
+        // Visual door where the entrance trunk meets the building
+        // Moved to the left-side "E" position
+        // Displayed "E" was (4,6) → raw is y+1.
+        entrance: { x: 4, y: 7, open: ['left'] },
+      },
+      locations: [
+        { x: 4, y: 7, name: "Entrance", image: roomMap['entrance'] },
+        { x: 3, y: 2, name: "Lunch Room", image: roomMap['lunch-room'] },
+        { x: 5, y: 4, name: "Music Room", image: roomMap['music-room'] },
+        { x: 13, y: 3, name: "Home Ec Room", image: roomMap['home-ec-room'] },
+        { x: 17, y: 5, name: "Gym", image: roomMap['gym'] },
+        { x: 8, y: 8, name: "Restroom", image: roomMap['rest-room'] },
+
+        { x: 5, y: 9, name: "Staff Room", image: roomMap['staff-room'] },
+        { x: 6, y: 10, name: "Principals Office", image: roomMap['principals-office'] },
+        { x: 8, y: 10, name: "Nurse’s Office", image: roomMap['nurses-office'] },
+        { x: 10, y: 8, name: "Class Room 1", image: roomMap['class-room'] },
+        { x: 12, y: 8, name: "Computer Lab", image: roomMap['computer-lab'] },
+
+        { x: 12, y: 10, name: "Library", image: roomMap['library'] },
+        { x: 16, y: 10, name: "Science Lab", image: roomMap['science-lab'] },
+        { x: 17, y: 8, name: "Art Room", image: roomMap['art-room'] },
+        { x: 18, y: 11, name: "Playground", image: roomMap['playground'] },
+        { x: 14, y: 6, name: "Sumo Ring", image: roomMap['sumo-ring'] },
+
+        // Additional classrooms in open non-road spaces (top area)
+        { x: 11, y: 1, name: "Class Room 2", image: roomMap['class-room'] },
+        { x: 8, y: 3, name: "Class Room 3", image: roomMap['class-room'] },
+        { x: 15, y: 1, name: "Class Room 4", image: roomMap['class-room'] },
+        { x: 10, y: 3, name: "Class Room 5", image: roomMap['class-room'] },
+        { x: 7, y: 1, name: "Class Room 6", image: roomMap['class-room'] },
+      ],
+      roads: [
+        // Path based on the red-marked tiles: a loop hallway around the courtyard opening
+        // plus a short connector from the left entrance/start area.
+
+        // Connector from start/entrance area into the loop
+        { x: 5, y: 7, image: 'straight-horizontal' },
+
+        // Path to Lunch Room
+        { x: 4, y: 2, image: 'straight-horizontal' },
+        { x: 5, y: 2, image: 'straight-horizontal' },
+
+        // Loop (moved 1 tile farther from courtyard): expanded rectangle
+        { x: 6, y: 2, image: 't-shape-down' }, // Junction to Lunch Room path
+        { x: 7, y: 2, image: 't-shape-up' },
+        { x: 8, y: 2, image: 't-shape-down' },
+        { x: 9, y: 2, image: 'straight-horizontal' },
+        { x: 10, y: 2, image: 't-shape-down' },
+        { x: 11, y: 2, image: 't-shape-up' },
+        { x: 12, y: 2, image: 'straight-horizontal' },
+        { x: 13, y: 2, image: 't-shape-down' },
+        { x: 14, y: 2, image: 'straight-horizontal' },
+        { x: 15, y: 2, image: 't-shape-up' },
+        { x: 16, y: 2, image: 'straight-horizontal' },
+        { x: 17, y: 2, image: 'straight-horizontal' },
+        { x: 18, y: 2, image: 'corner-bot-left' },
+
+        { x: 18, y: 3, image: 'straight-vertical' },
+        { x: 18, y: 4, image: 'straight-vertical' },
+        { x: 18, y: 5, image: 't-shape-left' },
+        { x: 18, y: 6, image: 'straight-vertical' },
+        { x: 18, y: 7, image: 'straight-vertical' },
+        { x: 18, y: 8, image: 't-shape-left' },
+        { x: 18, y: 9, image: 't-shape-left' },
+
+        { x: 17, y: 9, image: 'straight-horizontal' },
+        { x: 16, y: 9, image: 't-shape-down' },
+          { x: 15, y: 9, image: 'straight-horizontal' },
+        { x: 14, y: 9, image: 't-shape-up' },
+        { x: 13, y: 9, image: 'straight-horizontal' },
+        { x: 12, y: 9, image: 'cross' },
+        { x: 11, y: 9, image: 'straight-horizontal' },
+        { x: 10, y: 9, image: 't-shape-up' },
+        { x: 9, y: 9, image: 'straight-horizontal' },
+        { x: 8, y: 9, image: 'cross' },
+        { x: 7, y: 9, image: 'straight-horizontal' },
+        { x: 6, y: 9, image: 'cross' },
+
+        { x: 6, y: 3, image: 'straight-vertical' },
+        { x: 6, y: 4, image: 't-shape-left' },
+        { x: 6, y: 5, image: 'straight-vertical' },
+        { x: 6, y: 6, image: 'straight-vertical' },
+        { x: 6, y: 7, image: 'cross' },
+        { x: 6, y: 8, image: 'straight-vertical' },
+
+        // Spur into courtyard for Sumo Ring
+        { x: 14, y: 8, image: 'straight-vertical' },
+        { x: 14, y: 7, image: 't-shape-left' },
+        { x: 13, y: 7, image: 'straight-horizontal' },
+        { x: 12, y: 7, image: 'straight-horizontal' },
+        { x: 11, y: 7, image: 'straight-horizontal' },
+        { x: 10, y: 7, image: 'straight-horizontal' },
+        { x: 9, y: 7, image: 'straight-horizontal' },
+        { x: 8, y: 7, image: 'straight-horizontal' },
+        { x: 7, y: 7, image: 'straight-horizontal' },
+        // (Removed road at displayed 13,5)
+
+        // Spur to Playground (outside corner) — room sits at (18,11) so keep road adjacent only
+        { x: 18, y: 10, image: 'straight-vertical' },
+      ],
+      items: [
+        // Trees in green areas only (courtyard + outside)
+        { x: 9, y: 5, icon: "🌲" },
+        { x: 12, y: 6, icon: "🌳" },
+        { x: 15, y: 5, icon: "🌲" },
+        { x: 16, y: 7, icon: "🌳" },
+
+        { x: 0, y: 1, icon: "🌳" },
+        { x: 1, y: 10, icon: "🌲" },
+        { x: 2, y: 11, icon: "🌳" },
+        { x: 3, y: 5, icon: "🌲" },
+        { x: 19, y: 11, icon: "🌳" },
+        { x: 20, y: 5, icon: "🌲" },
+      ]
     }
   ];
 
+  const tacoIdx = levelsRaw.findIndex((lvl) => (lvl.name || '').includes('Taco ES'));
+  const levelsRawOrdered = tacoIdx > 0
+    ? [levelsRaw[tacoIdx], ...levelsRaw.slice(0, tacoIdx), ...levelsRaw.slice(tacoIdx + 1)]
+    : levelsRaw;
+
+  const levels = levelsRawOrdered.map((lvl) => shiftLevelY(lvl, SCHOOL_SHIFT_Y));
+
+  for (const lvl of levels) {
+    // Cache derived masks so renderGrid stays cheap.
+    lvl.__interiorSet = buildInteriorSet(lvl);
+    lvl.__entrance = getEntranceConfig(lvl);
+    warnDuplicateCoords(lvl);
+  }
+
   let currentLevelIdx = 0;
   let playerPos = { ...levels[0].startPos };
-  let playerHeading = 0; 
+  let playerHeading = levels[0].startHeading || 0; 
   const directions = [{ dx: 0, dy: -1 }, { dx: 1, dy: 0 }, { dx: 0, dy: 1 }, { dx: -1, dy: 0 }];
   const headingToRotation = [0, 90, 180, 270];
 
   function getLocationAt(x, y) { return levels[currentLevelIdx].locations.find(loc => loc.x === x && loc.y === y); }
   function getRoadAt(x, y) { return levels[currentLevelIdx].roads.find(r => r.x === x && r.y === y); }
   function getItemAt(x, y) { return (levels[currentLevelIdx].items || []).find(i => i.x === x && i.y === y); }
+
+  function warnDuplicateCoords(level) {
+    const bucketByKey = (arr) => {
+      const map = new Map();
+      for (const it of arr || []) {
+        const k = keyFor(it.x, it.y);
+        const existing = map.get(k) || [];
+        existing.push(it);
+        map.set(k, existing);
+      }
+      return map;
+    };
+
+    const dupes = [];
+    for (const [k, v] of bucketByKey(level.roads)) if (v.length > 1) dupes.push({ type: 'roads', key: k, entries: v });
+    for (const [k, v] of bucketByKey(level.locations)) if (v.length > 1) dupes.push({ type: 'locations', key: k, entries: v });
+    for (const [k, v] of bucketByKey(level.items)) if (v.length > 1) dupes.push({ type: 'items', key: k, entries: v });
+
+    if (dupes.length) {
+      console.warn(`[${level.name}] duplicate coords detected (renderer uses .find(), so first match wins):`, dupes);
+    }
+  }
+
+  function logCurrentTile(interiorSet) {
+    const level = levels[currentLevelIdx];
+    const tileKey = keyFor(playerPos.x, playerPos.y);
+    const inside = interiorSet?.has(tileKey) ?? false;
+    const road = getRoadAt(playerPos.x, playerPos.y);
+    const location = getLocationAt(playerPos.x, playerPos.y);
+    const item = getItemAt(playerPos.x, playerPos.y);
+    console.log(`[${level.name}] tile=(${playerPos.x},${playerPos.y}) heading=${playerHeading}`, {
+      inside,
+      road: road?.image || null,
+      location: location?.name || null,
+      item: item?.icon || null,
+    });
+  }
 
   function renderGrid() {
     const grid = document.getElementById("grid");
@@ -409,7 +760,9 @@ for (const path in roomImagesGlob) {
     if (!grid) return;
     grid.innerHTML = "";
 
-    const minX = 2, maxX = 18, minY = 1, maxY = 11;
+    const level = levels[currentLevelIdx];
+    const interiorSet = level.__interiorSet || buildInteriorSet(level);
+    const entrance = level.__entrance || getEntranceConfig(level);
 
     for (let y = 0; y < 12; y++) {
       for (let x = 0; x < 21; x++) {
@@ -420,14 +773,26 @@ for (const path in roomImagesGlob) {
         const item = getItemAt(x, y);
         const isPlayerHere = playerPos.x === x && playerPos.y === y;
 
-        // Interior floor
-        if (x >= minX && x <= maxX && y >= minY && y <= maxY) cell.classList.add("interior");
+        const inside = interiorSet.has(keyFor(x, y));
 
-        // Walls
-        if (y === 0 && x >= minX && x <= maxX) cell.classList.add("wall-bottom"); // School Top
-        if (x === minX && y >= minY && y <= maxY && !(x === 2 && y === 11)) cell.classList.add("wall-left"); // School Left
-        if (x === maxX && y >= minY && y <= maxY) cell.classList.add("wall-right"); // School Right
-        if (y === maxY && x >= minX && x <= maxX && !(x === 2 && y === 11)) cell.classList.add("wall-bottom"); // School Bottom
+        // Interior floor (beige)
+        if (inside) cell.classList.add("interior");
+
+        // Walls derived from interior mask
+        if (inside) {
+          const openSides =
+            entrance && entrance.x === x && entrance.y === y ? new Set(entrance.open || []) : null;
+
+          const upOutside = y === 0 || !interiorSet.has(keyFor(x, y - 1));
+          const downOutside = y === 11 || !interiorSet.has(keyFor(x, y + 1));
+          const leftOutside = x === 0 || !interiorSet.has(keyFor(x - 1, y));
+          const rightOutside = x === 20 || !interiorSet.has(keyFor(x + 1, y));
+
+          if (upOutside && !(openSides && openSides.has('top'))) cell.classList.add("wall-top");
+          if (downOutside && !(openSides && openSides.has('bottom'))) cell.classList.add("wall-bottom");
+          if (leftOutside && !(openSides && openSides.has('left'))) cell.classList.add("wall-left");
+          if (rightOutside && !(openSides && openSides.has('right'))) cell.classList.add("wall-right");
+        }
 
         if (road) {
           const roadBg = document.createElement("div");
@@ -476,6 +841,9 @@ for (const path in roomImagesGlob) {
         grid.appendChild(cell);
       }
     }
+
+    // Helpful for map editing: prints the current tile after every re-render.
+    logCurrentTile(interiorSet);
   }
 
   function turnLeft() { playerHeading = (playerHeading + 3) % 4; renderGrid(); }
@@ -510,7 +878,7 @@ for (const path in roomImagesGlob) {
 
   function resetGame() {
     playerPos = { ...levels[currentLevelIdx].startPos }; 
-    playerHeading = 0; 
+    playerHeading = levels[currentLevelIdx].startHeading || 0; 
     renderGrid(); 
   }
 
