@@ -3,20 +3,24 @@ import '../styles/global.css';
 
 interface Props {
 	title?: string;
+	description?: string;
 }
 
-const { title = "Takko Town" } = Astro.props;
+const {
+	title = "Takkotaco",
+	description = "Takkotaco is the unofficial English website for Takko Machi.",
+} = Astro.props;
 ---
 
 <!doctype html>
 <html lang="en">
 	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="generator" content={Astro.generator} />
-		<title>{title}</title>
+			<meta charset="UTF-8" />
+			<meta name="viewport" content="width=device-width" />
+			<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+			<meta name="generator" content={Astro.generator} />
+			<title>{title}</title>
+			<meta name="description" content={description} />
 
         <!-- Google Fonts -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -37,4 +41,3 @@ const { title = "Takko Town" } = Astro.props;
 
 <style>
 </style>
-

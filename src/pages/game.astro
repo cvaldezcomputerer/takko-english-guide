@@ -288,6 +288,72 @@ import T from '../components/T.astro';
     background: var(--color-secondary);
   }
 
+  @media (min-width: 1024px) {
+    .banner {
+      height: 170px;
+    }
+
+    .container {
+      max-width: 1320px;
+      padding: 1.25rem 1.5rem;
+    }
+
+    .content {
+      padding: 1.5rem;
+      margin-top: 1rem;
+    }
+
+    .intro {
+      margin-bottom: 1.25rem;
+    }
+
+    .intro h2 {
+      font-size: 2rem;
+      margin-bottom: 0.35rem;
+    }
+
+    .intro p {
+      font-size: 1rem;
+    }
+
+    .games-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1rem;
+    }
+
+    .game-card {
+      border-radius: 16px;
+    }
+
+    .card-image {
+      height: 120px;
+    }
+
+    .icon {
+      font-size: 3.4rem;
+    }
+
+    .card-content {
+      padding: 1rem 1rem 1.1rem;
+    }
+
+    .card-content h3 {
+      font-size: 1.2rem;
+      margin-bottom: 0.45rem;
+    }
+
+    .card-content p {
+      font-size: 0.92rem;
+      line-height: 1.35;
+      margin-bottom: 0.85rem;
+    }
+
+    .play-btn {
+      padding: 0.55rem 1rem;
+      font-size: 0.92rem;
+    }
+  }
+
   @media (max-width: 768px) {
     .content {
       padding: 1.5rem;
