@@ -1,5 +1,19 @@
 export const prerender = false;
 
+const UTM_SOURCE = "dog_site";
+
+function withUnsplashReferral(url) {
+  if (!url) return null;
+  try {
+    const parsed = new URL(url);
+    parsed.searchParams.set("utm_source", UTM_SOURCE);
+    parsed.searchParams.set("utm_medium", "referral");
+    return parsed.toString();
+  } catch {
+    return url;
+  }
+}
+
 export async function GET(context) {
   const { request } = context;
   const url = new URL(request.url);
@@ -39,10 +53,24 @@ export async function GET(context) {
     else if (type === "unsplash") {
       if (!UNSPLASH_KEY) throw new Error("Missing Unsplash Key");
       const res = await fetch(
-        `https://api.unsplash.com/photos/random?query=${query}&orientation=squarish&content_filter=high&featured=true&client_id=${UNSPLASH_KEY}`
+        `https://api.unsplash.com/photos/random?query=${query}&orientation=squarish&content_filter=high&featured=true&client_id=${UNSPLASH_KEY}`,
+        {
+          headers: {
+            "Accept-Version": "v1",
+          },
+        }
       );
       const data = await res.json();
-      return new Response(JSON.stringify({ url: data.urls?.small }), {
+      return new Response(JSON.stringify({
+        source: "unsplash",
+        url: data.urls?.small,
+        attribution: {
+          photographerName: data.user?.name || "Unknown",
+          photographerUrl: withUnsplashReferral(data.user?.links?.html),
+          photoUrl: withUnsplashReferral(data.links?.html),
+          unsplashUrl: withUnsplashReferral("https://unsplash.com/"),
+        },
+      }), {
         status: 200,
         headers: { "Content-Type": "application/json" },
       });

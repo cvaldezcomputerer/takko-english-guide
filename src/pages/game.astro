@@ -97,6 +97,34 @@ import T from '../components/T.astro';
                 </span>
             </div>
         </a>
+
+        <!-- Directions Reaction Game Card -->
+        <a href="/directions-reaction-game" class="game-card">
+             <div class="card-image reaction-bg">
+                <div class="icon">⚡</div>
+            </div>
+            <div class="card-content">
+                <h3>
+                  <T>
+                    <span slot="en">Directions Reaction Game</span>
+                    <span slot="ja">方向リアクションゲーム</span>
+                  </T>
+                </h3>
+                <p>
+                  <T>
+                    <span slot="en">Listen fast, react faster, and stack points by speed.</span>
+                    <span slot="ja">音声を聞いて素早く反応し、スピードで得点を伸ばそう。</span>
+                  </T>
+                </p>
+                <span class="play-btn">
+                  <T>
+                    <span slot="en">Play Now</span>
+                    <span slot="ja">今すぐプレイ</span>
+                  </T>
+                  <i class="fas fa-play"></i>
+                </span>
+            </div>
+        </a>
       </div>
     </main>
   </div>
@@ -207,6 +235,10 @@ import T from '../components/T.astro';
 
   .letter-bg {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  }
+
+  .reaction-bg {
+    background: linear-gradient(135deg, #43cea2 0%, #185a9d 100%);
   }
 
   .icon {

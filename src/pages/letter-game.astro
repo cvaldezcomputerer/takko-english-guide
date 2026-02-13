@@ -1,18 +1,15 @@
 ---
-import Layout from "../layouts/Layout.astro";
-import Navbar from "../components/Navbar.astro";
+import GameLayout from "../layouts/GameLayout.astro";
 import LetterFlipGame from "../components/LetterFlipGame.astro";
 ---
 
-<Layout title="Letter Flip Game">
+<GameLayout title="Letter Flip Game">
   <div class="letter-game-page">
-    <Navbar />
-
     <main>
         <LetterFlipGame />
     </main>
   </div>
-</Layout>
+</GameLayout>
 
 <style>
   .letter-game-page {

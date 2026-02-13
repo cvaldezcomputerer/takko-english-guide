@@ -1,13 +1,8 @@
 ---
-import Layout from '../layouts/Layout.astro';
+import GameLayout from '../layouts/GameLayout.astro';
 import GameComponent from '../components/MapGame.astro';
 ---
 
-<Layout title="School Navigation Game">
+<GameLayout title="School Navigation Game">
   <GameComponent />
-  <style is:global>
-    footer {
-      display: none;
-    }
-  </style>
-</Layout>
+</GameLayout>

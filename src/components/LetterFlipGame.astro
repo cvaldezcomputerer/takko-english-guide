@@ -123,6 +123,11 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
     </div>
   </section>
 
+  <div class="letter-game__attribution" id="lg-attribution-row" aria-live="polite">
+    <p class="letter-game__attribution-item" data-attribution-side="0" hidden></p>
+    <p class="letter-game__attribution-item" data-attribution-side="1" hidden></p>
+  </div>
+
   <!-- Feedback Toast -->
   <div class="letter-game__toast" data-testid="toast" aria-live="polite"></div>
 
@@ -335,6 +340,7 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
       align-items: center;
       height: 40px;
       width: 40px;
+      box-sizing: border-box;
       background: #f0f0f0;
       border-radius: 0.5rem;
       font-weight: bold;
@@ -344,8 +350,8 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
       text-transform: capitalize;
   }
 
-  /* "Off" State */
-  .item-toggle input:not(:checked) + span {
+  /* "Off" State (Letters only) */
+  #lg-letter-grid .item-toggle input:not(:checked) + span {
       background: #fee2e2 !important; /* Dull red */
       color: #b91c1c !important; /* Red text */
       opacity: 0.6;
@@ -358,7 +364,53 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
       color: white;
   }
   
-  /* "On" State - Colors: Handled by JS */
+  /* Color grid is created by JS, so use global selectors for dynamic nodes */
+  :global(#lg-color-grid) {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, 40px);
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+  }
+
+  :global(#lg-color-grid .item-toggle) {
+      cursor: pointer;
+  }
+
+  :global(#lg-color-grid .item-toggle input) {
+      display: none !important;
+      position: absolute !important;
+      opacity: 0 !important;
+      width: 0 !important;
+      height: 0 !important;
+      pointer-events: none !important;
+  }
+
+  :global(#lg-color-grid .item-toggle span) {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 40px;
+      width: 40px;
+      box-sizing: border-box;
+      border-radius: 0.5rem;
+      font-weight: bold;
+      border: 2px solid transparent;
+      text-transform: capitalize;
+      transition: all 0.2s;
+      background: var(--swatch-color, #f0f0f0);
+      color: var(--swatch-text-color, #fff);
+  }
+
+  :global(#lg-color-grid .item-toggle input:checked + span) {
+      opacity: 1;
+      filter: none;
+      transform: none;
+  }
+
+  :global(#lg-color-grid .item-toggle input:not(:checked) + span) {
+      opacity: 0.35;
+      filter: grayscale(0.65);
+  }
 
   /* Randomize Switch */
   .settings-row {
@@ -450,6 +502,10 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
       gap: 1.5rem;
       min-height: auto;
     }
+
+    .letter-game__attribution {
+      grid-template-columns: 1fr;
+    }
   }
 
   .letter-game__card-wrapper {
@@ -475,7 +531,7 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
     text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
     
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transition: box-shadow 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
     outline: none;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     display: flex;
@@ -484,15 +540,15 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
     padding: 0;
   }
 
-  .letter-game__card:hover:not(:disabled) {
-    transform: translateY(-5px);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+  .letter-game__card:not(.letter-game__card--flipped):hover:not(:disabled) {
+    transform: none;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.16);
     border-color: white;
   }
 
   .letter-game__card--flipped {
     background: white !important;
-    transform: rotateY(180deg);
+    transform: none;
   }
 
   .letter-game__card.color-mode {
@@ -533,6 +589,35 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
     transform: none;
   }
 
+  .letter-game__attribution {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+    width: 100%;
+    max-width: 1000px;
+    margin: 0.5rem auto 0.75rem;
+  }
+
+  .letter-game__attribution-item {
+    margin: 0;
+    font-size: 0.8rem;
+    line-height: 1.4;
+    color: rgba(255, 255, 255, 0.92);
+    background: rgba(0, 0, 0, 0.25);
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.65rem;
+    min-height: 2.35rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.2rem;
+    align-items: center;
+  }
+
+  .letter-game__attribution-item a {
+    color: #fff7b8;
+    font-weight: 600;
+  }
+
   .letter-game__toast {
     text-align: center;
     margin-top: 1rem;
@@ -570,8 +655,8 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
       animals: [...imagesFromGlob.animals],
       toys: [...imagesFromGlob.objects],
       trucks: [...imagesFromGlob.objects],
-      insects: [...imagesFromGlob.animals],
-      vehicles: [...imagesFromGlob.objects],
+      bugs: [...imagesFromGlob.animals],
+      cars: [...imagesFromGlob.objects],
       "funny-cats": ["API_PLACEHOLDER_1", "API_PLACEHOLDER_2"], 
     },
     randomize: true,
@@ -586,6 +671,7 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
   let currentColors = ["", ""];
   let currentCategory = "";
   let flippedCards = [false, false];
+  let currentAttributions = [null, null];
   let roundCount = 0;
   let recentImages = [];
   let currentSeed = Math.floor(Math.random() * 1000000);
@@ -595,6 +681,7 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
      3. DOM Elements
      ========================================= */
   let elBoard, elCards, elProgress, elToast, elNext;
+  let elAttributionItems;
   let elSettingsOverlay, elSettingsBtn, elSettingsClose;
   let elModeInputs, elLetterCheckboxes, elRandomize;
   let elLettersSettingsGroup, elColorsSettingsGroup, elColorGrid;
@@ -608,8 +695,35 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
       if (stored) {
           const parsed = JSON.parse(stored);
           config = { ...defaultConfig, ...parsed };
+          config.images = normalizeImageCategories(config.images);
       }
     } catch (e) { console.error("Failed to load settings", e); }
+  }
+
+  function normalizeImageCategories(images = {}) {
+    const next = { ...images };
+
+    // Migrate deprecated keys into the new set.
+    if (!next.trucks && next.trains) {
+      next.trucks = next.trains;
+    }
+    if (!next.cars && next.vehicles) {
+      next.cars = next.vehicles;
+    }
+    if (!next.bugs && next.insects) {
+      next.bugs = next.insects;
+    }
+
+    delete next.trains;
+    delete next.vehicles;
+    delete next.insects;
+
+    // Ensure required categories exist.
+    if (!Array.isArray(next.trucks)) next.trucks = [...imagesFromGlob.objects];
+    if (!Array.isArray(next.cars)) next.cars = [...imagesFromGlob.objects];
+    if (!Array.isArray(next.bugs)) next.bugs = [...imagesFromGlob.animals];
+
+    return next;
   }
 
   function saveSettings() {
@@ -655,7 +769,12 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
           const res = await fetch(`/api/get-image?type=unsplash&query=${query}`);
           if (!res.ok) return null;
           const data = await res.json();
-          return data.url; 
+          if (!data?.url) return null;
+          return {
+            url: data.url,
+            source: data.source || "unsplash",
+            attribution: data.attribution || null,
+          };
       } catch (e) {
           console.warn("Unsplash fetch failed:", e);
           return null;
@@ -704,6 +823,7 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
     let img1 = null;
     let img2 = null;
+    currentAttributions = [null, null];
 
     if (currentCategory === 'funny-cats') {
             img1 = await fetchGiphyCat();
@@ -717,8 +837,9 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
             fetchUnsplashImage(searchTerm),
             fetchUnsplashImage(searchTerm)
         ]);
-        img1 = r1;
-        img2 = r2;
+        img1 = r1?.url || null;
+        img2 = r2?.url || null;
+        currentAttributions = [r1?.attribution || null, r2?.attribution || null];
     }
 
     // C. Final Fallback (Local Images)
@@ -739,6 +860,7 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
             currentPair = ["", ""];
             console.error("No images available for category:", currentCategory);
         }
+        currentAttributions = [null, null];
     }
 
     preloadImages(currentPair);
@@ -773,12 +895,63 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
     img.onload = () => {
         card.innerHTML = "";
         card.appendChild(img);
+        updateAttributionUI();
         
         const label = config.mode === 'colors' 
             ? currentLabels[side].charAt(0).toUpperCase() + currentLabels[side].slice(1)
             : `Letter ${currentLabels[side]}`;
         elToast.textContent = `${label} flipped!`;
     };
+  }
+
+  function appendAttributionContent(container, attribution) {
+    container.textContent = "";
+    const photographer = attribution?.photographerName || "Unknown";
+    const photographerUrl = attribution?.photographerUrl || "https://unsplash.com/";
+    const photoUrl = attribution?.photoUrl || "https://unsplash.com/";
+    const unsplashUrl = attribution?.unsplashUrl || "https://unsplash.com/";
+
+    const prefix = document.createTextNode("Photo by ");
+    const nameLink = document.createElement("a");
+    nameLink.href = photographerUrl;
+    nameLink.textContent = photographer;
+    nameLink.target = "_blank";
+    nameLink.rel = "noopener noreferrer nofollow";
+
+    const mid = document.createTextNode(" on ");
+    const unsplashLink = document.createElement("a");
+    unsplashLink.href = unsplashUrl;
+    unsplashLink.textContent = "Unsplash";
+    unsplashLink.target = "_blank";
+    unsplashLink.rel = "noopener noreferrer nofollow";
+
+    const suffix = document.createTextNode(" · ");
+    const photoLink = document.createElement("a");
+    photoLink.href = photoUrl;
+    photoLink.textContent = "View photo";
+    photoLink.target = "_blank";
+    photoLink.rel = "noopener noreferrer nofollow";
+
+    container.appendChild(prefix);
+    container.appendChild(nameLink);
+    container.appendChild(mid);
+    container.appendChild(unsplashLink);
+    container.appendChild(suffix);
+    container.appendChild(photoLink);
+  }
+
+  function updateAttributionUI() {
+    if (!elAttributionItems || elAttributionItems.length < 2) return;
+    elAttributionItems.forEach((item, idx) => {
+      const attribution = currentAttributions[idx];
+      const shouldShow = !!attribution;
+      item.hidden = !shouldShow;
+      if (shouldShow) {
+        appendAttributionContent(item, attribution);
+      } else {
+        item.textContent = "";
+      }
+    });
   }
 
   async function goNext() {
@@ -816,6 +989,7 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
     });
 
     flippedCards = [false, false];
+    updateAttributionUI();
     if (elNext) {
         elNext.disabled = false;
         elNext.textContent = "Next";
@@ -846,20 +1020,22 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
           input.name = 'lg-color';
           input.value = colorName;
           input.checked = config.colors.includes(colorName);
+          input.style.display = 'none';
           
           const span = document.createElement('span');
           span.textContent = colorName.charAt(0).toUpperCase();
+          span.style.setProperty('--swatch-color', colorHex);
           
           // Helper to set style based on state
           const updateStyle = (isChecked) => {
+              const textColor = ['white', 'yellow'].includes(colorName) ? 'black' : 'white';
+              span.style.setProperty('--swatch-text-color', textColor);
               if (isChecked) {
-                  span.style.backgroundColor = colorHex;
-                  span.style.color = ['white', 'yellow'].includes(colorName) ? 'black' : 'white';
-                  span.style.borderColor = '#333';
+                  span.style.opacity = '1';
+                  span.style.filter = 'none';
               } else {
-                  span.style.backgroundColor = ''; 
-                  span.style.color = ''; 
-                  span.style.borderColor = '';
+                  span.style.opacity = '0.35';
+                  span.style.filter = 'grayscale(0.65)';
               }
           };
 
@@ -937,6 +1113,7 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
     elProgress = document.querySelector(".letter-game__progress");
     elToast = document.querySelector(".letter-game__toast");
     elNext = document.querySelector(".letter-game__next");
+    elAttributionItems = Array.from(document.querySelectorAll(".letter-game__attribution-item"));
     
     // Settings Elements
     elSettingsBtn = document.getElementById("settings-btn");

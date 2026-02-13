@@ -1,0 +1,484 @@
+<div class="reaction-game" id="reaction-game">
+  <header class="hud">
+    <div class="hud-card">
+      <span class="hud-label">Time</span>
+      <span class="hud-value" id="time-left">60.0s</span>
+    </div>
+    <div class="hud-card">
+      <span class="hud-label">Score</span>
+      <span class="hud-value" id="score">0</span>
+    </div>
+    <div class="hud-card">
+      <span class="hud-label">Round</span>
+      <span class="hud-value" id="round-count">0</span>
+    </div>
+  </header>
+
+  <main class="stage" id="stage">
+    <div class="stage-visual neutral" id="stage-visual">
+      <div class="placeholder-icon" id="placeholder-icon">?</div>
+      <p class="stage-title" id="stage-title">Press Play</p>
+      <p class="stage-subtitle" id="stage-subtitle">Audio will say: Left, Right, or Straight.</p>
+    </div>
+  </main>
+
+  <footer class="controls">
+    <button id="btn-left" class="input-btn" type="button" aria-label="Left">&lt;</button>
+    <button id="btn-straight" class="input-btn" type="button" aria-label="Straight">^</button>
+    <button id="btn-right" class="input-btn" type="button" aria-label="Right">&gt;</button>
+  </footer>
+
+  <div class="meta-row">
+    <button id="btn-start" class="start-btn" type="button">Play</button>
+    <p class="result-text" id="result-text">Press Play when ready.</p>
+  </div>
+</div>
+
+<style>
+  .reaction-game {
+    --bg-1: #f9f5ff;
+    --bg-2: #d9f4ff;
+    --panel: #ffffff;
+    --ink: #1f2937;
+    --muted: #5b6472;
+    --ok: #13955a;
+    --bad: #c9382d;
+
+    width: min(860px, 94vw);
+    margin: 2rem auto;
+    padding: 1rem;
+    border-radius: 24px;
+    background: linear-gradient(150deg, var(--bg-1), var(--bg-2));
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.12);
+    font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+    color: var(--ink);
+  }
+
+  .hud {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+
+  .hud-card {
+    background: var(--panel);
+    border-radius: 14px;
+    padding: 0.65rem 0.8rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  }
+
+  .hud-label {
+    font-size: 0.78rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .hud-value {
+    font-size: 1.4rem;
+    font-weight: 800;
+  }
+
+  .stage {
+    margin-top: 0.85rem;
+    min-height: 350px;
+    background: var(--panel);
+    border-radius: 18px;
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+    box-shadow: inset 0 0 0 2px rgba(18, 24, 40, 0.04);
+  }
+
+  .stage-visual {
+    width: 100%;
+    min-height: 300px;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    text-align: center;
+    padding: 1.2rem;
+    transition: background 0.12s ease;
+  }
+
+  .stage-visual.neutral {
+    background: linear-gradient(180deg, #f7fbff, #edf5ff);
+  }
+
+  .stage-visual.correct {
+    background: linear-gradient(180deg, #ecfff4, #d5ffe8);
+    animation: flash-correct 0.8s ease;
+  }
+
+  .stage-visual.wrong {
+    background: linear-gradient(180deg, #fff4f2, #ffe2de);
+    animation: flash-wrong 0.8s ease;
+  }
+
+  .placeholder-icon {
+    font-size: clamp(4rem, 10vw, 6rem);
+    line-height: 1;
+    margin-bottom: 0.6rem;
+  }
+
+  .stage-title {
+    margin: 0;
+    font-size: clamp(1.3rem, 3.2vw, 2rem);
+    font-weight: 800;
+  }
+
+  .stage-subtitle {
+    margin: 0.4rem 0 0;
+    font-size: 1rem;
+    color: var(--muted);
+  }
+
+  .controls {
+    margin-top: 0.85rem;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+
+  .input-btn {
+    border: none;
+    border-radius: 14px;
+    background: #111827;
+    color: white;
+    font-size: clamp(2rem, 5vw, 2.5rem);
+    font-weight: 800;
+    height: 76px;
+    cursor: pointer;
+    transition: transform 0.07s ease, filter 0.12s ease;
+  }
+
+  .input-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  .input-btn:not(:disabled):active {
+    transform: scale(0.96);
+  }
+
+  .meta-row {
+    margin-top: 0.85rem;
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+
+  .start-btn {
+    border: none;
+    border-radius: 12px;
+    background: #1463ff;
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 700;
+    padding: 0.7rem 1rem;
+    cursor: pointer;
+  }
+
+  .result-text {
+    margin: 0;
+    font-weight: 700;
+    color: var(--muted);
+  }
+
+  @keyframes flash-correct {
+    0% { transform: scale(1); }
+    30% { transform: scale(1.02); }
+    100% { transform: scale(1); }
+  }
+
+  @keyframes flash-wrong {
+    0% { transform: translateX(0); }
+    30% { transform: translateX(4px); }
+    60% { transform: translateX(-4px); }
+    100% { transform: translateX(0); }
+  }
+
+  @media (max-width: 640px) {
+    .reaction-game {
+      margin: 1rem auto;
+      padding: 0.8rem;
+    }
+
+    .stage {
+      min-height: 280px;
+    }
+
+    .stage-visual {
+      min-height: 230px;
+    }
+  }
+</style>
+
+<script is:inline>
+  const TOTAL_DURATION_MS = 60000;
+  const ANSWER_WINDOW_MS = 3000;
+  const FEEDBACK_MS = 800;
+
+  const DIRECTIONS = [
+    { key: "left", label: "Left", symbol: "<" },
+    { key: "straight", label: "Straight", symbol: "^" },
+    { key: "right", label: "Right", symbol: ">" },
+  ];
+
+  const HAPPY_PLACEHOLDERS = [
+    { icon: "😺", label: "Happy Cat Meme A" },
+    { icon: "😸", label: "Happy Cat Meme B" },
+    { icon: "😻", label: "Happy Cat Meme C" },
+    { icon: "🐱", label: "Happy Cat Meme D" },
+  ];
+
+  const BAD_PLACEHOLDERS = [
+    { icon: "🥦", label: "Vegetable Pic A" },
+    { icon: "🥕", label: "Vegetable Pic B" },
+    { icon: "💩", label: "Poop Pic A" },
+    { icon: "🍆", label: "Vegetable Pic C" },
+  ];
+
+  const ui = {
+    time: document.getElementById("time-left"),
+    score: document.getElementById("score"),
+    round: document.getElementById("round-count"),
+    stageVisual: document.getElementById("stage-visual"),
+    icon: document.getElementById("placeholder-icon"),
+    title: document.getElementById("stage-title"),
+    subtitle: document.getElementById("stage-subtitle"),
+    result: document.getElementById("result-text"),
+    startBtn: document.getElementById("btn-start"),
+    leftBtn: document.getElementById("btn-left"),
+    straightBtn: document.getElementById("btn-straight"),
+    rightBtn: document.getElementById("btn-right"),
+  };
+
+  const inputButtons = [ui.leftBtn, ui.straightBtn, ui.rightBtn];
+
+  let score = 0;
+  let roundCount = 0;
+  let gameActive = false;
+  let currentPrompt = null;
+  let promptStartTs = 0;
+  let roundAnswered = false;
+  let gameStartTs = 0;
+  let remainingMs = TOTAL_DURATION_MS;
+
+  let gameClockInterval = null;
+  let answerTimeout = null;
+  let feedbackTimeout = null;
+
+  function randomFrom(list) {
+    return list[Math.floor(Math.random() * list.length)];
+  }
+
+  function getPointsByResponseMs(responseMs) {
+    if (responseMs < 1000) return 100;
+    if (responseMs < 2000) return 50;
+    return 20;
+  }
+
+  function setInputEnabled(enabled) {
+    for (const btn of inputButtons) {
+      btn.disabled = !enabled;
+    }
+  }
+
+  function updateHud() {
+    ui.score.textContent = String(score);
+    ui.round.textContent = String(roundCount);
+    ui.time.textContent = `${(Math.max(remainingMs, 0) / 1000).toFixed(1)}s`;
+  }
+
+  function setNeutralVisual() {
+    ui.stageVisual.className = "stage-visual neutral";
+    ui.icon.textContent = "?";
+    ui.title.textContent = "Listening...";
+    ui.subtitle.textContent = "Audio cue is playing. Tap <, ^, or >.";
+  }
+
+  function setFeedbackVisual(isCorrect, payload, pointsAwarded, detailText) {
+    ui.stageVisual.className = `stage-visual ${isCorrect ? "correct" : "wrong"}`;
+    ui.icon.textContent = payload.icon;
+    ui.title.textContent = payload.label;
+    ui.subtitle.textContent = isCorrect
+      ? `${detailText}  +${pointsAwarded} pts`
+      : detailText;
+  }
+
+  function speakCue(text) {
+    if (!("speechSynthesis" in window) || typeof SpeechSynthesisUtterance === "undefined") return;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 0.9;
+    utterance.pitch = 1;
+    utterance.volume = 1;
+    window.speechSynthesis.speak(utterance);
+  }
+
+  function clearTimers() {
+    if (answerTimeout) clearTimeout(answerTimeout);
+    if (feedbackTimeout) clearTimeout(feedbackTimeout);
+    if (gameClockInterval) clearInterval(gameClockInterval);
+    answerTimeout = null;
+    feedbackTimeout = null;
+    gameClockInterval = null;
+  }
+
+  function endGame() {
+    gameActive = false;
+    clearTimers();
+    window.speechSynthesis?.cancel?.();
+    setInputEnabled(false);
+    ui.startBtn.textContent = "Play Again";
+
+    ui.stageVisual.className = "stage-visual neutral";
+    ui.icon.textContent = "🏁";
+    ui.title.textContent = "Time Up!";
+    ui.subtitle.textContent = `Final score: ${score} points across ${roundCount} rounds.`;
+    ui.result.textContent = "Round complete. Press Play Again to restart.";
+
+    remainingMs = 0;
+    updateHud();
+  }
+
+  function resetToIdle() {
+    gameActive = false;
+    clearTimers();
+    window.speechSynthesis?.cancel?.();
+    currentPrompt = null;
+    roundAnswered = false;
+    score = 0;
+    roundCount = 0;
+    remainingMs = TOTAL_DURATION_MS;
+
+    setInputEnabled(false);
+    ui.startBtn.textContent = "Play";
+    ui.stageVisual.className = "stage-visual neutral";
+    ui.icon.textContent = "?";
+    ui.title.textContent = "Press Play";
+    ui.subtitle.textContent = "Audio will say: Left, Right, or Straight.";
+    ui.result.textContent = "Press Play when ready.";
+    updateHud();
+  }
+
+  function runGameClock() {
+    if (gameClockInterval) clearInterval(gameClockInterval);
+    gameClockInterval = setInterval(() => {
+      const elapsed = performance.now() - gameStartTs;
+      remainingMs = Math.max(0, TOTAL_DURATION_MS - elapsed);
+      updateHud();
+      if (remainingMs <= 0) {
+        endGame();
+      }
+    }, 100);
+  }
+
+  function queueNextPrompt() {
+    if (!gameActive) return;
+    if (remainingMs <= 0) {
+      endGame();
+      return;
+    }
+
+    setNeutralVisual();
+    currentPrompt = randomFrom(DIRECTIONS);
+    promptStartTs = performance.now();
+    roundAnswered = false;
+    roundCount += 1;
+    updateHud();
+    ui.result.textContent = `Round ${roundCount}: waiting for your input.`;
+
+    speakCue(currentPrompt.label);
+
+    answerTimeout = setTimeout(() => {
+      resolveAnswer(null);
+    }, ANSWER_WINDOW_MS);
+  }
+
+  function resolveAnswer(answerKey) {
+    if (!gameActive || roundAnswered || !currentPrompt) return;
+    roundAnswered = true;
+    if (answerTimeout) {
+      clearTimeout(answerTimeout);
+      answerTimeout = null;
+    }
+
+    const responseMs = performance.now() - promptStartTs;
+    const isCorrect = answerKey === currentPrompt.key;
+    const speedPoints = isCorrect ? getPointsByResponseMs(responseMs) : 0;
+
+    if (isCorrect) {
+      score += speedPoints;
+    }
+
+    const feedbackItem = isCorrect
+      ? randomFrom(HAPPY_PLACEHOLDERS)
+      : randomFrom(BAD_PLACEHOLDERS);
+
+    const speedTag = responseMs < 1000 ? "Super" : responseMs < 2000 ? "Good" : "OK";
+    const wrongReason = answerKey === null ? "Too slow." : "Wrong direction.";
+    const detailText = isCorrect
+      ? `${speedTag} reaction (${(responseMs / 1000).toFixed(2)}s).`
+      : wrongReason;
+
+    setFeedbackVisual(isCorrect, feedbackItem, speedPoints, detailText);
+    ui.result.textContent = isCorrect
+      ? `Correct: ${currentPrompt.label} (${speedTag}, +${speedPoints})`
+      : `Incorrect. Cue was ${currentPrompt.label}.`;
+
+    updateHud();
+
+    feedbackTimeout = setTimeout(() => {
+      if (!gameActive) return;
+      queueNextPrompt();
+    }, FEEDBACK_MS);
+  }
+
+  function startGame() {
+    clearTimers();
+    window.speechSynthesis?.cancel?.();
+
+    score = 0;
+    roundCount = 0;
+    remainingMs = TOTAL_DURATION_MS;
+    gameStartTs = performance.now();
+    gameActive = true;
+    currentPrompt = null;
+    roundAnswered = false;
+
+    setInputEnabled(true);
+    ui.startBtn.textContent = "Reset";
+    ui.result.textContent = "Listen and react as fast as possible.";
+    updateHud();
+    runGameClock();
+    queueNextPrompt();
+  }
+
+  ui.leftBtn?.addEventListener("click", () => resolveAnswer("left"));
+  ui.straightBtn?.addEventListener("click", () => resolveAnswer("straight"));
+  ui.rightBtn?.addEventListener("click", () => resolveAnswer("right"));
+  ui.startBtn?.addEventListener("click", () => {
+    if (gameActive) {
+      resetToIdle();
+      return;
+    }
+    startGame();
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (!gameActive) return;
+    if (event.key === "ArrowLeft") resolveAnswer("left");
+    if (event.key === "ArrowUp") resolveAnswer("straight");
+    if (event.key === "ArrowRight") resolveAnswer("right");
+  });
+
+  setInputEnabled(false);
+  updateHud();
+</script>
