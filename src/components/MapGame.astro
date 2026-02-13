@@ -212,6 +212,29 @@ for (const path in roomImagesGlob) {
     left: 0;
   }
 
+  .grid :global(.player.first-visit-highlight)::after {
+    content: "";
+    position: absolute;
+    width: 82%;
+    height: 82%;
+    border-radius: 999px;
+    border: 3px solid #24b74b;
+    box-shadow: 0 0 0 3px rgba(36, 183, 75, 0.35), 0 0 18px rgba(36, 183, 75, 0.6);
+    animation: first-visit-pulse 1.2s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  @keyframes first-visit-pulse {
+    0%, 100% {
+      transform: scale(0.92);
+      opacity: 0.75;
+    }
+    50% {
+      transform: scale(1.04);
+      opacity: 1;
+    }
+  }
+
   .grid :global(.player-image) {
     width: 80%;
     height: 80%;
@@ -787,12 +810,14 @@ for (const path in roomImagesGlob) {
   const directions = [{ dx: 0, dy: -1 }, { dx: 1, dy: 0 }, { dx: 0, dy: 1 }, { dx: -1, dy: 0 }];
   const headingToRotation = [0, 90, 180, 270];
   const MUTE_STORAGE_KEY = 'map-game-muted';
+  const FIRST_VISIT_STORAGE_KEY = 'map-game-directions-visited-v1';
   let staticGridLevelIdx = -1;
   let cellEls = [];
   let gridEl = null;
   let mapTitleEl = null;
   let playerEl = null;
   let playerImgEl = null;
+  let showFirstVisitHighlight = false;
 
   let isMuted = true;
   const canSpeak = typeof window !== 'undefined' && 'speechSynthesis' in window && typeof SpeechSynthesisUtterance !== 'undefined';
@@ -837,6 +862,24 @@ for (const path in roomImagesGlob) {
 
   function toggleMute() {
     setMuted(!isMuted);
+  }
+
+  function initFirstVisitHighlight() {
+    try {
+      const hasVisited = localStorage.getItem(FIRST_VISIT_STORAGE_KEY) === '1';
+      if (!hasVisited) {
+        showFirstVisitHighlight = true;
+        localStorage.setItem(FIRST_VISIT_STORAGE_KEY, '1');
+      }
+    } catch {
+      showFirstVisitHighlight = true;
+    }
+  }
+
+  function clearFirstVisitHighlight() {
+    if (!showFirstVisitHighlight) return;
+    showFirstVisitHighlight = false;
+    if (playerEl) playerEl.classList.remove("first-visit-highlight");
   }
 
   function speakPlaceName(name) {
@@ -1022,6 +1065,7 @@ for (const path in roomImagesGlob) {
     if (!hasTileContent(playerPos.x, playerPos.y)) {
       nextCell.classList.add("out-of-bounds");
     }
+    playerEl.classList.toggle("first-visit-highlight", showFirstVisitHighlight);
     playerImgEl.style.transform = `rotate(${headingToRotation[playerHeading]}deg)`;
     nextCell.appendChild(playerEl);
   }
@@ -1052,6 +1096,10 @@ for (const path in roomImagesGlob) {
     const newX = playerPos.x + dir.dx, newY = playerPos.y + dir.dy;
     if (newX >= 0 && newX <= GRID_WIDTH - 1 && newY >= 0 && newY <= GRID_HEIGHT - 1) {
       playerPos = { x: newX, y: newY };
+      const startPos = levels[currentLevelIdx].startPos;
+      if (showFirstVisitHighlight && (playerPos.x !== startPos.x || playerPos.y !== startPos.y)) {
+        clearFirstVisitHighlight();
+      }
       renderGrid();
       handleTileAudio(newX, newY);
       if (!hasTileContent(newX, newY)) triggerExplosion(newX, newY);
@@ -1088,6 +1136,7 @@ for (const path in roomImagesGlob) {
 
   document.addEventListener("DOMContentLoaded", () => {
     loadMutePreference();
+    initFirstVisitHighlight();
     updateMuteButtonUI();
 
     renderGrid();
