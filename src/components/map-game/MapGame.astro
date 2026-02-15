@@ -1,11 +1,11 @@
 ---
 // MapGame.astro - School Map Navigation Game
-import lilMeow from '../assets/game/lilMeow.png';
-import boomGif from '../assets/game/boom.gif';
+import lilMeow from '../../assets/map-game/game/lilMeow.png';
+import boomGif from '../../assets/map-game/game/boom.gif';
 
 // Optimized image loading from src/assets
-const roadImagesGlob = import.meta.glob<any>('../assets/game-roads/*.png', { eager: true });
-const roomImagesGlob = import.meta.glob<any>('../assets/game-rooms/*.png', { eager: true });
+const roadImagesGlob = import.meta.glob<any>('../../assets/map-game/game-roads/*.png', { eager: true });
+const roomImagesGlob = import.meta.glob<any>('../../assets/map-game/game-rooms/*.png', { eager: true });
 
 const roadMap: Record<string, string> = {};
 for (const path in roadImagesGlob) {
@@ -820,9 +820,33 @@ for (const path in roomImagesGlob) {
   let showFirstVisitHighlight = false;
 
   let isMuted = true;
-  const canSpeak = typeof window !== 'undefined' && 'speechSynthesis' in window && typeof SpeechSynthesisUtterance !== 'undefined';
-  const meowAudio = new Audio('/audio/meowDeep.mp3');
+  const meowAudio = new Audio('/audio/map-game/meowDeep.mp3');
   meowAudio.preload = 'auto';
+  let locationAudio = null;
+
+  function normalizeLocationAudioKey(name) {
+    return String(name || '')
+      .toLowerCase()
+      .replace(/â€™/g, '')
+      .replace(/[’']/g, '')
+      .replace(/\d+/g, '')
+      .replace(/[^a-z\s-]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  function getLocationAudioSrc(name) {
+    const key = normalizeLocationAudioKey(name);
+    if (!key) return null;
+    return `/audio/map-game/${key.replace(/\s+/g, '-')}.mp3`;
+  }
+
+  function stopLocationAudio() {
+    if (!locationAudio) return;
+    locationAudio.pause();
+    locationAudio.currentTime = 0;
+    locationAudio = null;
+  }
 
   function loadMutePreference() {
     try {
@@ -854,7 +878,7 @@ for (const path in roomImagesGlob) {
     if (isMuted) {
       meowAudio.pause();
       meowAudio.currentTime = 0;
-      if (canSpeak) window.speechSynthesis.cancel();
+      stopLocationAudio();
     }
     updateMuteButtonUI();
     saveMutePreference();
@@ -882,23 +906,20 @@ for (const path in roomImagesGlob) {
     if (playerEl) playerEl.classList.remove("first-visit-highlight");
   }
 
-  function speakPlaceName(name) {
-    if (isMuted || !canSpeak || !name) return;
-    const text = String(name).trim();
-    if (!text) return;
-
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = 0.95;
-    utterance.pitch = 1;
-    utterance.volume = 1;
-    window.speechSynthesis.speak(utterance);
+  function playPlaceNameAudio(name) {
+    if (isMuted || !name) return;
+    const src = getLocationAudioSrc(name);
+    if (!src) return;
+    stopLocationAudio();
+    locationAudio = new Audio(src);
+    locationAudio.preload = 'auto';
+    locationAudio.play().catch((e) => console.warn('Location audio play blocked by browser:', e));
   }
 
   function handleTileAudio(x, y) {
     const location = getLocationAt(x, y);
     if (!location?.name) return;
-    speakPlaceName(location.name);
+    playPlaceNameAudio(location.name);
   }
 
   function getLocationAt(x, y) {
