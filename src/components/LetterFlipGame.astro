@@ -1,5 +1,6 @@
 ---
 // LetterFlipGame.astro
+import Loader from './Loader.astro';
 
 // 1. Imports & Asset Loading
 const foodImages = import.meta.glob<string>(
@@ -134,7 +135,20 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
   <!-- Controls -->
   <div class="letter-game__controls">
     <button class="letter-game__next" data-testid="next-btn" disabled>
-      Next
+      <span class="letter-game__next-label">Next</span>
+      <Loader
+        class="letter-game__next-loader"
+        size={18}
+        mobileSize={16}
+        stepMs={300}
+        outerUnit="garlic"
+        middleUnit="logo"
+        color="currentColor"
+        outerColor="currentColor"
+        middleColor="currentColor"
+        dotColor="currentColor"
+        aria-hidden="true"
+      />
     </button>
   </div>
 </div>
@@ -576,6 +590,23 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     text-transform: uppercase;
     letter-spacing: 1px;
+    min-height: 52px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  .letter-game__next-loader {
+    display: none;
+  }
+
+  .letter-game__next.is-loading .letter-game__next-label {
+    display: none;
+  }
+
+  .letter-game__next.is-loading .letter-game__next-loader {
+    display: inline-flex;
   }
 
   .letter-game__next:hover:not([disabled]) {
@@ -680,7 +711,7 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
   /* =========================================
      3. DOM Elements
      ========================================= */
-  let elBoard, elCards, elProgress, elToast, elNext;
+  let elBoard, elCards, elProgress, elToast, elNext, elNextLabel, elNextLoader;
   let elAttributionItems;
   let elSettingsOverlay, elSettingsBtn, elSettingsClose;
   let elModeInputs, elLetterCheckboxes, elRandomize;
@@ -964,15 +995,16 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
   }
 
   async function goNext() {
-    if (elNext) {
-        elNext.disabled = true;
-        elNext.textContent = "Loading...";
+    setNextLoading(true);
+    try {
+      roundCount++;
+      currentSeed = Math.floor(Math.random() * 1000000);
+      await generateNewPair();
+      updateProgress();
+      renderCurrentPair();
+    } finally {
+      setNextLoading(false);
     }
-    roundCount++;
-    currentSeed = Math.floor(Math.random() * 1000000);
-    await generateNewPair();
-    updateProgress();
-    renderCurrentPair();
   }
 
   /* =========================================
@@ -1000,8 +1032,20 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
     flippedCards = [false, false];
     updateAttributionUI();
     if (elNext) {
-        elNext.disabled = false;
-        elNext.textContent = "Next";
+      elNext.disabled = false;
+    }
+  }
+
+  function setNextLoading(isLoading) {
+    if (!elNext) return;
+    elNext.disabled = isLoading;
+    elNext.setAttribute("aria-busy", isLoading ? "true" : "false");
+    elNext.classList.toggle("is-loading", isLoading);
+    if (elNextLabel) {
+      elNextLabel.textContent = isLoading ? "Loading" : "Next";
+    }
+    if (elNextLoader) {
+      elNextLoader.setAttribute("aria-hidden", isLoading ? "false" : "true");
     }
   }
 
@@ -1122,6 +1166,8 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
     elProgress = document.querySelector(".letter-game__progress");
     elToast = document.querySelector(".letter-game__toast");
     elNext = document.querySelector(".letter-game__next");
+    elNextLabel = document.querySelector(".letter-game__next-label");
+    elNextLoader = document.querySelector(".letter-game__next-loader");
     elAttributionItems = Array.from(document.querySelectorAll(".letter-game__attribution-item"));
     
     // Settings Elements
@@ -1204,10 +1250,15 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
     currentSeed = Math.floor(Math.random() * 1000000);
     
     (async () => {
+        setNextLoading(true);
+      try {
         await generateNewPair();
         updateProgress();
         renderCurrentPair();
         if (elToast) elToast.textContent = "";
+      } finally {
+        setNextLoading(false);
+      }
     })();
   }
 

@@ -147,6 +147,8 @@ import Logo from './Logo.astro';
 
   .logo {
     display: inline-flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
     align-items: center;
     justify-content: center;
     gap: 0.45rem;
@@ -157,9 +159,15 @@ import Logo from './Logo.astro';
   }
 
   .logo-text {
+    display: inline-block;
     font-size: 1.1rem;
     font-weight: 700;
     letter-spacing: 0.01em;
+    white-space: nowrap;
+  }
+
+  .logo :global(.takko-logo) {
+    flex: 0 0 auto;
   }
 
   /* Default Desktop Styles */
