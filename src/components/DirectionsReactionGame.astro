@@ -1,4 +1,22 @@
-<div class="reaction-game" id="reaction-game">
+---
+import badcat1 from "../assets/DirectionsReactionGame/badcat1-nobg.png";
+import badcat2 from "../assets/DirectionsReactionGame/badcat2.jpg";
+import badcat3 from "../assets/DirectionsReactionGame/badcat3.jpg";
+import goodCat1 from "../assets/DirectionsReactionGame/goodCat1-nobg.png";
+import goodCat2 from "../assets/DirectionsReactionGame/goodCat2-nobg.png";
+import goodCat3 from "../assets/DirectionsReactionGame/goodCat3-nobg.png";
+import goodCat4 from "../assets/DirectionsReactionGame/goodcat4-nobg.png";
+
+const GOOD_FEEDBACK_IMAGES = [goodCat1.src, goodCat2.src, goodCat3.src, goodCat4.src];
+const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src];
+---
+
+<div
+  class="reaction-game"
+  id="reaction-game"
+  data-good-images={JSON.stringify(GOOD_FEEDBACK_IMAGES)}
+  data-bad-images={JSON.stringify(BAD_FEEDBACK_IMAGES)}
+>
   <header class="hud">
     <div class="hud-card">
       <span class="hud-label">Time</span>
@@ -17,6 +35,7 @@
   <main class="stage" id="stage">
     <div class="stage-visual neutral" id="stage-visual">
       <div class="placeholder-icon" id="placeholder-icon">?</div>
+      <img id="feedback-image" class="feedback-image hidden left" src="" alt="" />
       <p class="stage-title" id="stage-title">Press Play</p>
       <p class="stage-subtitle" id="stage-subtitle">Audio will say: Left, Right, or Straight.</p>
     </div>
@@ -32,6 +51,39 @@
     <button id="btn-start" class="start-btn" type="button">Play</button>
     <p class="result-text" id="result-text">Press Play when ready.</p>
   </div>
+
+  <section class="howto-ja" aria-label="あそびかた / How to play">
+    <div class="howto-grid">
+      <div class="howto-col">
+        <p class="howto-title">あそびかた</p>
+        <p class="howto-line">1. Playをおす。</p>
+        <p class="howto-line">2. こえをきいて、むきをえらぶ。</p>
+        <p class="howto-line">3. ただしいむきを、はやくおす。</p>
+        <p class="howto-subtitle">おしかたは3つあるよ</p>
+        <p class="howto-line">・マウスでボタンをおす</p>
+        <p class="howto-line">・キーボードの やじるし（← ↑ →）</p>
+        <p class="howto-line">・キーボードの A / W / D</p>
+      </div>
+      <div class="howto-col">
+        <p class="howto-title">How to Play</p>
+        <p class="howto-line">1. Press Play.</p>
+        <p class="howto-line">2. Listen and pick a direction.</p>
+        <p class="howto-line">3. Press the correct one fast.</p>
+        <p class="howto-subtitle">3 ways to answer</p>
+        <p class="howto-line">- Click the buttons with a mouse</p>
+        <p class="howto-line">- Use arrow keys (Left, Up, Right)</p>
+        <p class="howto-line">- Use A / W / D keys</p>
+      </div>
+    </div>
+  </section>
+
+  <div id="finish-popup" class="finish-popup hidden" role="dialog" aria-modal="true" aria-live="polite">
+    <div class="finish-card">
+      <p class="finish-label">Final Score</p>
+      <p class="finish-score" id="finish-score">0</p>
+      <p class="finish-meta" id="finish-meta">0 rounds</p>
+    </div>
+  </div>
 </div>
 
 <style>
@@ -44,6 +96,7 @@
     --ok: #13955a;
     --bad: #c9382d;
 
+    position: relative;
     width: min(860px, 94vw);
     margin: 2rem auto;
     padding: 1rem;
@@ -97,6 +150,8 @@
     width: 100%;
     min-height: 300px;
     border-radius: 14px;
+    position: relative;
+    overflow: hidden;
     display: grid;
     place-items: center;
     text-align: center;
@@ -122,18 +177,55 @@
     font-size: clamp(4rem, 10vw, 6rem);
     line-height: 1;
     margin-bottom: 0.6rem;
+    z-index: 2;
+  }
+
+  .feedback-image {
+    position: absolute;
+    top: 50%;
+    width: clamp(120px, 24vw, 220px);
+    max-height: 82%;
+    object-fit: contain;
+    pointer-events: none;
+    opacity: 0;
+    z-index: 1;
+    filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.22));
+  }
+
+  .feedback-image.left {
+    left: 0.5rem;
+  }
+
+  .feedback-image.right {
+    right: 0.5rem;
+  }
+
+  .feedback-image.hidden {
+    display: none;
+  }
+
+  .feedback-image.show.left {
+    display: block;
+    animation: pop-in-left 0.8s ease forwards;
+  }
+
+  .feedback-image.show.right {
+    display: block;
+    animation: pop-in-right 0.8s ease forwards;
   }
 
   .stage-title {
     margin: 0;
     font-size: clamp(1.3rem, 3.2vw, 2rem);
     font-weight: 800;
+    z-index: 2;
   }
 
   .stage-subtitle {
     margin: 0.4rem 0 0;
     font-size: 1rem;
     color: var(--muted);
+    z-index: 2;
   }
 
   .controls {
@@ -190,6 +282,98 @@
     color: var(--muted);
   }
 
+  .howto-ja {
+    margin-top: 0.75rem;
+    background: rgba(255, 255, 255, 0.92);
+    border-radius: 12px;
+    padding: 0.65rem 0.8rem;
+    box-shadow: inset 0 0 0 1px rgba(17, 24, 39, 0.08);
+  }
+
+  .howto-grid {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 0.9rem;
+  }
+
+  .howto-col {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .howto-title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 800;
+    color: #1f2937;
+  }
+
+  .howto-subtitle {
+    margin: 0.35rem 0 0.15rem;
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: #334155;
+  }
+
+  .howto-line {
+    margin: 0.1rem 0;
+    font-size: 0.9rem;
+    color: #334155;
+    line-height: 1.35;
+  }
+
+  .finish-popup {
+    position: absolute;
+    inset: 0;
+    z-index: 30;
+    display: grid;
+    place-items: center;
+    border-radius: 24px;
+    background: rgba(12, 20, 38, 0.56);
+    backdrop-filter: blur(3px);
+    padding: 1rem;
+  }
+
+  .finish-popup.hidden {
+    display: none;
+  }
+
+  .finish-card {
+    width: min(480px, 92%);
+    border-radius: 20px;
+    padding: 1.2rem 1rem;
+    text-align: center;
+    color: #ffffff;
+    background: radial-gradient(circle at top, #2b8cff 0%, #145eff 62%, #0d3fb6 100%);
+    box-shadow: 0 18px 46px rgba(0, 0, 0, 0.36);
+    animation: finish-pop 240ms ease-out;
+  }
+
+  .finish-label {
+    margin: 0;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 800;
+    font-size: 0.86rem;
+    opacity: 0.92;
+  }
+
+  .finish-score {
+    margin: 0.25rem 0;
+    line-height: 1;
+    font-size: clamp(3rem, 12vw, 6rem);
+    font-weight: 900;
+    text-shadow: 0 4px 12px rgba(0, 0, 0, 0.22);
+  }
+
+  .finish-meta {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    opacity: 0.95;
+  }
+
   @keyframes flash-correct {
     0% { transform: scale(1); }
     30% { transform: scale(1.02); }
@@ -201,6 +385,25 @@
     30% { transform: translateX(4px); }
     60% { transform: translateX(-4px); }
     100% { transform: translateX(0); }
+  }
+
+  @keyframes finish-pop {
+    0% { opacity: 0; transform: scale(0.94) translateY(8px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  @keyframes pop-in-left {
+    0% { opacity: 0; transform: translate(-28px, -50%) scale(0.8) rotate(-5deg); }
+    25% { opacity: 1; transform: translate(-10px, -50%) scale(1.04) rotate(-2deg); }
+    75% { opacity: 1; transform: translate(-12px, -50%) scale(1) rotate(-1deg); }
+    100% { opacity: 0; transform: translate(-18px, -50%) scale(0.95) rotate(-2deg); }
+  }
+
+  @keyframes pop-in-right {
+    0% { opacity: 0; transform: translate(28px, -50%) scale(0.8) rotate(5deg); }
+    25% { opacity: 1; transform: translate(10px, -50%) scale(1.04) rotate(2deg); }
+    75% { opacity: 1; transform: translate(12px, -50%) scale(1) rotate(1deg); }
+    100% { opacity: 0; transform: translate(18px, -50%) scale(0.95) rotate(2deg); }
   }
 
   @media (max-width: 640px) {
@@ -216,6 +419,18 @@
     .stage-visual {
       min-height: 230px;
     }
+
+    .howto-grid {
+      flex-direction: column;
+      gap: 0.55rem;
+    }
+
+    .howto-subtitle,
+    .howto-line,
+    .howto-title {
+      font-size: 0.84rem;
+    }
+
   }
 </style>
 
@@ -229,6 +444,9 @@
     { key: "straight", label: "Straight", symbol: "^" },
     { key: "right", label: "Right", symbol: ">" },
   ];
+  const gameRoot = document.getElementById("reaction-game");
+  const GOOD_IMAGE_POOL = JSON.parse(gameRoot?.dataset.goodImages ?? "[]");
+  const BAD_IMAGE_POOL = JSON.parse(gameRoot?.dataset.badImages ?? "[]");
 
   const HAPPY_PLACEHOLDERS = [
     { icon: "😺", label: "Happy Cat Meme A" },
@@ -250,9 +468,13 @@
     round: document.getElementById("round-count"),
     stageVisual: document.getElementById("stage-visual"),
     icon: document.getElementById("placeholder-icon"),
+    feedbackImage: document.getElementById("feedback-image"),
     title: document.getElementById("stage-title"),
     subtitle: document.getElementById("stage-subtitle"),
     result: document.getElementById("result-text"),
+    finishPopup: document.getElementById("finish-popup"),
+    finishScore: document.getElementById("finish-score"),
+    finishMeta: document.getElementById("finish-meta"),
     startBtn: document.getElementById("btn-start"),
     leftBtn: document.getElementById("btn-left"),
     straightBtn: document.getElementById("btn-straight"),
@@ -273,6 +495,37 @@
   let gameClockInterval = null;
   let answerTimeout = null;
   let feedbackTimeout = null;
+  let currentAudio = null;
+
+  const AUDIO_BASE = "/audio/directions-reaction-game/recorded";
+  const START_AUDIO = [
+    `${AUDIO_BASE}/start-1.mp3`,
+    `${AUDIO_BASE}/start-2.mp3`,
+  ];
+  const FINISH_AUDIO = [
+    `${AUDIO_BASE}/finish-1.mp3`,
+    `${AUDIO_BASE}/finish-2.mp3`,
+    `${AUDIO_BASE}/finish-3.mp3`,
+  ];
+  const DIRECTION_AUDIO_SRC = {
+    left: [
+      `${AUDIO_BASE}/turn-left-1.mp3`,
+      `${AUDIO_BASE}/turn-left-2.mp3`,
+      `${AUDIO_BASE}/turn-left-3.mp3`,
+      `${AUDIO_BASE}/turn-left-4.mp3`,
+    ],
+    straight: [
+      `${AUDIO_BASE}/go-straight-1.mp3`,
+      `${AUDIO_BASE}/go-straight-2.mp3`,
+      `${AUDIO_BASE}/go-straight-3.mp3`,
+    ],
+    right: [
+      `${AUDIO_BASE}/turn-right-1.mp3`,
+      `${AUDIO_BASE}/turn-right-2.mp3`,
+      `${AUDIO_BASE}/turn-right-3.mp3`,
+      `${AUDIO_BASE}/turn-right-4.mp3`,
+    ],
+  };
 
   function randomFrom(list) {
     return list[Math.floor(Math.random() * list.length)];
@@ -282,6 +535,10 @@
     if (responseMs < 1000) return 100;
     if (responseMs < 2000) return 50;
     return 20;
+  }
+
+  function waitMs(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   function setInputEnabled(enabled) {
@@ -299,27 +556,93 @@
   function setNeutralVisual() {
     ui.stageVisual.className = "stage-visual neutral";
     ui.icon.textContent = "?";
+    ui.feedbackImage.className = "feedback-image hidden left";
+    ui.feedbackImage.src = "";
+    ui.feedbackImage.alt = "";
     ui.title.textContent = "Listening...";
     ui.subtitle.textContent = "Audio cue is playing. Tap <, ^, or >.";
   }
 
-  function setFeedbackVisual(isCorrect, payload, pointsAwarded, detailText) {
+  function setFeedbackVisual(isCorrect, pointsAwarded, detailText) {
     ui.stageVisual.className = `stage-visual ${isCorrect ? "correct" : "wrong"}`;
-    ui.icon.textContent = payload.icon;
-    ui.title.textContent = payload.label;
+    ui.icon.textContent = isCorrect ? "OK" : "NO";
+    ui.title.textContent = isCorrect ? "Correct!" : "Wrong!";
+    const imageSrc = randomFrom(isCorrect ? GOOD_IMAGE_POOL : BAD_IMAGE_POOL);
+    const imageSide = Math.random() < 0.5 ? "left" : "right";
+    ui.feedbackImage.src = imageSrc;
+    ui.feedbackImage.alt = isCorrect ? "Good cat reaction" : "Bad cat reaction";
+    ui.feedbackImage.className = `feedback-image show ${imageSide}`;
     ui.subtitle.textContent = isCorrect
       ? `${detailText}  +${pointsAwarded} pts`
       : detailText;
   }
 
-  function speakCue(text) {
-    if (!("speechSynthesis" in window) || typeof SpeechSynthesisUtterance === "undefined") return;
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = 0.9;
-    utterance.pitch = 1;
-    utterance.volume = 1;
-    window.speechSynthesis.speak(utterance);
+  function hideFinishPopup() {
+    ui.finishPopup.classList.add("hidden");
+  }
+
+  function showFinishPopup() {
+    ui.finishScore.textContent = String(score);
+    ui.finishMeta.textContent = `${roundCount} rounds`;
+    ui.finishPopup.classList.remove("hidden");
+  }
+
+  function stopCurrentAudio() {
+    if (!currentAudio) return;
+    currentAudio.pause();
+    currentAudio.currentTime = 0;
+    currentAudio = null;
+  }
+
+  function playAudio(src, waitForEnd = false) {
+    if (!src) return Promise.resolve();
+    stopCurrentAudio();
+    currentAudio = new Audio(src);
+    currentAudio.preload = "auto";
+    const activeAudio = currentAudio;
+    const playPromise = activeAudio.play().catch((e) => {
+      console.warn("Audio play blocked by browser:", e);
+    });
+
+    if (!waitForEnd) return playPromise;
+    return new Promise((resolve) => {
+      const cleanupAndResolve = () => {
+        if (currentAudio === activeAudio) {
+          currentAudio = null;
+        }
+        resolve();
+      };
+      activeAudio.addEventListener("ended", cleanupAndResolve, { once: true });
+      activeAudio.addEventListener("error", cleanupAndResolve, { once: true });
+      playPromise.then(() => {
+        if (activeAudio.paused) cleanupAndResolve();
+      });
+    });
+  }
+
+  function playRandomFromPool(pool, waitForEnd = false) {
+    if (!pool || pool.length === 0) return Promise.resolve();
+    return playAudio(randomFrom(pool), waitForEnd);
+  }
+
+  function playDirectionCue(directionKey) {
+    return playRandomFromPool(DIRECTION_AUDIO_SRC[directionKey], false);
+  }
+
+  async function runStartCountdown(seconds = 3) {
+    ui.stageVisual.className = "stage-visual neutral";
+    ui.feedbackImage.className = "feedback-image hidden left";
+    ui.feedbackImage.src = "";
+    ui.feedbackImage.alt = "";
+    ui.subtitle.textContent = "Get ready...";
+    for (let n = seconds; n >= 1; n -= 1) {
+      if (!gameActive) return false;
+      ui.icon.textContent = String(n);
+      ui.title.textContent = `Starting in ${n}`;
+      ui.result.textContent = `Starting in ${n}...`;
+      await waitMs(1000);
+    }
+    return gameActive;
   }
 
   function clearTimers() {
@@ -334,24 +657,29 @@
   function endGame() {
     gameActive = false;
     clearTimers();
-    window.speechSynthesis?.cancel?.();
+    stopCurrentAudio();
     setInputEnabled(false);
     ui.startBtn.textContent = "Play Again";
 
     ui.stageVisual.className = "stage-visual neutral";
     ui.icon.textContent = "🏁";
+    ui.feedbackImage.className = "feedback-image hidden left";
+    ui.feedbackImage.src = "";
+    ui.feedbackImage.alt = "";
     ui.title.textContent = "Time Up!";
     ui.subtitle.textContent = `Final score: ${score} points across ${roundCount} rounds.`;
     ui.result.textContent = "Round complete. Press Play Again to restart.";
+    showFinishPopup();
 
     remainingMs = 0;
     updateHud();
+    playRandomFromPool(FINISH_AUDIO, false);
   }
 
   function resetToIdle() {
     gameActive = false;
     clearTimers();
-    window.speechSynthesis?.cancel?.();
+    stopCurrentAudio();
     currentPrompt = null;
     roundAnswered = false;
     score = 0;
@@ -362,9 +690,13 @@
     ui.startBtn.textContent = "Play";
     ui.stageVisual.className = "stage-visual neutral";
     ui.icon.textContent = "?";
+    ui.feedbackImage.className = "feedback-image hidden left";
+    ui.feedbackImage.src = "";
+    ui.feedbackImage.alt = "";
     ui.title.textContent = "Press Play";
     ui.subtitle.textContent = "Audio will say: Left, Right, or Straight.";
     ui.result.textContent = "Press Play when ready.";
+    hideFinishPopup();
     updateHud();
   }
 
@@ -395,7 +727,7 @@
     updateHud();
     ui.result.textContent = `Round ${roundCount}: waiting for your input.`;
 
-    speakCue(currentPrompt.label);
+    playDirectionCue(currentPrompt.key);
 
     answerTimeout = setTimeout(() => {
       resolveAnswer(null);
@@ -418,17 +750,13 @@
       score += speedPoints;
     }
 
-    const feedbackItem = isCorrect
-      ? randomFrom(HAPPY_PLACEHOLDERS)
-      : randomFrom(BAD_PLACEHOLDERS);
-
     const speedTag = responseMs < 1000 ? "Super" : responseMs < 2000 ? "Good" : "OK";
     const wrongReason = answerKey === null ? "Too slow." : "Wrong direction.";
     const detailText = isCorrect
       ? `${speedTag} reaction (${(responseMs / 1000).toFixed(2)}s).`
       : wrongReason;
 
-    setFeedbackVisual(isCorrect, feedbackItem, speedPoints, detailText);
+    setFeedbackVisual(isCorrect, speedPoints, detailText);
     ui.result.textContent = isCorrect
       ? `Correct: ${currentPrompt.label} (${speedTag}, +${speedPoints})`
       : `Incorrect. Cue was ${currentPrompt.label}.`;
@@ -441,9 +769,9 @@
     }, FEEDBACK_MS);
   }
 
-  function startGame() {
+  async function startGame() {
     clearTimers();
-    window.speechSynthesis?.cancel?.();
+    stopCurrentAudio();
 
     score = 0;
     roundCount = 0;
@@ -455,9 +783,14 @@
 
     setInputEnabled(true);
     ui.startBtn.textContent = "Reset";
-    ui.result.textContent = "Listen and react as fast as possible.";
+    ui.result.textContent = "Get ready...";
+    hideFinishPopup();
     updateHud();
     runGameClock();
+    playRandomFromPool(START_AUDIO, false);
+    const shouldContinue = await runStartCountdown(3);
+    if (!shouldContinue) return;
+    ui.result.textContent = "Listen and react as fast as possible.";
     queueNextPrompt();
   }
 
@@ -474,9 +807,20 @@
 
   document.addEventListener("keydown", (event) => {
     if (!gameActive) return;
-    if (event.key === "ArrowLeft") resolveAnswer("left");
-    if (event.key === "ArrowUp") resolveAnswer("straight");
-    if (event.key === "ArrowRight") resolveAnswer("right");
+    const key = event.key.toLowerCase();
+
+    if (key === "arrowleft" || key === "a") {
+      event.preventDefault();
+      resolveAnswer("left");
+    }
+    if (key === "arrowup" || key === "w") {
+      event.preventDefault();
+      resolveAnswer("straight");
+    }
+    if (key === "arrowright" || key === "d") {
+      event.preventDefault();
+      resolveAnswer("right");
+    }
   });
 
   setInputEnabled(false);

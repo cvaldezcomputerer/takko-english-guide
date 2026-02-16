@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@astrojs/cloudflare": "^12.6.12",
+    "@imgly/background-removal-node": "^1.4.5",
     "astro": "^5.16.15"
   }
 }
