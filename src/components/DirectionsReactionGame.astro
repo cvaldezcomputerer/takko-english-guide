@@ -1,14 +1,18 @@
 ---
-import badcat1 from "../assets/DirectionsReactionGame/badcat1-nobg.png";
-import badcat2 from "../assets/DirectionsReactionGame/badcat2.jpg";
-import badcat3 from "../assets/DirectionsReactionGame/badcat3.jpg";
-import goodCat1 from "../assets/DirectionsReactionGame/goodCat1-nobg.png";
-import goodCat2 from "../assets/DirectionsReactionGame/goodCat2-nobg.png";
-import goodCat3 from "../assets/DirectionsReactionGame/goodCat3-nobg.png";
-import goodCat4 from "../assets/DirectionsReactionGame/goodcat4-nobg.png";
+import badcat1 from "../assets/DirectionsReactionGame/bad-cat-1.png";
+import badcat10 from "../assets/DirectionsReactionGame/bad-cat-10.png";
+import badcat11 from "../assets/DirectionsReactionGame/bad-cat-11.png";
+import badcat2 from "../assets/DirectionsReactionGame/bad-cat-2.jpg";
+import badcat3 from "../assets/DirectionsReactionGame/bad-cat-3.jpg";
+import goodCat1 from "../assets/DirectionsReactionGame/good-cat-1.png";
+import goodCat10 from "../assets/DirectionsReactionGame/good-cat-10.png";
+import goodCat12 from "../assets/DirectionsReactionGame/good-cat-12.png";
+import goodCat2 from "../assets/DirectionsReactionGame/good-cat-2.png";
+import goodCat3 from "../assets/DirectionsReactionGame/good-cat-3.png";
+import goodCat4 from "../assets/DirectionsReactionGame/good-cat-4.png";
 
-const GOOD_FEEDBACK_IMAGES = [goodCat1.src, goodCat2.src, goodCat3.src, goodCat4.src];
-const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src];
+const GOOD_FEEDBACK_IMAGES = [goodCat1.src, goodCat2.src, goodCat3.src, goodCat4.src, goodCat10.src, goodCat12.src];
+const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src, badcat10.src, badcat11.src];
 ---
 
 <div
@@ -33,7 +37,8 @@ const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src];
       <div class="placeholder-icon" id="placeholder-icon">?</div>
       <img id="feedback-image" class="feedback-image hidden left" src="" alt="" />
       <p class="stage-title" id="stage-title">スタートを押してね</p>
-      <p class="stage-subtitle" id="stage-subtitle">音声で「左・まっすぐ・右」が流れます。</p>
+      <p class="stage-subtitle" id="stage-subtitle">You can also use the arrow keys on the keyboard.
+キーボードの矢印キー（← ↑ →）も使えます。</p>
     </div>
   </main>
 
@@ -47,21 +52,6 @@ const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src];
     <button id="btn-start" class="start-btn" type="button">スタート</button>
     <p class="result-text" id="result-text">準備ができたらスタートを押してね。</p>
   </div>
-
-  <section class="howto-ja" aria-label="あそびかた">
-    <div class="howto-grid">
-      <div class="howto-col">
-        <p class="howto-title">あそびかた</p>
-        <p class="howto-line">1. スタートをおす。</p>
-        <p class="howto-line">2. こえをきいて、むきをえらぶ。</p>
-        <p class="howto-line">3. ただしいむきを、はやくおす。</p>
-        <p class="howto-subtitle">おしかたは3つあるよ</p>
-        <p class="howto-line">・マウスでボタンをおす</p>
-        <p class="howto-line">・キーボードの やじるし（← ↑ →）</p>
-        <p class="howto-line">・キーボードの A / W / D</p>
-      </div>
-    </div>
-  </section>
 
   <div id="finish-popup" class="finish-popup hidden" role="dialog" aria-modal="true" aria-live="polite">
     <div class="finish-card">
@@ -164,6 +154,11 @@ const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src];
     background: linear-gradient(180deg, #f7fbff, #edf5ff);
   }
 
+  .stage-visual.speaking {
+    background: linear-gradient(180deg, #eff8ff, #dceeff);
+    animation: speaking-pulse 1.2s ease-in-out infinite;
+  }
+
   .stage-visual.correct {
     background: linear-gradient(180deg, #ecfff4, #d5ffe8);
     animation: flash-correct 0.8s ease;
@@ -179,6 +174,10 @@ const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src];
     line-height: 1;
     margin-bottom: 0.6rem;
     z-index: 2;
+  }
+
+  .placeholder-icon.speaking {
+    animation: speaker-bounce 0.9s ease-in-out infinite;
   }
 
   .feedback-image {
@@ -227,6 +226,7 @@ const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src];
     font-size: 1rem;
     color: var(--muted);
     z-index: 2;
+    white-space: pre-line;
   }
 
   .controls {
@@ -283,47 +283,6 @@ const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src];
     color: var(--muted);
   }
 
-  .howto-ja {
-    margin-top: 0.75rem;
-    background: rgba(255, 255, 255, 0.92);
-    border-radius: 12px;
-    padding: 0.65rem 0.8rem;
-    box-shadow: inset 0 0 0 1px rgba(17, 24, 39, 0.08);
-  }
-
-  .howto-grid {
-    display: flex;
-    flex-direction: row;
-    align-items: flex-start;
-    gap: 0.9rem;
-  }
-
-  .howto-col {
-    flex: 1 1 0;
-    min-width: 0;
-  }
-
-  .howto-title {
-    margin: 0;
-    font-size: 1rem;
-    font-weight: 800;
-    color: #1f2937;
-  }
-
-  .howto-subtitle {
-    margin: 0.35rem 0 0.15rem;
-    font-size: 0.9rem;
-    font-weight: 800;
-    color: #334155;
-  }
-
-  .howto-line {
-    margin: 0.1rem 0;
-    font-size: 0.9rem;
-    color: #334155;
-    line-height: 1.35;
-  }
-
   .finish-popup {
     position: absolute;
     inset: 0;
@@ -354,20 +313,27 @@ const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src];
 
   .finish-close {
     position: absolute;
-    top: 0.6rem;
-    right: 0.6rem;
-    width: 2rem;
-    height: 2rem;
+    top: 0.4rem;
+    right: 0.4rem;
+    width: 2.75rem;
+    height: 2.75rem;
     border: none;
     border-radius: 999px;
     background: #dc2626;
     color: #ffffff;
-    font-size: 1rem;
+    font-size: 1.1rem;
     font-weight: 800;
     line-height: 1;
     cursor: pointer;
     display: grid;
     place-items: center;
+    z-index: 2;
+    touch-action: manipulation;
+  }
+
+  .finish-close:focus-visible {
+    outline: 3px solid #ffffff;
+    outline-offset: 2px;
   }
 
   .finish-label {
@@ -397,6 +363,18 @@ const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src];
   @keyframes flash-correct {
     0% { transform: scale(1); }
     30% { transform: scale(1.02); }
+    100% { transform: scale(1); }
+  }
+
+  @keyframes speaking-pulse {
+    0% { box-shadow: inset 0 0 0 0 rgba(37, 99, 235, 0.16); }
+    50% { box-shadow: inset 0 0 0 5px rgba(37, 99, 235, 0.08); }
+    100% { box-shadow: inset 0 0 0 0 rgba(37, 99, 235, 0.16); }
+  }
+
+  @keyframes speaker-bounce {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
     100% { transform: scale(1); }
   }
 
@@ -440,24 +418,17 @@ const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src];
       min-height: 230px;
     }
 
-    .howto-grid {
-      flex-direction: column;
-      gap: 0.55rem;
-    }
-
-    .howto-subtitle,
-    .howto-line,
-    .howto-title {
-      font-size: 0.84rem;
-    }
-
   }
 </style>
 
 <script is:inline>
   const TOTAL_DURATION_MS = 60000;
   const ANSWER_WINDOW_MS = 3000;
+  const INPUT_LOCK_MS = 500;
   const FEEDBACK_MS = 800;
+  const KEYBOARD_HINT_EN = "You can also use the arrow keys on the keyboard.";
+  const KEYBOARD_HINT_JA = "キーボードの矢印キー（← ↑ →）も使えます。";
+  const KEYBOARD_HINT_BILINGUAL = `${KEYBOARD_HINT_EN}\n${KEYBOARD_HINT_JA}`;
 
   const DIRECTIONS = [
     { key: "left", label: "左", symbol: "<" },
@@ -516,6 +487,8 @@ const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src];
   let answerTimeout = null;
   let feedbackTimeout = null;
   let currentAudio = null;
+  let acceptingInput = false;
+  let promptUnlockTimeout = null;
 
   const AUDIO_BASE = "/audio/directions-reaction-game/recorded";
   const START_AUDIO = [
@@ -572,19 +545,32 @@ const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src];
     ui.time.textContent = `${(Math.max(remainingMs, 0) / 1000).toFixed(1)}s`;
   }
 
-  function setNeutralVisual() {
+  function setIdleVisual() {
     ui.stageVisual.className = "stage-visual neutral";
     ui.icon.textContent = "?";
+    ui.icon.classList.remove("speaking");
+    ui.feedbackImage.className = "feedback-image hidden left";
+    ui.feedbackImage.src = "";
+    ui.feedbackImage.alt = "";
+    ui.title.textContent = "スタートを押してね";
+    ui.subtitle.textContent = KEYBOARD_HINT_BILINGUAL;
+  }
+
+  function setSpeakingVisual() {
+    ui.stageVisual.className = "stage-visual speaking";
+    ui.icon.textContent = "🔊";
+    ui.icon.classList.add("speaking");
     ui.feedbackImage.className = "feedback-image hidden left";
     ui.feedbackImage.src = "";
     ui.feedbackImage.alt = "";
     ui.title.textContent = "聞いてね...";
-    ui.subtitle.textContent = "音声を聞いて、< ^ > を押してね。";
+    ui.subtitle.textContent = "音声を再生中...";
   }
 
   function setFeedbackVisual(isCorrect, pointsAwarded, detailText) {
     ui.stageVisual.className = `stage-visual ${isCorrect ? "correct" : "wrong"}`;
-    ui.icon.textContent = isCorrect ? "OK" : "NO";
+    ui.icon.classList.remove("speaking");
+    ui.icon.textContent = isCorrect ? "OK" : "Oh no!";
     ui.title.textContent = isCorrect ? "せいかい！" : "ざんねん！";
     const imageSrc = randomFrom(isCorrect ? GOOD_IMAGE_POOL : BAD_IMAGE_POOL);
     const imageSide = Math.random() < 0.5 ? "left" : "right";
@@ -668,9 +654,11 @@ const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src];
     if (answerTimeout) clearTimeout(answerTimeout);
     if (feedbackTimeout) clearTimeout(feedbackTimeout);
     if (gameClockInterval) clearInterval(gameClockInterval);
+    if (promptUnlockTimeout) clearTimeout(promptUnlockTimeout);
     answerTimeout = null;
     feedbackTimeout = null;
     gameClockInterval = null;
+    promptUnlockTimeout = null;
   }
 
   function endGame() {
@@ -681,6 +669,7 @@ const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src];
     ui.startBtn.textContent = "もう一回";
 
     ui.stageVisual.className = "stage-visual neutral";
+    ui.icon.classList.remove("speaking");
     ui.icon.textContent = "🏁";
     ui.feedbackImage.className = "feedback-image hidden left";
     ui.feedbackImage.src = "";
@@ -701,19 +690,14 @@ const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src];
     stopCurrentAudio();
     currentPrompt = null;
     roundAnswered = false;
+    acceptingInput = false;
     score = 0;
     roundCount = 0;
     remainingMs = TOTAL_DURATION_MS;
 
     setInputEnabled(false);
     ui.startBtn.textContent = "スタート";
-    ui.stageVisual.className = "stage-visual neutral";
-    ui.icon.textContent = "?";
-    ui.feedbackImage.className = "feedback-image hidden left";
-    ui.feedbackImage.src = "";
-    ui.feedbackImage.alt = "";
-    ui.title.textContent = "スタートを押してね";
-    ui.subtitle.textContent = "音声で「左・まっすぐ・右」が流れます。";
+    setIdleVisual();
     ui.result.textContent = "準備ができたらスタートを押してね。";
     hideFinishPopup();
     updateHud();
@@ -738,24 +722,38 @@ const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src];
       return;
     }
 
-    setNeutralVisual();
+    setSpeakingVisual();
     currentPrompt = randomFrom(DIRECTIONS);
     promptStartTs = performance.now();
     roundAnswered = false;
+    acceptingInput = false;
+    setInputEnabled(false);
     roundCount += 1;
     updateHud();
     ui.result.textContent = `${roundCount} ラウンド目: 入力まち`;
 
     playDirectionCue(currentPrompt.key);
 
+    promptUnlockTimeout = setTimeout(() => {
+      if (!gameActive || roundAnswered || !currentPrompt) return;
+      acceptingInput = true;
+      setInputEnabled(true);
+    }, INPUT_LOCK_MS);
+
     answerTimeout = setTimeout(() => {
       resolveAnswer(null);
-    }, ANSWER_WINDOW_MS);
+    }, INPUT_LOCK_MS + ANSWER_WINDOW_MS);
   }
 
   function resolveAnswer(answerKey) {
-    if (!gameActive || roundAnswered || !currentPrompt) return;
+    if (!gameActive || roundAnswered || !currentPrompt || !acceptingInput) return;
     roundAnswered = true;
+    acceptingInput = false;
+    setInputEnabled(false);
+    if (promptUnlockTimeout) {
+      clearTimeout(promptUnlockTimeout);
+      promptUnlockTimeout = null;
+    }
     if (answerTimeout) {
       clearTimeout(answerTimeout);
       answerTimeout = null;
@@ -799,6 +797,7 @@ const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src];
     gameActive = true;
     currentPrompt = null;
     roundAnswered = false;
+    acceptingInput = false;
 
     setInputEnabled(true);
     ui.startBtn.textContent = "リセット";
