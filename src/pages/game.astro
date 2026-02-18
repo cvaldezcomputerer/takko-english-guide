@@ -45,7 +45,14 @@ import T from '../components/T.astro';
         <!-- School Map Game Card -->
         <a href="/school-map-game" class="game-card">
             <div class="card-image map-bg">
-                <div class="icon">🗺️</div>
+                <div class="icon" aria-hidden="true">
+                  <svg viewBox="0 0 120 120" role="img" focusable="false">
+                    <path d="M14 30 40 18l40 12 26-10v70l-26 12-40-12-26 10z" fill="#e9f4ff" stroke="#214764" stroke-width="4" stroke-linejoin="round"/>
+                    <path d="M40 18v70m40-58v70" stroke="#214764" stroke-width="4"/>
+                    <circle cx="60" cy="56" r="15" fill="#f97316" stroke="#7c2d12" stroke-width="4"/>
+                    <path d="M60 41v30m-15-15h30" stroke="#fff7ed" stroke-width="4" stroke-linecap="round"/>
+                  </svg>
+                </div>
             </div>
             <div class="card-content">
                 <h3>
@@ -73,7 +80,16 @@ import T from '../components/T.astro';
         <!-- Letter Flip Game Card -->
         <a href="/letter-game" class="game-card">
              <div class="card-image letter-bg">
-                <div class="icon">🔤</div>
+                <div class="icon" aria-hidden="true">
+                  <svg viewBox="0 0 120 120" role="img" focusable="false">
+                    <rect x="14" y="28" width="36" height="36" rx="8" fill="#fff7cc" stroke="#7a5b12" stroke-width="4"/>
+                    <rect x="44" y="56" width="36" height="36" rx="8" fill="#d7f9ff" stroke="#1f5f70" stroke-width="4"/>
+                    <rect x="70" y="22" width="36" height="36" rx="8" fill="#ffd8d8" stroke="#7f1d1d" stroke-width="4"/>
+                    <text x="32" y="52" text-anchor="middle" font-size="20" font-weight="800" fill="#7a5b12">A</text>
+                    <text x="62" y="80" text-anchor="middle" font-size="20" font-weight="800" fill="#1f5f70">B</text>
+                    <text x="88" y="46" text-anchor="middle" font-size="20" font-weight="800" fill="#7f1d1d">C</text>
+                  </svg>
+                </div>
             </div>
             <div class="card-content">
                 <h3>
@@ -101,7 +117,12 @@ import T from '../components/T.astro';
         <!-- Directions Reaction Game Card -->
         <a href="/directions-reaction-game" class="game-card">
              <div class="card-image reaction-bg">
-                <div class="icon">⚡</div>
+                <div class="icon" aria-hidden="true">
+                  <svg viewBox="0 0 120 120" role="img" focusable="false">
+                    <circle cx="60" cy="60" r="42" fill="#fff4d6" stroke="#7c4a03" stroke-width="4"/>
+                    <path d="M64 24 44 66h18l-8 30 22-38H58z" fill="#facc15" stroke="#7c4a03" stroke-width="4" stroke-linejoin="round"/>
+                  </svg>
+                </div>
             </div>
             <div class="card-content">
                 <h3>
@@ -230,21 +251,33 @@ import T from '../components/T.astro';
   }
 
   .map-bg {
-    background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+    background: #cfe8ff;
   }
 
   .letter-bg {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #e4dbff;
   }
 
   .reaction-bg {
-    background: linear-gradient(135deg, #43cea2 0%, #185a9d 100%);
+    background: #d8f0dd;
   }
 
   .icon {
-    font-size: 5rem;
+    width: clamp(88px, 24vw, 116px);
+    height: clamp(88px, 24vw, 116px);
+    display: grid;
+    place-items: center;
+    background: #ffffff;
+    border: 3px solid rgba(0, 0, 0, 0.16);
+    border-radius: 22px;
     filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));
     transition: transform 0.3s ease;
+  }
+
+  .icon svg {
+    width: 88%;
+    height: 88%;
+    display: block;
   }
 
   .game-card:hover .icon {
@@ -330,7 +363,9 @@ import T from '../components/T.astro';
     }
 
     .icon {
-      font-size: 3.4rem;
+      width: 84px;
+      height: 84px;
+      border-radius: 18px;
     }
 
     .card-content {

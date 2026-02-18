@@ -518,6 +518,8 @@ const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src, badcat10.src
   const CUE_REPEAT_DELAY_MS = 2200;
   const FEEDBACK_MS = 1300;
   const HARD_MODE_AUDIO_RATE = 1.8;
+  const NORMAL_COUNTDOWN_STEP_MS = 1000;
+  const HARD_COUNTDOWN_STEP_MS = 500;
   const KEYBOARD_HINT_EN = "You can also use the arrow keys on the keyboard.";
   const KEYBOARD_HINT_JA = "キーボードの矢印キー（← ↑ →）も使えます。";
   const KEYBOARD_HINT_BILINGUAL = `${KEYBOARD_HINT_EN}\n${KEYBOARD_HINT_JA}`;
@@ -574,6 +576,7 @@ const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src, badcat10.src
 
   const AUDIO_BASE = "/audio/directions-reaction-game/recorded";
   const FEEDBACK_AUDIO_BASE = "/audio/directions-reaction-game/feedback";
+  const COUNTDOWN_TICK_AUDIO = "/audio/directions-reaction-game/countdown-tick.ogg";
   const START_AUDIO = [
     `${AUDIO_BASE}/start-1.mp3`,
     `${AUDIO_BASE}/start-2.mp3`,
@@ -625,6 +628,7 @@ const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src, badcat10.src
     `${FEEDBACK_AUDIO_BASE}/bad-woops-3.mp3`,
   ];
   const ALL_AUDIO_SOURCES = Array.from(new Set([
+    COUNTDOWN_TICK_AUDIO,
     ...START_AUDIO,
     ...FINISH_AUDIO,
     ...Object.values(DIRECTION_AUDIO_SRC).flat(),
@@ -858,11 +862,13 @@ const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src, badcat10.src
     ui.feedbackImage.src = "";
     ui.feedbackImage.alt = "";
     ui.subtitle.textContent = "よーい...";
+    const countdownStepMs = hardMode ? HARD_COUNTDOWN_STEP_MS : NORMAL_COUNTDOWN_STEP_MS;
     for (let n = seconds; n >= 1; n -= 1) {
       if (!gameActive) return false;
       ui.icon.textContent = String(n);
       ui.title.textContent = `${n} びょう後にスタート`;
-      await waitMs(1000);
+      playAudio(COUNTDOWN_TICK_AUDIO, false).catch(() => {});
+      await waitMs(countdownStepMs);
     }
     return gameActive;
   }

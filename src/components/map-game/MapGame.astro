@@ -32,16 +32,60 @@ for (const path in roomImagesGlob) {
   </div>
   
   <div class="controls-panel movement-controls">
-    <button class="control-btn" id="btn-left">⬅️</button>
-    <button class="control-btn" id="btn-straight">⬆️</button>
-    <button class="control-btn" id="btn-right">➡️</button>
+    <button class="control-btn move-btn" id="btn-left" aria-label="Turn left" title="Turn Left">
+      <svg class="control-icon" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+        <circle class="icon-badge" cx="32" cy="32" r="27"></circle>
+        <path class="icon-glyph" d="M36 18 22 32l14 14" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"></path>
+      </svg>
+    </button>
+    <button class="control-btn move-btn" id="btn-straight" aria-label="Go straight" title="Go Straight">
+      <svg class="control-icon" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+        <circle class="icon-badge" cx="32" cy="32" r="27"></circle>
+        <path class="icon-glyph" d="M32 45V19m0 0-10 10m10-10 10 10" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"></path>
+      </svg>
+    </button>
+    <button class="control-btn move-btn" id="btn-right" aria-label="Turn right" title="Turn Right">
+      <svg class="control-icon" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+        <circle class="icon-badge" cx="32" cy="32" r="27"></circle>
+        <path class="icon-glyph" d="m28 18 14 14-14 14" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"></path>
+      </svg>
+    </button>
   </div>
 
   <div class="controls-panel utility-controls">
-    <button class="control-btn blackout-toggle-btn" id="btn-blackout" title="Hide Board">👁️</button>
-    <button class="control-btn reset-btn" id="btn-reset">🔄</button>
-    <button class="control-btn" id="btn-next-map" title="Next Map">🗺️</button>
-    <button class="control-btn" id="btn-mute" title="Toggle Sound">🔊</button>
+    <button class="control-btn blackout-toggle-btn" id="btn-blackout" title="Hide Board" aria-label="Hide board" aria-pressed="false">
+      <svg class="control-icon icon-eye-open" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+        <path class="icon-badge" d="M8 32s8-14 24-14 24 14 24 14-8 14-24 14S8 32 8 32z"></path>
+        <circle class="icon-fill" cx="32" cy="32" r="8"></circle>
+      </svg>
+      <svg class="control-icon icon-eye-closed" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+        <path class="icon-glyph" d="M12 36c4-6 11-10 20-10s16 4 20 10" fill="none" stroke-width="4" stroke-linecap="round"></path>
+        <path class="icon-glyph" d="M18 18 46 46" fill="none" stroke-width="5" stroke-linecap="round"></path>
+      </svg>
+    </button>
+    <button class="control-btn reset-btn" id="btn-reset" aria-label="Reset map" title="Reset Map">
+      <svg class="control-icon" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+        <circle class="icon-badge" cx="32" cy="32" r="27"></circle>
+        <path class="icon-glyph" d="M44 22a16 16 0 1 0 3 14" fill="none" stroke-width="5" stroke-linecap="round"></path>
+        <path class="icon-glyph" d="M46 14v12H34" fill="none" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"></path>
+      </svg>
+    </button>
+    <button class="control-btn" id="btn-next-map" title="Next Map" aria-label="Next map">
+      <svg class="control-icon" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+        <path class="icon-badge" d="M8 20 24 13l16 7 16-6v30l-16 7-16-7-16 6z"></path>
+        <path class="icon-glyph" d="M24 13v31m16-24v31" fill="none" stroke-width="4"></path>
+      </svg>
+    </button>
+    <button class="control-btn" id="btn-mute" title="Toggle Sound" aria-label="Unmute sound" aria-pressed="true">
+      <svg class="control-icon icon-sound-on" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+        <path class="icon-badge" d="M10 36V28h12l14-12v32L22 36z"></path>
+        <path class="icon-glyph" d="M44 24c3 2 5 5 5 8s-2 6-5 8m6-22c5 4 8 9 8 14s-3 10-8 14" fill="none" stroke-width="4" stroke-linecap="round"></path>
+      </svg>
+      <svg class="control-icon icon-sound-off" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+        <path class="icon-badge" d="M10 36V28h12l14-12v32L22 36z"></path>
+        <path class="icon-glyph danger" d="M44 22 56 42M56 22 44 42" fill="none" stroke-width="5" stroke-linecap="round"></path>
+      </svg>
+    </button>
   </div>
 </div>
 
@@ -116,31 +160,136 @@ for (const path in roomImagesGlob) {
   }
 
   .control-btn {
-    font-size: 2rem;
-    padding: 10px 20px;
+    width: 72px;
+    height: 72px;
+    padding: 0;
     border-radius: 12px;
-    border: none;
+    border: 3px solid #0f172a;
     background: white;
     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
     cursor: pointer;
-    transition: all 0.1s;
+    transition: transform 0.1s ease, background-color 0.12s ease, box-shadow 0.12s ease;
     line-height: 1;
     display: flex;
     align-items: center;
     justify-content: center;
   }
 
+  .control-btn .control-icon {
+    width: 42px;
+    height: 42px;
+    display: block;
+    color: inherit;
+  }
+
+  .control-btn .icon-badge {
+    fill: #ffffff;
+    stroke: currentColor;
+    stroke-width: 4;
+    stroke-linejoin: round;
+  }
+
+  .control-btn .icon-glyph {
+    stroke: currentColor;
+  }
+
+  .control-btn .icon-fill {
+    fill: currentColor;
+  }
+
+  #btn-left {
+    background: #dbeafe;
+    border-color: #1d4ed8;
+  }
+
+  #btn-straight {
+    background: #d1fae5;
+    border-color: #047857;
+  }
+
+  #btn-right {
+    background: #ffedd5;
+    border-color: #c2410c;
+  }
+
+  #btn-reset {
+    background: #ede9fe;
+    border-color: #7c3aed;
+  }
+
+  #btn-next-map {
+    background: #ccfbf1;
+    border-color: #0f766e;
+  }
+
+  #btn-mute {
+    background: #e2e8f0;
+    border-color: #334155;
+  }
+
+  #btn-left .icon-badge, #btn-left .icon-glyph { stroke: #1d4ed8; }
+  #btn-left .icon-fill { fill: #1d4ed8; }
+
+  #btn-straight .icon-badge, #btn-straight .icon-glyph { stroke: #047857; }
+  #btn-straight .icon-fill { fill: #047857; }
+
+  #btn-right .icon-badge, #btn-right .icon-glyph { stroke: #c2410c; }
+  #btn-right .icon-fill { fill: #c2410c; }
+
+  #btn-reset .icon-badge, #btn-reset .icon-glyph { stroke: #7c3aed; }
+  #btn-reset .icon-fill { fill: #7c3aed; }
+
+  #btn-next-map .icon-badge, #btn-next-map .icon-glyph { stroke: #0f766e; }
+  #btn-next-map .icon-fill { fill: #0f766e; }
+
+  #btn-mute .icon-badge, #btn-mute .icon-glyph { stroke: #334155; }
+  #btn-mute .icon-fill { fill: #334155; }
+
+  .control-btn:focus-visible {
+    outline: 4px solid #fde047;
+    outline-offset: 2px;
+  }
+
   .control-btn:hover {
-    background: #f0f0f0;
+    background: #ecfeff;
+    box-shadow: 0 6px 10px rgba(0,0,0,0.22);
   }
 
   .control-btn:active {
-    transform: scale(0.9);
+    transform: scale(0.94);
   }
 
   .blackout-toggle-btn {
-    background: #111;
-    color: #fff;
+    background: #0f172a;
+    border-color: #0f172a;
+  }
+
+  .blackout-toggle-btn .icon-eye-open .icon-badge {
+    fill: #ffffff;
+    stroke: #0f172a;
+  }
+
+  .blackout-toggle-btn .icon-eye-open .icon-fill {
+    fill: #0f172a;
+  }
+
+  .blackout-toggle-btn .icon-eye-closed .icon-glyph {
+    stroke: #ffffff;
+  }
+
+  .blackout-toggle-btn .icon-eye-closed,
+  .control-btn .icon-sound-off {
+    display: none;
+  }
+
+  .blackout-toggle-btn.is-active .icon-eye-open,
+  .control-btn.is-muted .icon-sound-on {
+    display: none;
+  }
+
+  .blackout-toggle-btn.is-active .icon-eye-closed,
+  .control-btn.is-muted .icon-sound-off {
+    display: block;
   }
 
   .game-container.blackout-active .grid {
@@ -173,16 +322,19 @@ for (const path in roomImagesGlob) {
   }
 
   .game-container.blackout-active .movement-controls .control-btn {
-    font-size: 2.2rem;
-    padding: 12px 24px;
+    width: 82px;
+    height: 82px;
   }
 
   .game-container.blackout-active .blackout-toggle-btn {
     order: 0;
-    font-size: 2.5rem;
     background: #e53935;
-    color: #fff;
+    color: #ffffff;
     border: 2px solid #fff;
+  }
+
+  .control-btn .icon-glyph.danger {
+    stroke: #dc2626;
   }
 
   .grid-container {
@@ -1009,16 +1161,17 @@ for (const path in roomImagesGlob) {
   function updateMuteButtonUI() {
     const muteBtn = document.getElementById('btn-mute');
     if (!muteBtn) return;
-    muteBtn.textContent = isMuted ? '🔇' : '🔊';
+    muteBtn.classList.toggle('is-muted', isMuted);
     muteBtn.setAttribute('aria-pressed', isMuted ? 'true' : 'false');
     muteBtn.setAttribute('title', isMuted ? 'Unmute Sound' : 'Mute Sound');
+    muteBtn.setAttribute('aria-label', isMuted ? 'Unmute sound' : 'Mute sound');
   }
 
   function updateBlackoutUI() {
     const blackoutBtn = document.getElementById('btn-blackout');
     if (!blackoutBtn) return;
 
-    blackoutBtn.textContent = isBlackout ? '🙈' : '👁️';
+    blackoutBtn.classList.toggle('is-active', isBlackout);
     blackoutBtn.setAttribute('aria-pressed', isBlackout ? 'true' : 'false');
     blackoutBtn.setAttribute('title', isBlackout ? 'Show Board' : 'Hide Board');
     blackoutBtn.setAttribute('aria-label', isBlackout ? 'Show board' : 'Hide board');
