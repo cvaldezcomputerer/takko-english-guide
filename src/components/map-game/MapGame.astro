@@ -530,6 +530,12 @@ for (const path in roomImagesGlob) {
     object-fit: fill;
   }
 
+  .grid :global(.item-icon) {
+    font-size: 2rem;
+    z-index: 6;
+    position: absolute;
+  }
+
   .avatar-tool-btn {
     position: absolute;
     left: 10px;
@@ -647,6 +653,40 @@ for (const path in roomImagesGlob) {
   .avatar-modal__actions button:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+  }
+
+  @media (max-width: 900px) {
+    .map-title {
+      display: none;
+    }
+
+    .avatar-tool-btn {
+      display: none;
+    }
+
+    .utility-controls {
+      top: 10px;
+      right: 50%;
+      transform: translateX(50%);
+      flex-direction: row;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 14px;
+    }
+
+    .utility-controls .control-btn {
+      width: 56px;
+      height: 56px;
+    }
+
+    .utility-controls .control-btn .control-icon {
+      width: 34px;
+      height: 34px;
+    }
+
+    .grid :global(.item-icon) {
+      display: none;
+    }
   }
 </style>
 
@@ -1642,9 +1682,7 @@ for (const path in roomImagesGlob) {
 
         if (item) {
           const itemEl = document.createElement("div");
-          itemEl.style.fontSize = "2rem";
-          itemEl.style.zIndex = "6";
-          itemEl.style.position = "absolute";
+          itemEl.className = "item-icon";
           itemEl.textContent = item.icon;
           cell.appendChild(itemEl);
         }
