@@ -180,6 +180,41 @@ import T from '../components/T.astro';
                 </span>
             </div>
         </a>
+
+        <!-- Timer Game Card -->
+        <a href="/timer-game" class="game-card">
+             <div class="card-image timer-bg">
+                <div class="icon" aria-hidden="true">
+                  <svg viewBox="0 0 120 120" role="img" focusable="false">
+                    <circle cx="60" cy="66" r="34" fill="#fff7ed" stroke="#7c2d12" stroke-width="4"/>
+                    <rect x="48" y="18" width="24" height="12" rx="4" fill="#f97316" stroke="#7c2d12" stroke-width="4"/>
+                    <path d="M60 66V48m0 18 12 8" stroke="#7c2d12" stroke-width="4" stroke-linecap="round"/>
+                    <path d="M34 34 28 27m58 7 6-7" stroke="#7c2d12" stroke-width="4" stroke-linecap="round"/>
+                  </svg>
+                </div>
+            </div>
+            <div class="card-content">
+                <h3>
+                  <T>
+                    <span slot="en">Countdown Timer</span>
+                    <span slot="ja">カウントダウンタイマー</span>
+                  </T>
+                </h3>
+                <p>
+                  <T>
+                    <span slot="en">Set your time and run a simple countdown with a final 5-second alert.</span>
+                    <span slot="ja">時間を設定して、最後5秒のアラート付きカウントダウン。</span>
+                  </T>
+                </p>
+                <span class="play-btn">
+                  <T>
+                    <span slot="en">Play Now</span>
+                    <span slot="ja">今すぐプレイ</span>
+                  </T>
+                  <i class="fas fa-play"></i>
+                </span>
+            </div>
+        </a>
       </div>
     </main>
   </div>
@@ -300,6 +335,10 @@ import T from '../components/T.astro';
     background: #ffe8cf;
   }
 
+  .timer-bg {
+    background: #ffe2da;
+  }
+
   .icon {
     width: clamp(88px, 24vw, 116px);
     height: clamp(88px, 24vw, 116px);
@@ -388,7 +427,7 @@ import T from '../components/T.astro';
     }
 
     .games-grid {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-columns: repeat(5, minmax(0, 1fr));
       gap: 1rem;
     }
 

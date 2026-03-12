@@ -1,0 +1,311 @@
+---
+import GameLayout from "../layouts/GameLayout.astro";
+---
+
+<GameLayout title="Timer Game">
+  <div class="timer-page">
+    <main class="timer-shell">
+      <a class="back-link" href="/game">← Back to Games</a>
+
+      <section class="timer-panel">
+        <div id="timeDisplay" class="time-display">00:30</div>
+        <p id="statusText" class="status-text">Set your time and press start.</p>
+      </section>
+
+      <section class="controls-panel">
+        <label for="durationInput" class="input-label">Duration (seconds)</label>
+        <input id="durationInput" class="duration-input" type="number" min="1" max="3600" value="30" />
+        <p class="help-text">Default: 30 seconds. Maximum: 3600 seconds (60 minutes).</p>
+
+        <div class="quick-buttons">
+          <button type="button" class="quick-btn" data-seconds="30">30s</button>
+          <button type="button" class="quick-btn" data-seconds="60">1m</button>
+          <button type="button" class="quick-btn" data-seconds="300">5m</button>
+          <button type="button" class="quick-btn" data-seconds="600">10m</button>
+        </div>
+
+        <div class="action-buttons">
+          <button id="startBtn" type="button" class="action-btn action-start">Start</button>
+          <button id="pauseBtn" type="button" class="action-btn">Pause</button>
+          <button id="resetBtn" type="button" class="action-btn">Reset</button>
+        </div>
+      </section>
+    </main>
+  </div>
+</GameLayout>
+
+<script>
+  const MAX_SECONDS = 3600;
+  const DEFAULT_SECONDS = 30;
+
+  const timeDisplay = document.getElementById("timeDisplay");
+  const statusText = document.getElementById("statusText");
+  const durationInput = document.getElementById("durationInput");
+  const startBtn = document.getElementById("startBtn");
+  const pauseBtn = document.getElementById("pauseBtn");
+  const resetBtn = document.getElementById("resetBtn");
+  const quickButtons = Array.from(document.querySelectorAll(".quick-btn"));
+
+  const finalTickSound = new Audio("/audio/directions-reaction-game/countdown-tick.ogg");
+  finalTickSound.preload = "auto";
+  const doneSound = new Audio("/audio/directions-reaction-game/feedback/good-yeah-5.mp3");
+  doneSound.preload = "auto";
+
+  let remainingSeconds = DEFAULT_SECONDS;
+  let timerId = null;
+  let running = false;
+  let paused = false;
+
+  const clampSeconds = (value) => {
+    const n = Number.parseInt(String(value), 10);
+    if (!Number.isFinite(n)) return DEFAULT_SECONDS;
+    return Math.min(MAX_SECONDS, Math.max(1, n));
+  };
+
+  const formatTime = (seconds) => {
+    const total = Math.max(0, seconds);
+    const h = Math.floor(total / 3600);
+    const m = Math.floor((total % 3600) / 60);
+    const s = total % 60;
+    if (h > 0) {
+      return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+    }
+    return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+  };
+
+  const render = () => {
+    timeDisplay.textContent = formatTime(remainingSeconds);
+    const critical = remainingSeconds > 0 && remainingSeconds <= 5 && running;
+    timeDisplay.classList.toggle("critical", critical);
+    timeDisplay.classList.toggle("finished", remainingSeconds === 0);
+  };
+
+  const stopTimer = () => {
+    if (timerId) {
+      window.clearInterval(timerId);
+      timerId = null;
+    }
+    running = false;
+  };
+
+  const startTimer = () => {
+    if (running) return;
+
+    if (!paused) {
+      remainingSeconds = clampSeconds(durationInput.value);
+      durationInput.value = String(remainingSeconds);
+    }
+
+    running = true;
+    paused = false;
+    statusText.textContent = "Timer running.";
+    render();
+
+    timerId = window.setInterval(async () => {
+      remainingSeconds -= 1;
+      if (remainingSeconds > 0 && remainingSeconds <= 5) {
+        try {
+          finalTickSound.currentTime = 0;
+          await finalTickSound.play();
+        } catch {}
+      }
+
+      if (remainingSeconds <= 0) {
+        remainingSeconds = 0;
+        render();
+        stopTimer();
+        statusText.textContent = "Time is up.";
+        try {
+          doneSound.currentTime = 0;
+          await doneSound.play();
+        } catch {}
+        return;
+      }
+      render();
+    }, 1000);
+  };
+
+  const pauseTimer = () => {
+    if (!running) return;
+    stopTimer();
+    paused = true;
+    statusText.textContent = "Paused.";
+    render();
+  };
+
+  const resetTimer = () => {
+    stopTimer();
+    paused = false;
+    remainingSeconds = clampSeconds(durationInput.value);
+    statusText.textContent = "Ready.";
+    render();
+  };
+
+  durationInput.addEventListener("change", () => {
+    if (running) return;
+    remainingSeconds = clampSeconds(durationInput.value);
+    durationInput.value = String(remainingSeconds);
+    render();
+  });
+
+  quickButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      if (running) return;
+      const value = clampSeconds(btn.dataset.seconds || DEFAULT_SECONDS);
+      durationInput.value = String(value);
+      remainingSeconds = value;
+      paused = false;
+      statusText.textContent = "Quick time selected.";
+      render();
+    });
+  });
+
+  startBtn.addEventListener("click", startTimer);
+  pauseBtn.addEventListener("click", pauseTimer);
+  resetBtn.addEventListener("click", resetTimer);
+
+  render();
+</script>
+
+<style>
+  .timer-page {
+    min-height: 100vh;
+    background: var(--color-bg);
+    padding: 1.5rem;
+  }
+
+  .timer-shell {
+    width: min(760px, 100%);
+    margin: 0 auto;
+    background: var(--color-white);
+    border: 3px solid var(--color-secondary);
+    border-radius: 18px;
+    box-shadow: 0 12px 24px rgba(85, 113, 83, 0.15);
+    padding: 1.25rem;
+  }
+
+  .back-link {
+    color: var(--color-primary);
+    text-decoration: none;
+    font-weight: 700;
+  }
+
+  .timer-panel {
+    margin-top: 0.9rem;
+    border: 2px solid var(--color-secondary);
+    border-radius: 14px;
+    background: #fffdf8;
+    text-align: center;
+    padding: 1.2rem 1rem;
+  }
+
+  .time-display {
+    font-size: clamp(2.6rem, 10vw, 5rem);
+    line-height: 1.1;
+    font-weight: 800;
+    color: var(--color-dark-green);
+    letter-spacing: 0.03em;
+  }
+
+  .time-display.critical {
+    color: #b42318;
+    animation: final-seconds 1s ease-in-out infinite;
+  }
+
+  .time-display.finished {
+    color: #b42318;
+  }
+
+  .status-text {
+    margin-top: 0.6rem;
+    color: var(--color-dark-teal);
+    font-weight: 600;
+  }
+
+  .controls-panel {
+    margin-top: 1rem;
+    border: 2px solid var(--color-secondary);
+    border-radius: 14px;
+    background: var(--color-beige);
+    padding: 1rem;
+  }
+
+  .input-label {
+    display: block;
+    color: var(--color-primary);
+    font-weight: 700;
+    margin-bottom: 0.35rem;
+  }
+
+  .duration-input {
+    width: 100%;
+    border: 2px solid var(--color-secondary);
+    border-radius: 10px;
+    padding: 0.65rem 0.75rem;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--color-dark-teal);
+    background: var(--color-white);
+  }
+
+  .help-text {
+    color: var(--color-dark-teal);
+    font-size: 0.92rem;
+    margin-top: 0.4rem;
+  }
+
+  .quick-buttons {
+    margin-top: 0.85rem;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.5rem;
+  }
+
+  .quick-btn {
+    border: 2px solid var(--color-secondary);
+    background: var(--color-white);
+    color: var(--color-primary);
+    border-radius: 999px;
+    padding: 0.45rem 0.5rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .action-buttons {
+    margin-top: 0.85rem;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.6rem;
+  }
+
+  .action-btn {
+    border: 2px solid var(--color-primary);
+    background: var(--color-white);
+    color: var(--color-primary);
+    border-radius: 10px;
+    padding: 0.6rem 0.5rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .action-start {
+    background: var(--color-primary);
+    color: white;
+  }
+
+  @keyframes final-seconds {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.04); opacity: 0.82; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  @media (max-width: 640px) {
+    .timer-page {
+      padding: 1rem 0.75rem;
+    }
+
+    .timer-shell {
+      padding: 1rem;
+    }
+  }
+</style>
