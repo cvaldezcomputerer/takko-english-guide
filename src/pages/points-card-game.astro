@@ -1,0 +1,390 @@
+---
+import GameLayout from "../layouts/GameLayout.astro";
+---
+
+<GameLayout title="Points Event Game">
+  <div class="points-game-page">
+    <main class="game-shell">
+      <a class="back-link" href="/game">← Back to Games</a>
+
+      <div class="play-layout">
+        <aside class="side-panel event-list-wrap">
+          <h2>Event Card Pool (7)</h2>
+          <ul class="event-list">
+            <li>Point Swap: Flip your result sign (positive becomes negative).</li>
+            <li>Double Points: Boost result to +400.</li>
+            <li>Half Points: Drop result to -100.</li>
+            <li>Swap with random team: Trade this result with a random team.</li>
+            <li>Steal 300: Grab +300 points.</li>
+            <li>Oops -1000: Lose 1000 points.</li>
+            <li>Jackpot +1000: Hit the top reward.</li>
+          </ul>
+        </aside>
+
+        <section class="center-stage" aria-live="polite">
+          <div class="result-box">
+            <div class="result-label">Result</div>
+            <div id="resultText" class="result-text">PRESS ME</div>
+          </div>
+          <button id="rollBtn" class="roll-btn" type="button">PRESS ME</button>
+        </section>
+
+        <aside class="side-panel stats-wrap">
+          <h2>Point Range</h2>
+          <div class="stats-row">
+            <span class="stat-key">Min</span>
+            <span id="minPoints" class="stat-value">--</span>
+          </div>
+          <div class="stats-row">
+            <span class="stat-key">Max</span>
+            <span id="maxPoints" class="stat-value">--</span>
+          </div>
+          <p class="stats-note">Range shown is for point rolls (not event cards).</p>
+        </aside>
+      </div>
+    </main>
+  </div>
+</GameLayout>
+
+<script>
+  const rollBtn = document.getElementById("rollBtn");
+  const resultText = document.getElementById("resultText");
+  const minPointsText = document.getElementById("minPoints");
+  const maxPointsText = document.getElementById("maxPoints");
+
+  const countdownTickSrc = "/audio/directions-reaction-game/countdown-tick.ogg";
+  const positiveSounds = [
+    "/audio/directions-reaction-game/feedback/good-nice-1.mp3",
+    "/audio/directions-reaction-game/feedback/good-nice-2.mp3",
+    "/audio/directions-reaction-game/feedback/good-ohyeah-3.mp3",
+    "/audio/directions-reaction-game/feedback/good-great-4.mp3",
+    "/audio/directions-reaction-game/feedback/good-yeah-5.mp3",
+  ];
+  const negativeSounds = [
+    "/audio/directions-reaction-game/feedback/bad-ohno-1.mp3",
+    "/audio/directions-reaction-game/feedback/bad-ohno-2.mp3",
+    "/audio/directions-reaction-game/feedback/bad-woops-3.mp3",
+  ];
+
+  const points = [-200, -100, 0, 100, 200, 300, 400, 500, 600, 700];
+  const events = [
+    { text: "EVENT CARD: Point Swap", tone: "negative" },
+    { text: "EVENT CARD: Double Points (+400)", tone: "positive" },
+    { text: "EVENT CARD: Half Points (-100)", tone: "negative" },
+    { text: "EVENT CARD: Swap with random team", tone: "neutral" },
+    { text: "EVENT CARD: Steal 300", tone: "positive" },
+    { text: "EVENT CARD: Oops -1000", tone: "negative" },
+    { text: "EVENT CARD: Jackpot +1000", tone: "positive" },
+  ];
+
+  const randInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+  const minPoints = Math.min(...points);
+  const maxPoints = Math.max(...points);
+
+  let rolling = false;
+  let drumrollInterval = null;
+
+  const playFeedbackSound = async (tone) => {
+    const pool = tone === "negative" ? negativeSounds : positiveSounds;
+    const src = pool[randInt(0, pool.length - 1)];
+    const sfx = new Audio(src);
+    sfx.preload = "auto";
+    try {
+      await sfx.play();
+    } catch {}
+  };
+
+  const playDrumroll = () => {
+    let step = 0;
+    const maxSteps = 10;
+    const timer = window.setInterval(() => {
+      const tick = new Audio(countdownTickSrc);
+      tick.volume = 0.38;
+      tick.playbackRate = 1 + step * 0.05;
+      tick.play().catch(() => {});
+      step += 1;
+      if (step >= maxSteps) {
+        window.clearInterval(timer);
+      }
+    }, 130);
+
+    return () => {
+      window.clearInterval(timer);
+    };
+  };
+
+  const startVisualRoll = () => {
+    const states = ["...", "..", ".", "...."];
+    let idx = 0;
+    drumrollInterval = window.setInterval(() => {
+      resultText.textContent = `Rolling${states[idx]}`;
+      idx = (idx + 1) % states.length;
+    }, 220);
+    resultText.classList.add("rolling");
+  };
+
+  const stopVisualRoll = () => {
+    if (drumrollInterval) {
+      window.clearInterval(drumrollInterval);
+      drumrollInterval = null;
+    }
+    resultText.classList.remove("rolling");
+  };
+
+  const reveal = () => {
+    const isEvent = Math.random() < 0.33;
+    if (isEvent) {
+      const eventResult = events[randInt(0, events.length - 1)];
+      resultText.textContent = eventResult.text;
+      resultText.classList.add("event");
+      resultText.classList.remove("points");
+      return eventResult.tone;
+    }
+
+    const value = points[randInt(0, points.length - 1)];
+    resultText.textContent = value >= 0 ? `+${value} POINTS` : `${value} POINTS`;
+    resultText.classList.add("points");
+    resultText.classList.remove("event");
+    return value < 0 ? "negative" : "positive";
+  };
+
+  rollBtn.addEventListener("click", async () => {
+    if (rolling) return;
+    rolling = true;
+    rollBtn.disabled = true;
+    rollBtn.classList.add("is-rolling");
+    resultText.classList.remove("event", "points");
+
+    startVisualRoll();
+    const stopAudio = playDrumroll();
+
+    window.setTimeout(async () => {
+      stopVisualRoll();
+      stopAudio();
+      const tone = reveal();
+      await playFeedbackSound(tone);
+      rollBtn.classList.remove("is-rolling");
+      rollBtn.disabled = false;
+      rolling = false;
+    }, 1400);
+  });
+
+  minPointsText.textContent = String(minPoints);
+  maxPointsText.textContent = String(maxPoints);
+</script>
+
+<style>
+  .points-game-page {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: 1.25rem;
+    background: var(--color-bg);
+  }
+
+  .game-shell {
+    width: min(940px, 100%);
+    background: var(--color-white);
+    border: 2px solid var(--color-secondary);
+    border-radius: 16px;
+    box-shadow: 0 10px 22px rgba(85, 113, 83, 0.14);
+    padding: 1.1rem;
+  }
+
+  .play-layout {
+    display: grid;
+    grid-template-columns: minmax(200px, 1fr) minmax(360px, 1.8fr) minmax(200px, 1fr);
+    gap: 0.9rem;
+    align-items: stretch;
+  }
+
+  .back-link {
+    color: var(--color-primary);
+    font-weight: 700;
+    text-decoration: none;
+    display: inline-block;
+    margin-bottom: 0.75rem;
+  }
+
+  .side-panel {
+    border: 2px solid var(--color-secondary);
+    border-radius: 12px;
+    background: #fffdf8;
+    padding: 0.9rem;
+  }
+
+  .center-stage {
+    min-height: 340px;
+    border: 2px solid var(--color-secondary);
+    border-radius: 12px;
+    background: var(--color-beige);
+    display: grid;
+    place-content: center;
+    gap: 1rem;
+    text-align: center;
+    padding: 1.1rem;
+  }
+
+  .result-box {
+    border: 2px solid var(--color-primary);
+    background: #fffdf8;
+    border-radius: 10px;
+    padding: 1rem 1.2rem;
+    width: 100%;
+    max-width: 520px;
+  }
+
+  .result-label {
+    font-size: 0.9rem;
+    letter-spacing: 0.08em;
+    color: var(--color-primary);
+    font-weight: 700;
+    margin-bottom: 0.45rem;
+  }
+
+  .result-text {
+    font-size: clamp(1.6rem, 5.5vw, 3.2rem);
+    font-weight: 900;
+    letter-spacing: 0.02em;
+    color: var(--color-dark-teal);
+    min-height: 3.2rem;
+    display: grid;
+    place-items: center;
+  }
+
+  .result-text.rolling {
+    animation: jitter 0.3s ease-in-out infinite;
+    color: var(--color-primary);
+  }
+
+  .result-text.points {
+    color: var(--color-dark-green);
+    animation: pop 520ms ease-out;
+  }
+
+  .result-text.event {
+    color: var(--color-accent);
+    animation: pop 520ms ease-out;
+  }
+
+  .roll-btn {
+    justify-self: center;
+    border: 0;
+    border-radius: 999px;
+    background: #d90000;
+    color: #ffffff;
+    font-size: clamp(1.2rem, 3.4vw, 2rem);
+    font-weight: 900;
+    letter-spacing: 0.06em;
+    padding: 1rem 3.4rem;
+    cursor: pointer;
+    box-shadow: 0 8px 0 #8f0000;
+    transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+  }
+
+  .roll-btn:hover {
+    background: #ee0000;
+  }
+
+  .roll-btn:active {
+    transform: translateY(4px);
+    box-shadow: 0 3px 0 #8f0000;
+  }
+
+  .roll-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.9;
+  }
+
+  .roll-btn.is-rolling {
+    animation: pulse 1.2s ease-in-out infinite;
+  }
+
+  h2 {
+    margin: 0 0 0.6rem;
+    font-size: 1rem;
+    color: var(--color-primary);
+  }
+
+  .event-list {
+    margin: 0;
+    padding-left: 1.15rem;
+    color: var(--color-dark-teal);
+    line-height: 1.35;
+  }
+
+  .event-list li {
+    margin-bottom: 0.38rem;
+  }
+
+  .stats-wrap {
+    display: grid;
+    align-content: start;
+    gap: 0.55rem;
+  }
+
+  .stats-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid var(--color-secondary);
+    border-radius: 8px;
+    background: var(--color-beige);
+    padding: 0.5rem 0.65rem;
+  }
+
+  .stat-key {
+    color: var(--color-primary);
+    font-weight: 700;
+  }
+
+  .stat-value {
+    color: var(--color-dark-teal);
+    font-weight: 900;
+    font-size: 1.2rem;
+  }
+
+  .stats-note {
+    margin: 0;
+    color: var(--color-dark-teal);
+    font-size: 0.9rem;
+    line-height: 1.35;
+  }
+
+  @keyframes jitter {
+    0% { transform: translateX(-1px); }
+    25% { transform: translateX(1px); }
+    50% { transform: translateX(0); }
+    75% { transform: translateX(1px); }
+    100% { transform: translateX(-1px); }
+  }
+
+  @keyframes pop {
+    0% { transform: scale(0.88); opacity: 0.2; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }
+
+  @media (max-width: 1024px) {
+    .play-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .center-stage {
+      order: 1;
+    }
+
+    .event-list-wrap {
+      order: 2;
+    }
+
+    .stats-wrap {
+      order: 3;
+    }
+  }
+</style>
