@@ -204,7 +204,7 @@ import Layout from '../../layouts/Layout.astro';
   });
 
   function joinRoom() {
-    const host = (window as any).__PARTYKIT_HOST__ ?? 'localhost:1999';
+    const host = import.meta.env.PUBLIC_PARTYKIT_HOST ?? 'localhost:1999';
     socket = new PartySocket({ host, room: roomCode });
 
     socket.addEventListener('open', () => {

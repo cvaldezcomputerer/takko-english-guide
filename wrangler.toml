@@ -1,0 +1,11 @@
+name = "pictionary-server"
+main = "worker/pictionary-worker.ts"
+compatibility_date = "2025-03-17"
+
+[[durable_objects.bindings]]
+name = "PICTIONARY_ROOM"
+class_name = "PictionaryRoom"
+
+[[migrations]]
+tag = "v1"
+new_classes = ["PictionaryRoom"]
