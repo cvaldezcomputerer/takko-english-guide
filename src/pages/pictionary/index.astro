@@ -5,18 +5,35 @@ import Layout from '../../layouts/Layout.astro';
 <Layout title="Pictionary – Takkotaco">
   <div class="page">
     <div class="hero">
-      <h1>🎨 Pictionary</h1>
+      <h1>Pictionary</h1>
       <p>Draw and guess words with your class in real time!</p>
     </div>
     <div class="cards">
       <a href="/pictionary/host" class="card card--host">
-        <div class="card-icon">🖥️</div>
+        <div class="card-icon">
+          <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="20" cy="14" r="9" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+            <path d="M6 52C6 39 12 32 20 32C28 32 34 39 34 52" stroke="currentColor" stroke-width="3" stroke-linecap="round" fill="none"/>
+            <line x1="29" y1="37" x2="42" y2="32" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+            <rect x="42" y="10" width="20" height="26" rx="2" stroke="currentColor" stroke-width="3"/>
+            <line x1="47" y1="19" x2="57" y2="19" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="47" y1="26" x2="54" y2="26" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+          </svg>
+        </div>
         <h2>Host a Room</h2>
         <p>Choose a theme, set the timer, and get a room code to share with your class.</p>
         <span class="btn">Host Now</span>
       </a>
       <a href="/pictionary/play" class="card card--play">
-        <div class="card-icon">✏️</div>
+        <div class="card-icon">
+          <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="26" cy="13" r="9" stroke="currentColor" stroke-width="3"/>
+            <path d="M12 52C12 39 18 32 26 32C34 32 40 39 40 52" stroke="currentColor" stroke-width="3" stroke-linecap="round" fill="none"/>
+            <rect x="38" y="28" width="16" height="22" rx="4" stroke="currentColor" stroke-width="3"/>
+            <path d="M38 32C35 30 35 26 38 25H46C49 26 49 30 46 32" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+            <line x1="42" y1="39" x2="50" y2="39" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+          </svg>
+        </div>
         <h2>Join a Room</h2>
         <p>Enter the room code from your teacher and start drawing or watching!</p>
         <span class="btn">Join Now</span>
@@ -82,8 +99,9 @@ import Layout from '../../layouts/Layout.astro';
   }
 
   .card-icon {
-    font-size: 3rem;
     margin-bottom: 1rem;
+    color: var(--color-primary);
+    line-height: 0;
   }
 
   .card h2 {
