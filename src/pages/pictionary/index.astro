@@ -1,0 +1,116 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout title="Pictionary – Takkotaco">
+  <div class="page">
+    <div class="hero">
+      <h1>🎨 Pictionary</h1>
+      <p>Draw and guess words with your class in real time!</p>
+    </div>
+    <div class="cards">
+      <a href="/pictionary/host" class="card card--host">
+        <div class="card-icon">🖥️</div>
+        <h2>Host a Room</h2>
+        <p>Choose a theme, set the timer, and get a room code to share with your class.</p>
+        <span class="btn">Host Now</span>
+      </a>
+      <a href="/pictionary/play" class="card card--play">
+        <div class="card-icon">✏️</div>
+        <h2>Join a Room</h2>
+        <p>Enter the room code from your teacher and start drawing or watching!</p>
+        <span class="btn">Join Now</span>
+      </a>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    background: #f5f3ee;
+  }
+
+  .hero {
+    text-align: center;
+    margin-bottom: 2.5rem;
+  }
+
+  .hero h1 {
+    font-size: 3rem;
+    color: var(--color-primary);
+    margin-bottom: 0.5rem;
+  }
+
+  .hero p {
+    font-size: 1.2rem;
+    color: #555;
+  }
+
+  .cards {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    background: white;
+    border-radius: 20px;
+    padding: 2.5rem 2rem;
+    width: 280px;
+    text-decoration: none;
+    color: inherit;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    border: 3px solid transparent;
+    transition: all 0.25s ease;
+  }
+
+  .card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+    border-color: var(--color-secondary);
+  }
+
+  .card-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+  }
+
+  .card h2 {
+    font-size: 1.5rem;
+    color: var(--color-primary);
+    margin-bottom: 0.75rem;
+  }
+
+  .card p {
+    color: #666;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+    flex: 1;
+  }
+
+  .btn {
+    display: inline-block;
+    padding: 0.75rem 1.75rem;
+    background: var(--color-primary);
+    color: white;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 1rem;
+    transition: background 0.2s;
+  }
+
+  .card:hover .btn {
+    background: var(--color-secondary);
+  }
+</style>

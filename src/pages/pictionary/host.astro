@@ -1,0 +1,699 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout title="Pictionary Host – Takkotaco">
+  <!-- LOBBY SETUP SCREEN -->
+  <div id="screen-setup" class="screen">
+    <div class="setup-card">
+      <a href="/pictionary" class="back-link">← Back</a>
+      <h1>🎨 Host Pictionary</h1>
+
+      <div class="field">
+        <label for="theme-select">Theme</label>
+        <select id="theme-select">
+          <option value="Animals">Animals</option>
+          <option value="Food">Food</option>
+          <option value="School">School</option>
+          <option value="Home">Home</option>
+          <option value="Nature">Nature</option>
+          <option value="Sports">Sports</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Timer Duration</label>
+        <div class="timer-options">
+          <button class="timer-btn" data-seconds="10">10s</button>
+          <button class="timer-btn" data-seconds="30">30s</button>
+          <button class="timer-btn" data-seconds="60">60s</button>
+          <button class="timer-btn timer-btn--active" data-seconds="90">90s</button>
+          <button class="timer-btn" data-seconds="120">120s</button>
+        </div>
+      </div>
+
+      <button id="create-btn" class="primary-btn">Create Room</button>
+    </div>
+  </div>
+
+  <!-- HOST ROOM SCREEN -->
+  <div id="screen-room" class="screen screen--hidden">
+    <div class="host-layout">
+
+      <!-- Left sidebar -->
+      <aside class="sidebar">
+        <div class="room-code-box">
+          <div class="room-code-label">Room Code</div>
+          <div id="room-code" class="room-code">----</div>
+          <div class="room-url-hint">takkotaco.com/pictionary/play</div>
+        </div>
+
+        <div class="player-box">
+          <div class="player-box-header">
+            Players (<span id="player-count">0</span>/50)
+          </div>
+          <ul id="player-list" class="player-list"></ul>
+        </div>
+
+        <div class="sidebar-controls">
+          <div class="control-group">
+            <label class="control-label" for="room-theme-select">Theme</label>
+            <select id="room-theme-select" class="room-select">
+              <option value="Animals">Animals</option>
+              <option value="Food">Food</option>
+              <option value="School">School</option>
+              <option value="Home">Home</option>
+              <option value="Nature">Nature</option>
+              <option value="Sports">Sports</option>
+            </select>
+          </div>
+          <div class="control-group">
+            <label class="control-label">Timer</label>
+            <div class="room-timer-options">
+              <button class="room-timer-btn" data-seconds="10">10s</button>
+              <button class="room-timer-btn" data-seconds="30">30s</button>
+              <button class="room-timer-btn" data-seconds="60">60s</button>
+              <button class="room-timer-btn room-timer-btn--active" data-seconds="90">90s</button>
+              <button class="room-timer-btn" data-seconds="120">120s</button>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main area -->
+      <main class="main-area">
+        <!-- Lobby waiting state -->
+        <div id="state-lobby" class="state-panel">
+          <p class="waiting-msg">Waiting for students to join…</p>
+          <button id="start-btn" class="primary-btn" disabled>Start Round</button>
+          <p class="start-hint">At least 1 student must join first.</p>
+        </div>
+
+        <!-- Drawing state -->
+        <div id="state-drawing" class="state-panel state-panel--hidden">
+          <div class="round-header">
+            <div class="drawer-info">✏️ <strong id="drawer-name">—</strong> is drawing</div>
+            <div id="timer-display" class="timer-display">90</div>
+          </div>
+
+          <div class="word-row">
+            <span class="word-label">Word:</span>
+            <span id="host-word" class="host-word">———</span>
+            <button id="toggle-word-btn" class="icon-btn" title="Show/hide word">👁</button>
+          </div>
+
+          <canvas id="host-canvas" class="canvas" width="800" height="500"></canvas>
+
+          <div class="round-actions">
+            <button id="clear-btn" class="secondary-btn">Clear Canvas</button>
+            <button id="next-btn" class="primary-btn">Next Round →</button>
+          </div>
+        </div>
+
+        <!-- Round end state -->
+        <div id="state-round-end" class="state-panel state-panel--hidden">
+          <div class="round-end-layout">
+            <div class="round-end-left">
+              <h2>Time's up!</h2>
+              <p class="reveal-label">The word was:</p>
+              <p id="reveal-word" class="reveal-word">—</p>
+              <canvas id="end-canvas" class="canvas canvas--small" width="800" height="500"></canvas>
+              <button id="next-btn-2" class="primary-btn">Next Round →</button>
+            </div>
+            <div class="round-end-right">
+              <h3 class="guesses-title">Guesses</h3>
+              <ul id="host-guesses-list" class="guesses-list">
+                <li class="no-guesses">No guesses this round.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </main>
+
+    </div>
+  </div>
+</Layout>
+
+<script>
+  import PartySocket from 'partysocket';
+
+  // ── Helpers ──────────────────────────────────────────────────────────────
+  function el<T extends HTMLElement>(id: string) { return document.getElementById(id) as T; }
+
+  function generateCode(): string {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let code = '';
+    for (let i = 0; i < 4; i++) code += chars[Math.floor(Math.random() * chars.length)];
+    return code;
+  }
+
+  // ── State ─────────────────────────────────────────────────────────────────
+  let socket: PartySocket | null = null;
+  let timerDuration = 90;
+  let timerInterval: ReturnType<typeof setInterval> | null = null;
+  let wordVisible = true;
+  let currentWord = '';
+  let drawingCtx: CanvasRenderingContext2D | null = null;
+  let endCtx: CanvasRenderingContext2D | null = null;
+
+  // ── Timer option buttons ───────────────────────────────────────────────────
+  document.querySelectorAll<HTMLButtonElement>('.timer-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.timer-btn').forEach(b => b.classList.remove('timer-btn--active'));
+      btn.classList.add('timer-btn--active');
+      timerDuration = parseInt(btn.dataset.seconds!);
+    });
+  });
+
+  // ── Create Room ──────────────────────────────────────────────────────────
+  el('create-btn').addEventListener('click', () => {
+    const theme = (el<HTMLSelectElement>('theme-select')).value;
+    const code = generateCode();
+
+    // Sync room-side controls to setup choices
+    (el<HTMLSelectElement>('room-theme-select')).value = theme;
+    syncRoomTimerBtns(timerDuration);
+
+    el('room-code').textContent = code;
+    showScreen('screen-room');
+
+    const host = import.meta.env.PUBLIC_PARTYKIT_HOST ?? 'localhost:1999';
+    socket = new PartySocket({ host, room: code, id: 'host' });
+
+    socket.addEventListener('open', () => {
+      socket!.send(JSON.stringify({ type: 'host_init', theme, timerDuration }));
+    });
+
+    socket.addEventListener('message', (ev) => handleMessage(JSON.parse(ev.data)));
+  });
+
+  // ── Room-side theme / timer controls ─────────────────────────────────────
+  function sendSettings() {
+    const theme = (el<HTMLSelectElement>('room-theme-select')).value;
+    socket?.send(JSON.stringify({ type: 'host_init', theme, timerDuration }));
+  }
+
+  el('room-theme-select').addEventListener('change', sendSettings);
+
+  document.querySelectorAll<HTMLButtonElement>('.room-timer-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      syncRoomTimerBtns(parseInt(btn.dataset.seconds!));
+      sendSettings();
+    });
+  });
+
+  function syncRoomTimerBtns(seconds: number) {
+    timerDuration = seconds;
+    document.querySelectorAll<HTMLButtonElement>('.room-timer-btn').forEach(b => {
+      b.classList.toggle('room-timer-btn--active', parseInt(b.dataset.seconds!) === seconds);
+    });
+  }
+
+  function setRoomControlsDisabled(disabled: boolean) {
+    (el<HTMLSelectElement>('room-theme-select')).disabled = disabled;
+    document.querySelectorAll<HTMLButtonElement>('.room-timer-btn').forEach(b => b.disabled = disabled);
+  }
+
+  // ── Handle server messages ───────────────────────────────────────────────
+  function handleMessage(msg: any) {
+    switch (msg.type) {
+      case 'room_state':
+        updatePlayers(msg.players ?? []);
+        if (msg.phase === 'lobby') { showState('state-lobby'); setRoomControlsDisabled(false); }
+        break;
+
+      case 'round_started':
+        currentWord = msg.word ?? '';
+        wordVisible = false;
+        showState('state-drawing');
+        setRoomControlsDisabled(true);
+        el('drawer-name').textContent = msg.drawerName;
+        el('host-word').textContent = '• • • • •';
+        el('toggle-word-btn').textContent = '🙈';
+        clearCanvas(drawingCtx!);
+        startTimer(msg.roundTimerEnd);
+        break;
+
+      case 'draw':
+        applyDrawEvent(drawingCtx!, msg.event);
+        break;
+
+      case 'draw_history':
+        (msg.events as any[]).forEach(e => applyDrawEvent(drawingCtx!, e));
+        break;
+
+      case 'canvas_cleared':
+        clearCanvas(drawingCtx!);
+        break;
+
+      case 'round_ended': {
+        stopTimer();
+        const endCanvas = el<HTMLCanvasElement>('end-canvas');
+        const hostCanvas = el<HTMLCanvasElement>('host-canvas');
+        endCtx!.drawImage(hostCanvas, 0, 0, endCanvas.width, endCanvas.height);
+        el('reveal-word').textContent = msg.word ?? '—';
+        renderHostGuesses(msg.guesses ?? []);
+        showState('state-round-end');
+        setRoomControlsDisabled(false);
+        break;
+      }
+    }
+  }
+
+  // ── Players ───────────────────────────────────────────────────────────────
+  function updatePlayers(players: { id: string; name: string }[]) {
+    el('player-count').textContent = String(players.length);
+    const list = el('player-list');
+    list.innerHTML = players.map(p =>
+      `<li class="player-item">${escHtml(p.name)}</li>`
+    ).join('');
+    const startBtn = el<HTMLButtonElement>('start-btn');
+    startBtn.disabled = players.length === 0;
+    el('start-hint').style.display = players.length === 0 ? '' : 'none';
+  }
+
+  function escHtml(s: string) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  // ── Start / Next ──────────────────────────────────────────────────────────
+  el('start-btn').addEventListener('click', () => socket?.send(JSON.stringify({ type: 'start_round' })));
+  el('next-btn').addEventListener('click', () => socket?.send(JSON.stringify({ type: 'next_round' })));
+  el('next-btn-2').addEventListener('click', () => socket?.send(JSON.stringify({ type: 'next_round' })));
+
+  // ── Clear canvas ──────────────────────────────────────────────────────────
+  el('clear-btn').addEventListener('click', () => socket?.send(JSON.stringify({ type: 'clear_canvas' })));
+
+  // ── Toggle word visibility ────────────────────────────────────────────────
+  el('toggle-word-btn').addEventListener('click', () => {
+    wordVisible = !wordVisible;
+    el('host-word').textContent = wordVisible ? currentWord : '• • • • •';
+    el('toggle-word-btn').textContent = wordVisible ? '👁' : '🙈';
+  });
+
+  // ── Timer ─────────────────────────────────────────────────────────────────
+  function startTimer(timerEnd: number) {
+    stopTimer();
+    function tick() {
+      const remaining = Math.max(0, Math.ceil((timerEnd - Date.now()) / 1000));
+      el('timer-display').textContent = String(remaining);
+      el('timer-display').classList.toggle('timer-display--urgent', remaining <= 10);
+    }
+    tick();
+    timerInterval = setInterval(tick, 250);
+  }
+
+  function stopTimer() {
+    if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+  }
+
+  // ── Canvas (read-only on host) ────────────────────────────────────────────
+  const CANVAS_W = 800, CANVAS_H = 500;
+
+  window.addEventListener('DOMContentLoaded', () => {
+    const hostCanvas = el<HTMLCanvasElement>('host-canvas');
+    drawingCtx = hostCanvas.getContext('2d')!;
+    drawingCtx.lineCap = 'round';
+    drawingCtx.lineJoin = 'round';
+
+    const endCanvas = el<HTMLCanvasElement>('end-canvas');
+    endCtx = endCanvas.getContext('2d')!;
+  });
+
+  function clearCanvas(ctx: CanvasRenderingContext2D) {
+    ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
+  }
+
+  function applyDrawEvent(ctx: CanvasRenderingContext2D, e: any) {
+    if (e.type === 'start') {
+      ctx.beginPath();
+      ctx.strokeStyle = e.color ?? '#000';
+      ctx.lineWidth = e.width ?? 4;
+      ctx.moveTo(e.x * CANVAS_W, e.y * CANVAS_H);
+    } else if (e.type === 'move') {
+      ctx.lineTo(e.x * CANVAS_W, e.y * CANVAS_H);
+      ctx.stroke();
+    } else if (e.type === 'end') {
+      ctx.closePath();
+    }
+  }
+
+  // ── Guesses ───────────────────────────────────────────────────────────────
+  function renderHostGuesses(guesses: { name: string; text: string }[]) {
+    const list = el('host-guesses-list');
+    if (guesses.length === 0) {
+      list.innerHTML = '<li class="no-guesses">No guesses this round.</li>';
+    } else {
+      list.innerHTML = guesses.map(g =>
+        `<li class="guess-item"><span class="guess-name">${escHtml(g.name)}</span><span class="guess-text">${escHtml(g.text)}</span></li>`
+      ).join('');
+    }
+  }
+
+  // ── Screen / State helpers ────────────────────────────────────────────────
+  function showScreen(id: string) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.add('screen--hidden'));
+    el(id).classList.remove('screen--hidden');
+  }
+
+  function showState(id: string) {
+    document.querySelectorAll('.state-panel').forEach(s => s.classList.add('state-panel--hidden'));
+    el(id).classList.remove('state-panel--hidden');
+  }
+</script>
+
+<style>
+  /* ── Screens ─────────────────────────────────────────── */
+  .screen { min-height: 100vh; }
+  .screen--hidden { display: none !important; }
+
+  /* ── Setup card ──────────────────────────────────────── */
+  #screen-setup {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f5f3ee;
+    padding: 2rem;
+  }
+
+  .setup-card {
+    background: white;
+    border-radius: 20px;
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 460px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+  }
+
+  .back-link {
+    display: inline-block;
+    color: var(--color-primary);
+    text-decoration: none;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
+  }
+
+  .setup-card h1 {
+    color: var(--color-primary);
+    font-size: 2rem;
+    margin-bottom: 1.75rem;
+  }
+
+  .field {
+    margin-bottom: 1.5rem;
+  }
+
+  .field label {
+    display: block;
+    font-weight: 700;
+    color: var(--color-primary);
+    margin-bottom: 0.5rem;
+  }
+
+  select {
+    width: 100%;
+    padding: 0.7rem 1rem;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-family: inherit;
+    color: #333;
+    background: #fafafa;
+    cursor: pointer;
+  }
+
+  select:focus { outline: none; border-color: var(--color-secondary); }
+
+  .timer-options {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .timer-btn {
+    padding: 0.5rem 1rem;
+    border: 2px solid #ddd;
+    border-radius: 50px;
+    background: white;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+
+  .timer-btn:hover { border-color: var(--color-secondary); }
+  .timer-btn--active { background: var(--color-primary); color: white; border-color: var(--color-primary); }
+
+  /* ── Host room layout ────────────────────────────────── */
+  #screen-room { background: #f0eeea; }
+
+  .host-layout {
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ── Sidebar ─────────────────────────────────────────── */
+  .sidebar {
+    width: 220px;
+    min-width: 220px;
+    background: white;
+    border-right: 2px solid #e5e0d8;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .room-code-box {
+    text-align: center;
+    background: var(--color-primary);
+    color: white;
+    border-radius: 14px;
+    padding: 1rem;
+  }
+
+  .room-code-label { font-size: 0.8rem; opacity: 0.85; margin-bottom: 0.25rem; }
+  .room-code { font-size: 2.4rem; font-weight: 900; letter-spacing: 4px; line-height: 1; }
+  .room-url-hint { font-size: 0.65rem; opacity: 0.75; margin-top: 0.4rem; }
+
+  .player-box {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .player-box-header {
+    font-weight: 700;
+    color: var(--color-primary);
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+  }
+
+  .player-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    overflow-y: auto;
+    flex: 1;
+  }
+
+  .player-item {
+    padding: 0.35rem 0.5rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    color: #333;
+    background: #f5f3ee;
+    margin-bottom: 0.3rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .sidebar-controls { font-size: 0.85rem; display: flex; flex-direction: column; gap: 0.75rem; }
+
+  .control-group { display: flex; flex-direction: column; gap: 0.3rem; }
+  .control-label { font-weight: 700; color: var(--color-primary); font-size: 0.8rem; }
+
+  .room-select {
+    width: 100%;
+    padding: 0.4rem 0.5rem;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-family: inherit;
+    color: #333;
+    background: #fafafa;
+    cursor: pointer;
+  }
+  .room-select:disabled { opacity: 0.45; cursor: not-allowed; }
+  .room-select:focus { outline: none; border-color: var(--color-secondary); }
+
+  .room-timer-options { display: flex; gap: 0.25rem; flex-wrap: wrap; }
+
+  .room-timer-btn {
+    padding: 0.25rem 0.5rem;
+    border: 2px solid #ddd;
+    border-radius: 50px;
+    background: white;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s;
+  }
+  .room-timer-btn:hover:not(:disabled) { border-color: var(--color-secondary); }
+  .room-timer-btn--active { background: var(--color-primary); color: white; border-color: var(--color-primary); }
+  .room-timer-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+  /* ── Main area ───────────────────────────────────────── */
+  .main-area {
+    flex: 1;
+    padding: 1.5rem 2rem;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .state-panel { flex: 1; display: flex; flex-direction: column; }
+  .state-panel--hidden { display: none !important; }
+
+  /* Lobby */
+  .waiting-msg { font-size: 1.2rem; color: #777; margin-bottom: 1.5rem; text-align: center; margin-top: 3rem; }
+  .start-hint { font-size: 0.85rem; color: #aaa; text-align: center; margin-top: 0.5rem; }
+
+  /* Drawing */
+  .round-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+  }
+
+  .drawer-info { font-size: 1.1rem; color: #444; }
+
+  .timer-display {
+    font-size: 2.2rem;
+    font-weight: 900;
+    color: var(--color-primary);
+    min-width: 60px;
+    text-align: center;
+  }
+
+  .timer-display--urgent { color: #e03d2f; animation: pulse 0.5s infinite alternate; }
+  @keyframes pulse { from { opacity: 1; } to { opacity: 0.5; } }
+
+  .word-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: white;
+    border-radius: 12px;
+    padding: 0.6rem 1rem;
+    margin-bottom: 0.75rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+
+  .word-label { font-weight: 700; color: var(--color-primary); }
+  .host-word { font-size: 1.4rem; font-weight: 700; color: #222; flex: 1; }
+  .icon-btn { background: none; border: none; font-size: 1.3rem; cursor: pointer; padding: 0; line-height: 1; }
+
+  /* Canvas */
+  .canvas {
+    width: 100%;
+    max-width: 800px;
+    aspect-ratio: 8/5;
+    border-radius: 14px;
+    background: white;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    display: block;
+  }
+
+  .canvas--small { max-width: 600px; }
+
+  .round-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+    justify-content: flex-end;
+  }
+
+  /* Round end */
+  .round-end-layout {
+    display: flex;
+    gap: 1.5rem;
+    align-items: flex-start;
+    flex: 1;
+    flex-wrap: wrap;
+  }
+
+  .round-end-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    flex: 1;
+    min-width: 280px;
+  }
+
+  .round-end-left h2 { font-size: 2rem; color: var(--color-primary); }
+  .reveal-label { color: #666; }
+  .reveal-word { font-size: 3rem; font-weight: 900; color: var(--color-primary); }
+
+  .round-end-right {
+    background: white;
+    border-radius: 14px;
+    padding: 1rem 1.25rem;
+    min-width: 200px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+  }
+
+  .guesses-title { color: var(--color-primary); font-size: 1rem; font-weight: 700; margin-bottom: 0.6rem; }
+
+  .guesses-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.35rem; }
+
+  .guess-item {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    background: #f5f3ee;
+    border-radius: 8px;
+    padding: 0.35rem 0.65rem;
+    font-size: 0.9rem;
+  }
+
+  .guess-name { font-weight: 700; color: var(--color-primary); white-space: nowrap; }
+  .guess-text { color: #333; }
+  .no-guesses { color: #aaa; font-size: 0.85rem; font-style: italic; }
+
+  /* Buttons */
+  .primary-btn {
+    padding: 0.75rem 2rem;
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.2s, opacity 0.2s;
+  }
+  .primary-btn:hover:not(:disabled) { background: var(--color-secondary); }
+  .primary-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+  .secondary-btn {
+    padding: 0.75rem 1.5rem;
+    background: white;
+    color: var(--color-primary);
+    border: 2px solid var(--color-primary);
+    border-radius: 50px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+  }
+  .secondary-btn:hover { background: #f0eeea; }
+</style>
