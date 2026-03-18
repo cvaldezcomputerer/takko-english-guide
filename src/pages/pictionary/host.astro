@@ -89,6 +89,14 @@ import Layout from '../../layouts/Layout.astro';
           <p id="start-hint" class="start-hint">At least 1 student must join first.</p>
         </div>
 
+        <!-- Countdown state -->
+        <div id="state-countdown" class="state-panel state-panel--hidden">
+          <div class="countdown-panel">
+            <p class="countdown-label">Next drawer: <strong id="countdown-drawer-name">—</strong></p>
+            <div id="host-countdown-number" class="countdown-number">3</div>
+          </div>
+        </div>
+
         <!-- Drawing state -->
         <div id="state-drawing" class="state-panel state-panel--hidden">
           <div class="round-header">
@@ -106,6 +114,7 @@ import Layout from '../../layouts/Layout.astro';
 
           <div class="round-actions">
             <button id="clear-btn" class="secondary-btn">Clear Canvas</button>
+            <button id="stop-btn" class="danger-btn">Stop Round</button>
             <button id="next-btn" class="primary-btn">Next Round →</button>
           </div>
         </div>
@@ -151,6 +160,7 @@ import Layout from '../../layouts/Layout.astro';
   let socket: PartySocket | null = null;
   let timerDuration = 90;
   let timerInterval: ReturnType<typeof setInterval> | null = null;
+  let countdownInterval: ReturnType<typeof setInterval> | null = null;
   let wordVisible = true;
   let currentWord = '';
   let drawingCtx: CanvasRenderingContext2D | null = null;
@@ -220,9 +230,21 @@ import Layout from '../../layouts/Layout.astro';
       case 'room_state':
         updatePlayers(msg.players ?? []);
         if (msg.phase === 'lobby') { showState('state-lobby'); setRoomControlsDisabled(false); }
+        else if (msg.phase === 'countdown') {
+          showState('state-countdown');
+          el('countdown-drawer-name').textContent = msg.nextDrawerName ?? '—';
+          if (msg.countdownEnd) startCountdown(msg.countdownEnd);
+        }
+        break;
+
+      case 'countdown_started':
+        showState('state-countdown');
+        el('countdown-drawer-name').textContent = msg.nextDrawerName ?? '—';
+        startCountdown(msg.countdownEnd);
         break;
 
       case 'round_started':
+        stopCountdown();
         currentWord = msg.word ?? '';
         wordVisible = false;
         showState('state-drawing');
@@ -283,6 +305,7 @@ import Layout from '../../layouts/Layout.astro';
 
   // ── Clear canvas ──────────────────────────────────────────────────────────
   el('clear-btn').addEventListener('click', () => socket?.send(JSON.stringify({ type: 'clear_canvas' })));
+  el('stop-btn').addEventListener('click', () => socket?.send(JSON.stringify({ type: 'end_round' })));
 
   // ── Toggle word visibility ────────────────────────────────────────────────
   el('toggle-word-btn').addEventListener('click', () => {
@@ -305,6 +328,20 @@ import Layout from '../../layouts/Layout.astro';
 
   function stopTimer() {
     if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+  }
+
+  function startCountdown(end: number) {
+    if (countdownInterval) clearInterval(countdownInterval);
+    function tick() {
+      const remaining = Math.max(0, Math.ceil((end - Date.now()) / 1000));
+      el('host-countdown-number').textContent = String(remaining);
+    }
+    tick();
+    countdownInterval = setInterval(tick, 100);
+  }
+
+  function stopCountdown() {
+    if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
   }
 
   // ── Canvas (read-only on host) ────────────────────────────────────────────
@@ -682,6 +719,38 @@ import Layout from '../../layouts/Layout.astro';
   }
   .primary-btn:hover:not(:disabled) { background: var(--color-secondary); }
   .primary-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+  /* Countdown */
+  .countdown-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+  }
+
+  .countdown-label { font-size: 1.2rem; color: #555; }
+  .countdown-number {
+    font-size: 7rem;
+    font-weight: 900;
+    color: var(--color-primary);
+    line-height: 1;
+  }
+
+  .danger-btn {
+    padding: 0.75rem 1.5rem;
+    background: white;
+    color: #e03d2f;
+    border: 2px solid #e03d2f;
+    border-radius: 50px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+  }
+  .danger-btn:hover { background: #fee2e2; }
 
   .secondary-btn {
     padding: 0.75rem 1.5rem;

@@ -31,6 +31,14 @@ import Layout from '../../layouts/Layout.astro';
     </div>
   </div>
 
+  <!-- COUNTDOWN SCREEN -->
+  <div id="screen-countdown" class="screen screen--hidden">
+    <div class="countdown-panel">
+      <h2>GET READY!<span class="ja">じゅんびして！</span></h2>
+      <div id="play-countdown-number" class="countdown-number">3</div>
+    </div>
+  </div>
+
   <!-- LOBBY WAITING SCREEN -->
   <div id="screen-lobby" class="screen screen--hidden">
     <div class="center-panel">
@@ -144,6 +152,7 @@ import Layout from '../../layouts/Layout.astro';
   let currentWidth = 4;
   let isDrawing = false;
   let timerInterval: ReturnType<typeof setInterval> | null = null;
+  let countdownInterval: ReturnType<typeof setInterval> | null = null;
   let myRole: 'drawer' | 'viewer' | 'host' = 'viewer';
 
   const CANVAS_W = 800;
@@ -227,6 +236,9 @@ import Layout from '../../layouts/Layout.astro';
         updateLobbyList(players);
         if (msg.phase === 'lobby') {
           showScreen('screen-lobby');
+        } else if (msg.phase === 'countdown') {
+          showScreen('screen-countdown');
+          if (msg.countdownEnd) startCountdown(msg.countdownEnd);
         } else if (msg.phase === 'drawing') {
           myRole = msg.yourRole;
           if (myRole === 'drawer') showScreen('screen-drawing');
@@ -235,7 +247,13 @@ import Layout from '../../layouts/Layout.astro';
         break;
       }
 
+      case 'countdown_started':
+        showScreen('screen-countdown');
+        startCountdown(msg.countdownEnd);
+        break;
+
       case 'round_started': {
+        stopCountdown();
         myRole = msg.yourRole;
         clearCanvas();
         if (myRole === 'drawer') {
@@ -304,6 +322,20 @@ import Layout from '../../layouts/Layout.astro';
 
   function stopTimer() {
     if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+  }
+
+  function startCountdown(end: number) {
+    if (countdownInterval) clearInterval(countdownInterval);
+    function tick() {
+      const remaining = Math.max(0, Math.ceil((end - Date.now()) / 1000));
+      el('play-countdown-number').textContent = String(remaining);
+    }
+    tick();
+    countdownInterval = setInterval(tick, 100);
+  }
+
+  function stopCountdown() {
+    if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
   }
 
   // ── Canvas setup ──────────────────────────────────────────────────────────
@@ -498,6 +530,38 @@ import Layout from '../../layouts/Layout.astro';
 <style>
   .screen { min-height: 100vh; }
   .screen--hidden { display: none !important; }
+
+  /* ── Countdown screen ────────────────────────────────── */
+  #screen-countdown {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f5f3ee;
+    min-height: 100vh;
+  }
+
+  .countdown-panel {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .countdown-panel h2 {
+    color: var(--color-primary);
+    font-size: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  .countdown-number {
+    font-size: 9rem;
+    font-weight: 900;
+    color: var(--color-primary);
+    line-height: 1;
+  }
 
   /* ── Join card (code + name screens) ─────────────────── */
   #screen-code,

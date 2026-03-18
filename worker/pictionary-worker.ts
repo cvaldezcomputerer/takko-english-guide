@@ -9,7 +9,7 @@ const themes: Record<string, readonly string[]> = {
   Sports: ['football','basketball','swimming','running','tennis','bicycle','jump rope','baseball','golf','skiing','surfing','boxing','yoga','bowling','archery','diving','gymnastics','rowing','climbing','skating'],
 };
 
-type Phase = 'lobby' | 'drawing' | 'round_end';
+type Phase = 'lobby' | 'countdown' | 'drawing' | 'round_end';
 
 interface Player { id: string; name: string; }
 interface DrawEvent { type: 'start' | 'move' | 'end'; x: number; y: number; color?: string; width?: number; }
@@ -24,6 +24,8 @@ interface RoomState {
   drawerQueue: string[];
   players: Player[];
   roundTimerEnd: number | null;
+  countdownEnd: number | null;
+  nextDrawerName: string | null;
   drawHistory: DrawEvent[];
   guesses: Guess[];
 }
@@ -38,6 +40,8 @@ export class PictionaryRoom implements DurableObject {
     drawerQueue: [],
     players: [],
     roundTimerEnd: null,
+    countdownEnd: null,
+    nextDrawerName: null,
     drawHistory: [],
     guesses: [],
   };
@@ -99,6 +103,8 @@ export class PictionaryRoom implements DurableObject {
       currentDrawerId: this.roomState.currentDrawerId,
       players: this.roomState.players,
       roundTimerEnd: this.roomState.roundTimerEnd,
+      countdownEnd: this.roomState.countdownEnd,
+      nextDrawerName: this.roomState.nextDrawerName,
       yourRole: isHost ? 'host' : (isDrawer ? 'drawer' : 'viewer'),
       drawHistory: this.roomState.drawHistory,
     });
@@ -137,10 +143,18 @@ export class PictionaryRoom implements DurableObject {
         break;
       }
 
+      case 'end_round': {
+        if (senderId !== 'host') return;
+        if (this.roomState.phase !== 'drawing') return;
+        this.endRound();
+        break;
+      }
+
       case 'start_round':
       case 'next_round': {
         if (senderId !== 'host') return;
-        this.startRound();
+        if (this.roomState.phase === 'countdown') return;
+        this.beginCountdown();
         break;
       }
 
@@ -187,6 +201,28 @@ export class PictionaryRoom implements DurableObject {
     }
   }
 
+  private beginCountdown() {
+    if (this.roomState.players.length === 0 || !this.roomState.theme) return;
+    if (this.roomState.drawerQueue.length === 0) {
+      this.roomState.drawerQueue = this.roomState.players.map(p => p.id);
+    }
+    const nextDrawerId = this.roomState.drawerQueue[0]; // peek, don't shift yet
+    const nextDrawer = this.roomState.players.find(p => p.id === nextDrawerId);
+
+    this.roomState.phase = 'countdown';
+    this.roomState.countdownEnd = Date.now() + 3000;
+    this.roomState.nextDrawerName = nextDrawer?.name ?? 'Someone';
+
+    this.broadcast({
+      type: 'countdown_started',
+      countdownEnd: this.roomState.countdownEnd,
+      nextDrawerName: this.roomState.nextDrawerName,
+    });
+
+    if (this.roundTimer) clearTimeout(this.roundTimer);
+    this.roundTimer = setTimeout(() => this.startRound(), 3000);
+  }
+
   private startRound() {
     if (this.roomState.players.length === 0 || !this.roomState.theme) return;
     if (this.roomState.drawerQueue.length === 0) {
@@ -227,6 +263,8 @@ export class PictionaryRoom implements DurableObject {
   private endRound() {
     this.roomState.phase = 'round_end';
     this.roomState.roundTimerEnd = null;
+    this.roomState.countdownEnd = null;
+    this.roomState.nextDrawerName = null;
     if (this.roundTimer) { clearTimeout(this.roundTimer); this.roundTimer = null; }
     this.broadcast({ type: 'round_ended', word: this.roomState.currentWord, guesses: this.roomState.guesses });
   }
@@ -244,6 +282,8 @@ export class PictionaryRoom implements DurableObject {
         currentDrawerId: this.roomState.currentDrawerId,
         players: this.roomState.players,
         roundTimerEnd: this.roomState.roundTimerEnd,
+        countdownEnd: this.roomState.countdownEnd,
+        nextDrawerName: this.roomState.nextDrawerName,
         yourRole: isHost ? 'host' : (isDrawer ? 'drawer' : 'viewer'),
       });
     }
