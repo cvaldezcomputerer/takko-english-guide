@@ -124,11 +124,6 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
     </div>
   </section>
 
-  <div class="letter-game__attribution" id="lg-attribution-row" aria-live="polite">
-    <p class="letter-game__attribution-item" data-attribution-side="0" hidden></p>
-    <p class="letter-game__attribution-item" data-attribution-side="1" hidden></p>
-  </div>
-
   <!-- Feedback Toast -->
   <div class="letter-game__toast" data-testid="toast" aria-live="polite"></div>
 
@@ -517,9 +512,6 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
       min-height: auto;
     }
 
-    .letter-game__attribution {
-      grid-template-columns: 1fr;
-    }
   }
 
   .letter-game__card-wrapper {
@@ -620,35 +612,6 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
     transform: none;
   }
 
-  .letter-game__attribution {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.75rem;
-    width: 100%;
-    max-width: 1000px;
-    margin: 0.5rem auto 0.75rem;
-  }
-
-  .letter-game__attribution-item {
-    margin: 0;
-    font-size: 0.8rem;
-    line-height: 1.4;
-    color: rgba(255, 255, 255, 0.92);
-    background: rgba(0, 0, 0, 0.25);
-    border-radius: 0.5rem;
-    padding: 0.5rem 0.65rem;
-    min-height: 2.35rem;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.2rem;
-    align-items: center;
-  }
-
-  .letter-game__attribution-item a {
-    color: #fff7b8;
-    font-weight: 600;
-  }
-
   .letter-game__toast {
     text-align: center;
     margin-top: 1rem;
@@ -685,10 +648,12 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
       food: [...imagesFromGlob.food],
       animals: [...imagesFromGlob.animals],
       candy: [...imagesFromGlob.food],
-      trucks: [...imagesFromGlob.objects],
-      bugs: [...imagesFromGlob.animals],
-      "japanese food": [...imagesFromGlob.food],
-      "funny-cats": ["API_PLACEHOLDER_1", "API_PLACEHOLDER_2"], 
+      dinosaurs: [...imagesFromGlob.animals],
+      space: [...imagesFromGlob.objects],
+      puppies: [...imagesFromGlob.animals],
+      flowers: [...imagesFromGlob.food],
+      sports: [...imagesFromGlob.objects],
+      "funny-cats": ["API_PLACEHOLDER_1", "API_PLACEHOLDER_2"],
     },
     randomize: true,
   };
@@ -702,7 +667,6 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
   let currentColors = ["", ""];
   let currentCategory = "";
   let flippedCards = [false, false];
-  let currentAttributions = [null, null];
   let roundCount = 0;
   let recentImages = [];
   let currentSeed = Math.floor(Math.random() * 1000000);
@@ -712,7 +676,6 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
      3. DOM Elements
      ========================================= */
   let elBoard, elCards, elProgress, elToast, elNext, elNextLabel, elNextLoader;
-  let elAttributionItems;
   let elSettingsOverlay, elSettingsBtn, elSettingsClose;
   let elModeInputs, elLetterCheckboxes, elRandomize;
   let elLettersSettingsGroup, elColorsSettingsGroup, elColorGrid;
@@ -734,34 +697,30 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
   function normalizeImageCategories(images = {}) {
     const next = { ...images };
 
-    // Migrate deprecated keys into the new set.
-    if (!next.trucks && next.trains) {
-      next.trucks = next.trains;
-    }
-    if (!next["japanese food"] && next.vehicles) {
-      next["japanese food"] = next.vehicles;
-    }
-    if (!next.bugs && next.insects) {
-      next.bugs = next.insects;
-    }
-    if (!next.candy && next.toys) {
-      next.candy = next.toys;
-    }
-    if (!next["japanese food"] && next.cars) {
-      next["japanese food"] = next.cars;
-    }
-
+    // Remove deprecated categories from saved settings.
     delete next.trains;
     delete next.vehicles;
     delete next.insects;
     delete next.toys;
     delete next.cars;
+    delete next.trucks;
+    delete next.bugs;
+    delete next["japanese food"];
+    delete next.objects;
 
-    // Ensure required categories exist.
-    if (!Array.isArray(next.trucks)) next.trucks = [...imagesFromGlob.objects];
+    // Migrate candy from old "toys" key.
+    if (!next.candy && images.toys) next.candy = [...imagesFromGlob.food];
+
+    // Ensure all current categories exist.
+    if (!Array.isArray(next.food)) next.food = [...imagesFromGlob.food];
+    if (!Array.isArray(next.animals)) next.animals = [...imagesFromGlob.animals];
     if (!Array.isArray(next.candy)) next.candy = [...imagesFromGlob.food];
-    if (!Array.isArray(next["japanese food"])) next["japanese food"] = [...imagesFromGlob.food];
-    if (!Array.isArray(next.bugs)) next.bugs = [...imagesFromGlob.animals];
+    if (!Array.isArray(next.dinosaurs)) next.dinosaurs = [...imagesFromGlob.animals];
+    if (!Array.isArray(next.space)) next.space = [...imagesFromGlob.objects];
+    if (!Array.isArray(next.puppies)) next.puppies = [...imagesFromGlob.animals];
+    if (!Array.isArray(next.flowers)) next.flowers = [...imagesFromGlob.food];
+    if (!Array.isArray(next.sports)) next.sports = [...imagesFromGlob.objects];
+    if (!Array.isArray(next["funny-cats"])) next["funny-cats"] = ["API_PLACEHOLDER_1", "API_PLACEHOLDER_2"];
 
     return next;
   }
@@ -863,8 +822,6 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
     let img1 = null;
     let img2 = null;
-    currentAttributions = [null, null];
-
     if (currentCategory === 'funny-cats') {
             img1 = await fetchGiphyCat();
             img2 = await fetchGiphyCat();
@@ -879,7 +836,6 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
         ]);
         img1 = r1?.url || null;
         img2 = r2?.url || null;
-        currentAttributions = [r1?.attribution || null, r2?.attribution || null];
     }
 
     // C. Final Fallback (Local Images)
@@ -900,7 +856,6 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
             currentPair = ["", ""];
             console.error("No images available for category:", currentCategory);
         }
-        currentAttributions = [null, null];
     }
 
     preloadImages(currentPair);
@@ -942,56 +897,6 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
             : `Letter ${currentLabels[side]}`;
         elToast.textContent = `${label} flipped!`;
     };
-  }
-
-  function appendAttributionContent(container, attribution) {
-    container.textContent = "";
-    const photographer = attribution?.photographerName || "Unknown";
-    const photographerUrl = attribution?.photographerUrl || "https://unsplash.com/";
-    const photoUrl = attribution?.photoUrl || "https://unsplash.com/";
-    const unsplashUrl = attribution?.unsplashUrl || "https://unsplash.com/";
-
-    const prefix = document.createTextNode("Photo by ");
-    const nameLink = document.createElement("a");
-    nameLink.href = photographerUrl;
-    nameLink.textContent = photographer;
-    nameLink.target = "_blank";
-    nameLink.rel = "noopener noreferrer nofollow";
-
-    const mid = document.createTextNode(" on ");
-    const unsplashLink = document.createElement("a");
-    unsplashLink.href = unsplashUrl;
-    unsplashLink.textContent = "Unsplash";
-    unsplashLink.target = "_blank";
-    unsplashLink.rel = "noopener noreferrer nofollow";
-
-    const suffix = document.createTextNode(" · ");
-    const photoLink = document.createElement("a");
-    photoLink.href = photoUrl;
-    photoLink.textContent = "View photo";
-    photoLink.target = "_blank";
-    photoLink.rel = "noopener noreferrer nofollow";
-
-    container.appendChild(prefix);
-    container.appendChild(nameLink);
-    container.appendChild(mid);
-    container.appendChild(unsplashLink);
-    container.appendChild(suffix);
-    container.appendChild(photoLink);
-  }
-
-  function updateAttributionUI() {
-    if (!elAttributionItems || elAttributionItems.length < 2) return;
-    elAttributionItems.forEach((item, idx) => {
-      const attribution = currentAttributions[idx];
-      const shouldShow = !!attribution;
-      item.hidden = !shouldShow;
-      if (shouldShow) {
-        appendAttributionContent(item, attribution);
-      } else {
-        item.textContent = "";
-      }
-    });
   }
 
   async function goNext() {
@@ -1168,8 +1073,6 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
     elNext = document.querySelector(".letter-game__next");
     elNextLabel = document.querySelector(".letter-game__next-label");
     elNextLoader = document.querySelector(".letter-game__next-loader");
-    elAttributionItems = Array.from(document.querySelectorAll(".letter-game__attribution-item"));
-    
     // Settings Elements
     elSettingsBtn = document.getElementById("settings-btn");
     elSettingsOverlay = document.getElementById("settings-overlay");
