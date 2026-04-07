@@ -1,14 +1,19 @@
 ---
-import badcat1 from "../assets/DirectionsReactionGame/badcat1-nobg.png";
-import badcat2 from "../assets/DirectionsReactionGame/badcat2.jpg";
-import badcat3 from "../assets/DirectionsReactionGame/badcat3.jpg";
-import goodCat1 from "../assets/DirectionsReactionGame/goodCat1-nobg.png";
-import goodCat2 from "../assets/DirectionsReactionGame/goodCat2-nobg.png";
-import goodCat3 from "../assets/DirectionsReactionGame/goodCat3-nobg.png";
-import goodCat4 from "../assets/DirectionsReactionGame/goodcat4-nobg.png";
+import Loader from "./Loader.astro";
+import badcat1 from "../assets/DirectionsReactionGame/bad-cat-1.png";
+import badcat10 from "../assets/DirectionsReactionGame/bad-cat-10.png";
+import badcat11 from "../assets/DirectionsReactionGame/bad-cat-11.png";
+import badcat2 from "../assets/DirectionsReactionGame/bad-cat-2.jpg";
+import badcat3 from "../assets/DirectionsReactionGame/bad-cat-3.jpg";
+import goodCat1 from "../assets/DirectionsReactionGame/good-cat-1.png";
+import goodCat10 from "../assets/DirectionsReactionGame/good-cat-10.png";
+import goodCat12 from "../assets/DirectionsReactionGame/good-cat-12.png";
+import goodCat2 from "../assets/DirectionsReactionGame/good-cat-2.png";
+import goodCat3 from "../assets/DirectionsReactionGame/good-cat-3.png";
+import goodCat4 from "../assets/DirectionsReactionGame/good-cat-4.png";
 
-const GOOD_FEEDBACK_IMAGES = [goodCat1.src, goodCat2.src, goodCat3.src, goodCat4.src];
-const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src];
+const GOOD_FEEDBACK_IMAGES = [goodCat1.src, goodCat2.src, goodCat3.src, goodCat4.src, goodCat10.src, goodCat12.src];
+const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src, badcat10.src, badcat11.src];
 ---
 
 <div
@@ -18,81 +23,74 @@ const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src];
   data-bad-images={JSON.stringify(BAD_FEEDBACK_IMAGES)}
 >
   <header class="hud">
-    <div class="hud-card">
-      <span class="hud-label">Time</span>
+    <div class="hud-card time-card">
+      <span class="hud-label">時間</span>
       <span class="hud-value" id="time-left">60.0s</span>
     </div>
-    <div class="hud-card">
-      <span class="hud-label">Score</span>
+    <div class="hud-card score-card">
+      <span class="hud-label">スコア</span>
       <span class="hud-value" id="score">0</span>
-    </div>
-    <div class="hud-card">
-      <span class="hud-label">Round</span>
-      <span class="hud-value" id="round-count">0</span>
     </div>
   </header>
 
+  <div id="audio-loading" class="audio-loading hidden" aria-live="polite">
+    <Loader
+      class="audio-loading-spinner"
+      size={22}
+      mobileSize={18}
+      stepMs={300}
+      outerUnit="garlic"
+      middleUnit="logo"
+      color="#1d4ed8"
+      outerColor="#1d4ed8"
+      middleColor="#1d4ed8"
+      dotColor="#1d4ed8"
+      aria-hidden="true"
+    />
+    <p class="audio-loading-text">Loading audio...</p>
+  </div>
+
   <main class="stage" id="stage">
     <div class="stage-visual neutral" id="stage-visual">
-      <div class="placeholder-icon" id="placeholder-icon">?</div>
+      <div class="placeholder-icon" id="placeholder-icon"></div>
       <img id="feedback-image" class="feedback-image hidden left" src="" alt="" />
-      <p class="stage-title" id="stage-title">Press Play</p>
-      <p class="stage-subtitle" id="stage-subtitle">Audio will say: Left, Right, or Straight.</p>
+      <p class="stage-title" id="stage-title">スタートを押してね</p>
+      <p class="stage-subtitle" id="stage-subtitle">You can also use the arrow keys on the keyboard.
+キーボードの矢印キー（← ↑ →）も使えます。</p>
     </div>
   </main>
 
   <footer class="controls">
-    <button id="btn-left" class="input-btn" type="button" aria-label="Left">&lt;</button>
-    <button id="btn-straight" class="input-btn" type="button" aria-label="Straight">^</button>
-    <button id="btn-right" class="input-btn" type="button" aria-label="Right">&gt;</button>
+    <button id="btn-left" class="input-btn" type="button" aria-label="左">&lt;</button>
+    <button id="btn-straight" class="input-btn" type="button" aria-label="まっすぐ">^</button>
+    <button id="btn-right" class="input-btn" type="button" aria-label="右">&gt;</button>
   </footer>
 
   <div class="meta-row">
-    <button id="btn-start" class="start-btn" type="button">Play</button>
-    <p class="result-text" id="result-text">Press Play when ready.</p>
+    <button id="btn-start" class="start-btn" type="button">スタート</button>
+    <button id="btn-hard-mode" class="mode-btn" type="button" aria-pressed="false">むずかしい</button>
   </div>
-
-  <section class="howto-ja" aria-label="あそびかた / How to play">
-    <div class="howto-grid">
-      <div class="howto-col">
-        <p class="howto-title">あそびかた</p>
-        <p class="howto-line">1. Playをおす。</p>
-        <p class="howto-line">2. こえをきいて、むきをえらぶ。</p>
-        <p class="howto-line">3. ただしいむきを、はやくおす。</p>
-        <p class="howto-subtitle">おしかたは3つあるよ</p>
-        <p class="howto-line">・マウスでボタンをおす</p>
-        <p class="howto-line">・キーボードの やじるし（← ↑ →）</p>
-        <p class="howto-line">・キーボードの A / W / D</p>
-      </div>
-      <div class="howto-col">
-        <p class="howto-title">How to Play</p>
-        <p class="howto-line">1. Press Play.</p>
-        <p class="howto-line">2. Listen and pick a direction.</p>
-        <p class="howto-line">3. Press the correct one fast.</p>
-        <p class="howto-subtitle">3 ways to answer</p>
-        <p class="howto-line">- Click the buttons with a mouse</p>
-        <p class="howto-line">- Use arrow keys (Left, Up, Right)</p>
-        <p class="howto-line">- Use A / W / D keys</p>
-      </div>
-    </div>
-  </section>
 
   <div id="finish-popup" class="finish-popup hidden" role="dialog" aria-modal="true" aria-live="polite">
     <div class="finish-card">
-      <p class="finish-label">Final Score</p>
+      <button id="finish-close" class="finish-close" type="button" aria-label="最終スコアを閉じる">X</button>
+      <p class="finish-label">さいしゅうスコア</p>
       <p class="finish-score" id="finish-score">0</p>
-      <p class="finish-meta" id="finish-meta">0 rounds</p>
+      <p class="finish-meta" id="finish-meta">0 ラウンド</p>
     </div>
   </div>
 </div>
 
 <style>
   .reaction-game {
-    --bg-1: #f9f5ff;
-    --bg-2: #d9f4ff;
-    --panel: #ffffff;
-    --ink: #1f2937;
-    --muted: #5b6472;
+    --bg-1: #fffbf0;
+    --bg-2: #f6eddc;
+    --panel: #fffdf7;
+    --ink: #2f2a24;
+    --muted: #6b6257;
+    --primary: #4a7c59;
+    --secondary: #d4a373;
+    --accent: #e76f51;
     --ok: #13955a;
     --bad: #c9382d;
 
@@ -101,22 +99,24 @@ const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src];
     margin: 2rem auto;
     padding: 1rem;
     border-radius: 24px;
-    background: linear-gradient(150deg, var(--bg-1), var(--bg-2));
-    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.12);
-    font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+    background: var(--bg-1);
+    box-shadow: 0 12px 0 rgba(74, 124, 89, 0.18), 0 18px 34px rgba(0, 0, 0, 0.1);
+    border: 2px solid rgba(212, 163, 115, 0.45);
+    font-family: "Fredoka", "Trebuchet MS", "Segoe UI", sans-serif;
     color: var(--ink);
   }
 
   .hud {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr);
     gap: 0.75rem;
   }
 
   .hud-card {
     background: var(--panel);
     border-radius: 14px;
-    padding: 0.65rem 0.8rem;
+    border: 2px solid rgba(212, 163, 115, 0.35);
+    padding: 0.9rem 1rem;
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
@@ -131,8 +131,44 @@ const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src];
   }
 
   .hud-value {
-    font-size: 1.4rem;
+    font-size: 2rem;
     font-weight: 800;
+  }
+
+  .score-card {
+    border: 2px solid var(--primary);
+    box-shadow: 0 8px 16px rgba(74, 124, 89, 0.22);
+  }
+
+  .score-card .hud-label {
+    color: var(--primary);
+  }
+
+  .score-card .hud-value {
+    font-size: clamp(2.2rem, 6vw, 3rem);
+    line-height: 1;
+  }
+
+  .audio-loading {
+    margin-top: 0.85rem;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.88);
+    border: 1px solid rgba(74, 124, 89, 0.28);
+    padding: 0.55rem 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .audio-loading.hidden {
+    display: none;
+  }
+
+  .audio-loading-text {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--primary);
   }
 
   .stage {
@@ -160,16 +196,21 @@ const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src];
   }
 
   .stage-visual.neutral {
-    background: linear-gradient(180deg, #f7fbff, #edf5ff);
+    background: #f4ead7;
+  }
+
+  .stage-visual.speaking {
+    background: #dceedd;
+    animation: speaking-pulse 1.2s ease-in-out infinite;
   }
 
   .stage-visual.correct {
-    background: linear-gradient(180deg, #ecfff4, #d5ffe8);
+    background: #d5ffe8;
     animation: flash-correct 0.8s ease;
   }
 
   .stage-visual.wrong {
-    background: linear-gradient(180deg, #fff4f2, #ffe2de);
+    background: #ffe2de;
     animation: flash-wrong 0.8s ease;
   }
 
@@ -178,6 +219,10 @@ const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src];
     line-height: 1;
     margin-bottom: 0.6rem;
     z-index: 2;
+  }
+
+  .placeholder-icon.speaking {
+    animation: speaker-bounce 0.9s ease-in-out infinite;
   }
 
   .feedback-image {
@@ -189,7 +234,6 @@ const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src];
     pointer-events: none;
     opacity: 0;
     z-index: 1;
-    filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.22));
   }
 
   .feedback-image.left {
@@ -226,6 +270,7 @@ const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src];
     font-size: 1rem;
     color: var(--muted);
     z-index: 2;
+    white-space: pre-line;
   }
 
   .controls {
@@ -238,8 +283,9 @@ const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src];
   .input-btn {
     border: none;
     border-radius: 14px;
-    background: #111827;
-    color: white;
+    background: #6b3f21;
+    color: #fffdf7;
+    border: 2px solid #4f2d16;
     font-size: clamp(2rem, 5vw, 2.5rem);
     font-weight: 800;
     height: 76px;
@@ -256,6 +302,20 @@ const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src];
     transform: scale(0.96);
   }
 
+  .input-btn.correct-answer {
+    background: #22c55e !important;
+    color: #052e16 !important;
+    outline: 4px solid #fde047;
+    box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.35);
+    transform: scale(1.03);
+  }
+
+  .input-btn.correct-answer:disabled {
+    opacity: 1 !important;
+    filter: none !important;
+    cursor: default;
+  }
+
   .meta-row {
     margin-top: 0.85rem;
     display: flex;
@@ -268,59 +328,48 @@ const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src];
   .start-btn {
     border: none;
     border-radius: 12px;
-    background: #1463ff;
-    color: #fff;
+    background: #7a4a2a;
+    color: #fffdf7;
+    border: 2px solid #5a351d;
     font-size: 1rem;
     font-weight: 700;
     padding: 0.7rem 1rem;
     cursor: pointer;
+    box-shadow: 0 4px 0 #4a2b17;
   }
 
-  .result-text {
-    margin: 0;
-    font-weight: 700;
-    color: var(--muted);
+  .start-btn:active:not(:disabled) {
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 #4a2b17;
   }
 
-  .howto-ja {
-    margin-top: 0.75rem;
-    background: rgba(255, 255, 255, 0.92);
+  .start-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+
+  .mode-btn {
+    margin-left: auto;
+    border: 2px solid #5a351d;
     border-radius: 12px;
-    padding: 0.65rem 0.8rem;
-    box-shadow: inset 0 0 0 1px rgba(17, 24, 39, 0.08);
-  }
-
-  .howto-grid {
-    display: flex;
-    flex-direction: row;
-    align-items: flex-start;
-    gap: 0.9rem;
-  }
-
-  .howto-col {
-    flex: 1 1 0;
-    min-width: 0;
-  }
-
-  .howto-title {
-    margin: 0;
+    background: #f0decf;
+    color: #4a2b17;
     font-size: 1rem;
-    font-weight: 800;
-    color: #1f2937;
+    font-weight: 700;
+    padding: 0.58rem 0.9rem;
+    cursor: pointer;
+    transition: transform 0.08s ease, box-shadow 0.15s ease, background 0.15s ease;
   }
 
-  .howto-subtitle {
-    margin: 0.35rem 0 0.15rem;
-    font-size: 0.9rem;
-    font-weight: 800;
-    color: #334155;
+  .mode-btn.active {
+    background: #6b3f21;
+    color: #fffdf7;
+    box-shadow: 0 0 0 3px rgba(107, 63, 33, 0.25);
+    transform: translateY(-1px);
   }
 
-  .howto-line {
-    margin: 0.1rem 0;
-    font-size: 0.9rem;
-    color: #334155;
-    line-height: 1.35;
+  .mode-btn.hidden {
+    display: none;
   }
 
   .finish-popup {
@@ -340,14 +389,40 @@ const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src];
   }
 
   .finish-card {
+    position: relative;
     width: min(480px, 92%);
     border-radius: 20px;
     padding: 1.2rem 1rem;
     text-align: center;
     color: #ffffff;
-    background: radial-gradient(circle at top, #2b8cff 0%, #145eff 62%, #0d3fb6 100%);
+    background: #4a7c59;
     box-shadow: 0 18px 46px rgba(0, 0, 0, 0.36);
     animation: finish-pop 240ms ease-out;
+  }
+
+  .finish-close {
+    position: absolute;
+    top: 0.4rem;
+    right: 0.4rem;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: none;
+    border-radius: 999px;
+    background: #dc2626;
+    color: #ffffff;
+    font-size: 1.1rem;
+    font-weight: 800;
+    line-height: 1;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    z-index: 2;
+    touch-action: manipulation;
+  }
+
+  .finish-close:focus-visible {
+    outline: 3px solid #ffffff;
+    outline-offset: 2px;
   }
 
   .finish-label {
@@ -377,6 +452,18 @@ const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src];
   @keyframes flash-correct {
     0% { transform: scale(1); }
     30% { transform: scale(1.02); }
+    100% { transform: scale(1); }
+  }
+
+  @keyframes speaking-pulse {
+    0% { box-shadow: inset 0 0 0 0 rgba(74, 124, 89, 0.16); }
+    50% { box-shadow: inset 0 0 0 5px rgba(74, 124, 89, 0.08); }
+    100% { box-shadow: inset 0 0 0 0 rgba(74, 124, 89, 0.16); }
+  }
+
+  @keyframes speaker-bounce {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
     100% { transform: scale(1); }
   }
 
@@ -420,62 +507,47 @@ const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src];
       min-height: 230px;
     }
 
-    .howto-grid {
-      flex-direction: column;
-      gap: 0.55rem;
-    }
-
-    .howto-subtitle,
-    .howto-line,
-    .howto-title {
-      font-size: 0.84rem;
-    }
-
   }
 </style>
 
 <script is:inline>
   const TOTAL_DURATION_MS = 60000;
-  const ANSWER_WINDOW_MS = 3000;
-  const FEEDBACK_MS = 800;
+  const EASY_ANSWER_WINDOW_MS = 5000;
+  const HARD_ANSWER_WINDOW_MS = 1250;
+  const INPUT_LOCK_MS = 500;
+  const CUE_REPEAT_DELAY_MS = 2200;
+  const FEEDBACK_MS = 1300;
+  const HARD_MODE_AUDIO_RATE = 1.8;
+  const NORMAL_COUNTDOWN_STEP_MS = 1000;
+  const HARD_COUNTDOWN_STEP_MS = 500;
+  const KEYBOARD_HINT_EN = "You can also use the arrow keys on the keyboard.";
+  const KEYBOARD_HINT_JA = "キーボードの矢印キー（← ↑ →）も使えます。";
+  const KEYBOARD_HINT_BILINGUAL = `${KEYBOARD_HINT_EN}\n${KEYBOARD_HINT_JA}`;
 
   const DIRECTIONS = [
-    { key: "left", label: "Left", symbol: "<" },
-    { key: "straight", label: "Straight", symbol: "^" },
-    { key: "right", label: "Right", symbol: ">" },
+    { key: "left", label: "左" },
+    { key: "straight", label: "まっすぐ" },
+    { key: "right", label: "右" },
   ];
   const gameRoot = document.getElementById("reaction-game");
   const GOOD_IMAGE_POOL = JSON.parse(gameRoot?.dataset.goodImages ?? "[]");
   const BAD_IMAGE_POOL = JSON.parse(gameRoot?.dataset.badImages ?? "[]");
 
-  const HAPPY_PLACEHOLDERS = [
-    { icon: "😺", label: "Happy Cat Meme A" },
-    { icon: "😸", label: "Happy Cat Meme B" },
-    { icon: "😻", label: "Happy Cat Meme C" },
-    { icon: "🐱", label: "Happy Cat Meme D" },
-  ];
-
-  const BAD_PLACEHOLDERS = [
-    { icon: "🥦", label: "Vegetable Pic A" },
-    { icon: "🥕", label: "Vegetable Pic B" },
-    { icon: "💩", label: "Poop Pic A" },
-    { icon: "🍆", label: "Vegetable Pic C" },
-  ];
-
   const ui = {
     time: document.getElementById("time-left"),
     score: document.getElementById("score"),
-    round: document.getElementById("round-count"),
     stageVisual: document.getElementById("stage-visual"),
     icon: document.getElementById("placeholder-icon"),
     feedbackImage: document.getElementById("feedback-image"),
     title: document.getElementById("stage-title"),
     subtitle: document.getElementById("stage-subtitle"),
-    result: document.getElementById("result-text"),
     finishPopup: document.getElementById("finish-popup"),
     finishScore: document.getElementById("finish-score"),
     finishMeta: document.getElementById("finish-meta"),
+    finishClose: document.getElementById("finish-close"),
     startBtn: document.getElementById("btn-start"),
+    hardModeBtn: document.getElementById("btn-hard-mode"),
+    audioLoading: document.getElementById("audio-loading"),
     leftBtn: document.getElementById("btn-left"),
     straightBtn: document.getElementById("btn-straight"),
     rightBtn: document.getElementById("btn-right"),
@@ -496,8 +568,15 @@ const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src];
   let answerTimeout = null;
   let feedbackTimeout = null;
   let currentAudio = null;
+  let acceptingInput = false;
+  let promptUnlockTimeout = null;
+  let promptReplayTimeout = null;
+  let hardMode = false;
+  const audioCache = new Map();
 
   const AUDIO_BASE = "/audio/directions-reaction-game/recorded";
+  const FEEDBACK_AUDIO_BASE = "/audio/directions-reaction-game/feedback";
+  const COUNTDOWN_TICK_AUDIO = "/audio/directions-reaction-game/countdown-tick.ogg";
   const START_AUDIO = [
     `${AUDIO_BASE}/start-1.mp3`,
     `${AUDIO_BASE}/start-2.mp3`,
@@ -526,6 +605,38 @@ const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src];
       `${AUDIO_BASE}/turn-right-4.mp3`,
     ],
   };
+  const DIRECTION_AUDIO_SLOW_SRC = {
+    left: [`${AUDIO_BASE}/turn-left-slow-1.mp3`],
+    straight: [`${AUDIO_BASE}/go-straight-slow-1.mp3`],
+    right: [`${AUDIO_BASE}/turn-right-slow-1.mp3`],
+  };
+  const DIRECTION_AUDIO_FAST_SRC = {
+    left: [`${AUDIO_BASE}/turn-left-fast-1.mp3`],
+    straight: [`${AUDIO_BASE}/go-straight-fast-1.mp3`],
+    right: [`${AUDIO_BASE}/turn-right-fast-1.mp3`],
+  };
+  const GOOD_FEEDBACK_AUDIO = [
+    `${FEEDBACK_AUDIO_BASE}/good-nice-1.mp3`,
+    `${FEEDBACK_AUDIO_BASE}/good-nice-2.mp3`,
+    `${FEEDBACK_AUDIO_BASE}/good-ohyeah-3.mp3`,
+    `${FEEDBACK_AUDIO_BASE}/good-great-4.mp3`,
+    `${FEEDBACK_AUDIO_BASE}/good-yeah-5.mp3`,
+  ];
+  const BAD_FEEDBACK_AUDIO = [
+    `${FEEDBACK_AUDIO_BASE}/bad-ohno-1.mp3`,
+    `${FEEDBACK_AUDIO_BASE}/bad-ohno-2.mp3`,
+    `${FEEDBACK_AUDIO_BASE}/bad-woops-3.mp3`,
+  ];
+  const ALL_AUDIO_SOURCES = Array.from(new Set([
+    COUNTDOWN_TICK_AUDIO,
+    ...START_AUDIO,
+    ...FINISH_AUDIO,
+    ...Object.values(DIRECTION_AUDIO_SRC).flat(),
+    ...Object.values(DIRECTION_AUDIO_SLOW_SRC).flat(),
+    ...Object.values(DIRECTION_AUDIO_FAST_SRC).flat(),
+    ...GOOD_FEEDBACK_AUDIO,
+    ...BAD_FEEDBACK_AUDIO,
+  ]));
 
   function randomFrom(list) {
     return list[Math.floor(Math.random() * list.length)];
@@ -547,33 +658,80 @@ const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src];
     }
   }
 
+  function clearCorrectHighlight() {
+    for (const btn of inputButtons) {
+      btn.classList.remove("correct-answer");
+    }
+  }
+
+  function highlightCorrectButton(directionKey) {
+    const buttonByDirection = {
+      left: ui.leftBtn,
+      straight: ui.straightBtn,
+      right: ui.rightBtn,
+    };
+    const correctButton = buttonByDirection[directionKey];
+    if (!correctButton) return;
+    correctButton.classList.add("correct-answer");
+  }
+
   function updateHud() {
     ui.score.textContent = String(score);
-    ui.round.textContent = String(roundCount);
     ui.time.textContent = `${(Math.max(remainingMs, 0) / 1000).toFixed(1)}s`;
   }
 
-  function setNeutralVisual() {
+  function updateModeButton() {
+    if (!ui.hardModeBtn) return;
+    ui.hardModeBtn.classList.toggle("active", hardMode);
+    ui.hardModeBtn.classList.toggle("hidden", gameActive);
+    ui.hardModeBtn.setAttribute("aria-pressed", hardMode ? "true" : "false");
+    ui.hardModeBtn.textContent = "むずかしい";
+  }
+
+  function setAudioLoading(isLoading) {
+    ui.audioLoading?.classList.toggle("hidden", !isLoading);
+    if (ui.startBtn) ui.startBtn.disabled = isLoading;
+    if (ui.hardModeBtn) ui.hardModeBtn.disabled = isLoading || gameActive;
+  }
+
+  function getAnswerWindowMs() {
+    return hardMode ? HARD_ANSWER_WINDOW_MS : EASY_ANSWER_WINDOW_MS;
+  }
+
+  function setIdleVisual() {
     ui.stageVisual.className = "stage-visual neutral";
-    ui.icon.textContent = "?";
+    ui.icon.textContent = "";
+    ui.icon.classList.remove("speaking");
     ui.feedbackImage.className = "feedback-image hidden left";
     ui.feedbackImage.src = "";
     ui.feedbackImage.alt = "";
-    ui.title.textContent = "Listening...";
-    ui.subtitle.textContent = "Audio cue is playing. Tap <, ^, or >.";
+    ui.title.textContent = "スタートを押してね";
+    ui.subtitle.textContent = KEYBOARD_HINT_BILINGUAL;
+  }
+
+  function setSpeakingVisual() {
+    ui.stageVisual.className = "stage-visual speaking";
+    ui.icon.textContent = "🔊";
+    ui.icon.classList.add("speaking");
+    ui.feedbackImage.className = "feedback-image hidden left";
+    ui.feedbackImage.src = "";
+    ui.feedbackImage.alt = "";
+    ui.title.textContent = "聞いてね...";
+    ui.subtitle.textContent = "音声を再生中...";
   }
 
   function setFeedbackVisual(isCorrect, pointsAwarded, detailText) {
     ui.stageVisual.className = `stage-visual ${isCorrect ? "correct" : "wrong"}`;
-    ui.icon.textContent = isCorrect ? "OK" : "NO";
-    ui.title.textContent = isCorrect ? "Correct!" : "Wrong!";
+    ui.icon.classList.remove("speaking");
+    ui.icon.textContent = detailText;
+    ui.title.textContent = isCorrect ? "せいかい！" : "ざんねん！";
     const imageSrc = randomFrom(isCorrect ? GOOD_IMAGE_POOL : BAD_IMAGE_POOL);
     const imageSide = Math.random() < 0.5 ? "left" : "right";
     ui.feedbackImage.src = imageSrc;
-    ui.feedbackImage.alt = isCorrect ? "Good cat reaction" : "Bad cat reaction";
+    ui.feedbackImage.alt = isCorrect ? "正解のねこ画像" : "不正解のねこ画像";
     ui.feedbackImage.className = `feedback-image show ${imageSide}`;
     ui.subtitle.textContent = isCorrect
-      ? `${detailText}  +${pointsAwarded} pts`
+      ? `${detailText}  +${pointsAwarded} 点`
       : detailText;
   }
 
@@ -583,7 +741,7 @@ const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src];
 
   function showFinishPopup() {
     ui.finishScore.textContent = String(score);
-    ui.finishMeta.textContent = `${roundCount} rounds`;
+    ui.finishMeta.textContent = `${roundCount} ラウンド`;
     ui.finishPopup.classList.remove("hidden");
   }
 
@@ -594,11 +752,61 @@ const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src];
     currentAudio = null;
   }
 
-  function playAudio(src, waitForEnd = false) {
+  function getOrCreateAudio(src) {
+    if (!src) return null;
+    if (audioCache.has(src)) return audioCache.get(src);
+    const audio = new Audio(src);
+    audio.preload = "auto";
+    audioCache.set(src, audio);
+    return audio;
+  }
+
+  function preloadAudioSource(src) {
+    const audio = getOrCreateAudio(src);
+    if (!audio) return Promise.resolve();
+    return new Promise((resolve) => {
+      let done = false;
+      const finish = () => {
+        if (done) return;
+        done = true;
+        audio.removeEventListener("canplaythrough", finish);
+        audio.removeEventListener("loadeddata", finish);
+        audio.removeEventListener("error", finish);
+        resolve();
+      };
+      audio.addEventListener("canplaythrough", finish, { once: true });
+      audio.addEventListener("loadeddata", finish, { once: true });
+      audio.addEventListener("error", finish, { once: true });
+      setTimeout(finish, 3000);
+      try {
+        audio.load();
+      } catch {
+        finish();
+      }
+    });
+  }
+
+  async function preloadAllAudio() {
+    setAudioLoading(true);
+    try {
+      await Promise.all(ALL_AUDIO_SOURCES.map((src) => preloadAudioSource(src)));
+    } finally {
+      setAudioLoading(false);
+    }
+  }
+
+  function playAudio(src, waitForEnd = false, playbackRate = 1) {
     if (!src) return Promise.resolve();
     stopCurrentAudio();
-    currentAudio = new Audio(src);
-    currentAudio.preload = "auto";
+    currentAudio = getOrCreateAudio(src);
+    if (!currentAudio) return Promise.resolve();
+    try {
+      currentAudio.currentTime = 0;
+    } catch {}
+    currentAudio.playbackRate = playbackRate;
+    if ("preservesPitch" in currentAudio) {
+      currentAudio.preservesPitch = true;
+    }
     const activeAudio = currentAudio;
     const playPromise = activeAudio.play().catch((e) => {
       console.warn("Audio play blocked by browser:", e);
@@ -620,13 +828,32 @@ const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src];
     });
   }
 
-  function playRandomFromPool(pool, waitForEnd = false) {
+  function playRandomFromPool(pool, waitForEnd = false, playbackRate = 1) {
     if (!pool || pool.length === 0) return Promise.resolve();
-    return playAudio(randomFrom(pool), waitForEnd);
+    return playAudio(randomFrom(pool), waitForEnd, playbackRate);
+  }
+
+  function getFeedbackWordFromAudioSrc(src) {
+    if (!src) return "";
+    const fileName = src.split("/").pop()?.replace(".mp3", "") ?? "";
+    const token = fileName.split("-")[1] ?? "";
+    const spaced = token === "ohyeah" ? "oh yeah" : token === "ohno" ? "oh no" : token;
+    const word = spaced.trim().toUpperCase();
+    return word ? `${word}!` : "";
   }
 
   function playDirectionCue(directionKey) {
-    return playRandomFromPool(DIRECTION_AUDIO_SRC[directionKey], false);
+    if (hardMode) {
+      return playRandomFromPool(DIRECTION_AUDIO_FAST_SRC[directionKey], false, 1);
+    }
+    return playRandomFromPool(DIRECTION_AUDIO_SRC[directionKey], false, 1);
+  }
+
+  function playDirectionCueSlow(directionKey) {
+    if (hardMode) {
+      return playRandomFromPool(DIRECTION_AUDIO_FAST_SRC[directionKey], false, 1);
+    }
+    return playRandomFromPool(DIRECTION_AUDIO_SLOW_SRC[directionKey], false, 1);
   }
 
   async function runStartCountdown(seconds = 3) {
@@ -634,13 +861,14 @@ const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src];
     ui.feedbackImage.className = "feedback-image hidden left";
     ui.feedbackImage.src = "";
     ui.feedbackImage.alt = "";
-    ui.subtitle.textContent = "Get ready...";
+    ui.subtitle.textContent = "よーい...";
+    const countdownStepMs = hardMode ? HARD_COUNTDOWN_STEP_MS : NORMAL_COUNTDOWN_STEP_MS;
     for (let n = seconds; n >= 1; n -= 1) {
       if (!gameActive) return false;
       ui.icon.textContent = String(n);
-      ui.title.textContent = `Starting in ${n}`;
-      ui.result.textContent = `Starting in ${n}...`;
-      await waitMs(1000);
+      ui.title.textContent = `${n} びょう後にスタート`;
+      playAudio(COUNTDOWN_TICK_AUDIO, false).catch(() => {});
+      await waitMs(countdownStepMs);
     }
     return gameActive;
   }
@@ -649,9 +877,13 @@ const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src];
     if (answerTimeout) clearTimeout(answerTimeout);
     if (feedbackTimeout) clearTimeout(feedbackTimeout);
     if (gameClockInterval) clearInterval(gameClockInterval);
+    if (promptUnlockTimeout) clearTimeout(promptUnlockTimeout);
+    if (promptReplayTimeout) clearTimeout(promptReplayTimeout);
     answerTimeout = null;
     feedbackTimeout = null;
     gameClockInterval = null;
+    promptUnlockTimeout = null;
+    promptReplayTimeout = null;
   }
 
   function endGame() {
@@ -659,21 +891,23 @@ const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src];
     clearTimers();
     stopCurrentAudio();
     setInputEnabled(false);
-    ui.startBtn.textContent = "Play Again";
+    clearCorrectHighlight();
+    ui.startBtn.textContent = "もう一回";
 
     ui.stageVisual.className = "stage-visual neutral";
+    ui.icon.classList.remove("speaking");
     ui.icon.textContent = "🏁";
     ui.feedbackImage.className = "feedback-image hidden left";
     ui.feedbackImage.src = "";
     ui.feedbackImage.alt = "";
-    ui.title.textContent = "Time Up!";
-    ui.subtitle.textContent = `Final score: ${score} points across ${roundCount} rounds.`;
-    ui.result.textContent = "Round complete. Press Play Again to restart.";
+    ui.title.textContent = "タイムアップ！";
+    ui.subtitle.textContent = `最終スコア: ${score} 点（${roundCount} ラウンド）`;
     showFinishPopup();
 
     remainingMs = 0;
     updateHud();
     playRandomFromPool(FINISH_AUDIO, false);
+    updateModeButton();
   }
 
   function resetToIdle() {
@@ -682,20 +916,16 @@ const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src];
     stopCurrentAudio();
     currentPrompt = null;
     roundAnswered = false;
+    acceptingInput = false;
     score = 0;
     roundCount = 0;
     remainingMs = TOTAL_DURATION_MS;
 
     setInputEnabled(false);
-    ui.startBtn.textContent = "Play";
-    ui.stageVisual.className = "stage-visual neutral";
-    ui.icon.textContent = "?";
-    ui.feedbackImage.className = "feedback-image hidden left";
-    ui.feedbackImage.src = "";
-    ui.feedbackImage.alt = "";
-    ui.title.textContent = "Press Play";
-    ui.subtitle.textContent = "Audio will say: Left, Right, or Straight.";
-    ui.result.textContent = "Press Play when ready.";
+    clearCorrectHighlight();
+    ui.startBtn.textContent = "スタート";
+    updateModeButton();
+    setIdleVisual();
     hideFinishPopup();
     updateHud();
   }
@@ -719,24 +949,46 @@ const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src];
       return;
     }
 
-    setNeutralVisual();
+    setSpeakingVisual();
     currentPrompt = randomFrom(DIRECTIONS);
     promptStartTs = performance.now();
     roundAnswered = false;
+    acceptingInput = false;
+    setInputEnabled(false);
+    clearCorrectHighlight();
     roundCount += 1;
     updateHud();
-    ui.result.textContent = `Round ${roundCount}: waiting for your input.`;
 
     playDirectionCue(currentPrompt.key);
+    promptReplayTimeout = setTimeout(() => {
+      if (!gameActive || roundAnswered || !currentPrompt) return;
+      playDirectionCueSlow(currentPrompt.key);
+    }, CUE_REPEAT_DELAY_MS);
+
+    promptUnlockTimeout = setTimeout(() => {
+      if (!gameActive || roundAnswered || !currentPrompt) return;
+      acceptingInput = true;
+      setInputEnabled(true);
+    }, INPUT_LOCK_MS);
 
     answerTimeout = setTimeout(() => {
       resolveAnswer(null);
-    }, ANSWER_WINDOW_MS);
+    }, INPUT_LOCK_MS + getAnswerWindowMs());
   }
 
   function resolveAnswer(answerKey) {
-    if (!gameActive || roundAnswered || !currentPrompt) return;
+    if (!gameActive || roundAnswered || !currentPrompt || !acceptingInput) return;
     roundAnswered = true;
+    acceptingInput = false;
+    setInputEnabled(false);
+    if (promptUnlockTimeout) {
+      clearTimeout(promptUnlockTimeout);
+      promptUnlockTimeout = null;
+    }
+    if (promptReplayTimeout) {
+      clearTimeout(promptReplayTimeout);
+      promptReplayTimeout = null;
+    }
     if (answerTimeout) {
       clearTimeout(answerTimeout);
       answerTimeout = null;
@@ -744,22 +996,32 @@ const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src];
 
     const responseMs = performance.now() - promptStartTs;
     const isCorrect = answerKey === currentPrompt.key;
-    const speedPoints = isCorrect ? getPointsByResponseMs(responseMs) : 0;
+    const basePoints = getPointsByResponseMs(responseMs);
+    const speedPoints = isCorrect
+      ? (hardMode ? basePoints * 2 : basePoints)
+      : 0;
+    const penaltyPoints = hardMode
+      ? (answerKey === null ? 20 : basePoints)
+      : 0;
 
     if (isCorrect) {
       score += speedPoints;
+    } else if (hardMode) {
+      score -= penaltyPoints;
     }
 
-    const speedTag = responseMs < 1000 ? "Super" : responseMs < 2000 ? "Good" : "OK";
-    const wrongReason = answerKey === null ? "Too slow." : "Wrong direction.";
-    const detailText = isCorrect
-      ? `${speedTag} reaction (${(responseMs / 1000).toFixed(2)}s).`
-      : wrongReason;
+    if (!isCorrect) {
+      highlightCorrectButton(currentPrompt.key);
+    }
+
+    const wrongReason = answerKey === null ? "おそい！" : "むきがちがう！";
+    const feedbackPool = isCorrect ? GOOD_FEEDBACK_AUDIO : BAD_FEEDBACK_AUDIO;
+    const feedbackAudioSrc = randomFrom(feedbackPool);
+    const feedbackWord = getFeedbackWordFromAudioSrc(feedbackAudioSrc);
+    const detailText = feedbackWord || wrongReason;
 
     setFeedbackVisual(isCorrect, speedPoints, detailText);
-    ui.result.textContent = isCorrect
-      ? `Correct: ${currentPrompt.label} (${speedTag}, +${speedPoints})`
-      : `Incorrect. Cue was ${currentPrompt.label}.`;
+    playAudio(feedbackAudioSrc, false, hardMode ? HARD_MODE_AUDIO_RATE : 1);
 
     updateHud();
 
@@ -776,21 +1038,21 @@ const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src];
     score = 0;
     roundCount = 0;
     remainingMs = TOTAL_DURATION_MS;
-    gameStartTs = performance.now();
     gameActive = true;
     currentPrompt = null;
     roundAnswered = false;
+    acceptingInput = false;
 
     setInputEnabled(true);
-    ui.startBtn.textContent = "Reset";
-    ui.result.textContent = "Get ready...";
+    updateModeButton();
+    ui.startBtn.textContent = "リセット";
     hideFinishPopup();
     updateHud();
-    runGameClock();
     playRandomFromPool(START_AUDIO, false);
     const shouldContinue = await runStartCountdown(3);
     if (!shouldContinue) return;
-    ui.result.textContent = "Listen and react as fast as possible.";
+    gameStartTs = performance.now();
+    runGameClock();
     queueNextPrompt();
   }
 
@@ -804,6 +1066,12 @@ const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src];
     }
     startGame();
   });
+  ui.hardModeBtn?.addEventListener("click", () => {
+    if (gameActive) return;
+    hardMode = !hardMode;
+    updateModeButton();
+  });
+  ui.finishClose?.addEventListener("click", hideFinishPopup);
 
   document.addEventListener("keydown", (event) => {
     if (!gameActive) return;
@@ -824,5 +1092,7 @@ const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src];
   });
 
   setInputEnabled(false);
+  updateModeButton();
   updateHud();
+  preloadAllAudio().catch(() => setAudioLoading(false));
 </script>

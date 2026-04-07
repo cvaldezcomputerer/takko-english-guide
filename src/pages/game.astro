@@ -4,19 +4,19 @@ import Navbar from '../components/Navbar.astro';
 import T from '../components/T.astro';
 ---
 
-<Layout title="Takko Town Games">
+<Layout title="Takko Town Games and Tools">
   <div class="banner">
     <div class="banner-content">
       <h1>
         <T>
-          <span slot="en">Game Center</span>
-          <span slot="ja">ゲームセンター</span>
+          <span slot="en">Games/Tools</span>
+          <span slot="ja">ゲーム・ツール</span>
         </T>
       </h1>
       <p>
         <T>
-          <span slot="en">Play and Learn with Takko!</span>
-          <span slot="ja">タッコと一緒に遊んで学ぼう！</span>
+          <span slot="en">Games and tools to use in class</span>
+          <span slot="ja">授業で使えるゲームとツール</span>
         </T>
       </p>
     </div>
@@ -29,131 +29,333 @@ import T from '../components/T.astro';
       <div class="intro">
         <h2>
           <T>
-            <span slot="en">Choose a Game</span>
-            <span slot="ja">ゲームを選ぶ</span>
+            <span slot="en">Choose an Activity</span>
+            <span slot="ja">アクティビティを選ぶ</span>
           </T>
         </h2>
         <p>
           <T>
-            <span slot="en">Select a game below to start playing!</span>
-            <span slot="ja">下のゲームを選んで遊び始めましょう！</span>
+            <span slot="en">Pick a game or classroom tool below.</span>
+            <span slot="ja">下からゲームまたはクラス用ツールを選びましょう。</span>
           </T>
         </p>
       </div>
       
-      <div class="games-grid">
-        <!-- School Map Game Card -->
-        <a href="/school-map-game" class="game-card">
-            <div class="card-image map-bg">
-                <div class="icon">🗺️</div>
-            </div>
-            <div class="card-content">
-                <h3>
-                  <T>
-                    <span slot="en">School Map Game</span>
-                    <span slot="ja">校内マップゲーム</span>
-                  </T>
-                </h3>
-                <p>
-                  <T>
-                    <span slot="en">Navigate the school, find rooms, and explore the map!</span>
-                    <span slot="ja">学校を案内して、部屋を見つけ、マップを探索しよう！</span>
-                  </T>
-                </p>
-                <span class="play-btn">
-                  <T>
-                    <span slot="en">Play Now</span>
-                    <span slot="ja">今すぐプレイ</span>
-                  </T>
-                  <i class="fas fa-play"></i>
-                </span>
-            </div>
-        </a>
+      <section class="activity-section">
+        <div class="section-heading">
+          <h3>
+            <T>
+              <span slot="en">Games</span>
+              <span slot="ja">ゲーム</span>
+            </T>
+          </h3>
+          <p>
+            <T>
+              <span slot="en">Interactive activities for class play.</span>
+              <span slot="ja">授業で遊べるインタラクティブなアクティビティです。</span>
+            </T>
+          </p>
+        </div>
 
-        <!-- Letter Flip Game Card -->
-        <a href="/letter-game" class="game-card">
-             <div class="card-image letter-bg">
-                <div class="icon">🔤</div>
-            </div>
-            <div class="card-content">
-                <h3>
-                  <T>
-                    <span slot="en">Letter Flip Game</span>
-                    <span slot="ja">文字めくりゲーム</span>
-                  </T>
-                </h3>
-                <p>
-                  <T>
-                    <span slot="en">Flip cards, learn letters, and discover animals!</span>
-                    <span slot="ja">カードをめくって、文字を学び、動物を見つけよう！</span>
-                  </T>
-                </p>
-                <span class="play-btn">
-                  <T>
-                    <span slot="en">Play Now</span>
-                    <span slot="ja">今すぐプレイ</span>
-                  </T>
-                  <i class="fas fa-play"></i>
-                </span>
-            </div>
-        </a>
+        <div class="games-grid games-grid--games">
+          <!-- School Map Game Card -->
+          <a href="/school-map-game" class="game-card">
+              <div class="card-image map-bg">
+                  <div class="icon" aria-hidden="true">
+                    <svg viewBox="0 0 120 120" role="img" focusable="false">
+                      <path d="M14 30 40 18l40 12 26-10v70l-26 12-40-12-26 10z" fill="#e9f4ff" stroke="#214764" stroke-width="4" stroke-linejoin="round"/>
+                      <path d="M40 18v70m40-58v70" stroke="#214764" stroke-width="4"/>
+                      <circle cx="60" cy="56" r="15" fill="#f97316" stroke="#7c2d12" stroke-width="4"/>
+                      <path d="M60 41v30m-15-15h30" stroke="#fff7ed" stroke-width="4" stroke-linecap="round"/>
+                    </svg>
+                  </div>
+              </div>
+              <div class="card-content">
+                  <h3>
+                    <T>
+                      <span slot="en">School Map Game</span>
+                      <span slot="ja">校内マップゲーム</span>
+                    </T>
+                  </h3>
+                  <p>
+                    <T>
+                      <span slot="en">Navigate the school, find rooms, and explore the map!</span>
+                      <span slot="ja">学校を案内して、部屋を見つけ、マップを探索しよう！</span>
+                    </T>
+                  </p>
+                  <span class="play-btn">
+                    <T>
+                      <span slot="en">Play Now</span>
+                      <span slot="ja">今すぐプレイ</span>
+                    </T>
+                    <i class="fas fa-play"></i>
+                  </span>
+              </div>
+          </a>
 
-        <!-- Face Catch Game Card -->
-        <a href="/face-catch-game" class="game-card">
-            <div class="card-image facecatch-bg">
-                <div class="icon">🎯</div>
-            </div>
-            <div class="card-content">
-                <h3>
-                  <T>
-                    <span slot="en">Face Catch</span>
-                    <span slot="ja">フェイスキャッチ</span>
-                  </T>
-                </h3>
-                <p>
-                  <T>
-                    <span slot="en">(NOT DONE AT ALL DONT PLAY)Use your face to catch falling letters with a cup on your head!</span>
-                    <span slot="ja">頭のカップで落ちてくる文字をキャッチしよう！</span>
-                  </T>
-                </p>
-                <span class="play-btn">
-                  <T>
-                    <span slot="en">Play Now</span>
-                    <span slot="ja">今すぐプレイ</span>
-                  </T>
-                  <i class="fas fa-play"></i>
-                </span>
-            </div>
-        </a>
+          <!-- Pictionary Game Card -->
+          <a href="/pictionary" class="game-card">
+              <div class="card-image pictionary-bg">
+                  <div class="icon" aria-hidden="true">
+                    <svg viewBox="0 0 120 120" role="img" focusable="false">
+                      <rect x="16" y="24" width="88" height="64" rx="10" fill="#fff8f0" stroke="#557153" stroke-width="4"/>
+                      <path d="M32 72 50 44l16 20 12-12 18 20" fill="none" stroke="#557153" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                      <circle cx="88" cy="38" r="6" fill="#f97316" stroke="#7c2d12" stroke-width="2"/>
+                      <rect x="38" y="88" width="44" height="10" rx="5" fill="#94b49f" stroke="#557153" stroke-width="2"/>
+                    </svg>
+                  </div>
+              </div>
+              <div class="card-content">
+                  <h3>Pictionary</h3>
+                  <p>
+                    <T>
+                      <span slot="en">Draw a word while your class watches and guesses in real time!</span>
+                      <span slot="ja">クラスが見ている中でお題を描いて、リアルタイムで当てよう！</span>
+                    </T>
+                  </p>
+                  <span class="play-btn">
+                    <T>
+                      <span slot="en">Play Now</span>
+                      <span slot="ja">今すぐプレイ</span>
+                    </T>
+                    <i class="fas fa-play"></i>
+                  </span>
+              </div>
+          </a>
 
-        <!-- Directions Reaction Game Card -->
-        <a href="/directions-reaction-game" class="game-card">
-             <div class="card-image reaction-bg">
-                <div class="icon">⚡</div>
-            </div>
-            <div class="card-content">
-                <h3>
-                  <T>
-                    <span slot="en">Directions Reaction Game</span>
-                    <span slot="ja">方向リアクションゲーム</span>
-                  </T>
-                </h3>
-                <p>
-                  <T>
-                    <span slot="en">Listen fast, react faster, and stack points by speed.</span>
-                    <span slot="ja">音声を聞いて素早く反応し、スピードで得点を伸ばそう。</span>
-                  </T>
-                </p>
-                <span class="play-btn">
-                  <T>
-                    <span slot="en">Play Now</span>
-                    <span slot="ja">今すぐプレイ</span>
-                  </T>
-                  <i class="fas fa-play"></i>
-                </span>
-            </div>
-        </a>
-      </div>
+          <!-- Letter Flip Game Card -->
+          <a href="/letter-game" class="game-card">
+               <div class="card-image letter-bg">
+                  <div class="icon" aria-hidden="true">
+                    <svg viewBox="0 0 120 120" role="img" focusable="false">
+                      <rect x="14" y="28" width="36" height="36" rx="8" fill="#fff7cc" stroke="#7a5b12" stroke-width="4"/>
+                      <rect x="44" y="56" width="36" height="36" rx="8" fill="#d7f9ff" stroke="#1f5f70" stroke-width="4"/>
+                      <rect x="70" y="22" width="36" height="36" rx="8" fill="#ffd8d8" stroke="#7f1d1d" stroke-width="4"/>
+                      <text x="32" y="52" text-anchor="middle" font-size="20" font-weight="800" fill="#7a5b12">A</text>
+                      <text x="62" y="80" text-anchor="middle" font-size="20" font-weight="800" fill="#1f5f70">B</text>
+                      <text x="88" y="46" text-anchor="middle" font-size="20" font-weight="800" fill="#7f1d1d">C</text>
+                    </svg>
+                  </div>
+              </div>
+              <div class="card-content">
+                  <h3>
+                    <T>
+                      <span slot="en">Letter Flip Game</span>
+                      <span slot="ja">文字めくりゲーム</span>
+                    </T>
+                  </h3>
+                  <p>
+                    <T>
+                      <span slot="en">Flip cards, learn letters, and discover animals!</span>
+                      <span slot="ja">カードをめくって、文字を学び、動物を見つけよう！</span>
+                    </T>
+                  </p>
+                  <span class="play-btn">
+                    <T>
+                      <span slot="en">Play Now</span>
+                      <span slot="ja">今すぐプレイ</span>
+                    </T>
+                    <i class="fas fa-play"></i>
+                  </span>
+              </div>
+          </a>
+
+          <!-- Face Catch Game Card -->
+          <a href="/face-catch-game" class="game-card">
+              <div class="card-image facecatch-bg">
+                  <div class="icon" aria-hidden="true">
+                    <svg viewBox="0 0 120 120" role="img" focusable="false">
+                      <circle cx="60" cy="76" r="26" fill="#fde68a" stroke="#92400e" stroke-width="4"/>
+                      <circle cx="51" cy="72" r="3.5" fill="#92400e"/>
+                      <circle cx="69" cy="72" r="3.5" fill="#92400e"/>
+                      <path d="M51 82 q9 7 18 0" fill="none" stroke="#92400e" stroke-width="3.5" stroke-linecap="round"/>
+                      <path d="M38 50 l3 20 h38 l3-20z" fill="#f97316" stroke="#c2410c" stroke-width="3.5" stroke-linejoin="round"/>
+                      <rect x="34" y="43" width="52" height="9" rx="4" fill="#facc15" stroke="#c2410c" stroke-width="3.5"/>
+                      <circle cx="60" cy="22" r="10" fill="#3b82f6" stroke="#1d4ed8" stroke-width="2.5"/>
+                      <text x="60" y="27" text-anchor="middle" font-size="14" font-weight="800" fill="white">A</text>
+                    </svg>
+                  </div>
+              </div>
+              <div class="card-content">
+                  <h3>
+                    <T>
+                      <span slot="en">Face Catch</span>
+                      <span slot="ja">フェイスキャッチ</span>
+                    </T>
+                  </h3>
+                  <p>
+                    <T>
+                      <span slot="en">Use your face to catch falling letters with a cup on your head!</span>
+                      <span slot="ja">頭のカップで落ちてくる文字をキャッチしよう！</span>
+                    </T>
+                  </p>
+                  <span class="play-btn">
+                    <T>
+                      <span slot="en">Play Now</span>
+                      <span slot="ja">今すぐプレイ</span>
+                    </T>
+                    <i class="fas fa-play"></i>
+                  </span>
+              </div>
+          </a>
+
+          <!-- Directions Reaction Game Card -->
+          <a href="/directions-reaction-game" class="game-card">
+               <div class="card-image reaction-bg">
+                  <div class="icon" aria-hidden="true">
+                    <svg viewBox="0 0 120 120" role="img" focusable="false">
+                      <circle cx="60" cy="60" r="42" fill="#fff4d6" stroke="#7c4a03" stroke-width="4"/>
+                      <path d="M64 24 44 66h18l-8 30 22-38H58z" fill="#facc15" stroke="#7c4a03" stroke-width="4" stroke-linejoin="round"/>
+                    </svg>
+                  </div>
+              </div>
+              <div class="card-content">
+                  <h3>
+                    <T>
+                      <span slot="en">Directions Reaction Game</span>
+                      <span slot="ja">方向リアクションゲーム</span>
+                    </T>
+                  </h3>
+                  <p>
+                    <T>
+                      <span slot="en">Listen fast, react faster, and stack points by speed.</span>
+                      <span slot="ja">音声を聞いて素早く反応し、スピードで得点を伸ばそう。</span>
+                    </T>
+                  </p>
+                  <span class="play-btn">
+                    <T>
+                      <span slot="en">Play Now</span>
+                      <span slot="ja">今すぐプレイ</span>
+                    </T>
+                    <i class="fas fa-play"></i>
+                  </span>
+              </div>
+          </a>
+        </div>
+      </section>
+
+      <section class="activity-section activity-section--tools">
+        <div class="section-heading">
+          <h3>
+            <T>
+              <span slot="en">Tools</span>
+              <span slot="ja">ツール</span>
+            </T>
+          </h3>
+          <p>
+            <T>
+              <span slot="en">Quick classroom helpers for points, timing, and voting.</span>
+              <span slot="ja">得点、時間、投票に使えるクラス用の便利ツールです。</span>
+            </T>
+          </p>
+        </div>
+
+        <div class="games-grid games-grid--tools">
+          <!-- Points Card Game Card -->
+          <a href="/points-card-game" class="game-card">
+               <div class="card-image points-bg">
+                  <div class="icon" aria-hidden="true">
+                    <svg viewBox="0 0 120 120" role="img" focusable="false">
+                      <circle cx="60" cy="60" r="42" fill="#fff7ed" stroke="#9a3412" stroke-width="4"/>
+                      <path d="M46 47c0-8 6-14 14-14 9 0 14 5 14 12 0 10-10 11-10 18" fill="none" stroke="#7c2d12" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+                      <circle cx="60" cy="84" r="4.5" fill="#7c2d12"/>
+                    </svg>
+                  </div>
+              </div>
+              <div class="card-content">
+                  <h3>
+                    <T>
+                      <span slot="en">Random Point Button</span>
+                      <span slot="ja">ランダムポイントボタン</span>
+                    </T>
+                  </h3>
+                  <p>
+                    <T>
+                      <span slot="en">Gives random points or point-related events.</span>
+                      <span slot="ja">ランダムポイント、またはポイント関連イベントが出ます。</span>
+                    </T>
+                  </p>
+                  <span class="play-btn">
+                    <T>
+                      <span slot="en">Play Now</span>
+                      <span slot="ja">今すぐプレイ</span>
+                    </T>
+                    <i class="fas fa-play"></i>
+                  </span>
+              </div>
+          </a>
+
+          <!-- Timer Game Card -->
+          <a href="/timer-game" class="game-card">
+               <div class="card-image timer-bg">
+                  <div class="icon" aria-hidden="true">
+                    <svg viewBox="0 0 120 120" role="img" focusable="false">
+                      <circle cx="60" cy="66" r="34" fill="#fff7ed" stroke="#7c2d12" stroke-width="4"/>
+                      <rect x="48" y="18" width="24" height="12" rx="4" fill="#f97316" stroke="#7c2d12" stroke-width="4"/>
+                      <path d="M60 66V48m0 18 12 8" stroke="#7c2d12" stroke-width="4" stroke-linecap="round"/>
+                      <path d="M34 34 28 27m58 7 6-7" stroke="#7c2d12" stroke-width="4" stroke-linecap="round"/>
+                    </svg>
+                  </div>
+              </div>
+              <div class="card-content">
+                  <h3>
+                    <T>
+                      <span slot="en">Countdown Timer</span>
+                      <span slot="ja">カウントダウンタイマー</span>
+                    </T>
+                  </h3>
+                  <p>
+                    <T>
+                      <span slot="en">Set your time and run a simple countdown with a final 5-second alert.</span>
+                      <span slot="ja">時間を設定して、最後5秒のアラート付きカウントダウン。</span>
+                    </T>
+                  </p>
+                  <span class="play-btn">
+                    <T>
+                      <span slot="en">Play Now</span>
+                      <span slot="ja">今すぐプレイ</span>
+                    </T>
+                    <i class="fas fa-play"></i>
+                  </span>
+              </div>
+          </a>
+
+          <!-- Color Vote Tool Card -->
+          <a href="/color-vote-tool" class="game-card">
+               <div class="card-image color-vote-bg">
+                  <div class="icon" aria-hidden="true">
+                    <svg viewBox="0 0 120 120" role="img" focusable="false">
+                      <rect x="18" y="18" width="38" height="38" rx="8" fill="#ef4444" stroke="#7f1d1d" stroke-width="4"/>
+                      <rect x="64" y="18" width="38" height="38" rx="8" fill="#2563eb" stroke="#1e3a8a" stroke-width="4"/>
+                      <rect x="18" y="64" width="38" height="38" rx="8" fill="#facc15" stroke="#854d0e" stroke-width="4"/>
+                      <rect x="64" y="64" width="38" height="38" rx="8" fill="#22c55e" stroke="#166534" stroke-width="4"/>
+                    </svg>
+                  </div>
+              </div>
+              <div class="card-content">
+                  <h3>
+                    <T>
+                      <span slot="en">Color Vote Tool</span>
+                      <span slot="ja">カラー投票ツール</span>
+                    </T>
+                  </h3>
+                  <p>
+                    <T>
+                      <span slot="en">A simple way for students to answer questions or vote with colors.</span>
+                      <span slot="ja">色を使って、生徒が質問に答えたり投票したりできるシンプルなツールです。</span>
+                    </T>
+                  </p>
+                  <span class="play-btn">
+                    <T>
+                      <span slot="en">Play Now</span>
+                      <span slot="ja">今すぐプレイ</span>
+                    </T>
+                    <i class="fas fa-play"></i>
+                  </span>
+              </div>
+          </a>
+        </div>
+      </section>
     </main>
   </div>
 </Layout>
@@ -222,11 +424,38 @@ import T from '../components/T.astro';
     font-size: 1.1rem;
   }
 
+  .activity-section + .activity-section {
+    margin-top: 2.5rem;
+  }
+
+  .section-heading {
+    margin-bottom: 1.2rem;
+    padding-bottom: 0.85rem;
+    border-bottom: 3px dashed #d9cfb5;
+  }
+
+  .section-heading h3 {
+    color: var(--color-primary);
+    font-size: 1.8rem;
+    margin-bottom: 0.2rem;
+  }
+
+  .section-heading p {
+    color: #666;
+    font-size: 1rem;
+  }
+
   /* Grid */
   .games-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 2rem;
+  }
+
+  .games-grid--games,
+  .games-grid--tools {
+    max-width: 1040px;
+    margin: 0 auto;
   }
 
   /* Card */
@@ -257,16 +486,32 @@ import T from '../components/T.astro';
     position: relative;
   }
 
+  .pictionary-bg {
+    background: #d8f4e3;
+  }
+
   .map-bg {
-    background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+    background: #cfe8ff;
   }
 
   .letter-bg {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #e4dbff;
   }
 
   .reaction-bg {
-    background: linear-gradient(135deg, #43cea2 0%, #185a9d 100%);
+    background: #d8f0dd;
+  }
+
+  .points-bg {
+    background: #ffe8cf;
+  }
+
+  .timer-bg {
+    background: #ffe2da;
+  }
+
+  .color-vote-bg {
+    background: #fce7f3;
   }
 
   .facecatch-bg {
@@ -274,9 +519,21 @@ import T from '../components/T.astro';
   }
 
   .icon {
-    font-size: 5rem;
+    width: clamp(88px, 24vw, 116px);
+    height: clamp(88px, 24vw, 116px);
+    display: grid;
+    place-items: center;
+    background: #ffffff;
+    border: 3px solid rgba(0, 0, 0, 0.16);
+    border-radius: 22px;
     filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));
     transition: transform 0.3s ease;
+  }
+
+  .icon svg {
+    width: 88%;
+    height: 88%;
+    display: block;
   }
 
   .game-card:hover .icon {
@@ -348,9 +605,33 @@ import T from '../components/T.astro';
       font-size: 1rem;
     }
 
-    .games-grid {
+    .section-heading {
+      margin-bottom: 0.9rem;
+      padding-bottom: 0.65rem;
+    }
+
+    .section-heading h3 {
+      font-size: 1.35rem;
+    }
+
+    .section-heading p {
+      font-size: 0.92rem;
+    }
+
+    .activity-section + .activity-section {
+      margin-top: 1.5rem;
+    }
+
+    .games-grid--games {
       grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 1rem;
+      max-width: 980px;
+    }
+
+    .games-grid--tools {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1rem;
+      max-width: 980px;
     }
 
     .game-card {
@@ -362,7 +643,9 @@ import T from '../components/T.astro';
     }
 
     .icon {
-      font-size: 3.4rem;
+      width: 84px;
+      height: 84px;
+      border-radius: 18px;
     }
 
     .card-content {

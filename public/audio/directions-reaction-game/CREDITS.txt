@@ -1,0 +1,3 @@
+countdown-tick.ogg
+Source: https://commons.wikimedia.org/wiki/File:Watch_tick.ogg
+License: CC0 1.0 Universal (Public Domain)

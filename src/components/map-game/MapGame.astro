@@ -23,7 +23,7 @@ for (const path in roomImagesGlob) {
 }
 ---
 
-<div class="game-container">
+<div class="game-container" id="game-container">
   <div id="map-title" class="map-title"></div>
   <div class="grid-container">
     <div class="grid" id="grid">
@@ -31,13 +31,85 @@ for (const path in roomImagesGlob) {
     </div>
   </div>
   
-  <div class="controls">
-    <button class="control-btn" id="btn-left">⬅️</button>
-    <button class="control-btn" id="btn-straight">⬆️</button>
-    <button class="control-btn" id="btn-right">➡️</button>
-    <button class="control-btn reset-btn" id="btn-reset">🔄</button>
-    <button class="control-btn" id="btn-next-map" title="Next Map">🗺️</button>
-    <button class="control-btn" id="btn-mute" title="Toggle Sound">🔊</button>
+  <div class="controls-panel movement-controls">
+    <button class="control-btn move-btn" id="btn-left" aria-label="Turn left" title="Turn Left">
+      <svg class="control-icon" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+        <circle class="icon-badge" cx="32" cy="32" r="27"></circle>
+        <path class="icon-glyph" d="M36 18 22 32l14 14" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"></path>
+      </svg>
+    </button>
+    <button class="control-btn move-btn" id="btn-straight" aria-label="Go straight" title="Go Straight">
+      <svg class="control-icon" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+        <circle class="icon-badge" cx="32" cy="32" r="27"></circle>
+        <path class="icon-glyph" d="M32 45V19m0 0-10 10m10-10 10 10" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"></path>
+      </svg>
+    </button>
+    <button class="control-btn move-btn" id="btn-right" aria-label="Turn right" title="Turn Right">
+      <svg class="control-icon" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+        <circle class="icon-badge" cx="32" cy="32" r="27"></circle>
+        <path class="icon-glyph" d="m28 18 14 14-14 14" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"></path>
+      </svg>
+    </button>
+  </div>
+
+  <div class="controls-panel utility-controls">
+    <button class="control-btn blackout-toggle-btn" id="btn-blackout" title="Hide Board" aria-label="Hide board" aria-pressed="false">
+      <svg class="control-icon icon-eye-open" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+        <path class="icon-badge" d="M8 32s8-14 24-14 24 14 24 14-8 14-24 14S8 32 8 32z"></path>
+        <circle class="icon-fill" cx="32" cy="32" r="8"></circle>
+      </svg>
+      <svg class="control-icon icon-eye-closed" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+        <path class="icon-glyph" d="M12 36c4-6 11-10 20-10s16 4 20 10" fill="none" stroke-width="4" stroke-linecap="round"></path>
+        <path class="icon-glyph" d="M18 18 46 46" fill="none" stroke-width="5" stroke-linecap="round"></path>
+      </svg>
+    </button>
+    <button class="control-btn reset-btn" id="btn-reset" aria-label="Reset map" title="Reset Map">
+      <svg class="control-icon" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+        <circle class="icon-badge" cx="32" cy="32" r="27"></circle>
+        <path class="icon-glyph" d="M44 22a16 16 0 1 0 3 14" fill="none" stroke-width="5" stroke-linecap="round"></path>
+        <path class="icon-glyph" d="M46 14v12H34" fill="none" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"></path>
+      </svg>
+    </button>
+    <button class="control-btn" id="btn-next-map" title="Next Map" aria-label="Next map">
+      <svg class="control-icon" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+        <path class="icon-badge" d="M8 20 24 13l16 7 16-6v30l-16 7-16-7-16 6z"></path>
+        <path class="icon-glyph" d="M24 13v31m16-24v31" fill="none" stroke-width="4"></path>
+      </svg>
+    </button>
+    <button class="control-btn" id="btn-mute" title="Toggle Sound" aria-label="Unmute sound" aria-pressed="true">
+      <svg class="control-icon icon-sound-on" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+        <path class="icon-badge" d="M10 36V28h12l14-12v32L22 36z"></path>
+        <path class="icon-glyph" d="M44 24c3 2 5 5 5 8s-2 6-5 8m6-22c5 4 8 9 8 14s-3 10-8 14" fill="none" stroke-width="4" stroke-linecap="round"></path>
+      </svg>
+      <svg class="control-icon icon-sound-off" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+        <path class="icon-badge" d="M10 36V28h12l14-12v32L22 36z"></path>
+        <path class="icon-glyph danger" d="M44 22 56 42M56 22 44 42" fill="none" stroke-width="5" stroke-linecap="round"></path>
+      </svg>
+    </button>
+  </div>
+
+  <button class="avatar-tool-btn" id="btn-avatar-draw" type="button" title="アバターをかく" aria-label="アバターをかく">
+    <svg class="avatar-tool-btn__icon" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+      <rect x="10" y="10" width="44" height="44" rx="10" fill="#ffffff" stroke="#0f172a" stroke-width="4"></rect>
+      <path d="M20 42 42 20l6 6-22 22H20z" fill="#f59e0b" stroke="#92400e" stroke-width="3" stroke-linejoin="round"></path>
+      <path d="M40 18l6 6" stroke="#0f172a" stroke-width="3" stroke-linecap="round"></path>
+    </svg>
+  </button>
+
+  <div class="avatar-modal hidden" id="avatar-modal" role="dialog" aria-modal="true" aria-labelledby="avatar-modal-title">
+    <div class="avatar-modal__card">
+      <h2 id="avatar-modal-title">アバターをかこう</h2>
+      <p>かおをかいて、プレイヤーにしよう。</p>
+      <div class="avatar-modal__canvas-wrap">
+        <canvas id="avatar-canvas" width="256" height="256" aria-label="アバターおえかき"></canvas>
+      </div>
+      <div class="avatar-modal__actions">
+        <button id="btn-avatar-clear" type="button">けす</button>
+        <button id="btn-avatar-use-default" type="button">ねこにもどす</button>
+        <button id="btn-avatar-modal-close" type="button">とじる</button>
+        <button id="btn-avatar-apply" type="button">このえをつかう</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -78,45 +150,215 @@ for (const path in roomImagesGlob) {
     white-space: nowrap;
   }
 
-  .controls {
+  .controls-panel {
     position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
     display: flex;
-    flex-direction: column;
-    gap: 15px;
-    padding: 20px 10px;
     border-radius: 20px;
     justify-content: center;
+    align-items: center;
     flex-shrink: 0;
     z-index: 1000;
     background: rgba(255, 255, 255, 0.5);
     backdrop-filter: blur(4px);
     box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transition: all 0.2s ease;
+  }
+
+  .movement-controls {
+    position: absolute;
+    left: 50%;
+    bottom: 14px;
+    transform: translateX(-50%);
+    flex-direction: row;
+    gap: 12px;
+    padding: 12px 16px;
+  }
+
+  .utility-controls {
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    flex-direction: column;
+    gap: 15px;
+    padding: 20px 10px;
   }
 
   .control-btn {
-    font-size: 2rem;
-    padding: 10px 20px;
+    width: 72px;
+    height: 72px;
+    padding: 0;
     border-radius: 12px;
-    border: none;
+    border: 3px solid #0f172a;
     background: white;
     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
     cursor: pointer;
-    transition: all 0.1s;
+    transition: transform 0.1s ease, background-color 0.12s ease, box-shadow 0.12s ease;
     line-height: 1;
     display: flex;
     align-items: center;
     justify-content: center;
   }
 
+  .control-btn .control-icon {
+    width: 42px;
+    height: 42px;
+    display: block;
+    color: inherit;
+  }
+
+  .control-btn .icon-badge {
+    fill: #ffffff;
+    stroke: currentColor;
+    stroke-width: 4;
+    stroke-linejoin: round;
+  }
+
+  .control-btn .icon-glyph {
+    stroke: currentColor;
+  }
+
+  .control-btn .icon-fill {
+    fill: currentColor;
+  }
+
+  #btn-left {
+    background: #dbeafe;
+    border-color: #1d4ed8;
+  }
+
+  #btn-straight {
+    background: #d1fae5;
+    border-color: #047857;
+  }
+
+  #btn-right {
+    background: #ffedd5;
+    border-color: #c2410c;
+  }
+
+  #btn-reset {
+    background: #ede9fe;
+    border-color: #7c3aed;
+  }
+
+  #btn-next-map {
+    background: #ccfbf1;
+    border-color: #0f766e;
+  }
+
+  #btn-mute {
+    background: #e2e8f0;
+    border-color: #334155;
+  }
+
+  #btn-left .icon-badge, #btn-left .icon-glyph { stroke: #1d4ed8; }
+  #btn-left .icon-fill { fill: #1d4ed8; }
+
+  #btn-straight .icon-badge, #btn-straight .icon-glyph { stroke: #047857; }
+  #btn-straight .icon-fill { fill: #047857; }
+
+  #btn-right .icon-badge, #btn-right .icon-glyph { stroke: #c2410c; }
+  #btn-right .icon-fill { fill: #c2410c; }
+
+  #btn-reset .icon-badge, #btn-reset .icon-glyph { stroke: #7c3aed; }
+  #btn-reset .icon-fill { fill: #7c3aed; }
+
+  #btn-next-map .icon-badge, #btn-next-map .icon-glyph { stroke: #0f766e; }
+  #btn-next-map .icon-fill { fill: #0f766e; }
+
+  #btn-mute .icon-badge, #btn-mute .icon-glyph { stroke: #334155; }
+  #btn-mute .icon-fill { fill: #334155; }
+
+  .control-btn:focus-visible {
+    outline: 4px solid #fde047;
+    outline-offset: 2px;
+  }
+
   .control-btn:hover {
-    background: #f0f0f0;
+    background: #ecfeff;
+    box-shadow: 0 6px 10px rgba(0,0,0,0.22);
   }
 
   .control-btn:active {
-    transform: scale(0.9);
+    transform: scale(0.94);
+  }
+
+  .blackout-toggle-btn {
+    background: #0f172a;
+    border-color: #0f172a;
+  }
+
+  .blackout-toggle-btn .icon-eye-open .icon-badge {
+    fill: #ffffff;
+    stroke: #0f172a;
+  }
+
+  .blackout-toggle-btn .icon-eye-open .icon-fill {
+    fill: #0f172a;
+  }
+
+  .blackout-toggle-btn .icon-eye-closed .icon-glyph {
+    stroke: #ffffff;
+  }
+
+  .blackout-toggle-btn .icon-eye-closed,
+  .control-btn .icon-sound-off {
+    display: none;
+  }
+
+  .blackout-toggle-btn.is-active .icon-eye-open,
+  .control-btn.is-muted .icon-sound-on {
+    display: none;
+  }
+
+  .blackout-toggle-btn.is-active .icon-eye-closed,
+  .control-btn.is-muted .icon-sound-off {
+    display: block;
+  }
+
+  .game-container.blackout-active .grid {
+    visibility: hidden;
+  }
+
+  .game-container.blackout-active .grid-container {
+    background: #000;
+  }
+
+  .game-container.blackout-active .map-title {
+    opacity: 0.15;
+  }
+
+  .game-container.blackout-active .movement-controls {
+    left: 50%;
+    top: 50%;
+    bottom: auto;
+    transform: translate(-50%, -50%);
+    flex-direction: row;
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5);
+    gap: 14px;
+    padding: 16px 18px;
+  }
+
+  .game-container.blackout-active .utility-controls {
+    background: rgba(255, 255, 255, 0.85);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.4);
+  }
+
+  .game-container.blackout-active .movement-controls .control-btn {
+    width: 82px;
+    height: 82px;
+  }
+
+  .game-container.blackout-active .blackout-toggle-btn {
+    order: 0;
+    background: #e53935;
+    color: #ffffff;
+    border: 2px solid #fff;
+  }
+
+  .control-btn .icon-glyph.danger {
+    stroke: #dc2626;
   }
 
   .grid-container {
@@ -212,6 +454,19 @@ for (const path in roomImagesGlob) {
     left: 0;
   }
 
+  .grid :global(.player.custom-avatar)::before {
+    content: "";
+    position: absolute;
+    width: 86%;
+    height: 86%;
+    border-radius: 999px;
+    background: #ffffff;
+    border: 2px solid rgba(15, 23, 42, 0.24);
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.18);
+    z-index: 0;
+    pointer-events: none;
+  }
+
   .grid :global(.player.first-visit-highlight)::after {
     content: "";
     position: absolute;
@@ -240,6 +495,8 @@ for (const path in roomImagesGlob) {
     height: 80%;
     object-fit: contain;
     transition: transform 0.2s ease;
+    position: relative;
+    z-index: 1;
   }
 
   .grid :global(.location-label) {
@@ -271,6 +528,165 @@ for (const path in roomImagesGlob) {
     z-index: 200;
     pointer-events: none;
     object-fit: fill;
+  }
+
+  .grid :global(.item-icon) {
+    font-size: 2rem;
+    z-index: 6;
+    position: absolute;
+  }
+
+  .avatar-tool-btn {
+    position: absolute;
+    left: 10px;
+    bottom: 14px;
+    z-index: 1000;
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    padding: 0;
+    border-radius: 12px;
+    border: 3px solid #0f172a;
+    background: #fff2cc;
+    color: #0f172a;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.22);
+    cursor: pointer;
+  }
+
+  .avatar-tool-btn__icon {
+    width: 34px;
+    height: 34px;
+    display: block;
+  }
+
+  .avatar-tool-btn:focus-visible {
+    outline: 4px solid #fde047;
+    outline-offset: 2px;
+  }
+
+  .avatar-tool-btn:active {
+    transform: scale(0.96);
+  }
+
+  .avatar-modal {
+    position: absolute;
+    inset: 0;
+    z-index: 1200;
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+    background: rgba(2, 6, 23, 0.58);
+  }
+
+  .avatar-modal.hidden {
+    display: none;
+  }
+
+  .avatar-modal__card {
+    width: min(430px, 96vw);
+    border-radius: 16px;
+    border: 3px solid #1e3a8a;
+    background: #f8fbff;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.35);
+    padding: 0.9rem;
+    color: #0f172a;
+  }
+
+  .avatar-modal__card h2 {
+    margin: 0;
+    font-size: 1.3rem;
+  }
+
+  .avatar-modal__card p {
+    margin: 0.35rem 0 0.75rem;
+    font-size: 0.95rem;
+  }
+
+  .avatar-modal__canvas-wrap {
+    border-radius: 12px;
+    border: 3px solid #1e3a8a;
+    background: #ffffff;
+    overflow: hidden;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+  }
+
+  #avatar-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    touch-action: none;
+    cursor: crosshair;
+  }
+
+  .avatar-modal__actions {
+    margin-top: 0.7rem;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+  }
+
+  .avatar-modal__actions button {
+    min-height: 44px;
+    border-radius: 10px;
+    border: 2px solid #1e3a8a;
+    background: #dbeafe;
+    color: #1e3a8a;
+    font-family: inherit;
+    font-weight: 800;
+    cursor: pointer;
+  }
+
+  #btn-avatar-apply {
+    border-color: #065f46;
+    background: #d1fae5;
+    color: #065f46;
+  }
+
+  #btn-avatar-use-default {
+    border-color: #7c2d12;
+    background: #ffedd5;
+    color: #7c2d12;
+  }
+
+  .avatar-modal__actions button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  @media (max-width: 900px) {
+    .map-title {
+      display: none;
+    }
+
+    .avatar-tool-btn {
+      display: none;
+    }
+
+    .utility-controls {
+      top: 10px;
+      right: 50%;
+      transform: translateX(50%);
+      flex-direction: row;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 14px;
+    }
+
+    .utility-controls .control-btn {
+      width: 56px;
+      height: 56px;
+    }
+
+    .utility-controls .control-btn .control-icon {
+      width: 34px;
+      height: 34px;
+    }
+
+    .grid :global(.item-icon) {
+      display: none;
+    }
   }
 </style>
 
@@ -400,6 +816,68 @@ for (const path in roomImagesGlob) {
     return map;
   }
 
+  function pickRoadImageFromNeighbors(up, right, down, left) {
+    const count = (up ? 1 : 0) + (right ? 1 : 0) + (down ? 1 : 0) + (left ? 1 : 0);
+
+    if (count === 4) return 'cross';
+
+    if (count === 3) {
+      if (!up) return 't-shape-down';
+      if (!right) return 't-shape-left';
+      if (!down) return 't-shape-up';
+      return 't-shape-right';
+    }
+
+    if (count === 2) {
+      if (up && down) return 'straight-vertical';
+      if (left && right) return 'straight-horizontal';
+      if (up && right) return 'corner-top-right';
+      if (right && down) return 'corner-bot-right';
+      if (down && left) return 'corner-bot-left';
+      return 'corner-top-left';
+    }
+
+    if (count === 1) {
+      if (up) return 'end-up';
+      if (right) return 'end-right';
+      if (down) return 'end-down';
+      return 'end-left';
+    }
+
+    return 'end-up';
+  }
+
+  function fillInteriorRoads(level) {
+    const interiorSet = buildInteriorSet(level);
+    const locationByKey = buildCoordIndex(level.locations);
+    const roadByKey = buildCoordIndex(level.roads);
+
+    // Fill every interior tile that isn't a location.
+    for (const k of interiorSet) {
+      if (locationByKey.has(k) || roadByKey.has(k)) continue;
+      const [xStr, yStr] = k.split(',');
+      roadByKey.set(k, { x: Number(xStr), y: Number(yStr), image: 'straight-horizontal' });
+    }
+
+    const hasConnection = (x, y) => {
+      const k = keyFor(x, y);
+      return roadByKey.has(k) || locationByKey.has(k);
+    };
+    for (const [k, road] of roadByKey.entries()) {
+      const [xStr, yStr] = k.split(',');
+      const x = Number(xStr);
+      const y = Number(yStr);
+      road.image = pickRoadImageFromNeighbors(
+        hasConnection(x, y - 1),
+        hasConnection(x + 1, y),
+        hasConnection(x, y + 1),
+        hasConnection(x - 1, y)
+      );
+    }
+
+    level.roads = [...roadByKey.values()];
+  }
+
   // We keep authoring coordinates in `levelsRaw`, then apply a uniform shift so the school doesn't
   // sit flush to the bottom of the viewport/grid. This preserves the grid size and just moves
   // the school content (player + roads + locations + items) together.
@@ -437,6 +915,11 @@ for (const path in roomImagesGlob) {
         { x: 12, y: 9, name: "Home Ec Room", image: roomMap['home-ec-room'] },
         { x: 14, y: 7, name: "Playground", image: roomMap['playground'] },
         { x: 6, y: 1, name: "Class Room", image: roomMap['class-room'] },
+        { x: 7, y: 6, name: "Classroom 2", image: roomMap['class-room'] },
+        { x: 13, y: 6, name: "Classroom 3", image: roomMap['class-room'] },
+        { x: 8, y: 9, name: "Classroom 4", image: roomMap['class-room'] },
+        { x: 10, y: 9, name: "Classroom 5", image: roomMap['class-room'] },
+        { x: 14, y: 9, name: "Classroom 6", image: roomMap['class-room'] },
         { x: 4, y: 3, name: "Principals Office", image: roomMap['principals-office'] },
       ],
       roads: [
@@ -448,7 +931,7 @@ for (const path in roomImagesGlob) {
         { x: 3, y: 2, image: 'straight-horizontal' }, { x: 4, y: 2, image: 'cross' },    
         { x: 5, y: 2, image: 'straight-horizontal' }, { x: 6, y: 2, image: 't-shape-up' },
         { x: 7, y: 2, image: 't-shape-down' }, { x: 8, y: 2, image: 't-shape-down' }, 
-        { x: 9, y: 2, image: 'straight-horizontal' }, { x: 10, y: 2, image: 'straight-horizontal' },
+        { x: 9, y: 2, image: 'straight-horizontal' }, { x: 10, y: 2, image: 't-shape-up' },
         { x: 11, y: 2, image: 'straight-horizontal' }, { x: 12, y: 2, image: 't-shape-down' },    
         { x: 13, y: 2, image: 'straight-horizontal' }, { x: 14, y: 2, image: 'straight-horizontal' },
         { x: 15, y: 2, image: 'straight-horizontal' }, { x: 16, y: 2, image: 't-shape-down' }, 
@@ -459,10 +942,10 @@ for (const path in roomImagesGlob) {
 
         { x: 3, y: 5, image: 'straight-horizontal' }, { x: 4, y: 5, image: 'straight-horizontal' },
         { x: 5, y: 5, image: 't-shape-down' }, { x: 6, y: 5, image: 'straight-horizontal' },
-        { x: 7, y: 5, image: 't-shape-up' }, { x: 8, y: 5, image: 't-shape-down' },
+        { x: 7, y: 5, image: 'cross' }, { x: 8, y: 5, image: 't-shape-down' },
         { x: 9, y: 5, image: 'straight-horizontal' }, { x: 10, y: 5, image: 't-shape-down' }, 
         { x: 11, y: 5, image: 't-shape-down' }, { x: 12, y: 5, image: 't-shape-up' },
-        { x: 13, y: 5, image: 'straight-horizontal' }, { x: 14, y: 5, image: 'straight-horizontal' },
+        { x: 13, y: 5, image: 't-shape-down' }, { x: 14, y: 5, image: 'straight-horizontal' },
         { x: 15, y: 5, image: 'cross' }, { x: 16, y: 5, image: 'straight-horizontal' },
         { x: 17, y: 5, image: 'straight-horizontal' },
 
@@ -472,10 +955,10 @@ for (const path in roomImagesGlob) {
 
         { x: 3, y: 8, image: 'straight-horizontal' }, { x: 4, y: 8, image: 't-shape-down' }, 
         { x: 5, y: 8, image: 'straight-horizontal' }, { x: 6, y: 8, image: 't-shape-up' },    
-        { x: 7, y: 8, image: 'straight-horizontal' }, { x: 8, y: 8, image: 't-shape-up' },
-        { x: 9, y: 8, image: 'straight-horizontal' }, { x: 10, y: 8, image: 'straight-horizontal' },
+        { x: 7, y: 8, image: 'straight-horizontal' }, { x: 8, y: 8, image: 'cross' },
+        { x: 9, y: 8, image: 'straight-horizontal' }, { x: 10, y: 8, image: 't-shape-down' },
         { x: 11, y: 8, image: 't-shape-up' }, { x: 12, y: 8, image: 't-shape-down' }, 
-        { x: 13, y: 8, image: 'straight-horizontal' }, { x: 14, y: 8, image: 't-shape-up' },    
+        { x: 13, y: 8, image: 'straight-horizontal' }, { x: 14, y: 8, image: 'cross' },    
         { x: 15, y: 8, image: 'end-left' },
       ],
       items: [
@@ -790,6 +1273,12 @@ for (const path in roomImagesGlob) {
   const levels = levelsRawOrdered.map((lvl) => shiftLevelY(lvl, SCHOOL_SHIFT_Y));
 
   for (const lvl of levels) {
+    if ((lvl.name || '').includes('Kamogo ES')) {
+      fillInteriorRoads(lvl);
+    }
+  }
+
+  for (const lvl of levels) {
     // Cache derived masks so renderGrid stays cheap.
     lvl.__interiorSet = buildInteriorSet(lvl);
     lvl.__entrance = getEntranceConfig(lvl);
@@ -803,6 +1292,7 @@ for (const path in roomImagesGlob) {
   const GRID_HEIGHT = 12;
   const GRID_CELL_COUNT = GRID_WIDTH * GRID_HEIGHT;
   const DEBUG_TILE_LOG = false;
+  const AVATAR_LINE_COLOR = "#1e3a8a";
 
   let currentLevelIdx = 0;
   let playerPos = { ...levels[0].startPos };
@@ -814,10 +1304,19 @@ for (const path in roomImagesGlob) {
   let staticGridLevelIdx = -1;
   let cellEls = [];
   let gridEl = null;
+  let gameContainerEl = null;
   let mapTitleEl = null;
   let playerEl = null;
   let playerImgEl = null;
+  let currentPlayerImageSrc = playerImageSrc;
   let showFirstVisitHighlight = false;
+  let isBlackout = false;
+  let avatarModalEl = null;
+  let avatarCanvasEl = null;
+  let avatarCanvasCtx = null;
+  let avatarApplyBtnEl = null;
+  let isAvatarDrawing = false;
+  let avatarHasInk = false;
 
   let isMuted = true;
   const meowAudio = new Audio('/audio/map-game/meowDeep.mp3');
@@ -868,9 +1367,138 @@ for (const path in roomImagesGlob) {
   function updateMuteButtonUI() {
     const muteBtn = document.getElementById('btn-mute');
     if (!muteBtn) return;
-    muteBtn.textContent = isMuted ? '🔇' : '🔊';
+    muteBtn.classList.toggle('is-muted', isMuted);
     muteBtn.setAttribute('aria-pressed', isMuted ? 'true' : 'false');
     muteBtn.setAttribute('title', isMuted ? 'Unmute Sound' : 'Mute Sound');
+    muteBtn.setAttribute('aria-label', isMuted ? 'Unmute sound' : 'Mute sound');
+  }
+
+  function updateBlackoutUI() {
+    const blackoutBtn = document.getElementById('btn-blackout');
+    if (!blackoutBtn) return;
+
+    blackoutBtn.classList.toggle('is-active', isBlackout);
+    blackoutBtn.setAttribute('aria-pressed', isBlackout ? 'true' : 'false');
+    blackoutBtn.setAttribute('title', isBlackout ? 'Show Board' : 'Hide Board');
+    blackoutBtn.setAttribute('aria-label', isBlackout ? 'Show board' : 'Hide board');
+
+    if (gameContainerEl) {
+      gameContainerEl.classList.toggle('blackout-active', isBlackout);
+    }
+  }
+
+  function getAvatarCanvasPoint(event) {
+    if (!avatarCanvasEl) return { x: 0, y: 0 };
+    const rect = avatarCanvasEl.getBoundingClientRect();
+    const scaleX = avatarCanvasEl.width / rect.width;
+    const scaleY = avatarCanvasEl.height / rect.height;
+    return {
+      x: (event.clientX - rect.left) * scaleX,
+      y: (event.clientY - rect.top) * scaleY,
+    };
+  }
+
+  function updateAvatarApplyButtonState() {
+    if (avatarApplyBtnEl) avatarApplyBtnEl.disabled = !avatarHasInk;
+  }
+
+  function clearAvatarCanvas() {
+    if (!avatarCanvasCtx || !avatarCanvasEl) return;
+    avatarCanvasCtx.clearRect(0, 0, avatarCanvasEl.width, avatarCanvasEl.height);
+    avatarHasInk = false;
+    updateAvatarApplyButtonState();
+  }
+
+  function setPlayerAvatarImage(src) {
+    currentPlayerImageSrc = src || playerImageSrc;
+    if (playerImgEl) playerImgEl.src = currentPlayerImageSrc;
+    renderGrid();
+  }
+
+  function openAvatarModal() {
+    if (!avatarModalEl) return;
+    avatarModalEl.classList.remove("hidden");
+  }
+
+  function closeAvatarModal() {
+    if (!avatarModalEl) return;
+    avatarModalEl.classList.add("hidden");
+  }
+
+  function setupAvatarDrawing() {
+    avatarModalEl = document.getElementById("avatar-modal");
+    avatarCanvasEl = document.getElementById("avatar-canvas");
+    avatarApplyBtnEl = document.getElementById("btn-avatar-apply");
+    const avatarOpenBtn = document.getElementById("btn-avatar-draw");
+    const avatarCloseBtn = document.getElementById("btn-avatar-modal-close");
+    const avatarClearBtn = document.getElementById("btn-avatar-clear");
+    const avatarUseDefaultBtn = document.getElementById("btn-avatar-use-default");
+
+    if (!(avatarCanvasEl instanceof HTMLCanvasElement)) return;
+    avatarCanvasCtx = avatarCanvasEl.getContext("2d");
+    if (!avatarCanvasCtx) return;
+
+    avatarCanvasCtx.lineCap = "round";
+    avatarCanvasCtx.lineJoin = "round";
+    avatarCanvasCtx.strokeStyle = AVATAR_LINE_COLOR;
+    avatarCanvasCtx.lineWidth = 10;
+    clearAvatarCanvas();
+
+    avatarOpenBtn?.addEventListener("click", openAvatarModal);
+    avatarCloseBtn?.addEventListener("click", closeAvatarModal);
+    avatarClearBtn?.addEventListener("click", clearAvatarCanvas);
+    avatarUseDefaultBtn?.addEventListener("click", () => {
+      setPlayerAvatarImage(playerImageSrc);
+      closeAvatarModal();
+    });
+
+    avatarApplyBtnEl?.addEventListener("click", () => {
+      if (!avatarCanvasEl || !avatarHasInk) return;
+      setPlayerAvatarImage(avatarCanvasEl.toDataURL("image/png"));
+      closeAvatarModal();
+    });
+
+    avatarCanvasEl.addEventListener("pointerdown", (event) => {
+      if (!avatarCanvasCtx || !avatarCanvasEl) return;
+      event.preventDefault();
+      avatarCanvasEl.setPointerCapture(event.pointerId);
+      const { x, y } = getAvatarCanvasPoint(event);
+      avatarCanvasCtx.beginPath();
+      avatarCanvasCtx.moveTo(x, y);
+      isAvatarDrawing = true;
+      avatarHasInk = true;
+      updateAvatarApplyButtonState();
+    });
+
+    avatarCanvasEl.addEventListener("pointermove", (event) => {
+      if (!avatarCanvasCtx || !isAvatarDrawing) return;
+      const { x, y } = getAvatarCanvasPoint(event);
+      avatarCanvasCtx.lineTo(x, y);
+      avatarCanvasCtx.stroke();
+    });
+
+    const endAvatarStroke = (event) => {
+      if (!avatarCanvasEl) return;
+      if (event && avatarCanvasEl.hasPointerCapture(event.pointerId)) {
+        avatarCanvasEl.releasePointerCapture(event.pointerId);
+      }
+      isAvatarDrawing = false;
+    };
+
+    avatarCanvasEl.addEventListener("pointerup", endAvatarStroke);
+    avatarCanvasEl.addEventListener("pointercancel", endAvatarStroke);
+    avatarCanvasEl.addEventListener("pointerleave", endAvatarStroke);
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && avatarModalEl && !avatarModalEl.classList.contains("hidden")) {
+        closeAvatarModal();
+      }
+    });
+  }
+
+  function toggleBlackout() {
+    isBlackout = !isBlackout;
+    updateBlackoutUI();
   }
 
   function setMuted(nextMuted) {
@@ -988,7 +1616,7 @@ for (const path in roomImagesGlob) {
     playerEl = document.createElement("div");
     playerEl.className = "player";
     playerImgEl = document.createElement("img");
-    playerImgEl.src = playerImageSrc;
+    playerImgEl.src = currentPlayerImageSrc;
     playerImgEl.className = "player-image";
     playerEl.appendChild(playerImgEl);
   }
@@ -1054,9 +1682,7 @@ for (const path in roomImagesGlob) {
 
         if (item) {
           const itemEl = document.createElement("div");
-          itemEl.style.fontSize = "2rem";
-          itemEl.style.zIndex = "6";
-          itemEl.style.position = "absolute";
+          itemEl.className = "item-icon";
           itemEl.textContent = item.icon;
           cell.appendChild(itemEl);
         }
@@ -1086,6 +1712,7 @@ for (const path in roomImagesGlob) {
     if (!hasTileContent(playerPos.x, playerPos.y)) {
       nextCell.classList.add("out-of-bounds");
     }
+    playerEl.classList.toggle("custom-avatar", currentPlayerImageSrc !== playerImageSrc);
     playerEl.classList.toggle("first-visit-highlight", showFirstVisitHighlight);
     playerImgEl.style.transform = `rotate(${headingToRotation[playerHeading]}deg)`;
     nextCell.appendChild(playerEl);
@@ -1159,6 +1786,9 @@ for (const path in roomImagesGlob) {
     loadMutePreference();
     initFirstVisitHighlight();
     updateMuteButtonUI();
+    gameContainerEl = document.getElementById("game-container");
+    updateBlackoutUI();
+    setupAvatarDrawing();
 
     renderGrid();
     document.getElementById("btn-left")?.addEventListener("click", turnLeft);
@@ -1167,6 +1797,7 @@ for (const path in roomImagesGlob) {
     document.getElementById("btn-reset")?.addEventListener("click", resetGame);
     document.getElementById("btn-next-map")?.addEventListener("click", switchMap);
     document.getElementById("btn-mute")?.addEventListener("click", toggleMute);
+    document.getElementById("btn-blackout")?.addEventListener("click", toggleBlackout);
     
     // Keyboard controls
     document.addEventListener("keydown", (e) => {

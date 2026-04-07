@@ -1,0 +1,195 @@
+---
+import GameLayout from "../layouts/GameLayout.astro";
+---
+
+<GameLayout title="Color Vote Tool">
+  <div class="color-vote-page" data-screen="neutral">
+    <main class="vote-shell">
+      <a class="back-link" href="/game">← Back to Games</a>
+
+      <section class="vote-controls" aria-label="Answer color buttons">
+        <button type="button" class="vote-btn vote-btn--red" data-color="red">
+          <span class="vote-btn__key">A</span>
+          <span class="vote-btn__label">Red</span>
+        </button>
+        <button type="button" class="vote-btn vote-btn--blue" data-color="blue">
+          <span class="vote-btn__key">B</span>
+          <span class="vote-btn__label">Blue</span>
+        </button>
+        <button type="button" class="vote-btn vote-btn--yellow" data-color="yellow">
+          <span class="vote-btn__key">C</span>
+          <span class="vote-btn__label">Yellow</span>
+        </button>
+        <button type="button" class="vote-btn vote-btn--green" data-color="green">
+          <span class="vote-btn__key">D</span>
+          <span class="vote-btn__label">Green</span>
+        </button>
+      </section>
+    </main>
+  </div>
+</GameLayout>
+
+<script>
+  const screen = document.querySelector(".color-vote-page");
+  const buttons = Array.from(document.querySelectorAll(".vote-btn"));
+
+  const setColor = (color) => {
+    if (!screen || !color) return;
+
+    screen.dataset.screen = color;
+
+    buttons.forEach((button) => {
+      button.classList.toggle("is-active", button.dataset.color === color);
+    });
+  };
+
+  buttons.forEach((button) => {
+    button.addEventListener("click", () => {
+      setColor(button.dataset.color || "");
+    });
+  });
+
+  window.addEventListener("keydown", (event) => {
+    const keyMap = {
+      "1": "red",
+      "2": "blue",
+      "3": "yellow",
+      "4": "green",
+      a: "red",
+      b: "blue",
+      c: "yellow",
+      d: "green",
+    };
+
+    const nextColor = keyMap[event.key.toLowerCase()];
+    if (nextColor) {
+      setColor(nextColor);
+    }
+  });
+</script>
+
+<style>
+  .color-vote-page {
+    min-height: 100vh;
+    background: #f8f3e6;
+    padding: 1.25rem;
+    transition: background-color 0.2s ease;
+  }
+
+  .color-vote-page[data-screen="red"] {
+    background: #ef4444;
+  }
+
+  .color-vote-page[data-screen="blue"] {
+    background: #2563eb;
+  }
+
+  .color-vote-page[data-screen="yellow"] {
+    background: #facc15;
+  }
+
+  .color-vote-page[data-screen="green"] {
+    background: #22c55e;
+  }
+
+  .vote-shell {
+    width: min(1040px, 100%);
+    min-height: calc(100vh - 2.5rem);
+    margin: 0 auto;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    gap: 1rem;
+  }
+
+  .back-link {
+    color: var(--color-primary);
+    font-weight: 700;
+    text-decoration: none;
+    width: fit-content;
+  }
+
+  .vote-controls {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    align-self: end;
+    gap: 0.8rem;
+    padding: 0.9rem;
+    border: 3px solid var(--color-secondary);
+    border-radius: 22px;
+    background: rgba(255, 253, 248, 0.94);
+    box-shadow: 0 12px 24px rgba(45, 58, 58, 0.12);
+  }
+
+  .vote-btn {
+    border: 3px solid rgba(0, 0, 0, 0.14);
+    border-radius: 18px;
+    min-height: 102px;
+    display: grid;
+    place-items: center;
+    gap: 0.2rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    color: #ffffff;
+  }
+
+  .vote-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 16px rgba(0, 0, 0, 0.14);
+  }
+
+  .vote-btn:focus-visible {
+    outline: 4px solid rgba(255, 255, 255, 0.88);
+    outline-offset: 2px;
+  }
+
+  .vote-btn.is-active {
+    transform: translateY(-3px);
+    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.9);
+  }
+
+  .vote-btn--red {
+    background: #dc2626;
+  }
+
+  .vote-btn--blue {
+    background: #2563eb;
+  }
+
+  .vote-btn--yellow {
+    background: #f59e0b;
+    color: #3f2a00;
+  }
+
+  .vote-btn--green {
+    background: #16a34a;
+  }
+
+  .vote-btn__key {
+    font-size: clamp(1.9rem, 4vw, 2.4rem);
+    line-height: 1;
+  }
+
+  .vote-btn__label {
+    font-size: clamp(1rem, 2vw, 1.15rem);
+    line-height: 1.1;
+  }
+
+  @media (max-width: 720px) {
+    .color-vote-page {
+      padding: 1rem;
+    }
+
+    .vote-shell {
+      min-height: calc(100vh - 2rem);
+    }
+
+    .vote-controls {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .vote-btn {
+      min-height: 88px;
+    }
+  }
+</style>

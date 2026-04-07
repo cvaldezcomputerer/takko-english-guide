@@ -1,0 +1,1016 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout title="Pictionary – Join Room">
+
+  <!-- ENTER CODE SCREEN -->
+  <div id="screen-code" class="screen">
+    <div class="join-card">
+      <a href="/pictionary" class="back-link">← BACK</a>
+      <h1>JOIN<span class="ja">参加</span></h1>
+      <div class="field">
+        <label for="code-input">ROOM CODE / ルームコード</label>
+        <input id="code-input" type="text" maxlength="4" placeholder="ABCD" autocapitalize="characters" autocomplete="off" spellcheck="false" inputmode="text" />
+        <p class="input-hint">ローマ字で入力 / Use English letters &amp; numbers</p>
+      </div>
+      <button id="code-btn" class="primary-btn">NEXT</button>
+      <p id="code-error" class="error-msg hidden"></p>
+    </div>
+  </div>
+
+  <!-- ENTER NAME SCREEN -->
+  <div id="screen-name" class="screen screen--hidden">
+    <div class="join-card">
+      <h1>YOUR NAME?<span class="ja">なまえは？</span></h1>
+      <div class="field">
+        <label for="name-input">NAME / なまえ</label>
+        <input id="name-input" type="text" maxlength="20" placeholder="e.g. Taro" autocomplete="off" />
+      </div>
+      <button id="name-btn" class="primary-btn">JOIN</button>
+    </div>
+  </div>
+
+  <!-- COUNTDOWN SCREEN -->
+  <div id="screen-countdown" class="screen screen--hidden">
+    <div class="countdown-panel">
+      <h2>GET READY!<span class="ja">じゅんびして！</span></h2>
+      <div id="play-countdown-number" class="countdown-number">3</div>
+    </div>
+  </div>
+
+  <!-- LOBBY WAITING SCREEN -->
+  <div id="screen-lobby" class="screen screen--hidden">
+    <div class="center-panel">
+      <h2>WAITING…<span class="ja">まっています…</span></h2>
+      <p id="lobby-player-count" class="lobby-count">0 players in room</p>
+      <ul id="lobby-player-list" class="lobby-list"></ul>
+    </div>
+  </div>
+
+  <!-- DRAWER SCREEN -->
+  <div id="screen-drawing" class="screen screen--hidden">
+    <div class="drawing-layout">
+      <div class="drawing-header">
+        <div class="drawing-word-box">
+          <span class="word-label">DRAW / かけ：</span>
+          <strong id="draw-word">—</strong>
+        </div>
+        <div id="draw-timer" class="timer-display">90</div>
+      </div>
+
+      <div class="tool-row">
+        <div class="color-swatches">
+          <button class="swatch swatch--active" data-color="#000000" style="background:#000000" title="Black"></button>
+          <button class="swatch" data-color="#e03d2f" style="background:#e03d2f" title="Red"></button>
+          <button class="swatch" data-color="#2563eb" style="background:#2563eb" title="Blue"></button>
+          <button class="swatch" data-color="#16a34a" style="background:#16a34a" title="Green"></button>
+          <button class="swatch" data-color="#f59e0b" style="background:#f59e0b" title="Yellow"></button>
+          <button class="swatch" data-color="#a855f7" style="background:#a855f7" title="Purple"></button>
+          <button class="swatch" data-color="#f97316" style="background:#f97316" title="Orange"></button>
+          <button class="swatch swatch--eraser" data-color="#ffffff" title="Eraser">
+            <svg width="22" height="14" viewBox="0 0 22 14" fill="none">
+              <rect x="1" y="1" width="20" height="12" rx="2.5" fill="#fda4af" stroke="#be123c" stroke-width="1.5"/>
+              <rect x="13" y="1" width="8" height="12" rx="0 2.5 2.5 0" fill="#fff" stroke="#be123c" stroke-width="1.5"/>
+              <line x1="13" y1="1" x2="13" y2="13" stroke="#be123c" stroke-width="1.5"/>
+            </svg>
+          </button>
+        </div>
+        <div class="brush-sizes">
+          <button class="brush-btn brush-btn--active" data-width="4" title="Small">
+            <span class="brush-dot" style="width:6px;height:6px"></span>
+          </button>
+          <button class="brush-btn" data-width="10" title="Medium">
+            <span class="brush-dot" style="width:12px;height:12px"></span>
+          </button>
+          <button class="brush-btn" data-width="20" title="Large">
+            <span class="brush-dot" style="width:20px;height:20px"></span>
+          </button>
+        </div>
+        <button id="clear-my-canvas" class="clear-btn" title="Clear canvas">🗑️</button>
+      </div>
+
+      <canvas id="draw-canvas" class="draw-canvas"></canvas>
+    </div>
+  </div>
+
+  <!-- VIEWER SCREEN -->
+  <div id="screen-viewer" class="screen screen--hidden">
+    <div class="viewer-layout">
+      <div class="viewer-header">
+        <span id="viewer-drawer-label" class="viewer-label">✏️ Someone is drawing…</span>
+        <div id="view-timer" class="timer-display">90</div>
+      </div>
+      <canvas id="view-canvas" class="view-canvas"></canvas>
+      <div class="guess-row">
+        <input id="guess-input" type="text" maxlength="60" placeholder="えいごでかいとう / Guess in English…" autocomplete="off" />
+        <button id="guess-btn" class="guess-submit-btn">SEND</button>
+        <span id="guess-feedback" class="guess-feedback hidden"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROUND END SCREEN -->
+  <div id="screen-end" class="screen screen--hidden">
+    <div class="end-layout">
+      <div class="end-left">
+        <h2>TIME'S UP!<span class="ja">じかんきれ！</span></h2>
+        <p class="reveal-label">ことばは / THE WORD:</p>
+        <p id="end-word" class="reveal-word">—</p>
+        <p class="waiting-next">つぎのラウンドをまっています… / Waiting for next round…</p>
+        <div id="end-guess-row" class="end-guess-row hidden">
+          <input id="end-guess-input" type="text" maxlength="60" placeholder="えいごでかいとう / Guess in English…" autocomplete="off" />
+          <button id="end-guess-btn" class="guess-submit-btn">SEND</button>
+          <span id="end-guess-feedback" class="guess-feedback hidden"></span>
+        </div>
+      </div>
+      <div class="end-right">
+        <h3 class="guesses-title">GUESSES / かいとう</h3>
+        <ul id="guesses-list" class="guesses-list">
+          <li class="no-guesses">No guesses this round.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</Layout>
+
+<script>
+  import PartySocket from 'partysocket';
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
+  function el<T = HTMLElement>(id: string): T { return document.getElementById(id)! as unknown as T; }
+  function escHtml(s: string) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  // ── State ─────────────────────────────────────────────────────────────────
+  let socket: PartySocket | null = null;
+  let roomCode = '';
+  let playerName = '';
+  let currentColor = '#000000';
+  let currentWidth = 4;
+  let isDrawing = false;
+  let timerInterval: ReturnType<typeof setInterval> | null = null;
+  let countdownInterval: ReturnType<typeof setInterval> | null = null;
+  let myRole: 'drawer' | 'viewer' | 'host' = 'viewer';
+
+  const CANVAS_W = 800;
+  const CANVAS_H = 500;
+
+  // ── Screen helpers ─────────────────────────────────────────────────────────
+  function showScreen(id: string) {
+    document.querySelectorAll<HTMLElement>('.screen').forEach(s => s.classList.add('screen--hidden'));
+    el(id).classList.remove('screen--hidden');
+  }
+
+  // ── Code screen ───────────────────────────────────────────────────────────
+  el('code-input').addEventListener('input', (e) => {
+    const input = e.target as HTMLInputElement;
+    const hasJapanese = /[^\x00-\x7F]/.test(input.value);
+    input.value = input.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    if (hasJapanese) {
+      showError('code-error', 'ローマ字で入力してください / Please use English letters');
+    } else {
+      el('code-error').classList.add('hidden');
+    }
+  });
+
+  // Handle IME composition (e.g. Japanese hiragana committed via Enter)
+  el('code-input').addEventListener('compositionend', (e) => {
+    const input = e.target as HTMLInputElement;
+    input.value = input.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    showError('code-error', 'ローマ字で入力してください / Please use English letters');
+  });
+
+  el('code-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') el('code-btn').click();
+  });
+
+  el('code-btn').addEventListener('click', () => {
+    const val = (el<HTMLInputElement>('code-input')).value.trim().toUpperCase();
+    if (val.length !== 4) {
+      showError('code-error', '4文字のコードをにゅうりょく / Enter a 4-character code');
+      return;
+    }
+    roomCode = val;
+    showScreen('screen-name');
+    el<HTMLInputElement>('name-input').focus();
+  });
+
+  // ── Name screen ───────────────────────────────────────────────────────────
+  el('name-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') el('name-btn').click();
+  });
+
+  el('name-btn').addEventListener('click', () => {
+    const val = (el<HTMLInputElement>('name-input')).value.trim();
+    if (!val) return;
+    playerName = val;
+    joinRoom();
+  });
+
+  function joinRoom() {
+    const host = import.meta.env.PUBLIC_PARTYKIT_HOST ?? 'localhost:1999';
+    socket = new PartySocket({ host, room: roomCode });
+
+    socket.addEventListener('open', () => {
+      socket!.send(JSON.stringify({ type: 'player_join', name: playerName }));
+    });
+
+    socket.addEventListener('message', (ev) => handleMessage(JSON.parse(ev.data)));
+    showScreen('screen-lobby');
+  }
+
+  // ── Server messages ───────────────────────────────────────────────────────
+  function handleMessage(msg: any) {
+    switch (msg.type) {
+      case 'error':
+        showError('code-error', msg.message);
+        showScreen('screen-code');
+        socket?.close();
+        break;
+
+      case 'room_state': {
+        const players: { id: string; name: string }[] = msg.players ?? [];
+        updateLobbyList(players);
+        if (msg.phase === 'lobby') {
+          showScreen('screen-lobby');
+        } else if (msg.phase === 'countdown') {
+          showScreen('screen-countdown');
+          if (msg.countdownEnd) startCountdown(msg.countdownEnd);
+        } else if (msg.phase === 'drawing') {
+          myRole = msg.yourRole;
+          if (myRole === 'drawer') showScreen('screen-drawing');
+          else showScreen('screen-viewer');
+        }
+        break;
+      }
+
+      case 'countdown_started':
+        showScreen('screen-countdown');
+        startCountdown(msg.countdownEnd);
+        break;
+
+      case 'round_started': {
+        stopCountdown();
+        myRole = msg.yourRole;
+        clearCanvas();
+        if (myRole === 'drawer') {
+          el('draw-word').textContent = msg.word ?? '—';
+          showScreen('screen-drawing');
+        } else {
+          el('viewer-drawer-label').textContent = `${msg.drawerName} がかいています / ${msg.drawerName} IS DRAWING`;
+          showScreen('screen-viewer');
+        }
+        startTimer(msg.roundTimerEnd, myRole === 'drawer' ? 'draw-timer' : 'view-timer');
+        break;
+      }
+
+      case 'draw':
+        applyDrawEvent(msg.event, false);
+        break;
+
+      case 'draw_history':
+        (msg.events as any[]).forEach(e => applyDrawEvent(e, false));
+        break;
+
+      case 'canvas_cleared':
+        clearCanvas();
+        break;
+
+      case 'round_ended':
+        stopTimer();
+        el('end-word').textContent = msg.word ?? '—';
+        renderGuesses(msg.guesses ?? []);
+        // Show late-guess input for viewers/drawers (anyone who hadn't guessed)
+        if (myRole !== 'drawer') {
+          el('end-guess-row').classList.remove('hidden');
+          el<HTMLInputElement>('end-guess-input').value = '';
+          el('end-guess-feedback').classList.add('hidden');
+        }
+        showScreen('screen-end');
+        break;
+
+      case 'guess_ack':
+        showGuessFeedback('guess-feedback', `✓ "${msg.text}"`);
+        showGuessFeedback('end-guess-feedback', `✓ "${msg.text}"`);
+        break;
+    }
+  }
+
+  // ── Lobby list ────────────────────────────────────────────────────────────
+  function updateLobbyList(players: { id: string; name: string }[]) {
+    el('lobby-player-count').textContent = `${players.length}人 / ${players.length} PLAYER${players.length !== 1 ? 'S' : ''}`;
+    el('lobby-player-list').innerHTML = players.map(p =>
+      `<li class="lobby-item">${escHtml(p.name)}</li>`
+    ).join('');
+  }
+
+  // ── Timer ─────────────────────────────────────────────────────────────────
+  function startTimer(timerEnd: number, displayId: string) {
+    stopTimer();
+    function tick() {
+      const remaining = Math.max(0, Math.ceil((timerEnd - Date.now()) / 1000));
+      const display = el(displayId);
+      display.textContent = String(remaining);
+      display.classList.toggle('timer-display--urgent', remaining <= 10);
+    }
+    tick();
+    timerInterval = setInterval(tick, 250);
+  }
+
+  function stopTimer() {
+    if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+  }
+
+  function startCountdown(end: number) {
+    if (countdownInterval) clearInterval(countdownInterval);
+    function tick() {
+      const remaining = Math.max(0, Math.ceil((end - Date.now()) / 1000));
+      el('play-countdown-number').textContent = String(remaining);
+    }
+    tick();
+    countdownInterval = setInterval(tick, 100);
+  }
+
+  function stopCountdown() {
+    if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
+  }
+
+  // ── Canvas setup ──────────────────────────────────────────────────────────
+  let drawCtx: CanvasRenderingContext2D | null = null;
+  let viewCtx: CanvasRenderingContext2D | null = null;
+
+  window.addEventListener('DOMContentLoaded', () => {
+    const drawCanvas = el<HTMLCanvasElement>('draw-canvas');
+    drawCanvas.width = CANVAS_W;
+    drawCanvas.height = CANVAS_H;
+    drawCtx = drawCanvas.getContext('2d')!;
+    setupDrawCanvas(drawCanvas);
+
+    const viewCanvas = el<HTMLCanvasElement>('view-canvas');
+    viewCanvas.width = CANVAS_W;
+    viewCanvas.height = CANVAS_H;
+    viewCtx = viewCanvas.getContext('2d')!;
+
+    setupColorSwatches();
+    setupBrushSizes();
+  });
+
+  function clearCanvas() {
+    drawCtx?.clearRect(0, 0, CANVAS_W, CANVAS_H);
+    viewCtx?.clearRect(0, 0, CANVAS_W, CANVAS_H);
+  }
+
+  // ── Draw tools ────────────────────────────────────────────────────────────
+  function setupColorSwatches() {
+    document.querySelectorAll<HTMLButtonElement>('.swatch').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.swatch').forEach(b => b.classList.remove('swatch--active'));
+        btn.classList.add('swatch--active');
+        currentColor = btn.dataset.color!;
+      });
+    });
+  }
+
+  function setupBrushSizes() {
+    document.querySelectorAll<HTMLButtonElement>('.brush-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.brush-btn').forEach(b => b.classList.remove('brush-btn--active'));
+        btn.classList.add('brush-btn--active');
+        currentWidth = parseInt(btn.dataset.width!);
+      });
+    });
+  }
+
+  el('clear-my-canvas').addEventListener('click', () => {
+    socket?.send(JSON.stringify({ type: 'clear_canvas' }));
+  });
+
+  // ── Canvas drawing ────────────────────────────────────────────────────────
+  function setupDrawCanvas(canvas: HTMLCanvasElement) {
+    function getPos(e: MouseEvent | Touch): { x: number; y: number } {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = CANVAS_W / rect.width;
+      const scaleY = CANVAS_H / rect.height;
+      const clientX = e.clientX;
+      const clientY = e.clientY;
+      return {
+        x: ((clientX - rect.left) * scaleX) / CANVAS_W,
+        y: ((clientY - rect.top) * scaleY) / CANVAS_H,
+      };
+    }
+
+    function sendDraw(event: { type: string; x: number; y: number; color?: string; width?: number }) {
+      if (myRole !== 'drawer') return;
+      socket?.send(JSON.stringify({ type: 'draw', event }));
+      applyDrawEvent(event, true);
+    }
+
+    // Mouse events
+    canvas.addEventListener('mousedown', (e) => {
+      if (myRole !== 'drawer') return;
+      isDrawing = true;
+      const pos = getPos(e);
+      sendDraw({ type: 'start', ...pos, color: currentColor, width: currentWidth });
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+      if (!isDrawing || myRole !== 'drawer') return;
+      const pos = getPos(e);
+      sendDraw({ type: 'move', ...pos });
+    });
+
+    canvas.addEventListener('mouseup', () => {
+      if (!isDrawing) return;
+      isDrawing = false;
+      sendDraw({ type: 'end', x: 0, y: 0 });
+    });
+
+    canvas.addEventListener('mouseleave', () => {
+      if (isDrawing) {
+        isDrawing = false;
+        sendDraw({ type: 'end', x: 0, y: 0 });
+      }
+    });
+
+    // Touch events
+    canvas.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      if (myRole !== 'drawer') return;
+      isDrawing = true;
+      const pos = getPos(e.touches[0]);
+      sendDraw({ type: 'start', ...pos, color: currentColor, width: currentWidth });
+    }, { passive: false });
+
+    canvas.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+      if (!isDrawing || myRole !== 'drawer') return;
+      const pos = getPos(e.touches[0]);
+      sendDraw({ type: 'move', ...pos });
+    }, { passive: false });
+
+    canvas.addEventListener('touchend', () => {
+      if (!isDrawing) return;
+      isDrawing = false;
+      sendDraw({ type: 'end', x: 0, y: 0 });
+    });
+  }
+
+  function applyDrawEvent(e: any, toDrawCanvas: boolean) {
+    // Draw on both canvases: if drawer apply to drawCtx, viewers to viewCtx
+    const ctx = toDrawCanvas ? drawCtx : (myRole === 'drawer' ? drawCtx : viewCtx);
+    if (!ctx) return;
+
+    if (e.type === 'start') {
+      ctx.beginPath();
+      ctx.strokeStyle = e.color ?? '#000';
+      ctx.lineWidth = e.width ?? 4;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.moveTo(e.x * CANVAS_W, e.y * CANVAS_H);
+    } else if (e.type === 'move') {
+      ctx.lineTo(e.x * CANVAS_W, e.y * CANVAS_H);
+      ctx.stroke();
+    } else if (e.type === 'end') {
+      ctx.closePath();
+    }
+  }
+
+  // ── Guess submission ──────────────────────────────────────────────────────
+  function sendGuess(text: string) {
+    if (!text.trim()) return;
+    socket?.send(JSON.stringify({ type: 'guess', text: text.trim() }));
+  }
+
+  el('guess-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      sendGuess(el<HTMLInputElement>('guess-input').value);
+    }
+  });
+  el('guess-btn').addEventListener('click', () => {
+    sendGuess(el<HTMLInputElement>('guess-input').value);
+  });
+
+  el('end-guess-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      sendGuess(el<HTMLInputElement>('end-guess-input').value);
+    }
+  });
+  el('end-guess-btn').addEventListener('click', () => {
+    sendGuess(el<HTMLInputElement>('end-guess-input').value);
+  });
+
+  function showGuessFeedback(id: string, message: string) {
+    const el2 = el(id);
+    el2.textContent = message;
+    el2.classList.remove('hidden');
+  }
+
+  function renderGuesses(guesses: { name: string; text: string }[]) {
+    const list = el('guesses-list');
+    if (guesses.length === 0) {
+      list.innerHTML = '<li class="no-guesses">かいとうなし / No guesses</li>';
+    } else {
+      list.innerHTML = guesses.map(g =>
+        `<li class="guess-item"><span class="guess-name">${escHtml(g.name)}</span><span class="guess-text">${escHtml(g.text)}</span></li>`
+      ).join('');
+    }
+  }
+
+  // ── Error display ─────────────────────────────────────────────────────────
+  function showError(id: string, message: string) {
+    const el2 = el(id);
+    el2.textContent = message;
+    el2.classList.remove('hidden');
+  }
+</script>
+
+<style>
+  .screen { min-height: 100vh; }
+  .screen--hidden { display: none !important; }
+
+  /* ── Countdown screen ────────────────────────────────── */
+  #screen-countdown {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f5f3ee;
+    min-height: 100vh;
+  }
+
+  .countdown-panel {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .countdown-panel h2 {
+    color: var(--color-primary);
+    font-size: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  .countdown-number {
+    font-size: 9rem;
+    font-weight: 900;
+    color: var(--color-primary);
+    line-height: 1;
+  }
+
+  /* ── Join card (code + name screens) ─────────────────── */
+  #screen-code,
+  #screen-name {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f5f3ee;
+    padding: 2rem;
+  }
+
+  .join-card {
+    background: white;
+    border-radius: 20px;
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+  }
+
+  .back-link {
+    display: inline-block;
+    color: var(--color-primary);
+    text-decoration: none;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
+  }
+
+  .join-card h1 {
+    color: var(--color-primary);
+    font-size: 2rem;
+    margin-bottom: 1.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  .ja {
+    font-size: 1rem;
+    font-weight: 400;
+    color: #aaa;
+  }
+
+  .center-panel h2 {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  .end-left h2 {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  .field { margin-bottom: 1.25rem; }
+  .field label {
+    display: block;
+    font-weight: 700;
+    color: var(--color-primary);
+    margin-bottom: 0.5rem;
+  }
+
+  input[type="text"] {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    font-size: 1.4rem;
+    font-weight: 700;
+    text-align: center;
+    letter-spacing: 4px;
+    font-family: inherit;
+    box-sizing: border-box;
+    transition: border-color 0.15s;
+  }
+
+  #name-input { letter-spacing: 0; font-size: 1.1rem; text-align: left; }
+  input:focus { outline: none; border-color: var(--color-secondary); }
+
+  .error-msg { color: #e03d2f; font-size: 0.9rem; margin-top: 0.5rem; }
+  .hidden { display: none; }
+
+  /* ── Lobby ───────────────────────────────────────────── */
+  #screen-lobby {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f5f3ee;
+    min-height: 100vh;
+  }
+
+  .center-panel {
+    background: white;
+    border-radius: 20px;
+    padding: 3rem 2.5rem;
+    text-align: center;
+    max-width: 420px;
+    width: 90%;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+  }
+
+  .center-panel h2 { color: var(--color-primary); font-size: 1.6rem; margin-bottom: 0.5rem; }
+
+  .lobby-count { color: #888; margin-bottom: 1rem; }
+  .lobby-list { list-style: none; padding: 0; margin: 0; }
+  .lobby-item {
+    padding: 0.4rem 0.75rem;
+    background: #f5f3ee;
+    border-radius: 8px;
+    margin-bottom: 0.3rem;
+    font-size: 0.95rem;
+    color: #333;
+  }
+
+  /* ── Drawing screen ──────────────────────────────────── */
+  #screen-drawing {
+    background: #f0eeea;
+    min-height: 100vh;
+    display: flex;
+    align-items: stretch;
+  }
+
+  .drawing-layout {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+    gap: 0.75rem;
+    max-width: 860px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .drawing-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .drawing-word-box {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: white;
+    border-radius: 12px;
+    padding: 0.5rem 1rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+
+  .word-label { font-weight: 700; color: var(--color-primary); }
+  .drawing-word-box strong { font-size: 1.5rem; color: #111; }
+
+  .timer-display {
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--color-primary);
+    min-width: 52px;
+    text-align: center;
+  }
+
+  .timer-display--urgent { color: #e03d2f; animation: pulse 0.5s infinite alternate; }
+  @keyframes pulse { from { opacity: 1; } to { opacity: 0.5; } }
+
+  /* Tool row */
+  .tool-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    background: white;
+    border-radius: 12px;
+    padding: 0.5rem 0.75rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+
+  .color-swatches { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+
+  .swatch {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 3px solid transparent;
+    cursor: pointer;
+    transition: transform 0.1s, border-color 0.1s;
+    font-size: 0.65rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .swatch--eraser { border: 2px solid #ccc; background: white !important; }
+  .swatch--active { border-color: #333; transform: scale(1.2); }
+
+  .brush-sizes { display: flex; gap: 0.3rem; }
+
+  .brush-btn {
+    width: 36px;
+    height: 36px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    background: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    padding: 0;
+  }
+
+  .brush-btn--active { border-color: var(--color-primary); background: #f0f7f2; }
+
+  .brush-dot {
+    display: block;
+    border-radius: 50%;
+    background: #222;
+    flex-shrink: 0;
+  }
+
+  .brush-btn--active .brush-dot { background: var(--color-primary); }
+
+  .clear-btn {
+    margin-left: auto;
+    width: 36px;
+    height: 36px;
+    border: 2px solid #e03d2f;
+    border-radius: 8px;
+    background: white;
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: all 0.15s;
+  }
+  .clear-btn:hover { background: #fee2e2; }
+
+  .input-hint {
+    font-size: 0.8rem;
+    color: #888;
+    margin-top: 0.35rem;
+    margin-bottom: 0;
+  }
+
+  /* Draw canvas */
+  .draw-canvas {
+    width: 100%;
+    border-radius: 14px;
+    background: white;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    touch-action: none;
+    cursor: crosshair;
+    flex: 1;
+  }
+
+  /* ── Viewer screen ───────────────────────────────────── */
+  #screen-viewer {
+    background: #f0eeea;
+    min-height: 100vh;
+    display: flex;
+    align-items: stretch;
+  }
+
+  .viewer-layout {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+    gap: 0.75rem;
+    max-width: 860px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .viewer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: white;
+    border-radius: 12px;
+    padding: 0.6rem 1rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+
+  .viewer-label { font-size: 1.1rem; color: #333; font-weight: 600; }
+
+  .view-canvas {
+    width: 100%;
+    border-radius: 14px;
+    background: white;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    flex: 1;
+  }
+
+  /* ── Viewer guess row ────────────────────────────────── */
+  .guess-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: white;
+    border-radius: 12px;
+    padding: 0.5rem 0.75rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+
+  .guess-row input {
+    flex: 1;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    padding: 0.4rem 0.75rem;
+    font-size: 1rem;
+    font-family: inherit;
+    letter-spacing: 0;
+    font-weight: 400;
+    text-align: left;
+  }
+
+  .guess-submit-btn {
+    padding: 0.4rem 1rem;
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    font-family: inherit;
+    white-space: nowrap;
+    transition: background 0.2s;
+  }
+  .guess-submit-btn:hover { background: var(--color-secondary); }
+
+  .guess-feedback {
+    font-size: 0.85rem;
+    color: var(--color-primary);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  /* ── Round end screen ────────────────────────────────── */
+  #screen-end {
+    background: #f5f3ee;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+  }
+
+  .end-layout {
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
+    max-width: 860px;
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .end-left {
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    text-align: center;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+    min-width: 220px;
+  }
+
+  .end-right {
+    background: white;
+    border-radius: 20px;
+    padding: 1.5rem;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+    min-width: 220px;
+    flex: 1;
+  }
+
+  .reveal-label { color: #666; margin-bottom: 0.25rem; }
+  .reveal-word { font-size: 2.5rem; font-weight: 900; color: var(--color-primary); margin-bottom: 0.75rem; }
+  .waiting-next { font-size: 0.9rem; color: #aaa; margin-bottom: 1rem; }
+
+  .end-guess-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .end-guess-row input {
+    flex: 1;
+    min-width: 120px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    padding: 0.4rem 0.75rem;
+    font-size: 0.95rem;
+    font-family: inherit;
+    letter-spacing: 0;
+    font-weight: 400;
+    text-align: left;
+  }
+
+  .guesses-title {
+    color: var(--color-primary);
+    font-size: 1.1rem;
+    margin-bottom: 0.75rem;
+    font-weight: 700;
+  }
+
+  .guesses-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .guess-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.75rem;
+    background: #f5f3ee;
+    border-radius: 8px;
+    padding: 0.4rem 0.75rem;
+    font-size: 0.95rem;
+  }
+
+  .guess-name { font-weight: 700; color: var(--color-primary); white-space: nowrap; }
+  .guess-text { color: #333; }
+  .no-guesses { color: #aaa; font-size: 0.9rem; font-style: italic; }
+
+  /* ── Shared button ───────────────────────────────────── */
+  .primary-btn {
+    width: 100%;
+    padding: 0.85rem;
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.2s;
+    margin-top: 0.5rem;
+  }
+  .primary-btn:hover { background: var(--color-secondary); }
+</style>

@@ -1,2 +1,0 @@
-don't make extra changed without my permission. just try to do exactly as i ask, and if its unclear, ask me before making any suggested changed.
-Periodically check for code redundancy, overlapping functions, or duplicate definitions, especially during long sessions with many prompts.

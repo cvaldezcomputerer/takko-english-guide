@@ -4,13 +4,16 @@ import Navbar from '../components/Navbar.astro';
 import T from '../components/T.astro';
 ---
 
-<Layout title="Takko Machi - Town Guide">
+<Layout
+    title="TakkoTaco"
+    description="TakkoTaco is the unofficial English website for Takko Machi — English learning tools for students, and an English guide to the town."
+>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Patrick+Hand&display=swap" rel="stylesheet">
 
     <div class="town-guide-body">
         <Navbar />
 
-        <!-- Hero Section -->
+        <!-- Hero -->
         <header class="hero">
             <div class="hero-content">
                 <span class="welcome-text">
@@ -27,97 +30,136 @@ import T from '../components/T.astro';
                 </h1>
                 <p class="tagline">
                     <T>
-                        <span slot="en">Garlic, Culture, & Community</span>
-                        <span slot="ja">にんにく・文化・コミュニティ</span>
+                        <span slot="en">Learn English. Explore Takko.</span>
+                        <span slot="ja">英語で楽しむ田子町</span>
                     </T>
                 </p>
-                <a href="/game" class="cta-button">
-                    <T>
-                        <span slot="en">Play Game ↓</span>
-                        <span slot="ja">ゲームを遊ぶ ↓</span>
-                    </T>
-                </a>
+                <div class="hero-ctas">
+                    <a href="/game" class="cta-button">
+                        <T>
+                            <span slot="en">English Tools</span>
+                            <span slot="ja">英語ツール</span>
+                        </T>
+                    </a>
+                    <a href="#town-guide" class="cta-button cta-secondary">
+                        <T>
+                            <span slot="en">Town Guide</span>
+                            <span slot="ja">町の案内</span>
+                        </T>
+                    </a>
+                </div>
             </div>
             <div class="hero-overlay"></div>
         </header>
 
-        <!-- Main Navigation Grid -->
-        <!-- <section id="explore" class="town-grid">
-            <div class="grid-header">
-                <h2>Discover Our Town</h2>
-                <p>From historic shrines to the best garlic beef bowls.</p>
-            </div>
-            
-            <div class="category-cards">
-                <a href="#" class="cat-card">
-                    <div class="cat-icon">⛩️</div>
-                    <h3>Shrines & Temples</h3>
-                    <p>Tap into local history and spiritual spots.</p>
-                </a>
-                
-                <a href="#" class="cat-card">
-                    <div class="cat-icon">🍜</div>
-                    <h3>Local Eats</h3>
-                    <p>Garlic steak, ramen, and hidden cafes.</p>
-                </a>
-
-                <a href="#" class="cat-card">
-                    <div class="cat-icon">👺</div>
-                    <h3>Festivals</h3>
-                    <p>Experience the vibrant culture of Aomori.</p>
-                </a>
-
-                <a href="#" class="cat-card">
-                    <div class="cat-icon">🏸</div>
-                    <h3>Clubs & Activities</h3>
-                    <p>Join local sports teams and hobby groups.</p>
-                </a>
-            </div>
-        </section> -->
-
-        <!-- English Corner / Games -->
-        <!-- <section class="english-corner">
-            <div class="corner-content">
-                <h2>Takko English Corner</h2>
-                <p>Fun games to learn English while exploring Takko!</p>
-                <div class="game-links">
-                    <a href="/school-map-game" class="game-btn map-theme">
-                        <span class="emoji">🗺️</span> School Map Game
-                    </a>
-                    <a href="/letter-game" class="game-btn letter-theme">
-                        <span class="emoji">🅰️</span> Letter Flip
+        <!-- English Learning -->
+        <section class="site-section">
+            <div class="section-inner">
+                <div class="section-header">
+                    <h2>
+                        <T>
+                            <span slot="en">English Learning</span>
+                            <span slot="ja">英語学習</span>
+                        </T>
+                    </h2>
+                    <p>
+                        <T>
+                            <span slot="en">Games and tools for Takko students and teachers.</span>
+                            <span slot="ja">田子の生徒と先生のためのゲームとツール</span>
+                        </T>
+                    </p>
+                </div>
+                <div class="card-grid">
+                    <a href="/game" class="site-card">
+                        <h3>
+                            <T>
+                                <span slot="en">Games and Tools</span>
+                                <span slot="ja">ゲームとツール</span>
+                            </T>
+                        </h3>
+                        <p>
+                            <T>
+                                <span slot="en">Vocabulary games, drawing games, classroom tools, and more.</span>
+                                <span slot="ja">語彙ゲーム、絵描きゲーム、授業ツールなど</span>
+                            </T>
+                        </p>
                     </a>
                 </div>
             </div>
-        </section> -->
+        </section>
 
-        <section class="community-board">
-            <div class="board-paper">
-                <div class="pin">📌</div>
-                <h2>
-                    <T>
-                        <span slot="en">Takko Bulletin</span>
-                        <span slot="ja">田子掲示板</span>
-                    </T>
-                </h2>
-                <p>
-                    <T>
-                        <span slot="en">This site is under construction! Please check out my <a href="https://bloggydoggy.com/">blog</a> in the meantime!</span>
-                        <span slot="ja">このサイトは現在制作中です！その間、私の<a href="https://bloggydoggy.com/">ブログ</a>をチェックしてください！</span>
-                    </T>
-                </p>
+        <!-- Town Guide -->
+        <section class="site-section section-alt" id="town-guide">
+            <div class="section-inner">
+                <div class="section-header">
+                    <h2>
+                        <T>
+                            <span slot="en">Town Guide</span>
+                            <span slot="ja">町の案内</span>
+                        </T>
+                    </h2>
+                    <p>
+                        <T>
+                            <span slot="en">An unofficial English guide to Takko Machi.</span>
+                            <span slot="ja">田子町の非公式英語ガイド</span>
+                        </T>
+                    </p>
+                </div>
+                <div class="card-grid">
+                    <div class="site-card coming-soon">
+                        <h3>
+                            <T>
+                                <span slot="en">Restaurants</span>
+                                <span slot="ja">飲食店</span>
+                            </T>
+                        </h3>
+                        <p class="soon-label">
+                            <T>
+                                <span slot="en">Coming soon</span>
+                                <span slot="ja">準備中</span>
+                            </T>
+                        </p>
+                    </div>
+                    <div class="site-card coming-soon">
+                        <h3>
+                            <T>
+                                <span slot="en">Events</span>
+                                <span slot="ja">イベント</span>
+                            </T>
+                        </h3>
+                        <p class="soon-label">
+                            <T>
+                                <span slot="en">Coming soon</span>
+                                <span slot="ja">準備中</span>
+                            </T>
+                        </p>
+                    </div>
+                    <div class="site-card coming-soon">
+                        <h3>
+                            <T>
+                                <span slot="en">Things to Do</span>
+                                <span slot="ja">観光・体験</span>
+                            </T>
+                        </h3>
+                        <p class="soon-label">
+                            <T>
+                                <span slot="en">Coming soon</span>
+                                <span slot="ja">準備中</span>
+                            </T>
+                        </p>
+                    </div>
+                </div>
             </div>
         </section>
     </div>
 </Layout>
 
 <style>
-    /* Variables */
     .town-guide-body {
-        --color-bg: #fffbf0; /* Warm paper white */
-        --color-primary: #4a7c59; /* Forest Green */
-        --color-secondary: #d4a373; /* Wood/Earth tone */
-        --color-accent: #e76f51; /* Terra cotta */
+        --color-bg: #fffbf0;
+        --color-primary: #4a7c59;
+        --color-secondary: #d4a373;
+        --color-accent: #e76f51;
         --font-main: 'Fredoka', sans-serif;
         --font-hand: 'Patrick Hand', cursive;
 
@@ -126,7 +168,6 @@ import T from '../components/T.astro';
         color: #333;
     }
 
-    /* Typography Overrides */
     h1, h2, h3 { font-family: var(--font-main); }
 
     /* Hero */
@@ -147,7 +188,7 @@ import T from '../components/T.astro';
     .hero-overlay {
         position: absolute;
         inset: 0;
-        background: rgba(0,0,0,0.4); /* Solid semi-transparent overlay */
+        background: rgba(0,0,0,0.4);
     }
 
     .hero-content {
@@ -175,6 +216,13 @@ import T from '../components/T.astro';
         opacity: 0.9;
     }
 
+    .hero-ctas {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
     .cta-button {
         display: inline-block;
         background: var(--color-accent);
@@ -187,168 +235,98 @@ import T from '../components/T.astro';
         box-shadow: 0 4px 0px #c05035;
     }
 
+    .cta-button.cta-secondary {
+        background: transparent;
+        border: 2px solid white;
+        box-shadow: none;
+    }
+
     .cta-button:active {
         transform: translateY(4px);
         box-shadow: none;
     }
 
-    /* Town Grid */
-    .town-grid {
-        padding: 4rem 2rem;
-        max-width: 1200px;
+    /* Sections */
+    .site-section {
+        padding: 5rem 2rem;
+    }
+
+    .section-alt {
+        background: #f0f7f2;
+        border-top: 4px solid var(--color-primary);
+    }
+
+    .section-inner {
+        max-width: 1100px;
         margin: 0 auto;
     }
 
-    .grid-header {
+    .section-header {
         text-align: center;
         margin-bottom: 3rem;
     }
 
-    .grid-header h2 {
-        font-size: 3rem;
+    .section-header h2 {
+        font-size: 2.5rem;
         color: var(--color-primary);
         margin-bottom: 0.5rem;
     }
 
-    .category-cards {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 2rem;
+    .section-header p {
+        font-size: 1.1rem;
+        color: #555;
     }
 
-    .cat-card {
+    /* Cards */
+    .card-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .site-card {
         background: white;
         border: 3px solid var(--color-secondary);
-        border-radius: 20px;
+        border-radius: 16px;
         padding: 2rem;
-        text-align: center;
         text-decoration: none;
         color: inherit;
-        transition: all 0.3s ease;
-        position: relative;
-        overflow: hidden;
+        transition: transform 0.2s, box-shadow 0.2s;
+        display: block;
     }
 
-    .cat-card:hover {
-        transform: translateY(-5px) rotate(1deg);
+    .site-card:not(.coming-soon):hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 20px rgba(74, 124, 89, 0.15);
         border-color: var(--color-primary);
-        box-shadow: 8px 8px 0px rgba(74, 124, 89, 0.2);
     }
 
-    .cat-icon {
-        font-size: 3.5rem;
-        margin-bottom: 1rem;
+    .site-card.coming-soon {
+        opacity: 0.6;
+        border-style: dashed;
+        cursor: default;
     }
 
-    .cat-card h3 {
-        font-size: 1.5rem;
+    .site-card h3 {
+        font-size: 1.4rem;
         color: var(--color-primary);
         margin-bottom: 0.5rem;
     }
 
-    /* English Corner */
-    .english-corner {
-        background: #e8f5e9;
-        padding: 4rem 2rem;
-        text-align: center;
-        border-top: 4px dashed var(--color-primary);
-        border-bottom: 4px dashed var(--color-primary);
+    .site-card p {
+        font-size: 1rem;
+        color: #666;
+        margin: 0;
     }
 
-    .game-links {
-        display: flex;
-        justify-content: center;
-        gap: 2rem;
-        margin-top: 2rem;
-        flex-wrap: wrap;
-    }
-
-    .game-btn {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        padding: 1rem 2rem;
-        background: white;
-        border-radius: 15px;
-        text-decoration: none;
-        color: #333;
-        font-weight: bold;
-        font-size: 1.2rem;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        transition: transform 0.2s;
-    }
-
-    .game-btn:hover {
-        transform: scale(1.05);
-    }
-
-    .map-theme { border-bottom: 5px solid #4ecdc4; }
-    .letter-theme { border-bottom: 5px solid #ff6b6b; }
-
-    /* Community Board */
-    .community-board {
-        padding: 5rem 2rem;
-        display: flex;
-        justify-content: center;
-        background-color: var(--color-bg);
-    }
-
-    .board-paper {
-        background: white;
-        padding: 3rem;
-        max-width: 600px;
-        width: 100%;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        position: relative;
-        transform: rotate(-1deg);
-    }
-
-    .pin {
-        position: absolute;
-        top: -15px;
-        left: 50%;
-        transform: translateX(-50%);
-        font-size: 2rem;
-    }
-
-    .newsletter-form {
-        display: flex;
-        gap: 1rem;
-        margin: 2rem 0;
-    }
-
-    .newsletter-form input {
-        flex: 1;
-        padding: 0.8rem;
-        border: 2px solid #ddd;
-        border-radius: 8px;
-    }
-
-    .newsletter-form button {
-        background: var(--color-primary);
-        color: white;
-        border: none;
-        padding: 0 1.5rem;
-        border-radius: 8px;
-        cursor: pointer;
-        font-weight: bold;
-    }
-
-    .recent-updates ul {
-        list-style: none;
-        padding: 0;
-        text-align: left;
-    }
-
-    .recent-updates li {
-        padding: 0.8rem 0;
-        border-bottom: 1px dashed #eee;
+    .soon-label {
         font-family: var(--font-hand);
-        font-size: 1.2rem;
+        color: #999 !important;
+        font-size: 1rem;
     }
 
     @media (max-width: 768px) {
-        .town-name { font-size: 4rem; }
-        .newsletter-form { flex-direction: column; }
+        .town-name { font-size: 3.5rem; }
+        .hero-ctas { flex-direction: column; align-items: center; }
     }
 </style>
