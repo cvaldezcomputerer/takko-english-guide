@@ -1,226 +1,218 @@
 export const themes = {
-  Feelings: [
-    'happy', 'sad', 'angry', 'surprised', 'tired', 'scared', 'bored', 'excited',
-    'hungry', 'sleepy', 'nervous', 'embarrassed', 'proud', 'lonely', 'fine', 'great',
+  // Food, Drink & Taste
+  Drinks: [
+    'coffee', 'tea', 'green tea', 'juice', 'soda', 'milk', 'water', 'mineral water',
   ],
-  Numbers: [
-    'zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine',
-    'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen',
-    'seventeen', 'eighteen', 'nineteen', 'twenty', 'thirty', 'forty', 'fifty',
-    'sixty', 'seventy', 'eighty', 'ninety', 'hundred', 'thousand',
-  ],
-  Colors: [
-    'red', 'blue', 'green', 'yellow', 'orange', 'purple', 'pink', 'black',
-    'white', 'brown', 'gray', 'gold', 'silver', 'light blue', 'dark green',
-  ],
-  Shapes: [
-    'circle', 'square', 'triangle', 'rectangle', 'star', 'heart', 'diamond',
-    'oval', 'arrow', 'cross', 'spiral', 'pentagon', 'hexagon',
-  ],
-  Sports: [
-    'soccer', 'basketball', 'swimming', 'running', 'tennis', 'baseball',
-    'volleyball', 'judo', 'kendo', 'skiing', 'cycling', 'gymnastics',
-    'table tennis', 'archery', 'skating', 'surfing', 'boxing', 'golf',
-    'badminton', 'rugby', 'sumo',
+  Dessert: [
+    'cake', 'donut', 'parfait', 'pudding', 'ice cream', 'shaved ice', 'chocolate',
+    'cream puff', 'popcorn', 'potato chips',
   ],
   Food: [
-    'rice', 'bread', 'pizza', 'sushi', 'ramen', 'curry', 'hamburger',
-    'sandwich', 'egg', 'soup', 'fried chicken', 'steak', 'salad', 'bento',
-    'onigiri', 'takoyaki', 'tempura', 'udon', 'yakitori', 'gratin',
+    'rice', 'rice ball', 'curry and rice', 'grilled eel', 'grilled fish', 'bread',
+    'sandwich', 'pancake', 'pizza', 'hamburger', 'hot dog', 'French fries',
+    'fried chicken', 'sausage', 'steak', 'omelet', 'spaghetti', 'pie', 'salad', 'soup',
   ],
-  Drinks: [
-    'water', 'juice', 'milk', 'tea', 'coffee', 'soda', 'lemonade',
-    'hot chocolate', 'smoothie', 'green tea', 'sports drink',
+  'Japanese Food': [
+    'fried noodles', 'ramen', 'soba', 'beef bowl', 'sushi', 'tempura',
   ],
-  Desserts: [
-    'cake', 'ice cream', 'cookie', 'pudding', 'donut', 'chocolate',
-    'candy', 'pie', 'crepe', 'mochi', 'waffle', 'cupcake', 'jelly',
-    'parfait', 'taiyaki',
-  ],
-  'Fruits and Vegetables': [
-    'apple', 'banana', 'orange', 'grape', 'strawberry', 'watermelon',
-    'pineapple', 'peach', 'cherry', 'lemon', 'carrot', 'tomato',
-    'onion', 'potato', 'broccoli', 'corn', 'cabbage', 'cucumber',
-    'pumpkin', 'mushroom', 'spinach', 'sweet potato', 'eggplant',
+  'Fruit and Vegetables': [
+    'apple', 'banana', 'bean', 'broccoli', 'cabbage', 'carrot', 'cherry', 'corn',
+    'cucumber', 'eggplant', 'grapes', 'green pepper', 'kiwi fruit', 'lemon', 'lettuce',
+    'melon', 'mushroom', 'nut', 'onion', 'orange', 'peach', 'pineapple', 'potato',
+    'spinach', 'strawberry',
   ],
   Meals: [
-    'breakfast', 'lunch', 'dinner', 'snack', 'bento', 'brunch',
-    'midnight snack', 'picnic lunch',
+    'breakfast', 'lunch', 'dinner',
   ],
-  Ingredients: [
-    'egg', 'flour', 'butter', 'sugar', 'salt', 'pepper', 'oil',
-    'soy sauce', 'miso', 'vinegar', 'cheese', 'garlic', 'ginger',
-    'honey', 'cream', 'mayonnaise', 'ketchup',
+  'Ingredients': [
+    'meat', 'beef', 'chicken', 'pork', 'bacon', 'ham', 'cheese', 'egg',
+    'fish', 'salmon', 'octopus',
   ],
   Taste: [
-    'sweet', 'sour', 'salty', 'spicy', 'bitter', 'delicious', 'yummy',
-    'hot', 'cold', 'fresh', 'crispy', 'soft', 'chewy', 'bland',
+    'bitter', 'sweet', 'salty', 'sour', 'spicy', 'delicious', 'soft', 'hard', 'cold', 'hot',
   ],
-  Animals: [
-    'cat', 'dog', 'rabbit', 'hamster', 'elephant', 'lion', 'tiger',
-    'bear', 'giraffe', 'zebra', 'horse', 'cow', 'pig', 'sheep',
-    'monkey', 'gorilla', 'panda', 'koala', 'kangaroo', 'fox', 'wolf',
-    'deer', 'raccoon',
-  ],
-  Nature: [
-    'mountain', 'river', 'forest', 'ocean', 'beach', 'flower', 'tree',
-    'sun', 'moon', 'star', 'rain', 'snow', 'cloud', 'rainbow',
-    'volcano', 'island', 'lake', 'waterfall', 'desert', 'cave', 'field',
-  ],
-  'Marine Life': [
-    'fish', 'whale', 'dolphin', 'crab', 'octopus', 'jellyfish',
-    'turtle', 'shark', 'shrimp', 'clam', 'starfish', 'seal',
-    'penguin', 'squid', 'eel', 'sea horse',
-  ],
-  Insects: [
-    'butterfly', 'ant', 'bee', 'beetle', 'dragonfly', 'mosquito',
-    'grasshopper', 'ladybug', 'caterpillar', 'firefly', 'spider',
-    'cockroach', 'moth', 'cicada',
-  ],
-  'Living Creatures: Problems and Solutions': [
-    'endangered', 'extinct', 'protect', 'environment', 'recycle',
-    'pollution', 'habitat', 'ecosystem', 'deforestation', 'conservation',
-    'climate change', 'littering', 'plant trees', 'clean water',
-  ],
-  Months: [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December',
-  ],
-  Dates: [
-    'first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh',
-    'eighth', 'ninth', 'tenth', 'eleventh', 'twelfth', 'thirteenth',
-    'fourteenth', 'fifteenth', 'twentieth', 'twenty-first', 'thirtieth',
-    'thirty-first',
-  ],
-  'Days of the Week': [
-    'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday',
-  ],
-  Seasons: [
-    'spring', 'summer', 'autumn', 'winter',
-  ],
-  Weather: [
-    'sunny', 'rainy', 'cloudy', 'snowy', 'windy', 'stormy', 'foggy',
-    'hot', 'cold', 'typhoon', 'thunder', 'hail', 'humid', 'dry',
+
+  // People, Feelings & Body
+  Feelings: [
+    'fine', 'good', 'great', 'happy', 'sad', 'nervous', 'tired', 'sleepy',
+    'busy', 'hungry', 'thirsty', 'comfortable',
   ],
   People: [
-    'boy', 'girl', 'man', 'woman', 'baby', 'child', 'student', 'teacher',
-    'friend', 'classmate', 'stranger', 'tourist',
+    'I', 'you', 'she', 'he', 'we', 'children', 'man', 'woman', 'boy', 'girl',
+    'classmates', 'friends', 'baby',
   ],
   Personality: [
-    'kind', 'friendly', 'funny', 'shy', 'brave', 'smart', 'cheerful',
-    'honest', 'creative', 'patient', 'serious', 'energetic', 'gentle',
-    'curious', 'confident',
+    'active', 'brave', 'friendly', 'funny', 'kind', 'shy', 'smart', 'strong',
   ],
   Family: [
-    'mother', 'father', 'brother', 'sister', 'grandmother', 'grandfather',
-    'uncle', 'aunt', 'cousin', 'baby', 'parents', 'family',
+    'grandfather', 'grandmother', 'grandparents', 'father', 'mother', 'uncle', 'aunt',
+    'parents', 'brother', 'sister', 'cousin', 'me',
   ],
-  Actions: [
-    'run', 'jump', 'swim', 'eat', 'sleep', 'read', 'write', 'dance',
-    'sing', 'cook', 'draw', 'study', 'play', 'walk', 'climb', 'throw',
-    'catch', 'kick', 'wave', 'hug', 'laugh', 'cry', 'listen', 'speak',
-    'watch', 'help', 'make', 'buy', 'sell', 'clean',
+  'Body Parts': [
+    'hair', 'head', 'face', 'eye', 'ear', 'nose', 'mouth', 'shoulder', 'teeth',
+    'hand', 'arm', 'neck', 'knee', 'leg', 'toe',
   ],
-  'What I Did': [
-    'went to the park', 'ate sushi', 'played soccer', 'watched TV',
-    'read a book', 'made a cake', 'visited my grandma', 'cleaned my room',
-    'went shopping', 'swam at the pool', 'rode my bike', 'studied English',
-    'had a birthday party', 'went camping', 'watched a movie',
-  ],
+
+  // Daily Life, Clothes & Belongings
   Frequency: [
-    'always', 'usually', 'often', 'sometimes', 'rarely', 'never',
-    'every day', 'once a week', 'twice a week', 'every month',
+    'always', 'usually', 'sometimes', 'never',
   ],
-  'Daily Life': [
-    'wake up', 'brush teeth', 'wash face', 'take a bath', 'get dressed',
-    'eat breakfast', 'go to school', 'do homework', 'watch TV',
-    'go to bed', 'wash hands', 'make lunch', 'set the table', 'take out trash',
+  'Daily Routines': [
+    'morning', 'afternoon', 'evening', 'night', 'get up', 'comb my hair',
+    'take out the garbage', 'get the newspaper', 'have breakfast', 'brush my teeth',
+    'go to school', 'study English', 'have lunch', 'go home', 'play soccer',
+    'walk my dog', 'do my homework', 'have dinner', 'wash the dishes', 'watch TV',
+    'take a bath', 'go to bed',
   ],
-  Clothing: [
-    'shirt', 'pants', 'dress', 'hat', 'shoes', 'socks', 'jacket',
-    'skirt', 'tie', 'gloves', 'coat', 'scarf', 'boots', 'uniform',
-    'swimsuit', 'pajamas', 'sneakers', 'sandals', 'cap', 'vest',
-  ],
-  Body: [
-    'head', 'eye', 'nose', 'mouth', 'ear', 'hand', 'foot', 'arm',
-    'leg', 'finger', 'hair', 'back', 'shoulder', 'knee', 'stomach',
-    'elbow', 'thumb', 'toe', 'neck', 'chest', 'hip', 'ankle', 'wrist',
-  ],
-  Town: [
-    'school', 'hospital', 'park', 'library', 'station', 'supermarket',
-    'restaurant', 'post office', 'bank', 'shrine', 'museum', 'airport',
-    'hotel', 'fire station', 'police station', 'church', 'convenience store',
-    'bookstore', 'pharmacy', 'gym', 'shopping mall', 'bus stop',
-  ],
-  Directions: [
-    'left', 'right', 'straight', 'turn right', 'turn left', 'go straight',
-    'north', 'south', 'east', 'west', 'corner', 'traffic light',
-    'crosswalk', 'intersection', 'upstairs', 'downstairs',
-  ],
-  Position: [
-    'on', 'under', 'next to', 'between', 'in front of', 'behind',
-    'above', 'below', 'inside', 'outside', 'near', 'far', 'left', 'right',
-    'top', 'bottom', 'middle',
-  ],
-  Subjects: [
-    'math', 'English', 'Japanese', 'science', 'music', 'P.E.', 'art',
-    'social studies', 'home economics', 'moral education', 'computer',
-  ],
-  School: [
-    'classroom', 'playground', 'gym', 'cafeteria', 'library', 'principal',
-    'blackboard', 'desk', 'locker', 'hallway', 'school gate', 'rooftop',
-    'science room', 'music room', 'art room', 'staff room',
-  ],
-  Stationery: [
-    'pen', 'pencil', 'eraser', 'ruler', 'scissors', 'glue', 'stapler',
-    'notebook', 'folder', 'tape', 'compass', 'marker', 'highlighter',
-    'pencil case', 'colored pencil', 'paintbrush',
-  ],
-  'Musical Instruments': [
-    'piano', 'guitar', 'drum', 'violin', 'flute', 'trumpet', 'recorder',
-    'xylophone', 'harmonica', 'cello', 'trombone', 'harp', 'ukulele',
-    'maracas', 'triangle',
+  Clothes: [
+    'shirt', 'T-shirt', 'sweatshirt', 'sweater', 'uniform', 'pants', 'jeans',
+    'cap', 'hat', 'gloves', 'socks', 'shoes',
   ],
   'Personal Belongings': [
-    'bag', 'wallet', 'key', 'watch', 'phone', 'umbrella', 'glasses',
-    'book', 'camera', 'headphones', 'pencil case', 'lunchbox', 'water bottle',
-    'towel', 'handkerchief', 'tissue',
+    'bag', 'bat', 'glove', 'racket', 'soccer shoes', 'umbrella', 'glass', 'mug',
+    'textbook', 'comic book', 'dictionary', 'present', 'treasure', 'sticker', 'ticket',
+    'watch', 'TV', 'computer', 'smartphone', 'tablet', 'desk', 'chair', 'bed',
   ],
-  Play: [
-    'hide and seek', 'tag', 'dodgeball', 'jump rope', 'card game',
-    'video game', 'board game', 'origami', 'marbles', 'hopscotch',
-    'kendama', 'yo-yo', 'puzzle',
+  Stationery: [
+    'crayon', 'marker', 'pen', 'pencil', 'pencil case', 'eraser', 'ruler', 'glue',
+    'scissors', 'stapler', 'notebook', 'pencil sharpener',
   ],
-  'School Events': [
-    'sports day', 'field trip', 'school play', 'graduation', 'entrance ceremony',
-    'culture festival', 'chorus contest', 'art exhibition', 'career day',
-    'cleaning day', 'open school day',
+
+  // Nature, Animals & Environment
+  Animals: [
+    'bear', 'elephant', 'tiger', 'lion', 'horse', 'zebra', 'camel', 'giraffe',
+    'gorilla', 'monkey', 'orangutan', 'panda', 'koala', 'dog', 'cat', 'fox',
+    'rabbit', 'mouse', 'crocodile', 'snake', 'frog', 'bird',
   ],
-  'Annual Events': [
-    'New Year', 'setsubun', 'hinamatsuri', 'cherry blossom viewing',
-    'Golden Week', 'Tanabata', 'summer festival', 'fireworks', 'obon',
-    'sports day', 'Halloween', "Valentine's Day", 'Christmas',
+  'Sea Animals': [
+    'whale', 'dolphin', 'penguin', 'sea turtle', 'fish', 'shark', 'crab', 'jellyfish',
   ],
-  'Impressions and Observations': [
-    'beautiful', 'interesting', 'difficult', 'easy', 'fun', 'boring',
-    'amazing', 'strange', 'cool', 'wonderful', 'scary', 'delicious',
-    'loud', 'quiet', 'big', 'small', 'fast', 'slow',
+  Bugs: [
+    'ant', 'beetle', 'stag beetle', 'butterfly', 'dragonfly', 'grasshopper', 'mantis', 'spider',
   ],
-  Situations: [
-    'at the store', 'at the park', 'at the library', 'at school',
-    'at home', 'at the hospital', 'at the station', 'at the restaurant',
-    'on the train', 'at the airport', 'at the beach', 'at a friend\'s house',
+  Nature: [
+    'desert', 'forest', 'rainforest', 'lake', 'mountain', 'river', 'savanna', 'sea',
   ],
-  Occupations: [
-    'teacher', 'doctor', 'nurse', 'police officer', 'firefighter', 'chef',
-    'farmer', 'pilot', 'dentist', 'scientist', 'artist', 'musician',
-    'actor', 'athlete', 'vet', 'engineer', 'carpenter', 'baker',
-    'bus driver', 'postal worker', 'astronaut',
+  'Environment and 4Rs': [
+    'forest loss', 'plant trees', 'global warming', 'save energy', 'plastic',
+    'use eco-friendly bags', 'refuse', 'reduce', 'reuse', 'recycle',
+  ],
+
+  // Time, Dates & Weather
+  Months: [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December', 'one year',
+  ],
+  Dates: [
+    '1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th', '10th',
+    '11th', '12th', '13th', '14th', '15th', '16th', '17th', '18th', '19th', '20th',
+    '21st', '22nd', '23rd', '24th', '25th', '26th', '27th', '28th', '29th', '30th', '31st',
+  ],
+  Days: [
+    'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'one week',
+  ],
+  Seasons: [
+    'spring', 'summer', 'fall', 'winter',
+  ],
+  Weather: [
+    'sunny', 'cloudy', 'windy', 'rainy', 'snowy', 'cold', 'warm', 'hot', 'humid',
+  ],
+
+  // School & Activities
+  'School Subjects': [
+    'English', 'Japanese', 'calligraphy', 'social studies', 'math', 'science', 'music',
+    'arts and crafts', 'home economics', 'P.E.', 'moral education',
+    'period for integrated studies',
+  ],
+  'School Places': [
+    'classroom', 'computer room', 'entrance', 'gym', 'library', 'music room',
+    'playground', "school nurse's office", 'restroom', 'swimming pool',
+    "teachers' office", "school principal's office",
   ],
   'Club Activities': [
-    'soccer club', 'art club', 'music club', 'swimming club', 'basketball club',
-    'baseball club', 'dance club', 'drama club', 'science club', 'cooking club',
-    'kendo club', 'tennis club', 'choir', 'computer club', 'brass band',
+    'baseball team', 'softball team', 'basketball team', 'volleyball team', 'soccer team',
+    'tennis team', 'table tennis team', 'badminton team', 'dance team',
+    'track and field team', 'art club', 'cooking club', 'drama club', 'brass band',
+    'chorus', 'broadcasting club', 'newspaper club', 'photography club',
+  ],
+  'School Events': [
+    'field trip', 'school trip', 'chorus contest', 'volunteer day', 'drama festival',
+    'music festival', 'school festival', 'sports day', 'evacuation drill',
+    'swimming meet', 'summer vacation', 'entrance ceremony', 'graduation ceremony',
+  ],
+  'Musical Instruments': [
+    'recorder', 'harmonica', 'triangle', 'piano', 'guitar', 'violin', 'drum',
+    'xylophone', 'keyboard harmonica',
+  ],
+  'Play and Activities': [
+    'camping', 'dancing', 'fishing', 'hiking', 'shopping', 'reading', 'drawing',
+    'jogging', 'skateboarding', 'swinging', 'playing the piano', 'playing video games',
+    'seeing movies', 'cards', 'jump rope', 'tag', 'hide-and-seek', 'rock-paper-scissors',
+  ],
+  Sports: [
+    'baseball', 'basketball', 'volleyball', 'dodgeball', 'rugby', 'soccer', 'tennis',
+    'table tennis', 'badminton', 'cricket', 'gymnastics', 'track and field',
+    'judo', 'kendo', 'sumo', 'swimming', 'skateboarding', 'skiing',
+  ],
+
+  // Town, Travel & Directions
+  'Town and Places': [
+    'house', 'park', 'library', 'museum', 'hospital', 'bus stop', 'station',
+    'police station', 'fire station', 'post office', 'bookstore', 'restaurant',
+    'supermarket', 'castle', 'shrine', 'temple', 'church', 'aquarium', 'stadium',
+    'zoo', 'amusement park', 'convenience store', 'elementary school', 'junior high school',
+  ],
+  Vehicles: [
+    'bus', 'taxi', 'bike', 'train',
+  ],
+  Directions: [
+    'go', 'straight', 'turn', 'right', 'left', 'see', 'up', 'down', 'block', 'corner',
+  ],
+  Positions: [
+    'by', 'in', 'on', 'under',
+  ],
+
+  // Jobs, Events & Adjectives
+  Jobs: [
+    'artist', 'writer', 'singer', 'comedian', 'doctor', 'nurse', 'vet', 'zookeeper',
+    'cook', 'baker', 'farmer', 'police officer', 'fire fighter', 'pilot', 'programmer',
+    'office worker', 'astronaut', 'teacher', 'researcher', 'scientist',
+    'flight attendant', 'baseball player', 'mountaineer',
+  ],
+  'Annual Events': [
+    'birthday', "New Year's Day", "Dolls' Festival", 'cherry blossom viewing',
+    "Children's Day", 'Star Festival', 'fireworks festival', 'Halloween',
+    'Christmas', "New Year's Eve",
+  ],
+  Impressions: [
+    'good', 'great', 'bad', 'nice', 'amazing', 'fantastic', 'wonderful', 'beautiful',
+    'cool', 'cute', 'favorite', 'interesting', 'exciting', 'famous', 'popular',
+    'colorful', 'international', 'fun',
+  ],
+  Conditions: [
+    'big', 'small', 'long', 'short', 'new', 'old', 'fast', 'slow', 'high', 'low',
+  ],
+  Colors: [
+    'white', 'red', 'orange', 'yellow', 'green', 'pink', 'purple', 'brown', 'black',
+    'blue', 'light blue', 'yellow green', 'gold', 'silver',
+  ],
+  Shapes: [
+    'circle', 'cross', 'diamond', 'heart', 'rectangle', 'square', 'star', 'triangle',
+  ],
+
+  // Verbs / Actions
+  'Verbs (5th Grade)': [
+    'spell', 'like', 'listen', 'want', 'play', 'walk', 'run', 'dance', 'jump',
+    'catch', 'swim', 'fly', 'sing', 'cook', 'have', 'go', 'turn', 'see', 'look',
+    'drink', 'eat', 'buy',
+  ],
+  'Verbs (6th Grade)': [
+    'speak', 'live', 'make', 'wear', 'talk', 'watch', 'read', 'help', 'practice',
+    'clean', 'enjoy', 'visit', 'ride', 'come', 'get', 'save', 'stop', 'study',
+    'join', 'work',
+  ],
+  'Past Tense Verbs': [
+    'ate', 'went', 'saw', 'had', 'made', 'enjoyed', 'played', 'watched',
   ],
 } as const;
 

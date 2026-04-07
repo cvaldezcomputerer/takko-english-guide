@@ -1,0 +1,634 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { categories } from '../data/anarika/words';
+const categoriesJson = JSON.stringify(categories);
+---
+
+<Layout title="Anarika's Challenge" description="A Japanese vocabulary quiz game.">
+<div class="game-wrap">
+
+  <!-- Category Select -->
+  <div id="screen-select" class="screen">
+    <div class="anarika-card">
+      <div class="anarika-avatar">
+        <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" class="avatar-svg">
+          <circle cx="60" cy="60" r="60" fill="#f4c2c2"/>
+          <circle cx="60" cy="48" r="26" fill="#fff0e0"/>
+          <ellipse cx="60" cy="105" rx="38" ry="28" fill="#e8a0a0"/>
+          <circle cx="50" cy="44" r="4" fill="#333"/>
+          <circle cx="70" cy="44" r="4" fill="#333"/>
+          <path d="M50 58 Q60 66 70 58" stroke="#c06060" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <h1 class="game-title">Anarika's Challenge</h1>
+      <p class="game-subtitle">アナリカのちょうせん</p>
+      <p class="game-desc">Choose a category. Type the Japanese answer for each word.</p>
+    </div>
+
+    <div class="category-grid" id="category-grid"></div>
+  </div>
+
+  <!-- Quiz Screen -->
+  <div id="screen-quiz" class="screen hidden">
+    <div class="quiz-header">
+      <button class="back-btn" id="back-btn">← Back</button>
+      <div class="progress-wrap">
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+        <span class="progress-label" id="progress-label"></span>
+      </div>
+      <div class="score-display" id="score-display">0 / 0</div>
+    </div>
+
+    <div class="question-card">
+      <p class="question-label">What is this in Japanese?</p>
+      <p class="question-hint">にほんごでなんですか？</p>
+      <div class="english-word" id="english-word"></div>
+      <input
+        type="text"
+        id="answer-input"
+        class="answer-input"
+        placeholder="ひらがなでこたえてください"
+        autocomplete="off"
+        autocorrect="off"
+        spellcheck="false"
+      />
+      <button class="submit-btn" id="submit-btn">Check / かくにん</button>
+    </div>
+
+    <div class="feedback-card hidden" id="feedback-card">
+      <div class="feedback-icon" id="feedback-icon"></div>
+      <div class="feedback-text" id="feedback-text"></div>
+      <div class="accepted-answers" id="accepted-answers"></div>
+      <button class="next-btn" id="next-btn">Next →</button>
+    </div>
+  </div>
+
+  <!-- Results Screen -->
+  <div id="screen-results" class="screen hidden">
+    <div class="anarika-card">
+      <div class="anarika-avatar">
+        <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" class="avatar-svg">
+          <circle cx="60" cy="60" r="60" fill="#f4c2c2"/>
+          <circle cx="60" cy="48" r="26" fill="#fff0e0"/>
+          <ellipse cx="60" cy="105" rx="38" ry="28" fill="#e8a0a0"/>
+          <circle cx="50" cy="44" r="4" fill="#333"/>
+          <circle cx="70" cy="44" r="4" fill="#333"/>
+          <path d="M50 58 Q60 66 70 58" stroke="#c06060" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <h2 class="result-title" id="result-title"></h2>
+      <div class="score-big" id="score-big"></div>
+    </div>
+
+    <div class="missed-section" id="missed-section">
+      <h3 class="missed-title">Review / ふくしゅう</h3>
+      <table class="missed-table" id="missed-table">
+        <thead>
+          <tr>
+            <th>English</th>
+            <th>Your answer / こたえ</th>
+            <th>Correct / せいかい</th>
+          </tr>
+        </thead>
+        <tbody id="missed-body"></tbody>
+      </table>
+    </div>
+
+    <div class="results-actions">
+      <button class="play-again-btn" id="play-again-btn">Play again / もういちど</button>
+      <button class="back-to-select-btn" id="back-to-select-btn">Categories / もどる</button>
+    </div>
+  </div>
+
+</div>
+</Layout>
+
+<script define:vars={{ categoriesJson }}>
+  const categories = JSON.parse(categoriesJson);
+
+  // State
+  let currentCategory = null;
+  let words = [];
+  let wordIndex = 0;
+  let score = 0;
+  let missed = []; // { en, yourAnswer, correct: ja[0] }
+
+  // Elements
+  const screenSelect  = document.getElementById('screen-select');
+  const screenQuiz    = document.getElementById('screen-quiz');
+  const screenResults = document.getElementById('screen-results');
+
+  const categoryGrid  = document.getElementById('category-grid');
+  const englishWord   = document.getElementById('english-word');
+  const answerInput   = document.getElementById('answer-input');
+  const submitBtn     = document.getElementById('submit-btn');
+  const feedbackCard  = document.getElementById('feedback-card');
+  const feedbackIcon  = document.getElementById('feedback-icon');
+  const feedbackText  = document.getElementById('feedback-text');
+  const acceptedEl    = document.getElementById('accepted-answers');
+  const nextBtn       = document.getElementById('next-btn');
+  const backBtn       = document.getElementById('back-btn');
+  const progressFill  = document.getElementById('progress-fill');
+  const progressLabel = document.getElementById('progress-label');
+  const scoreDisplay  = document.getElementById('score-display');
+
+  const resultTitle   = document.getElementById('result-title');
+  const scoreBig      = document.getElementById('score-big');
+  const missedSection = document.getElementById('missed-section');
+  const missedBody    = document.getElementById('missed-body');
+  const playAgainBtn  = document.getElementById('play-again-btn');
+  const backToSelectBtn = document.getElementById('back-to-select-btn');
+
+  // Screens
+  function showScreen(id) {
+    [screenSelect, screenQuiz, screenResults].forEach(s => s.classList.add('hidden'));
+    document.getElementById(id).classList.remove('hidden');
+  }
+
+  // Normalize: trim, collapse whitespace
+  function normalize(str) {
+    return str.trim().replace(/\s+/g, '');
+  }
+
+  // Check answer against accepted list
+  function checkAnswer(input, accepted) {
+    const norm = normalize(input);
+    return accepted.some(a => normalize(a) === norm);
+  }
+
+  // Build category grid
+  categories.forEach((cat, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'cat-btn';
+    btn.innerHTML = `<span class="cat-name">${cat.name}</span><span class="cat-count">${cat.words.length} words</span>`;
+    btn.addEventListener('click', () => startQuiz(i));
+    categoryGrid.appendChild(btn);
+  });
+
+  function startQuiz(catIndex) {
+    currentCategory = categories[catIndex];
+    words = [...currentCategory.words];
+    wordIndex = 0;
+    score = 0;
+    missed = [];
+    showScreen('screen-quiz');
+    showQuestion();
+  }
+
+  function showQuestion() {
+    feedbackCard.classList.add('hidden');
+    answerInput.value = '';
+    answerInput.disabled = false;
+    submitBtn.disabled = false;
+
+    const word = words[wordIndex];
+    englishWord.textContent = word.en;
+
+    const pct = (wordIndex / words.length) * 100;
+    progressFill.style.width = pct + '%';
+    progressLabel.textContent = `${wordIndex + 1} / ${words.length}`;
+    scoreDisplay.textContent = `${score} / ${wordIndex}`;
+
+    answerInput.focus();
+  }
+
+  function submitAnswer() {
+    const word = words[wordIndex];
+    const input = answerInput.value;
+
+    if (!input.trim()) return;
+
+    answerInput.disabled = true;
+    submitBtn.disabled = true;
+
+    const correct = checkAnswer(input, word.ja);
+
+    if (correct) {
+      score++;
+      feedbackIcon.textContent = 'O';
+      feedbackIcon.className = 'feedback-icon correct';
+      feedbackText.textContent = 'Correct! せいかい！';
+    } else {
+      missed.push({ en: word.en, yourAnswer: input, correct: word.ja[0] });
+      feedbackIcon.textContent = 'X';
+      feedbackIcon.className = 'feedback-icon wrong';
+      feedbackText.textContent = 'Not quite. ざんねん！';
+    }
+
+    acceptedEl.innerHTML = `<span class="accepted-label">Accepted answers:</span> ${word.ja.join('、 ')}`;
+    feedbackCard.classList.remove('hidden');
+  }
+
+  function nextQuestion() {
+    wordIndex++;
+    if (wordIndex >= words.length) {
+      showResults();
+    } else {
+      showQuestion();
+    }
+  }
+
+  function showResults() {
+    scoreDisplay.textContent = `${score} / ${words.length}`;
+    showScreen('screen-results');
+
+    const pct = Math.round((score / words.length) * 100);
+    scoreBig.textContent = `${score} / ${words.length}`;
+
+    if (pct === 100) {
+      resultTitle.textContent = 'Perfect! かんぺき！';
+    } else if (pct >= 70) {
+      resultTitle.textContent = 'Well done! よくできました！';
+    } else if (pct >= 40) {
+      resultTitle.textContent = 'Good try! よくがんばりました！';
+    } else {
+      resultTitle.textContent = 'Keep practicing! もっとれんしゅうしよう！';
+    }
+
+    if (missed.length === 0) {
+      missedSection.classList.add('hidden');
+    } else {
+      missedSection.classList.remove('hidden');
+      missedBody.innerHTML = '';
+      missed.forEach(m => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${m.en}</td>
+          <td class="wrong-answer">${m.yourAnswer || '—'}</td>
+          <td class="right-answer">${m.correct}</td>
+        `;
+        missedBody.appendChild(tr);
+      });
+    }
+  }
+
+  // Events
+  submitBtn.addEventListener('click', submitAnswer);
+  answerInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      if (!feedbackCard.classList.contains('hidden')) {
+        nextQuestion();
+      } else {
+        submitAnswer();
+      }
+    }
+  });
+  nextBtn.addEventListener('click', nextQuestion);
+  backBtn.addEventListener('click', () => showScreen('screen-select'));
+  playAgainBtn.addEventListener('click', () => {
+    const idx = categories.indexOf(currentCategory);
+    startQuiz(idx);
+  });
+  backToSelectBtn.addEventListener('click', () => showScreen('screen-select'));
+</script>
+
+<style>
+  .game-wrap {
+    min-height: 100vh;
+    background: #fff5f5;
+    font-family: 'Andika', sans-serif;
+    padding: 2rem 1rem;
+  }
+
+  .screen { max-width: 800px; margin: 0 auto; }
+  .hidden { display: none !important; }
+
+  /* Anarika Card */
+  .anarika-card {
+    text-align: center;
+    margin-bottom: 2.5rem;
+  }
+
+  .anarika-avatar {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 1rem;
+  }
+
+  .avatar-svg { width: 100%; height: 100%; }
+
+  .game-title {
+    font-size: 2.2rem;
+    color: #c0394b;
+    margin: 0;
+  }
+
+  .game-subtitle {
+    font-size: 1rem;
+    color: #888;
+    margin: 0.2rem 0 0.8rem;
+  }
+
+  .game-desc {
+    color: #555;
+    font-size: 1rem;
+    margin: 0;
+  }
+
+  /* Category Grid */
+  .category-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1rem;
+  }
+
+  .cat-btn {
+    background: white;
+    border: 2px solid #f4a0aa;
+    border-radius: 12px;
+    padding: 1rem;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.15s;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    font-family: inherit;
+  }
+
+  .cat-btn:hover {
+    border-color: #c0394b;
+    background: #fff0f1;
+    transform: translateY(-2px);
+  }
+
+  .cat-name {
+    font-weight: bold;
+    color: #333;
+    font-size: 0.95rem;
+  }
+
+  .cat-count {
+    font-size: 0.8rem;
+    color: #999;
+  }
+
+  /* Quiz Header */
+  .quiz-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .back-btn {
+    background: none;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    padding: 0.4rem 0.8rem;
+    cursor: pointer;
+    font-family: inherit;
+    color: #666;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .back-btn:hover { border-color: #aaa; }
+
+  .progress-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .progress-bar {
+    height: 8px;
+    background: #f0d0d4;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: #c0394b;
+    border-radius: 4px;
+    transition: width 0.3s;
+  }
+
+  .progress-label {
+    font-size: 0.75rem;
+    color: #999;
+    text-align: center;
+  }
+
+  .score-display {
+    font-weight: bold;
+    color: #c0394b;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    min-width: 3rem;
+    text-align: right;
+  }
+
+  /* Question Card */
+  .question-card {
+    background: white;
+    border: 2px solid #f4a0aa;
+    border-radius: 16px;
+    padding: 2.5rem 2rem;
+    text-align: center;
+  }
+
+  .question-label {
+    font-size: 0.9rem;
+    color: #999;
+    margin: 0 0 0.1rem;
+  }
+
+  .question-hint {
+    font-size: 0.85rem;
+    color: #bbb;
+    margin: 0 0 1.5rem;
+  }
+
+  .english-word {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 1.5rem;
+    min-height: 3rem;
+  }
+
+  .answer-input {
+    width: 100%;
+    max-width: 360px;
+    font-size: 1.4rem;
+    padding: 0.8rem 1rem;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    text-align: center;
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+    outline: none;
+    transition: border-color 0.2s;
+    box-sizing: border-box;
+  }
+
+  .answer-input:focus { border-color: #c0394b; }
+
+  .submit-btn {
+    display: block;
+    margin: 1.2rem auto 0;
+    background: #c0394b;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    padding: 0.8rem 2.5rem;
+    font-size: 1rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .submit-btn:hover { background: #a02d3d; }
+  .submit-btn:disabled { background: #ddd; cursor: default; }
+
+  /* Feedback Card */
+  .feedback-card {
+    background: white;
+    border: 2px solid #eee;
+    border-radius: 16px;
+    padding: 2rem;
+    text-align: center;
+    margin-top: 1.5rem;
+  }
+
+  .feedback-icon {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+  }
+
+  .feedback-icon.correct { color: #2e7d32; }
+  .feedback-icon.wrong   { color: #c0394b; }
+
+  .feedback-text {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 0.8rem;
+  }
+
+  .accepted-answers {
+    font-size: 1rem;
+    color: #555;
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+    margin-bottom: 1.2rem;
+  }
+
+  .accepted-label {
+    color: #999;
+    font-family: 'Andika', sans-serif;
+    font-size: 0.85rem;
+    margin-right: 0.3rem;
+  }
+
+  .next-btn {
+    background: #333;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    padding: 0.7rem 2rem;
+    font-size: 1rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .next-btn:hover { background: #555; }
+
+  /* Results */
+  .result-title {
+    font-size: 1.8rem;
+    color: #c0394b;
+    margin: 0 0 0.5rem;
+  }
+
+  .score-big {
+    font-size: 3rem;
+    font-weight: bold;
+    color: #333;
+  }
+
+  .missed-section {
+    background: white;
+    border: 2px solid #f4a0aa;
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-top: 2rem;
+  }
+
+  .missed-title {
+    font-size: 1.2rem;
+    color: #c0394b;
+    margin: 0 0 1rem;
+  }
+
+  .missed-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+  }
+
+  .missed-table th {
+    text-align: left;
+    color: #999;
+    font-weight: normal;
+    padding: 0.4rem 0.6rem;
+    border-bottom: 1px solid #eee;
+  }
+
+  .missed-table td {
+    padding: 0.5rem 0.6rem;
+    border-bottom: 1px solid #f5f5f5;
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+  }
+
+  .wrong-answer { color: #c0394b; }
+  .right-answer { color: #2e7d32; font-weight: bold; }
+
+  .results-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .play-again-btn {
+    background: #c0394b;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    padding: 0.9rem 2rem;
+    font-size: 1rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .play-again-btn:hover { background: #a02d3d; }
+
+  .back-to-select-btn {
+    background: white;
+    color: #c0394b;
+    border: 2px solid #c0394b;
+    border-radius: 50px;
+    padding: 0.9rem 2rem;
+    font-size: 1rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .back-to-select-btn:hover {
+    background: #fff0f1;
+  }
+
+  @media (max-width: 600px) {
+    .english-word { font-size: 2rem; }
+    .score-big { font-size: 2.5rem; }
+    .category-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+    .quiz-header { flex-wrap: wrap; }
+  }
+</style>
