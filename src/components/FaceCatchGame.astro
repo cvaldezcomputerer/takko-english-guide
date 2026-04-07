@@ -1,0 +1,753 @@
+<div class="face-catch-game" id="face-catch-game">
+
+  <!-- HUD -->
+  <header class="hud">
+    <div class="hud-card">
+      <span class="hud-label">Score</span>
+      <span class="hud-value" id="fcc-score">0</span>
+    </div>
+    <div class="hud-card">
+      <span class="hud-label">Best</span>
+      <span class="hud-value" id="fcc-best">0</span>
+    </div>
+    <div class="hud-card lives-card">
+      <span class="hud-label">Lives</span>
+      <span class="hud-value" id="fcc-lives">❤️❤️❤️</span>
+    </div>
+  </header>
+
+  <!-- Game canvas area -->
+  <div class="canvas-wrap">
+    <video id="fcc-video" autoplay playsinline muted></video>
+    <canvas id="fcc-canvas"></canvas>
+
+    <!-- Idle screen -->
+    <div class="overlay-screen" id="fcc-screen-idle">
+      <p class="screen-title">🎯 Face Catch</p>
+      <p class="screen-sub">Move your head to catch falling letters with the cup!</p>
+      <button id="fcc-btn-start" class="primary-btn">Start Game</button>
+      <p class="screen-note">Camera access required</p>
+    </div>
+
+    <!-- Loading screen -->
+    <div class="overlay-screen hidden" id="fcc-screen-loading">
+      <div class="spinner"></div>
+      <p class="screen-title" style="font-size:1.5rem">Loading…</p>
+      <p class="screen-sub" id="fcc-loading-msg">Starting up…</p>
+    </div>
+
+    <!-- Countdown screen -->
+    <div class="overlay-screen hidden" id="fcc-screen-countdown">
+      <p class="screen-countdown" id="fcc-countdown">3</p>
+    </div>
+
+    <!-- Game Over screen -->
+    <div class="overlay-screen hidden" id="fcc-screen-gameover">
+      <div class="gameover-card">
+        <p class="gameover-label">Game Over</p>
+        <p class="gameover-score" id="fcc-final-score">0</p>
+        <p class="gameover-meta">points</p>
+        <p class="gameover-best" id="fcc-gameover-best"></p>
+        <button id="fcc-btn-restart" class="primary-btn">Play Again</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Instructions -->
+  <section class="howto">
+    <div class="howto-grid">
+      <div class="howto-col">
+        <p class="howto-title">あそびかた</p>
+        <p class="howto-line">1. 「Start Game」をおす。</p>
+        <p class="howto-line">2. カメラに顔をみせる。</p>
+        <p class="howto-line">3. 頭をうごかして文字をキャッチ！</p>
+        <p class="howto-line">3つミスしたらゲームオーバー。</p>
+      </div>
+      <div class="howto-col">
+        <p class="howto-title">How to Play</p>
+        <p class="howto-line">1. Press Start Game.</p>
+        <p class="howto-line">2. Show your face to the camera.</p>
+        <p class="howto-line">3. Move your head to catch falling letters!</p>
+        <p class="howto-line">Miss 3 and it's game over.</p>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<style>
+  .face-catch-game {
+    --bg-1: #1a1a2e;
+    --bg-2: #16213e;
+    --panel: rgba(255, 255, 255, 0.07);
+    --border: rgba(255, 255, 255, 0.1);
+    --ink: #e8eaf6;
+    --muted: #9fa8da;
+
+    position: relative;
+    width: min(860px, 94vw);
+    margin: 2rem auto;
+    padding: 1rem;
+    border-radius: 24px;
+    background: linear-gradient(150deg, var(--bg-1), var(--bg-2));
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.5);
+    font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+    color: var(--ink);
+  }
+
+  /* HUD */
+  .hud {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.65rem;
+    margin-bottom: 0.85rem;
+  }
+
+  .hud-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 0.6rem 0.8rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  .hud-label {
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .hud-value {
+    font-size: 1.35rem;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  /* Canvas wrap */
+  .canvas-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    background: #000;
+    border-radius: 18px;
+    overflow: hidden;
+  }
+
+  #fcc-video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  #fcc-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  /* Overlay screens */
+  .overlay-screen {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.9rem;
+    background: rgba(8, 8, 25, 0.86);
+    backdrop-filter: blur(6px);
+    border-radius: 18px;
+    text-align: center;
+    padding: 1.5rem;
+    z-index: 10;
+  }
+
+  .overlay-screen.hidden {
+    display: none;
+  }
+
+  .screen-title {
+    margin: 0;
+    font-size: clamp(2rem, 6vw, 3.2rem);
+    font-weight: 900;
+    line-height: 1.1;
+  }
+
+  .screen-sub {
+    margin: 0;
+    font-size: 1rem;
+    color: var(--muted);
+    max-width: 340px;
+    line-height: 1.5;
+  }
+
+  .screen-note {
+    margin: 0;
+    font-size: 0.8rem;
+    color: rgba(159, 168, 218, 0.6);
+  }
+
+  .screen-countdown {
+    margin: 0;
+    font-size: clamp(5rem, 18vw, 10rem);
+    font-weight: 900;
+    color: #fff;
+    text-shadow: 0 0 60px rgba(80, 180, 255, 0.9);
+    animation: countdown-pop 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  /* Buttons */
+  .primary-btn {
+    border: none;
+    border-radius: 12px;
+    background: #2979ff;
+    color: #fff;
+    font-size: 1.05rem;
+    font-weight: 700;
+    padding: 0.75rem 2rem;
+    cursor: pointer;
+    transition: filter 0.12s, transform 0.1s;
+  }
+
+  .primary-btn:hover {
+    filter: brightness(1.18);
+    transform: scale(1.03);
+  }
+
+  .primary-btn:active {
+    transform: scale(0.97);
+  }
+
+  /* Loading spinner */
+  .spinner {
+    width: 44px;
+    height: 44px;
+    border: 4px solid rgba(255, 255, 255, 0.15);
+    border-top-color: #2979ff;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  /* Game Over card */
+  .gameover-card {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 22px;
+    padding: 2rem 2.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .gameover-label {
+    margin: 0;
+    font-size: 0.85rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .gameover-score {
+    margin: 0.2rem 0 0;
+    font-size: clamp(3.5rem, 12vw, 6rem);
+    font-weight: 900;
+    line-height: 1;
+  }
+
+  .gameover-meta {
+    margin: 0;
+    font-size: 0.95rem;
+    color: var(--muted);
+  }
+
+  .gameover-best {
+    margin: 0.3rem 0 0.6rem;
+    font-size: 0.9rem;
+    color: #ffd740;
+    font-weight: 700;
+    min-height: 1.2em;
+  }
+
+  /* Instructions */
+  .howto {
+    margin-top: 0.85rem;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+  }
+
+  .howto-grid {
+    display: flex;
+    gap: 1.5rem;
+  }
+
+  .howto-col {
+    flex: 1;
+  }
+
+  .howto-title {
+    margin: 0 0 0.35rem;
+    font-size: 0.95rem;
+    font-weight: 800;
+  }
+
+  .howto-line {
+    margin: 0.1rem 0;
+    font-size: 0.85rem;
+    color: var(--muted);
+    line-height: 1.45;
+  }
+
+  /* Animations */
+  @keyframes countdown-pop {
+    0% { opacity: 0; transform: scale(0.5); }
+    60% { opacity: 1; transform: scale(1.12); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  @media (max-width: 640px) {
+    .howto-grid {
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+  }
+</style>
+
+<script type="module" is:inline>
+  // ── DOM refs ──────────────────────────────────────────────────────────────
+  const video       = document.getElementById('fcc-video');
+  const canvas      = document.getElementById('fcc-canvas');
+  const ctx         = canvas.getContext('2d');
+  const scoreEl     = document.getElementById('fcc-score');
+  const bestEl      = document.getElementById('fcc-best');
+  const livesEl     = document.getElementById('fcc-lives');
+  const screenIdle  = document.getElementById('fcc-screen-idle');
+  const screenLoad  = document.getElementById('fcc-screen-loading');
+  const screenCount = document.getElementById('fcc-screen-countdown');
+  const screenOver  = document.getElementById('fcc-screen-gameover');
+  const countdownEl = document.getElementById('fcc-countdown');
+  const loadMsgEl   = document.getElementById('fcc-loading-msg');
+  const finalScoreEl = document.getElementById('fcc-final-score');
+  const gameoverBestEl = document.getElementById('fcc-gameover-best');
+  const btnStart    = document.getElementById('fcc-btn-start');
+  const btnRestart  = document.getElementById('fcc-btn-restart');
+
+  // ── Canvas resolution (internal drawing space) ────────────────────────────
+  const W = 640, H = 480;
+  canvas.width  = W;
+  canvas.height = H;
+
+  // ── Game config ───────────────────────────────────────────────────────────
+  const ITEM_R      = 30;
+  const MAX_LIVES   = 3;
+  const SPAWN_MS    = 1300;
+  const BASE_SPEED  = 2.2;
+  const MAX_SPEED   = 7;
+  const CUP_H       = 38;
+  const LETTERS     = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+  const ITEM_COLORS = ['#e74c3c','#3498db','#2ecc71','#f1c40f','#9b59b6','#e67e22','#1abc9c','#e84393'];
+
+  // ── Game state ────────────────────────────────────────────────────────────
+  let state       = 'idle'; // idle | loading | countdown | playing | gameover
+  let score       = 0;
+  let lives       = MAX_LIVES;
+  let items       = [];   // { id, x, y, letter, color, speed }
+  let effects     = [];   // { x, y, text, color, life, maxLife, dy }
+  let missFlash   = 0;    // frames remaining for red flash
+  let nextId      = 0;
+  let frameId     = null;
+  let spawnTimer  = null;
+  let faceDetected = false;
+
+  // Cup position (in canvas coords)
+  let cupX = W / 2, cupY = H / 2, cupW = 110;
+
+  // ── MediaPipe ─────────────────────────────────────────────────────────────
+  let faceLandmarker = null;
+
+  // ── Persistence ───────────────────────────────────────────────────────────
+  const LS_KEY = 'fcc-best';
+  let bestScore = parseInt(localStorage.getItem(LS_KEY) ?? '0', 10);
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+  function showScreen(name) {
+    for (const el of [screenIdle, screenLoad, screenCount, screenOver]) {
+      el.classList.add('hidden');
+    }
+    if (name === 'idle')      screenIdle.classList.remove('hidden');
+    if (name === 'loading')   screenLoad.classList.remove('hidden');
+    if (name === 'countdown') screenCount.classList.remove('hidden');
+    if (name === 'gameover')  screenOver.classList.remove('hidden');
+    // name === 'playing': all overlays hidden → canvas is fully visible
+  }
+
+  function updateHud() {
+    scoreEl.textContent = String(score);
+    bestEl.textContent  = String(bestScore);
+    const h = '❤️'.repeat(lives) + '🖤'.repeat(MAX_LIVES - lives);
+    livesEl.textContent = h;
+  }
+
+  function itemSpeed() {
+    // Linearly ramp from BASE_SPEED to MAX_SPEED as score grows to 200
+    return Math.min(BASE_SPEED + (score / 200) * (MAX_SPEED - BASE_SPEED), MAX_SPEED);
+  }
+
+  // ── MediaPipe init ────────────────────────────────────────────────────────
+  async function initMediaPipe() {
+    loadMsgEl.textContent = 'Loading AI model… (first load may take a moment)';
+    const { FaceLandmarker, FilesetResolver } = await import(
+      'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.mjs'
+    );
+    const vision = await FilesetResolver.forVisionTasks(
+      'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm'
+    );
+    faceLandmarker = await FaceLandmarker.createFromOptions(vision, {
+      baseOptions: {
+        modelAssetPath:
+          'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task',
+        delegate: 'GPU',
+      },
+      runningMode: 'VIDEO',
+      numFaces: 1,
+      outputFaceBlendshapes: false,
+      outputFacialTransformationMatrixes: false,
+    });
+  }
+
+  // ── Camera init ───────────────────────────────────────────────────────────
+  async function initCamera() {
+    loadMsgEl.textContent = 'Requesting camera access…';
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' },
+      audio: false,
+    });
+    video.srcObject = stream;
+    await new Promise((res) => { video.onloadedmetadata = res; });
+    await video.play();
+  }
+
+  // ── Countdown ─────────────────────────────────────────────────────────────
+  async function runCountdown() {
+    showScreen('countdown');
+    for (let n = 3; n >= 1; n--) {
+      countdownEl.textContent = String(n);
+      // Re-trigger CSS animation each tick
+      countdownEl.style.animation = 'none';
+      void countdownEl.offsetWidth;
+      countdownEl.style.animation = '';
+      await sleep(850);
+    }
+    countdownEl.textContent = 'GO!';
+    countdownEl.style.animation = 'none';
+    void countdownEl.offsetWidth;
+    countdownEl.style.animation = '';
+    await sleep(600);
+  }
+
+  // ── Spawning ──────────────────────────────────────────────────────────────
+  function spawnItem() {
+    if (state !== 'playing') return;
+    const margin = ITEM_R + 8;
+    items.push({
+      id:     nextId++,
+      x:      margin + Math.random() * (W - margin * 2),
+      y:      -ITEM_R,
+      letter: LETTERS[Math.floor(Math.random() * LETTERS.length)],
+      color:  ITEM_COLORS[Math.floor(Math.random() * ITEM_COLORS.length)],
+      speed:  itemSpeed(),
+    });
+  }
+
+  function startSpawning() {
+    stopSpawning();
+    spawnItem(); // immediate first item
+    spawnTimer = setInterval(() => { if (state === 'playing') spawnItem(); }, SPAWN_MS);
+  }
+
+  function stopSpawning() {
+    if (spawnTimer) { clearInterval(spawnTimer); spawnTimer = null; }
+  }
+
+  // ── Face detection ────────────────────────────────────────────────────────
+  function detectFace() {
+    if (!faceLandmarker || video.readyState < 2) return;
+
+    const results = faceLandmarker.detectForVideo(video, performance.now());
+
+    if (results.faceLandmarks.length > 0) {
+      faceDetected = true;
+      const lm = results.faceLandmarks[0];
+
+      // Landmark 10  = upper forehead (top visible head point)
+      // Landmarks 234 & 454 = left/right face boundary
+      const top   = lm[10];
+      const left  = lm[234];
+      const right = lm[454];
+
+      // Mirror X because video is drawn flipped (selfie mode)
+      const targetX  = (1 - top.x) * W;
+      const targetY  = top.y * H - CUP_H; // cup opening sits just above forehead
+      const faceW    = Math.abs(right.x - left.x) * W;
+      const targetW  = Math.max(70, faceW * 1.55);
+
+      // Smooth tracking
+      cupX = cupX * 0.65 + targetX * 0.35;
+      cupY = cupY * 0.65 + targetY * 0.35;
+      cupW = cupW * 0.8  + targetW * 0.2;
+    } else {
+      faceDetected = false;
+    }
+  }
+
+  // ── Drawing ───────────────────────────────────────────────────────────────
+  function drawCup(x, y, w) {
+    const halfW = w / 2;
+    const lip   = CUP_H * 0.28; // trapezoid taper at bottom
+
+    ctx.save();
+
+    // Cup body fill
+    ctx.beginPath();
+    ctx.moveTo(x - halfW,        y);          // top-left (wide opening)
+    ctx.lineTo(x + halfW,        y);          // top-right
+    ctx.lineTo(x + halfW - lip,  y + CUP_H); // bottom-right (narrower)
+    ctx.lineTo(x - halfW + lip,  y + CUP_H); // bottom-left
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(255, 210, 55, 0.45)';
+    ctx.fill();
+
+    // Cup outline
+    ctx.strokeStyle = '#ffd740';
+    ctx.lineWidth   = 3;
+    ctx.lineJoin    = 'round';
+    ctx.stroke();
+
+    // Bright rim at the opening (the "catch line")
+    ctx.beginPath();
+    ctx.moveTo(x - halfW, y);
+    ctx.lineTo(x + halfW, y);
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+    ctx.lineWidth   = 5;
+    ctx.lineCap     = 'round';
+    ctx.stroke();
+
+    ctx.restore();
+  }
+
+  function drawItem(item) {
+    ctx.save();
+
+    // Drop shadow
+    ctx.shadowColor  = 'rgba(0,0,0,0.45)';
+    ctx.shadowBlur   = 10;
+    ctx.shadowOffsetY = 3;
+
+    // Circle
+    ctx.beginPath();
+    ctx.arc(item.x, item.y, ITEM_R, 0, Math.PI * 2);
+    ctx.fillStyle = item.color;
+    ctx.fill();
+
+    ctx.restore();
+
+    // Rim
+    ctx.beginPath();
+    ctx.arc(item.x, item.y, ITEM_R, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(255,255,255,0.45)';
+    ctx.lineWidth   = 2.5;
+    ctx.stroke();
+
+    // Letter
+    ctx.fillStyle    = '#ffffff';
+    ctx.font         = `bold ${ITEM_R * 1.25}px sans-serif`;
+    ctx.textAlign    = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(item.letter, item.x, item.y);
+  }
+
+  function drawEffects() {
+    for (const e of effects) {
+      const alpha = e.life / e.maxLife;
+      ctx.save();
+      ctx.globalAlpha  = alpha;
+      ctx.fillStyle    = e.color;
+      ctx.font         = `bold ${e.fontSize ?? 22}px sans-serif`;
+      ctx.textAlign    = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(e.text, e.x, e.y);
+      ctx.restore();
+      e.y   -= e.dy ?? 1.5;
+      e.life--;
+    }
+    effects = effects.filter((e) => e.life > 0);
+  }
+
+  function drawNoFaceWarning() {
+    ctx.save();
+    ctx.fillStyle    = 'rgba(255, 210, 50, 0.88)';
+    ctx.font         = 'bold 15px sans-serif';
+    ctx.textAlign    = 'center';
+    ctx.textBaseline = 'top';
+    ctx.fillText('⚠  Show your face to the camera!', W / 2, 10);
+    ctx.restore();
+  }
+
+  function drawMissFlash() {
+    if (missFlash <= 0) return;
+    ctx.save();
+    ctx.globalAlpha = (missFlash / 22) * 0.5;
+    ctx.fillStyle   = '#ff1f1f';
+    ctx.fillRect(0, 0, W, H);
+    ctx.restore();
+    missFlash--;
+  }
+
+  // ── Main game loop ────────────────────────────────────────────────────────
+  function gameLoop() {
+    if (state !== 'playing') return;
+
+    // 1. Draw mirrored camera feed
+    ctx.save();
+    ctx.scale(-1, 1);
+    ctx.drawImage(video, -W, 0, W, H);
+    ctx.restore();
+
+    // 2. Face detection → update cup position
+    detectFace();
+
+    // 3. Red flash overlay (miss feedback)
+    drawMissFlash();
+
+    // 4. Update items & check collisions
+    const toRemove = [];
+    for (const item of items) {
+      item.y += item.speed;
+
+      const withinX = item.x > cupX - cupW / 2 && item.x < cupX + cupW / 2;
+      const atRim   = item.y + ITEM_R >= cupY && item.y - ITEM_R <= cupY + CUP_H;
+
+      if (faceDetected && withinX && atRim) {
+        toRemove.push({ item, caught: true });
+      } else if (item.y - ITEM_R > H) {
+        toRemove.push({ item, caught: false });
+      }
+    }
+
+    for (const { item, caught } of toRemove) {
+      items = items.filter((i) => i.id !== item.id);
+      if (caught) {
+        score += 10;
+        if (score > bestScore) {
+          bestScore = score;
+          localStorage.setItem(LS_KEY, String(bestScore));
+        }
+        effects.push({ x: item.x, y: cupY - 14, text: '+10', color: '#69f0ae', life: 42, maxLife: 42, dy: 1.8 });
+        updateHud();
+      } else {
+        lives--;
+        missFlash = 22;
+        effects.push({ x: item.x, y: H - 50, text: '✗', color: '#ff5252', life: 30, maxLife: 30, dy: 2, fontSize: 28 });
+        updateHud();
+        if (lives <= 0) {
+          endGame();
+          return;
+        }
+      }
+    }
+
+    // 5. Draw items (behind cup)
+    for (const item of items) drawItem(item);
+
+    // 6. Draw cup (in front of items)
+    if (faceDetected) {
+      drawCup(cupX, cupY, cupW);
+    } else {
+      drawNoFaceWarning();
+    }
+
+    // 7. Draw floating text effects
+    drawEffects();
+
+    frameId = requestAnimationFrame(gameLoop);
+  }
+
+  // ── Game lifecycle ────────────────────────────────────────────────────────
+  function endGame() {
+    state = 'gameover';
+    stopSpawning();
+    if (frameId) { cancelAnimationFrame(frameId); frameId = null; }
+
+    finalScoreEl.textContent = String(score);
+    gameoverBestEl.textContent =
+      score >= bestScore && score > 0 ? '🏆 New Best!' : `Best: ${bestScore}`;
+
+    showScreen('gameover');
+  }
+
+  async function startGame() {
+    // Reset
+    score = 0; lives = MAX_LIVES; items = []; effects = []; missFlash = 0;
+    faceDetected = false;
+    cupX = W / 2; cupY = H / 3; cupW = 110;
+    updateHud();
+
+    state = 'loading';
+    showScreen('loading');
+
+    try {
+      if (!video.srcObject) await initCamera();
+      if (!faceLandmarker)  await initMediaPipe();
+    } catch (err) {
+      loadMsgEl.textContent = `Error: ${err.message}`;
+      return;
+    }
+
+    await runCountdown();
+
+    state = 'playing';
+    showScreen('playing');
+    startSpawning();
+    frameId = requestAnimationFrame(gameLoop);
+  }
+
+  async function restartGame() {
+    stopSpawning();
+    if (frameId) { cancelAnimationFrame(frameId); frameId = null; }
+
+    score = 0; lives = MAX_LIVES; items = []; effects = []; missFlash = 0;
+    faceDetected = false;
+    updateHud();
+
+    await runCountdown();
+
+    state = 'playing';
+    showScreen('playing');
+    startSpawning();
+    frameId = requestAnimationFrame(gameLoop);
+  }
+
+  // ── Button listeners ──────────────────────────────────────────────────────
+  btnStart.addEventListener('click', startGame);
+  btnRestart.addEventListener('click', restartGame);
+
+  // ── Init HUD ──────────────────────────────────────────────────────────────
+  updateHud();
+</script>

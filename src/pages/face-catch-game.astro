@@ -1,0 +1,22 @@
+---
+import GameLayout from "../layouts/GameLayout.astro";
+import FaceCatchGame from "../components/FaceCatchGame.astro";
+---
+
+<GameLayout title="Face Catch Game">
+  <div class="face-catch-page">
+    <main>
+      <FaceCatchGame />
+    </main>
+  </div>
+</GameLayout>
+
+<style>
+  .face-catch-page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(160deg, #0d0d1e 0%, #1a1a3a 100%);
+    padding-bottom: 1.5rem;
+  }
+</style>
