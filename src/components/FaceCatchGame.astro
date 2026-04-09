@@ -23,10 +23,19 @@
 
     <!-- Idle screen -->
     <div class="overlay-screen" id="fcc-screen-idle">
-      <p class="screen-title">🎯 Face Catch</p>
-      <p class="screen-sub">Move your head to catch falling letters with the cup!</p>
-      <button id="fcc-btn-start" class="primary-btn">Start Game</button>
-      <p class="screen-note">Camera access required</p>
+      <p class="screen-title">Catch</p>
+      <p class="screen-sub">Move your face to catch blue circles and dodge red X!</p>
+      <div class="mode-btns">
+        <button id="fcc-btn-time" class="primary-btn">
+          Time Attack
+          <span class="btn-sub">60 seconds / 60秒</span>
+        </button>
+        <button id="fcc-btn-endless" class="primary-btn btn-endless">
+          Endless
+          <span class="btn-sub">How long can you last? / どこまでいける？</span>
+        </button>
+      </div>
+      <p class="screen-note">Camera access required / カメラが必要です</p>
     </div>
 
     <!-- Loading screen -->
@@ -53,25 +62,7 @@
     </div>
   </div>
 
-  <!-- Instructions -->
-  <section class="howto">
-    <div class="howto-grid">
-      <div class="howto-col">
-        <p class="howto-title">あそびかた</p>
-        <p class="howto-line">1. 「Start Game」をおす。</p>
-        <p class="howto-line">2. カメラに顔をみせる。</p>
-        <p class="howto-line">3. 頭をうごかして文字をキャッチ！</p>
-        <p class="howto-line">3つミスしたらゲームオーバー。</p>
-      </div>
-      <div class="howto-col">
-        <p class="howto-title">How to Play</p>
-        <p class="howto-line">1. Press Start Game.</p>
-        <p class="howto-line">2. Show your face to the camera.</p>
-        <p class="howto-line">3. Move your head to catch falling letters!</p>
-        <p class="howto-line">Miss 3 and it's game over.</p>
-      </div>
-    </div>
-  </section>
+
 
 </div>
 
@@ -206,6 +197,13 @@
   }
 
   /* Buttons */
+  .mode-btns {
+    display: flex;
+    gap: 0.9rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
   .primary-btn {
     border: none;
     border-radius: 12px;
@@ -213,9 +211,23 @@
     color: #fff;
     font-size: 1.05rem;
     font-weight: 700;
-    padding: 0.75rem 2rem;
+    padding: 0.75rem 1.6rem;
     cursor: pointer;
     transition: filter 0.12s, transform 0.1s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+  }
+
+  .btn-sub {
+    font-size: 0.72rem;
+    font-weight: 400;
+    opacity: 0.8;
+  }
+
+  .btn-endless {
+    background: #7c3aed;
   }
 
   .primary-btn:hover {
@@ -278,37 +290,6 @@
     min-height: 1.2em;
   }
 
-  /* Instructions */
-  .howto {
-    margin-top: 0.85rem;
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 0.75rem 1rem;
-  }
-
-  .howto-grid {
-    display: flex;
-    gap: 1.5rem;
-  }
-
-  .howto-col {
-    flex: 1;
-  }
-
-  .howto-title {
-    margin: 0 0 0.35rem;
-    font-size: 0.95rem;
-    font-weight: 800;
-  }
-
-  .howto-line {
-    margin: 0.1rem 0;
-    font-size: 0.85rem;
-    color: var(--muted);
-    line-height: 1.45;
-  }
-
   /* Animations */
   @keyframes countdown-pop {
     0% { opacity: 0; transform: scale(0.5); }
@@ -330,59 +311,74 @@
 
 <script type="module" is:inline>
   // ── DOM refs ──────────────────────────────────────────────────────────────
-  const video       = document.getElementById('fcc-video');
-  const canvas      = document.getElementById('fcc-canvas');
-  const ctx         = canvas.getContext('2d');
-  const scoreEl     = document.getElementById('fcc-score');
-  const bestEl      = document.getElementById('fcc-best');
-  const livesEl     = document.getElementById('fcc-lives');
-  const screenIdle  = document.getElementById('fcc-screen-idle');
-  const screenLoad  = document.getElementById('fcc-screen-loading');
-  const screenCount = document.getElementById('fcc-screen-countdown');
-  const screenOver  = document.getElementById('fcc-screen-gameover');
-  const countdownEl = document.getElementById('fcc-countdown');
-  const loadMsgEl   = document.getElementById('fcc-loading-msg');
-  const finalScoreEl = document.getElementById('fcc-final-score');
+  const video          = document.getElementById('fcc-video');
+  const canvas         = document.getElementById('fcc-canvas');
+  const ctx            = canvas.getContext('2d');
+  const scoreEl        = document.getElementById('fcc-score');
+  const bestEl         = document.getElementById('fcc-best');
+  const livesEl        = document.getElementById('fcc-lives');
+  const screenIdle     = document.getElementById('fcc-screen-idle');
+  const screenLoad     = document.getElementById('fcc-screen-loading');
+  const screenCount    = document.getElementById('fcc-screen-countdown');
+  const screenOver     = document.getElementById('fcc-screen-gameover');
+  const countdownEl    = document.getElementById('fcc-countdown');
+  const loadMsgEl      = document.getElementById('fcc-loading-msg');
+  const finalScoreEl   = document.getElementById('fcc-final-score');
   const gameoverBestEl = document.getElementById('fcc-gameover-best');
-  const btnStart    = document.getElementById('fcc-btn-start');
-  const btnRestart  = document.getElementById('fcc-btn-restart');
+  const btnTime        = document.getElementById('fcc-btn-time');
+  const btnEndless     = document.getElementById('fcc-btn-endless');
+  const btnRestart     = document.getElementById('fcc-btn-restart');
 
-  // ── Canvas resolution (internal drawing space) ────────────────────────────
+  // ── Canvas resolution ─────────────────────────────────────────────────────
   const W = 640, H = 480;
   canvas.width  = W;
   canvas.height = H;
 
   // ── Game config ───────────────────────────────────────────────────────────
-  const ITEM_R      = 30;
-  const MAX_LIVES   = 3;
-  const SPAWN_MS    = 1300;
-  const BASE_SPEED  = 2.2;
-  const MAX_SPEED   = 7;
-  const CUP_H       = 38;
-  const LETTERS     = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-  const ITEM_COLORS = ['#e74c3c','#3498db','#2ecc71','#f1c40f','#9b59b6','#e67e22','#1abc9c','#e84393'];
+  const MAX_LIVES    = 3;
+  const SPAWN_MS     = 1600;
+  const BASE_SPEED   = 0.0028; // progress per frame (~6s at 60fps)
+  const MAX_SPEED    = 0.007;  // cap for time mode (~2.4s)
+  const BAD_CHANCE   = 0.3;    // 30% red X
+  const ITEM_R       = 26;     // fixed radius
+  const HEART_R      = 38;     // collision radius of heart
+  const TIME_LIMIT   = 60;     // seconds for time attack
 
   // ── Game state ────────────────────────────────────────────────────────────
-  let state       = 'idle'; // idle | loading | countdown | playing | gameover
-  let score       = 0;
-  let lives       = MAX_LIVES;
-  let items       = [];   // { id, x, y, letter, color, speed }
-  let effects     = [];   // { x, y, text, color, life, maxLife, dy }
-  let missFlash   = 0;    // frames remaining for red flash
-  let nextId      = 0;
-  let frameId     = null;
-  let spawnTimer  = null;
+  let state        = 'idle';
+  let gameMode     = 'time';   // 'time' | 'endless'
+  let score        = 0;
+  let lives        = MAX_LIVES;
+  let items        = [];
+  let effects      = [];
+  let missFlash    = 0;
+  let nextId       = 0;
+  let frameId      = null;
+  let spawnTimer   = null;
   let faceDetected = false;
+  let gameStartTime = 0;
+  let timeLeft      = TIME_LIMIT;
 
-  // Cup position (in canvas coords)
-  let cupX = W / 2, cupY = H / 2, cupW = 110;
+  // Heart position (canvas coords, follows nose)
+  let heartX = W / 2, heartY = H / 2;
 
   // ── MediaPipe ─────────────────────────────────────────────────────────────
   let faceLandmarker = null;
 
   // ── Persistence ───────────────────────────────────────────────────────────
-  const LS_KEY = 'fcc-best';
-  let bestScore = parseInt(localStorage.getItem(LS_KEY) ?? '0', 10);
+  const LS_KEY_TIME    = 'fcc-best-time';
+  const LS_KEY_ENDLESS = 'fcc-best-endless';
+  let bestScore = 0;
+
+  function loadBest() {
+    const key = gameMode === 'time' ? LS_KEY_TIME : LS_KEY_ENDLESS;
+    bestScore = parseInt(localStorage.getItem(key) ?? '0', 10);
+  }
+
+  function saveBest() {
+    const key = gameMode === 'time' ? LS_KEY_TIME : LS_KEY_ENDLESS;
+    localStorage.setItem(key, String(bestScore));
+  }
 
   // ── Helpers ───────────────────────────────────────────────────────────────
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -395,19 +391,33 @@
     if (name === 'loading')   screenLoad.classList.remove('hidden');
     if (name === 'countdown') screenCount.classList.remove('hidden');
     if (name === 'gameover')  screenOver.classList.remove('hidden');
-    // name === 'playing': all overlays hidden → canvas is fully visible
   }
 
   function updateHud() {
     scoreEl.textContent = String(score);
     bestEl.textContent  = String(bestScore);
-    const h = '❤️'.repeat(lives) + '🖤'.repeat(MAX_LIVES - lives);
-    livesEl.textContent = h;
+    livesEl.textContent = '❤️'.repeat(lives) + '🖤'.repeat(MAX_LIVES - lives);
   }
 
   function itemSpeed() {
-    // Linearly ramp from BASE_SPEED to MAX_SPEED as score grows to 200
+    if (gameMode === 'endless') {
+      const elapsed = (performance.now() - gameStartTime) / 1000;
+      return BASE_SPEED + elapsed * 0.00018; // no cap — gets faster forever
+    }
+    // time mode: score-based, capped
     return Math.min(BASE_SPEED + (score / 200) * (MAX_SPEED - BASE_SPEED), MAX_SPEED);
+  }
+
+  function drawTimerOverlay() {
+    if (gameMode !== 'time') return;
+    const secs = Math.ceil(timeLeft);
+    ctx.save();
+    ctx.fillStyle    = secs <= 10 ? '#ff5252' : 'rgba(255,255,255,0.85)';
+    ctx.font         = `bold 20px sans-serif`;
+    ctx.textAlign    = 'right';
+    ctx.textBaseline = 'top';
+    ctx.fillText(`${secs}s`, W - 12, 12);
+    ctx.restore();
   }
 
   // ── MediaPipe init ────────────────────────────────────────────────────────
@@ -449,7 +459,6 @@
     showScreen('countdown');
     for (let n = 3; n >= 1; n--) {
       countdownEl.textContent = String(n);
-      // Re-trigger CSS animation each tick
       countdownEl.style.animation = 'none';
       void countdownEl.offsetWidth;
       countdownEl.style.animation = '';
@@ -465,20 +474,32 @@
   // ── Spawning ──────────────────────────────────────────────────────────────
   function spawnItem() {
     if (state !== 'playing') return;
-    const margin = ITEM_R + 8;
+    const pad = ITEM_R + 4;
+    let startX, startY, endX, endY;
+    const edge = Math.floor(Math.random() * 4);
+    if (edge === 0) {       // left → right
+      startX = -pad; startY = pad + Math.random() * (H - pad * 2);
+      endX   = W + pad; endY = pad + Math.random() * (H - pad * 2);
+    } else if (edge === 1) { // right → left
+      startX = W + pad; startY = pad + Math.random() * (H - pad * 2);
+      endX   = -pad;    endY   = pad + Math.random() * (H - pad * 2);
+    } else if (edge === 2) { // top → bottom
+      startX = pad + Math.random() * (W - pad * 2); startY = -pad;
+      endX   = pad + Math.random() * (W - pad * 2); endY   = H + pad;
+    } else {                 // bottom → top
+      startX = pad + Math.random() * (W - pad * 2); startY = H + pad;
+      endX   = pad + Math.random() * (W - pad * 2); endY   = -pad;
+    }
     items.push({
-      id:     nextId++,
-      x:      margin + Math.random() * (W - margin * 2),
-      y:      -ITEM_R,
-      letter: LETTERS[Math.floor(Math.random() * LETTERS.length)],
-      color:  ITEM_COLORS[Math.floor(Math.random() * ITEM_COLORS.length)],
-      speed:  itemSpeed(),
+      id: nextId++, startX, startY, endX, endY,
+      progress: 0, speed: itemSpeed(),
+      type: Math.random() < BAD_CHANCE ? 'bad' : 'good',
     });
   }
 
   function startSpawning() {
     stopSpawning();
-    spawnItem(); // immediate first item
+    spawnItem();
     spawnTimer = setInterval(() => { if (state === 'playing') spawnItem(); }, SPAWN_MS);
   }
 
@@ -489,98 +510,91 @@
   // ── Face detection ────────────────────────────────────────────────────────
   function detectFace() {
     if (!faceLandmarker || video.readyState < 2) return;
-
     const results = faceLandmarker.detectForVideo(video, performance.now());
-
     if (results.faceLandmarks.length > 0) {
       faceDetected = true;
-      const lm = results.faceLandmarks[0];
-
-      // Landmark 10  = upper forehead (top visible head point)
-      // Landmarks 234 & 454 = left/right face boundary
-      const top   = lm[10];
-      const left  = lm[234];
-      const right = lm[454];
-
-      // Mirror X because video is drawn flipped (selfie mode)
-      const targetX  = (1 - top.x) * W;
-      const targetY  = top.y * H - CUP_H; // cup opening sits just above forehead
-      const faceW    = Math.abs(right.x - left.x) * W;
-      const targetW  = Math.max(70, faceW * 1.55);
-
-      // Smooth tracking
-      cupX = cupX * 0.65 + targetX * 0.35;
-      cupY = cupY * 0.65 + targetY * 0.35;
-      cupW = cupW * 0.8  + targetW * 0.2;
+      const lm   = results.faceLandmarks[0];
+      // Landmark 1 = nose tip — good center-of-face anchor
+      const nose = lm[1];
+      const tx   = (1 - nose.x) * W; // mirror X for selfie
+      const ty   = nose.y * H;
+      heartX = heartX * 0.7 + tx * 0.3;
+      heartY = heartY * 0.7 + ty * 0.3;
     } else {
       faceDetected = false;
     }
   }
 
   // ── Drawing ───────────────────────────────────────────────────────────────
-  function drawCup(x, y, w) {
-    const halfW = w / 2;
-    const lip   = CUP_H * 0.28; // trapezoid taper at bottom
-
+  function drawBackground() {
+    // Mirrored camera feed dimmed heavily so objects stand out
     ctx.save();
+    ctx.scale(-1, 1);
+    ctx.drawImage(video, -W, 0, W, H);
+    ctx.restore();
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.72)';
+    ctx.fillRect(0, 0, W, H);
+  }
 
-    // Cup body fill
+  function drawHeart(x, y) {
+    // Canonical heart centered at (x, y) with fixed HEART_R size
+    const s = HEART_R;
+    ctx.save();
     ctx.beginPath();
-    ctx.moveTo(x - halfW,        y);          // top-left (wide opening)
-    ctx.lineTo(x + halfW,        y);          // top-right
-    ctx.lineTo(x + halfW - lip,  y + CUP_H); // bottom-right (narrower)
-    ctx.lineTo(x - halfW + lip,  y + CUP_H); // bottom-left
+    ctx.moveTo(x, y + s * 0.9);
+    ctx.bezierCurveTo(x - s * 1.05, y + s * 0.25, x - s * 1.1, y - s * 0.55, x, y - s * 0.2);
+    ctx.bezierCurveTo(x + s * 1.1,  y - s * 0.55, x + s * 1.05, y + s * 0.25, x, y + s * 0.9);
     ctx.closePath();
-    ctx.fillStyle = 'rgba(255, 210, 55, 0.45)';
+    ctx.fillStyle   = '#ff4d6d';
+    ctx.shadowColor = 'rgba(255, 77, 109, 0.65)';
+    ctx.shadowBlur  = 18;
     ctx.fill();
-
-    // Cup outline
-    ctx.strokeStyle = '#ffd740';
-    ctx.lineWidth   = 3;
-    ctx.lineJoin    = 'round';
-    ctx.stroke();
-
-    // Bright rim at the opening (the "catch line")
-    ctx.beginPath();
-    ctx.moveTo(x - halfW, y);
-    ctx.lineTo(x + halfW, y);
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
-    ctx.lineWidth   = 5;
-    ctx.lineCap     = 'round';
-    ctx.stroke();
-
     ctx.restore();
   }
 
+  function itemCoords(item) {
+    const t = item.progress;
+    return {
+      x: item.startX + (item.endX - item.startX) * t,
+      y: item.startY + (item.endY - item.startY) * t,
+      r: ITEM_R,
+    };
+  }
+
   function drawItem(item) {
+    const { x, y, r } = itemCoords(item);
     ctx.save();
 
-    // Drop shadow
-    ctx.shadowColor  = 'rgba(0,0,0,0.45)';
-    ctx.shadowBlur   = 10;
-    ctx.shadowOffsetY = 3;
-
-    // Circle
-    ctx.beginPath();
-    ctx.arc(item.x, item.y, ITEM_R, 0, Math.PI * 2);
-    ctx.fillStyle = item.color;
-    ctx.fill();
+    if (item.type === 'good') {
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fillStyle   = '#3b82f6';
+      ctx.shadowColor = 'rgba(59,130,246,0.55)';
+      ctx.shadowBlur  = 14;
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+      ctx.lineWidth   = 2;
+      ctx.stroke();
+    } else {
+      // Red circle
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fillStyle   = '#ef4444';
+      ctx.shadowColor = 'rgba(239,68,68,0.55)';
+      ctx.shadowBlur  = 14;
+      ctx.fill();
+      // X mark
+      const arm = r * 0.52;
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth   = Math.max(1.5, r * 0.2);
+      ctx.lineCap     = 'round';
+      ctx.beginPath();
+      ctx.moveTo(x - arm, y - arm); ctx.lineTo(x + arm, y + arm);
+      ctx.moveTo(x + arm, y - arm); ctx.lineTo(x - arm, y + arm);
+      ctx.stroke();
+    }
 
     ctx.restore();
-
-    // Rim
-    ctx.beginPath();
-    ctx.arc(item.x, item.y, ITEM_R, 0, Math.PI * 2);
-    ctx.strokeStyle = 'rgba(255,255,255,0.45)';
-    ctx.lineWidth   = 2.5;
-    ctx.stroke();
-
-    // Letter
-    ctx.fillStyle    = '#ffffff';
-    ctx.font         = `bold ${ITEM_R * 1.25}px sans-serif`;
-    ctx.textAlign    = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(item.letter, item.x, item.y);
   }
 
   function drawEffects() {
@@ -602,11 +616,11 @@
 
   function drawNoFaceWarning() {
     ctx.save();
-    ctx.fillStyle    = 'rgba(255, 210, 50, 0.88)';
+    ctx.fillStyle    = 'rgba(255, 210, 50, 0.9)';
     ctx.font         = 'bold 15px sans-serif';
     ctx.textAlign    = 'center';
     ctx.textBaseline = 'top';
-    ctx.fillText('⚠  Show your face to the camera!', W / 2, 10);
+    ctx.fillText('Show your face! / 顔をカメラに見せて！', W / 2, 10);
     ctx.restore();
   }
 
@@ -624,67 +638,83 @@
   function gameLoop() {
     if (state !== 'playing') return;
 
-    // 1. Draw mirrored camera feed
-    ctx.save();
-    ctx.scale(-1, 1);
-    ctx.drawImage(video, -W, 0, W, H);
-    ctx.restore();
+    // 1. Camera feed with dark overlay
+    drawBackground();
 
-    // 2. Face detection → update cup position
+    // 2. Face detection → update heart position
     detectFace();
 
-    // 3. Red flash overlay (miss feedback)
+    // 3. Red flash feedback
     drawMissFlash();
 
-    // 4. Update items & check collisions
+    // 4. Freeze when no face
+    if (!faceDetected) {
+      for (const item of items) drawItem(item);
+      drawNoFaceWarning();
+      drawEffects();
+      frameId = requestAnimationFrame(gameLoop);
+      return;
+    }
+
+    // 5. Advance items & check per-frame collision
     const toRemove = [];
     for (const item of items) {
-      item.y += item.speed;
+      item.progress += item.speed;
+      const { x, y, r } = itemCoords(item);
+      const dist = Math.hypot(x - heartX, y - heartY);
+      const hit  = dist < HEART_R * 0.9 + r * 0.7;
 
-      const withinX = item.x > cupX - cupW / 2 && item.x < cupX + cupW / 2;
-      const atRim   = item.y + ITEM_R >= cupY && item.y - ITEM_R <= cupY + CUP_H;
-
-      if (faceDetected && withinX && atRim) {
-        toRemove.push({ item, caught: true });
-      } else if (item.y - ITEM_R > H) {
-        toRemove.push({ item, caught: false });
+      if (hit && !item.resolved) {
+        item.resolved = true;
+        toRemove.push({ item, hit: true });
+      } else if (item.progress >= 1 && !item.resolved) {
+        item.resolved = true;
+        toRemove.push({ item, hit: false });
       }
     }
+    items = items.filter((i) => !i.resolved || toRemove.find((t) => t.item === i));
 
-    for (const { item, caught } of toRemove) {
-      items = items.filter((i) => i.id !== item.id);
-      if (caught) {
-        score += 10;
-        if (score > bestScore) {
-          bestScore = score;
-          localStorage.setItem(LS_KEY, String(bestScore));
+    for (const { item, hit } of toRemove) {
+      items = items.filter((i) => i !== item);
+      const { x, y } = itemCoords(item);
+
+      if (item.type === 'good') {
+        if (hit) {
+          score += 10;
+          effects.push({ x, y: y - 10, text: '+10', color: '#69f0ae', life: 42, maxLife: 42, dy: 1.8 });
+        } else {
+          // No penalty for missing a good item
         }
-        effects.push({ x: item.x, y: cupY - 14, text: '+10', color: '#69f0ae', life: 42, maxLife: 42, dy: 1.8 });
         updateHud();
+        if (lives <= 0) { endGame(); return; }
       } else {
-        lives--;
-        missFlash = 22;
-        effects.push({ x: item.x, y: H - 50, text: '✗', color: '#ff5252', life: 30, maxLife: 30, dy: 2, fontSize: 28 });
-        updateHud();
-        if (lives <= 0) {
-          endGame();
-          return;
+        if (hit) {
+          lives--;
+          missFlash = 22;
+          effects.push({ x, y, text: 'ouch', color: '#ff5252', life: 35, maxLife: 35, dy: 1.5, fontSize: 18 });
+          updateHud();
+          if (lives <= 0) { endGame(); return; }
         }
       }
     }
 
-    // 5. Draw items (behind cup)
+    // 6. Time mode: check timer
+    if (gameMode === 'time') {
+      timeLeft = TIME_LIMIT - (performance.now() - gameStartTime) / 1000;
+      if (timeLeft <= 0) { timeLeft = 0; endGame(); return; }
+    }
+
+    // 7. Draw items
     for (const item of items) drawItem(item);
 
-    // 6. Draw cup (in front of items)
-    if (faceDetected) {
-      drawCup(cupX, cupY, cupW);
-    } else {
-      drawNoFaceWarning();
-    }
+    // 8. Draw heart
+    drawHeart(heartX, heartY);
 
-    // 7. Draw floating text effects
+    // 9. Floating text effects
     drawEffects();
+
+    // 10. Timer overlay (time mode)
+    drawTimerOverlay();
 
     frameId = requestAnimationFrame(gameLoop);
   }
@@ -694,19 +724,21 @@
     state = 'gameover';
     stopSpawning();
     if (frameId) { cancelAnimationFrame(frameId); frameId = null; }
-
-    finalScoreEl.textContent = String(score);
-    gameoverBestEl.textContent =
-      score >= bestScore && score > 0 ? '🏆 New Best!' : `Best: ${bestScore}`;
-
+    if (score > bestScore) { bestScore = score; saveBest(); }
+    document.querySelector('.gameover-label').textContent =
+      gameMode === 'time' ? 'Time Up! / 終了！' : 'Game Over';
+    finalScoreEl.textContent   = String(score);
+    gameoverBestEl.textContent = score >= bestScore && score > 0 ? 'New Best!' : `Best: ${bestScore}`;
     showScreen('gameover');
   }
 
-  async function startGame() {
-    // Reset
+  async function startGame(mode) {
+    gameMode = mode;
+    loadBest();
     score = 0; lives = MAX_LIVES; items = []; effects = []; missFlash = 0;
     faceDetected = false;
-    cupX = W / 2; cupY = H / 3; cupW = 110;
+    heartX = W / 2; heartY = H / 2;
+    timeLeft = TIME_LIMIT;
     updateHud();
 
     state = 'loading';
@@ -721,8 +753,8 @@
     }
 
     await runCountdown();
-
     state = 'playing';
+    gameStartTime = performance.now();
     showScreen('playing');
     startSpawning();
     frameId = requestAnimationFrame(gameLoop);
@@ -731,21 +763,22 @@
   async function restartGame() {
     stopSpawning();
     if (frameId) { cancelAnimationFrame(frameId); frameId = null; }
-
     score = 0; lives = MAX_LIVES; items = []; effects = []; missFlash = 0;
     faceDetected = false;
+    timeLeft = TIME_LIMIT;
     updateHud();
 
     await runCountdown();
-
     state = 'playing';
+    gameStartTime = performance.now();
     showScreen('playing');
     startSpawning();
     frameId = requestAnimationFrame(gameLoop);
   }
 
   // ── Button listeners ──────────────────────────────────────────────────────
-  btnStart.addEventListener('click', startGame);
+  btnTime.addEventListener('click',    () => startGame('time'));
+  btnEndless.addEventListener('click', () => startGame('endless'));
   btnRestart.addEventListener('click', restartGame);
 
   // ── Init HUD ──────────────────────────────────────────────────────────────

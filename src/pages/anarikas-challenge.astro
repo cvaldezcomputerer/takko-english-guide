@@ -11,27 +11,48 @@ const categoriesJson = JSON.stringify(categories);
   <div id="screen-select" class="screen">
     <div class="anarika-card">
       <div class="anarika-avatar">
-        <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" class="avatar-svg">
-          <circle cx="60" cy="60" r="60" fill="#f4c2c2"/>
-          <circle cx="60" cy="48" r="26" fill="#fff0e0"/>
-          <ellipse cx="60" cy="105" rx="38" ry="28" fill="#e8a0a0"/>
-          <circle cx="50" cy="44" r="4" fill="#333"/>
-          <circle cx="70" cy="44" r="4" fill="#333"/>
-          <path d="M50 58 Q60 66 70 58" stroke="#c06060" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-        </svg>
+        <img src="/images/anarika-challenge/anarika-face.png" alt="Anarika" class="avatar-img" />
       </div>
-      <h1 class="game-title">Anarika's Challenge</h1>
-      <p class="game-subtitle">アナリカのちょうせん</p>
-      <p class="game-desc">Choose a category. Type the Japanese answer for each word.</p>
+      <h1 class="game-title">Anarika's Challenge<span class="title-ja">アナリカのちょうせん</span></h1>
+      <p class="game-desc"><span class="bilingual-line"><span>Choose a category.</span><span>カテゴリーをえらぼう。</span></span><span class="bilingual-line"><span>Type the Japanese answer for each word.</span><span>にほんごでこたえてね。</span></span></p>
     </div>
 
     <div class="category-grid" id="category-grid"></div>
   </div>
 
+  <!-- Category Modal -->
+  <div id="category-modal" class="modal-overlay hidden" role="dialog" aria-modal="true">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <span class="modal-group-name" id="modal-group-name"></span>
+          <span class="modal-group-ja" id="modal-group-ja"></span>
+        </div>
+        <button class="modal-close" id="modal-close" aria-label="Close">✕</button>
+      </div>
+
+      <label class="select-all-row">
+        <input type="checkbox" id="select-all-cb" />
+        <span>Select all ／ すべてえらぶ</span>
+      </label>
+
+      <div class="modal-subcats" id="modal-subcats"></div>
+
+      <div class="mode-select" id="mode-select">
+        <button class="mode-btn active" data-mode="easy">Easy ／ かんたん</button>
+        <button class="mode-btn" data-mode="hard">Hard ／ むずかしい</button>
+      </div>
+
+      <div class="modal-footer">
+        <button class="modal-start-btn" id="modal-start-btn">Start Quiz ／ はじめる</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Quiz Screen -->
   <div id="screen-quiz" class="screen hidden">
     <div class="quiz-header">
-      <button class="back-btn" id="back-btn">← Back</button>
+      <button class="back-btn" id="back-btn">← Back / もどる</button>
       <div class="progress-wrap">
         <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
         <span class="progress-label" id="progress-label"></span>
@@ -40,9 +61,9 @@ const categoriesJson = JSON.stringify(categories);
     </div>
 
     <div class="question-card">
-      <p class="question-label">What is this in Japanese?</p>
-      <p class="question-hint">にほんごでなんですか？</p>
+      <p class="question-label" id="question-label"></p>
       <div class="english-word" id="english-word"></div>
+      <div class="choices-grid hidden" id="choices-grid"></div>
       <input
         type="text"
         id="answer-input"
@@ -59,7 +80,7 @@ const categoriesJson = JSON.stringify(categories);
       <div class="feedback-icon" id="feedback-icon"></div>
       <div class="feedback-text" id="feedback-text"></div>
       <div class="accepted-answers" id="accepted-answers"></div>
-      <button class="next-btn" id="next-btn">Next →</button>
+      <button class="next-btn" id="next-btn">Next / つぎ →</button>
     </div>
   </div>
 
@@ -67,27 +88,20 @@ const categoriesJson = JSON.stringify(categories);
   <div id="screen-results" class="screen hidden">
     <div class="anarika-card">
       <div class="anarika-avatar">
-        <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" class="avatar-svg">
-          <circle cx="60" cy="60" r="60" fill="#f4c2c2"/>
-          <circle cx="60" cy="48" r="26" fill="#fff0e0"/>
-          <ellipse cx="60" cy="105" rx="38" ry="28" fill="#e8a0a0"/>
-          <circle cx="50" cy="44" r="4" fill="#333"/>
-          <circle cx="70" cy="44" r="4" fill="#333"/>
-          <path d="M50 58 Q60 66 70 58" stroke="#c06060" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-        </svg>
+        <img src="/images/anarika-challenge/anarika-face.png" alt="Anarika" class="avatar-img" />
       </div>
       <h2 class="result-title" id="result-title"></h2>
       <div class="score-big" id="score-big"></div>
     </div>
 
     <div class="missed-section" id="missed-section">
-      <h3 class="missed-title">Review / ふくしゅう</h3>
+      <h3 class="missed-title">Review ／ ふくしゅう</h3>
       <table class="missed-table" id="missed-table">
         <thead>
           <tr>
-            <th>English</th>
-            <th>Your answer / こたえ</th>
-            <th>Correct / せいかい</th>
+            <th>English ／ えいご</th>
+            <th>Your answer ／ こたえ</th>
+            <th>Correct ／ せいかい</th>
           </tr>
         </thead>
         <tbody id="missed-body"></tbody>
@@ -107,11 +121,13 @@ const categoriesJson = JSON.stringify(categories);
   const categories = JSON.parse(categoriesJson);
 
   // State
-  let currentCategory = null;
   let words = [];
+  let lastWordsForReplay = [];
   let wordIndex = 0;
   let score = 0;
-  let missed = []; // { en, yourAnswer, correct: ja[0] }
+  let missed = [];
+  let quizMode = 'easy';
+  let lastMode = 'easy';
 
   // Elements
   const screenSelect  = document.getElementById('screen-select');
@@ -131,6 +147,8 @@ const categoriesJson = JSON.stringify(categories);
   const progressFill  = document.getElementById('progress-fill');
   const progressLabel = document.getElementById('progress-label');
   const scoreDisplay  = document.getElementById('score-display');
+  const questionLabel = document.getElementById('question-label');
+  const choicesGrid   = document.getElementById('choices-grid');
 
   const resultTitle   = document.getElementById('result-title');
   const scoreBig      = document.getElementById('score-big');
@@ -139,35 +157,242 @@ const categoriesJson = JSON.stringify(categories);
   const playAgainBtn  = document.getElementById('play-again-btn');
   const backToSelectBtn = document.getElementById('back-to-select-btn');
 
+  // Modal elements
+  const modal         = document.getElementById('category-modal');
+  const modalClose    = document.getElementById('modal-close');
+  const modalGroupName = document.getElementById('modal-group-name');
+  const modalGroupJa  = document.getElementById('modal-group-ja');
+  const modalSubcats  = document.getElementById('modal-subcats');
+  const selectAllCb   = document.getElementById('select-all-cb');
+  const modalStartBtn = document.getElementById('modal-start-btn');
+  const modeBtns      = document.querySelectorAll('.mode-btn');
+
+  modeBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      quizMode = btn.dataset.mode;
+      modeBtns.forEach(b => b.classList.toggle('active', b === btn));
+    });
+  });
+
   // Screens
   function showScreen(id) {
     [screenSelect, screenQuiz, screenResults].forEach(s => s.classList.add('hidden'));
     document.getElementById(id).classList.remove('hidden');
   }
 
-  // Normalize: trim, collapse whitespace
   function normalize(str) {
     return str.trim().replace(/\s+/g, '');
   }
 
-  // Check answer against accepted list
   function checkAnswer(input, accepted) {
     const norm = normalize(input);
     return accepted.some(a => normalize(a) === norm);
   }
 
-  // Build category grid
-  categories.forEach((cat, i) => {
-    const btn = document.createElement('button');
-    btn.className = 'cat-btn';
-    btn.innerHTML = `<span class="cat-name">${cat.name}</span><span class="cat-count">${cat.words.length} words</span>`;
-    btn.addEventListener('click', () => startQuiz(i));
-    categoryGrid.appendChild(btn);
+  const categoryGroups = [
+    { label: "Food & Drink", ja: "たべもの・のみもの", color: "#e6a817", categories: [
+      { name: "Drinks", ja: "のみもの" },
+      { name: "Dessert", ja: "おかし" },
+      { name: "Food", ja: "たべもの" },
+      { name: "Japanese Food", ja: "にほんのたべもの" },
+      { name: "Fruit and Vegetables", ja: "くだもの・やさい" },
+      { name: "Meals", ja: "しょくじ" },
+      { name: "Ingredients", ja: "ざいりょう" },
+      { name: "Taste", ja: "あじ" },
+    ]},
+    { label: "People & Self", ja: "ひと・じぶん", color: "#d64f8a", categories: [
+      { name: "Feelings", ja: "きもち" },
+      { name: "People", ja: "ひと" },
+      { name: "Personality", ja: "せいかく" },
+      { name: "Family", ja: "かぞく" },
+      { name: "Body Parts", ja: "からだ" },
+      { name: "Frequency", ja: "ひんど" },
+      { name: "Daily Routines", ja: "にちじょう" },
+    ]},
+    { label: "Clothes & Belongings", ja: "ふく・もちもの", color: "#7c5cbf", categories: [
+      { name: "Clothes", ja: "ふく" },
+      { name: "Personal Belongings", ja: "もちもの" },
+      { name: "Stationery", ja: "ぶんぼうぐ" },
+    ]},
+    { label: "Nature & Animals", ja: "しぜん・どうぶつ", color: "#3a9e5f", categories: [
+      { name: "Animals", ja: "どうぶつ" },
+      { name: "Sea Animals", ja: "うみのいきもの" },
+      { name: "Bugs", ja: "むし" },
+      { name: "Nature", ja: "しぜん" },
+      { name: "Environment and 4Rs", ja: "かんきょう" },
+    ]},
+    { label: "Date / Time", ja: "じかん・にちじ", color: "#1a8fa0", categories: [
+      { name: "Months", ja: "つき" },
+      { name: "Dates", ja: "ひにち" },
+      { name: "Days", ja: "ようび" },
+      { name: "Seasons", ja: "きせつ" },
+      { name: "Weather", ja: "てんき" },
+    ]},
+    { label: "School", ja: "がっこう", color: "#2a6db5", categories: [
+      { name: "School Subjects", ja: "きょうか" },
+      { name: "School Places", ja: "がっこうのばしょ" },
+      { name: "Club Activities", ja: "クラブかつどう" },
+      { name: "School Events", ja: "がっこうのイベント" },
+    ]},
+    { label: "Arts & Play", ja: "おんがく・あそび", color: "#d9622b", categories: [
+      { name: "Musical Instruments", ja: "がっき" },
+      { name: "Play and Activities", ja: "あそび" },
+      { name: "Sports", ja: "スポーツ" },
+    ]},
+    { label: "Town & Travel", ja: "まち・いどう", color: "#5a7a8a", categories: [
+      { name: "Town and Places", ja: "まち・ばしょ" },
+      { name: "Vehicles", ja: "のりもの" },
+      { name: "Directions", ja: "ほうこう" },
+      { name: "Positions", ja: "いち" },
+    ]},
+    { label: "Language & Concepts", ja: "ことば・がいねん", color: "#c0394b", categories: [
+      { name: "Jobs", ja: "しごと" },
+      { name: "Annual Events", ja: "ねんじゅうぎょうじ" },
+      { name: "Impressions", ja: "いんしょう" },
+      { name: "Conditions", ja: "じょうたい" },
+      { name: "Colors", ja: "いろ" },
+      { name: "Shapes", ja: "かたち" },
+      { name: "Verbs (5th Grade)", ja: "どうし（5ねんせい）" },
+      { name: "Verbs (6th Grade)", ja: "どうし（6ねんせい）" },
+      { name: "Past Tense Verbs", ja: "かこのどうし" },
+    ]},
+  ];
+
+  // Build group header buttons
+  categoryGroups.forEach(group => {
+    const header = document.createElement('button');
+    header.className = 'group-header';
+    header.style.borderLeftColor = group.color;
+    header.innerHTML = `
+      <span class="group-header-text">
+        <span class="group-label">${group.label} ／ ${group.ja}</span>
+      </span>
+      <span class="group-chevron">▸</span>
+    `;
+    header.addEventListener('click', () => openModal(group));
+    categoryGrid.appendChild(header);
   });
 
-  function startQuiz(catIndex) {
-    currentCategory = categories[catIndex];
-    words = [...currentCategory.words];
+  // Modal logic
+  function openModal(group) {
+    modalGroupName.textContent = group.label;
+    modalGroupJa.textContent = group.ja;
+    modal.style.setProperty('--modal-color', group.color);
+
+    // Populate subcategory checkboxes
+    modalSubcats.innerHTML = '';
+    group.categories.forEach(groupCat => {
+      const cat = categories.find(c => c.name === groupCat.name);
+      if (!cat) return;
+
+      const label = document.createElement('label');
+      label.className = 'subcat-row';
+
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.value = groupCat.name;
+      cb.checked = true;
+      cb.addEventListener('change', syncSelectAll);
+
+      const info = document.createElement('span');
+      info.className = 'subcat-info';
+
+      const nameRow = document.createElement('span');
+      nameRow.className = 'subcat-name-row';
+      const enSpan = document.createElement('span');
+      enSpan.className = 'subcat-name-en';
+      enSpan.textContent = groupCat.name;
+      const sep = document.createElement('span');
+      sep.className = 'subcat-sep';
+      sep.textContent = '／';
+      const jaSpan = document.createElement('span');
+      jaSpan.className = 'subcat-name-ja';
+      jaSpan.textContent = groupCat.ja;
+      nameRow.appendChild(enSpan);
+      nameRow.appendChild(sep);
+      nameRow.appendChild(jaSpan);
+
+      const countSpan = document.createElement('span');
+      countSpan.className = 'subcat-count';
+      countSpan.textContent = `${cat.words.length} words ／ ${cat.words.length} たんご`;
+
+      info.appendChild(nameRow);
+      info.appendChild(countSpan);
+
+      label.appendChild(cb);
+      label.appendChild(info);
+      modalSubcats.appendChild(label);
+    });
+
+    // Default: all checked
+    selectAllCb.checked = true;
+    selectAllCb.indeterminate = false;
+    updateStartBtn();
+
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal() {
+    modal.classList.add('hidden');
+    document.body.style.overflow = '';
+  }
+
+  function syncSelectAll() {
+    const cbs = [...modalSubcats.querySelectorAll('input[type=checkbox]')];
+    const checkedCount = cbs.filter(c => c.checked).length;
+    if (checkedCount === 0) {
+      selectAllCb.checked = false;
+      selectAllCb.indeterminate = false;
+    } else if (checkedCount === cbs.length) {
+      selectAllCb.checked = true;
+      selectAllCb.indeterminate = false;
+    } else {
+      selectAllCb.checked = false;
+      selectAllCb.indeterminate = true;
+    }
+    updateStartBtn();
+  }
+
+  function updateStartBtn() {
+    const cbs = [...modalSubcats.querySelectorAll('input[type=checkbox]')];
+    const anyChecked = cbs.some(c => c.checked);
+    modalStartBtn.disabled = !anyChecked;
+  }
+
+  selectAllCb.addEventListener('change', () => {
+    const checked = selectAllCb.checked;
+    modalSubcats.querySelectorAll('input[type=checkbox]').forEach(cb => cb.checked = checked);
+    selectAllCb.indeterminate = false;
+    updateStartBtn();
+  });
+
+  modalClose.addEventListener('click', closeModal);
+
+  modal.addEventListener('click', e => {
+    if (e.target === modal) closeModal();
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeModal();
+  });
+
+  modalStartBtn.addEventListener('click', () => {
+    const cbs = [...modalSubcats.querySelectorAll('input[type=checkbox]')];
+    const selectedNames = cbs.filter(c => c.checked).map(c => c.value);
+    const merged = [];
+    selectedNames.forEach(name => {
+      const cat = categories.find(c => c.name === name);
+      if (cat) merged.push(...cat.words);
+    });
+    closeModal();
+    startQuiz(merged, quizMode);
+  });
+
+  function startQuiz(wordsArray, mode) {
+    words = [...wordsArray];
+    lastWordsForReplay = [...wordsArray];
+    lastMode = mode;
     wordIndex = 0;
     score = 0;
     missed = [];
@@ -175,21 +400,72 @@ const categoriesJson = JSON.stringify(categories);
     showQuestion();
   }
 
+  function getChoices(correctWord) {
+    const pool = words.filter(w => w.en !== correctWord.en);
+    const shuffled = pool.sort(() => Math.random() - 0.5).slice(0, 3);
+    return [correctWord, ...shuffled].sort(() => Math.random() - 0.5);
+  }
+
   function showQuestion() {
     feedbackCard.classList.add('hidden');
-    answerInput.value = '';
-    answerInput.disabled = false;
-    submitBtn.disabled = false;
 
     const word = words[wordIndex];
-    englishWord.textContent = word.en;
 
     const pct = (wordIndex / words.length) * 100;
     progressFill.style.width = pct + '%';
     progressLabel.textContent = `${wordIndex + 1} / ${words.length}`;
     scoreDisplay.textContent = `${score} / ${wordIndex}`;
 
-    answerInput.focus();
+    if (lastMode === 'easy') {
+      questionLabel.textContent = 'What does this mean? ／ どういう いみ？';
+      englishWord.textContent = word.ja[0];
+      answerInput.classList.add('hidden');
+      submitBtn.classList.add('hidden');
+      choicesGrid.classList.remove('hidden');
+
+      const choices = getChoices(word);
+      choicesGrid.innerHTML = '';
+      choices.forEach(choice => {
+        const btn = document.createElement('button');
+        btn.className = 'choice-btn';
+        btn.textContent = choice.en;
+        btn.addEventListener('click', () => submitChoiceAnswer(choice.en, word));
+        choicesGrid.appendChild(btn);
+      });
+    } else {
+      questionLabel.textContent = 'What is this in Japanese? ／ にほんごでなんですか？';
+      englishWord.textContent = word.en;
+      choicesGrid.classList.add('hidden');
+      answerInput.classList.remove('hidden');
+      submitBtn.classList.remove('hidden');
+      answerInput.value = '';
+      answerInput.disabled = false;
+      submitBtn.disabled = false;
+      answerInput.focus();
+    }
+  }
+
+  function submitChoiceAnswer(chosenEn, word) {
+    choicesGrid.querySelectorAll('.choice-btn').forEach(btn => {
+      btn.disabled = true;
+      if (btn.textContent === word.en) btn.classList.add('choice-correct');
+      else if (btn.textContent === chosenEn) btn.classList.add('choice-wrong');
+    });
+
+    const correct = chosenEn === word.en;
+    if (correct) {
+      score++;
+      feedbackIcon.textContent = 'O';
+      feedbackIcon.className = 'feedback-icon correct';
+      feedbackText.innerHTML = 'Correct! ／ <span class="ja">せいかい！</span>';
+    } else {
+      missed.push({ en: word.en, yourAnswer: chosenEn, correct: word.en });
+      feedbackIcon.textContent = 'X';
+      feedbackIcon.className = 'feedback-icon wrong';
+      feedbackText.innerHTML = 'Not quite. ／ <span class="ja">ざんねん！</span>';
+    }
+    acceptedEl.innerHTML = `<span class="accepted-label">Answer ／ こたえ：</span> ${word.en}`;
+    feedbackCard.classList.remove('hidden');
   }
 
   function submitAnswer() {
@@ -207,15 +483,15 @@ const categoriesJson = JSON.stringify(categories);
       score++;
       feedbackIcon.textContent = 'O';
       feedbackIcon.className = 'feedback-icon correct';
-      feedbackText.textContent = 'Correct! せいかい！';
+      feedbackText.innerHTML = 'Correct! ／ <span class="ja">せいかい！</span>';
     } else {
       missed.push({ en: word.en, yourAnswer: input, correct: word.ja[0] });
       feedbackIcon.textContent = 'X';
       feedbackIcon.className = 'feedback-icon wrong';
-      feedbackText.textContent = 'Not quite. ざんねん！';
+      feedbackText.innerHTML = 'Not quite. ／ <span class="ja">ざんねん！</span>';
     }
 
-    acceptedEl.innerHTML = `<span class="accepted-label">Accepted answers:</span> ${word.ja.join('、 ')}`;
+    acceptedEl.innerHTML = `<span class="accepted-label">Accepted answers ／ せいかい：</span> ${word.ja.join('、 ')}`;
     feedbackCard.classList.remove('hidden');
   }
 
@@ -275,10 +551,7 @@ const categoriesJson = JSON.stringify(categories);
   });
   nextBtn.addEventListener('click', nextQuestion);
   backBtn.addEventListener('click', () => showScreen('screen-select'));
-  playAgainBtn.addEventListener('click', () => {
-    const idx = categories.indexOf(currentCategory);
-    startQuiz(idx);
-  });
+  playAgainBtn.addEventListener('click', () => startQuiz(lastWordsForReplay, lastMode));
   backToSelectBtn.addEventListener('click', () => showScreen('screen-select'));
 </script>
 
@@ -300,67 +573,307 @@ const categoriesJson = JSON.stringify(categories);
   }
 
   .anarika-avatar {
-    width: 100px;
-    height: 100px;
+    width: 140px;
+    height: 140px;
     margin: 0 auto 1rem;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 4px solid #f4a0aa;
+    box-shadow: 0 4px 16px rgba(192, 57, 75, 0.15);
   }
 
-  .avatar-svg { width: 100%; height: 100%; }
+  .avatar-img { width: 100%; height: 100%; object-fit: cover; object-position: center top; }
 
   .game-title {
-    font-size: 2.2rem;
+    font-size: 2rem;
     color: #c0394b;
-    margin: 0;
+    margin: 0 0 0.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.15rem;
   }
 
-  .game-subtitle {
-    font-size: 1rem;
-    color: #888;
-    margin: 0.2rem 0 0.8rem;
+  .title-ja {
+    font-size: 1.3rem;
+    color: #c0394b;
+    font-weight: 700;
   }
 
   .game-desc {
     color: #555;
-    font-size: 1rem;
+    font-size: 0.95rem;
     margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
   }
+
+  .bilingual-line {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .bilingual-line span:first-child { color: #777; }
+  .bilingual-line span:last-child  { color: #333; font-weight: 600; }
 
   /* Category Grid */
   .category-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.4rem;
   }
 
-  .cat-btn {
+  :global(.group-header) {
+    -webkit-appearance: none;
+    appearance: none;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    height: 56px;
     background: white;
-    border: 2px solid #f4a0aa;
-    border-radius: 12px;
-    padding: 1rem;
+    border: 1px solid #eee;
+    border-left: 5px solid #c0394b;
+    border-radius: 0 10px 10px 0;
+    padding: 0 1rem;
     cursor: pointer;
+    font-family: inherit;
     text-align: left;
-    transition: all 0.15s;
+    transition: background 0.15s;
+    box-sizing: border-box;
+    color: inherit;
+  }
+
+  :global(.group-header:hover) { background: #fafafa; }
+
+  :global(.group-header-text) {
+    flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 0.3rem;
+    gap: 0.15rem;
+  }
+
+  :global(.group-label) {
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: #222;
+  }
+
+  :global(.group-chevron) {
+    font-size: 0.9rem;
+    color: #aaa;
+    flex-shrink: 0;
+  }
+
+  /* Modal */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 1rem;
+  }
+
+  .modal-box {
+    background: white;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 480px;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.2);
+    border-top: 5px solid var(--modal-color, #c0394b);
+  }
+
+  .modal-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 1.25rem 1.25rem 0.75rem;
+    border-bottom: 1px solid #f0f0f0;
+    flex-shrink: 0;
+  }
+
+  .modal-title-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  .modal-group-name {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #222;
+  }
+
+  .modal-group-ja {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #555;
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+  }
+
+  .modal-close {
+    background: none;
+    border: none;
+    font-size: 1.1rem;
+    color: #aaa;
+    cursor: pointer;
+    padding: 0.2rem 0.4rem;
+    line-height: 1;
+    border-radius: 6px;
+    flex-shrink: 0;
+  }
+
+  .modal-close:hover { background: #f5f5f5; color: #555; }
+
+  .select-all-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.75rem 1.25rem;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 0.9rem;
+    color: #555;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .select-all-row input[type=checkbox] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--modal-color, #c0394b);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .modal-subcats {
+    overflow-y: auto;
+    flex: 1;
+    padding: 0.5rem 0;
+  }
+
+  .modal-footer {
+    padding: 1rem 1.25rem;
+    border-top: 1px solid #f0f0f0;
+    flex-shrink: 0;
+  }
+
+  .mode-select {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    border-top: 1px solid #f0f0f0;
+    flex-shrink: 0;
+  }
+
+  .mode-btn {
+    flex: 1;
+    background: white;
+    border: 2px solid #ddd;
+    border-radius: 50px;
+    padding: 0.55rem 0.5rem;
+    font-size: 0.85rem;
     font-family: inherit;
+    cursor: pointer;
+    color: #666;
+    transition: all 0.15s;
   }
 
-  .cat-btn:hover {
+  .mode-btn:hover { border-color: #aaa; color: #333; }
+
+  .mode-btn[data-mode="easy"].active {
+    background: #2e7d32;
+    border-color: #2e7d32;
+    color: white;
+    font-weight: 700;
+  }
+
+  .mode-btn[data-mode="hard"].active {
+    background: #c0394b;
     border-color: #c0394b;
-    background: #fff0f1;
-    transform: translateY(-2px);
+    color: white;
+    font-weight: 700;
   }
 
-  .cat-name {
-    font-weight: bold;
-    color: #333;
+  .modal-start-btn {
+    width: 100%;
+    background: var(--modal-color, #c0394b);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    padding: 0.85rem 1rem;
+    font-size: 1rem;
+    font-family: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+
+  .modal-start-btn:hover { opacity: 0.88; }
+  .modal-start-btn:disabled { opacity: 0.4; cursor: default; }
+
+  /* Subcat rows — created by JS so need :global() */
+  :global(.subcat-row) {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.7rem 1.25rem;
+    cursor: pointer;
+    transition: background 0.12s;
+  }
+
+  :global(.subcat-row:hover) { background: #fafafa; }
+
+  :global(.subcat-row input[type=checkbox]) {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--modal-color, #c0394b);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  :global(.subcat-info) {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+  }
+
+  :global(.subcat-name-row) {
+    display: flex;
+    align-items: baseline;
+    gap: 0.35rem;
+  }
+
+  :global(.subcat-name-en) {
     font-size: 0.95rem;
+    font-weight: 700;
+    color: #333;
   }
 
-  .cat-count {
-    font-size: 0.8rem;
-    color: #999;
+  :global(.subcat-sep) {
+    font-size: 0.85rem;
+    color: #ccc;
+  }
+
+  :global(.subcat-name-ja) {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #888;
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+  }
+
+  :global(.subcat-count) {
+    font-size: 0.78rem;
+    color: #aaa;
   }
 
   /* Quiz Header */
@@ -431,14 +944,9 @@ const categoriesJson = JSON.stringify(categories);
   }
 
   .question-label {
-    font-size: 0.9rem;
-    color: #999;
-    margin: 0 0 0.1rem;
-  }
-
-  .question-hint {
-    font-size: 0.85rem;
-    color: #bbb;
+    font-size: 0.95rem;
+    color: #555;
+    font-weight: 600;
     margin: 0 0 1.5rem;
   }
 
@@ -473,7 +981,8 @@ const categoriesJson = JSON.stringify(categories);
     color: white;
     border: none;
     border-radius: 50px;
-    padding: 0.8rem 2.5rem;
+    padding: 0.8rem 0;
+    width: 220px;
     font-size: 1rem;
     font-family: inherit;
     cursor: pointer;
@@ -482,6 +991,31 @@ const categoriesJson = JSON.stringify(categories);
 
   .submit-btn:hover { background: #a02d3d; }
   .submit-btn:disabled { background: #ddd; cursor: default; }
+
+  .choices-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+  }
+
+  .choice-btn {
+    background: white;
+    border: 2px solid #ddd;
+    border-radius: 12px;
+    padding: 0.9rem 0.75rem;
+    font-size: 1rem;
+    font-family: inherit;
+    cursor: pointer;
+    color: #333;
+    transition: border-color 0.15s, background 0.15s;
+    line-height: 1.3;
+  }
+
+  .choice-btn:hover:not(:disabled) { border-color: #aaa; background: #fafafa; }
+  .choice-btn:disabled { cursor: default; }
+  .choice-btn.choice-correct { border-color: #2e7d32; background: #f0faf0; color: #2e7d32; font-weight: 700; }
+  .choice-btn.choice-wrong   { border-color: #c0394b; background: #fff0f1; color: #c0394b; }
 
   /* Feedback Card */
   .feedback-card {
@@ -528,7 +1062,8 @@ const categoriesJson = JSON.stringify(categories);
     color: white;
     border: none;
     border-radius: 50px;
-    padding: 0.7rem 2rem;
+    padding: 0.8rem 0;
+    width: 220px;
     font-size: 1rem;
     font-family: inherit;
     cursor: pointer;
@@ -600,7 +1135,8 @@ const categoriesJson = JSON.stringify(categories);
     color: white;
     border: none;
     border-radius: 50px;
-    padding: 0.9rem 2rem;
+    padding: 0.8rem 0;
+    width: 220px;
     font-size: 1rem;
     font-family: inherit;
     cursor: pointer;
@@ -614,7 +1150,8 @@ const categoriesJson = JSON.stringify(categories);
     color: #c0394b;
     border: 2px solid #c0394b;
     border-radius: 50px;
-    padding: 0.9rem 2rem;
+    padding: 0.8rem 0;
+    width: 220px;
     font-size: 1rem;
     font-family: inherit;
     cursor: pointer;
@@ -628,7 +1165,8 @@ const categoriesJson = JSON.stringify(categories);
   @media (max-width: 600px) {
     .english-word { font-size: 2rem; }
     .score-big { font-size: 2.5rem; }
-    .category-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+    .category-grid { grid-template-columns: 1fr; }
     .quiz-header { flex-wrap: wrap; }
+    .modal-box { max-height: 92vh; }
   }
 </style>
