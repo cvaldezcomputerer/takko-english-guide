@@ -24,7 +24,16 @@
     <!-- Idle screen -->
     <div class="overlay-screen" id="fcc-screen-idle">
       <p class="screen-title">Catch</p>
-      <p class="screen-sub">Move your face to catch blue circles and dodge red X!</p>
+      <p class="screen-sub" id="fcc-theme-desc">Catch the letters! Dodge the emojis!</p>
+
+      <div class="theme-row">
+        <span class="theme-label">Theme / テーマ:</span>
+        <div class="theme-btns">
+          <button class="theme-btn active" data-theme="letters">A B C</button>
+          <button class="theme-btn" data-theme="classic">Circles</button>
+        </div>
+      </div>
+
       <div class="mode-btns">
         <button id="fcc-btn-time" class="primary-btn">
           Time Attack
@@ -197,6 +206,42 @@
   }
 
   /* Buttons */
+  .theme-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .theme-label {
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+
+  .theme-btns {
+    display: flex;
+    gap: 0.4rem;
+  }
+
+  .theme-btn {
+    border: 2px solid rgba(255,255,255,0.18);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--muted);
+    font-size: 0.85rem;
+    font-weight: 700;
+    padding: 0.3rem 0.9rem;
+    cursor: pointer;
+    transition: background 0.12s, color 0.12s, border-color 0.12s;
+  }
+
+  .theme-btn.active {
+    background: rgba(255,255,255,0.14);
+    border-color: rgba(255,255,255,0.5);
+    color: #fff;
+  }
+
   .mode-btns {
     display: flex;
     gap: 0.9rem;
@@ -339,14 +384,20 @@
   const SPAWN_MS     = 1600;
   const BASE_SPEED   = 0.0028; // progress per frame (~6s at 60fps)
   const MAX_SPEED    = 0.007;  // cap for time mode (~2.4s)
-  const BAD_CHANCE   = 0.3;    // 30% red X
+  const BAD_CHANCE   = 0.3;    // 30% bad items
   const ITEM_R       = 26;     // fixed radius
   const HEART_R      = 38;     // collision radius of heart
   const TIME_LIMIT   = 60;     // seconds for time attack
 
+  const CAPITAL_LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+  const BAD_EMOJIS      = ['😈','💀','👾','🕷️','🦠','🐛','🦂','💣','⚡','🔥'];
+  const BAD_NUMBERS     = '0123456789'.split('');
+  const BAD_POOL        = [...BAD_EMOJIS, ...BAD_NUMBERS];
+
   // ── Game state ────────────────────────────────────────────────────────────
   let state        = 'idle';
-  let gameMode     = 'time';   // 'time' | 'endless'
+  let gameMode     = 'time';    // 'time' | 'endless'
+  let gameTheme    = 'letters'; // 'letters' | 'classic'
   let score        = 0;
   let lives        = MAX_LIVES;
   let items        = [];
@@ -490,11 +541,13 @@
       startX = pad + Math.random() * (W - pad * 2); startY = H + pad;
       endX   = pad + Math.random() * (W - pad * 2); endY   = -pad;
     }
-    items.push({
-      id: nextId++, startX, startY, endX, endY,
-      progress: 0, speed: itemSpeed(),
-      type: Math.random() < BAD_CHANCE ? 'bad' : 'good',
-    });
+    const type = Math.random() < BAD_CHANCE ? 'bad' : 'good';
+    const label = gameTheme === 'letters'
+      ? (type === 'good'
+          ? CAPITAL_LETTERS[Math.floor(Math.random() * CAPITAL_LETTERS.length)]
+          : BAD_POOL[Math.floor(Math.random() * BAD_POOL.length)])
+      : null;
+    items.push({ id: nextId++, startX, startY, endX, endY, progress: 0, speed: itemSpeed(), type, label });
   }
 
   function startSpawning() {
@@ -565,33 +618,58 @@
     const { x, y, r } = itemCoords(item);
     ctx.save();
 
-    if (item.type === 'good') {
+    if (gameTheme === 'letters') {
+      // All circles are yellow — content tells good from bad
       ctx.beginPath();
       ctx.arc(x, y, r, 0, Math.PI * 2);
-      ctx.fillStyle   = '#3b82f6';
-      ctx.shadowColor = 'rgba(59,130,246,0.55)';
+      ctx.fillStyle   = '#facc15';
+      ctx.shadowColor = 'rgba(250,204,21,0.55)';
       ctx.shadowBlur  = 14;
       ctx.fill();
-      ctx.strokeStyle = 'rgba(255,255,255,0.35)';
-      ctx.lineWidth   = 2;
-      ctx.stroke();
+      ctx.shadowBlur = 0;
+      if (item.type === 'good') {
+        // Capital letter — Georgia for proper serif serifs (I has crossbars, etc.)
+        ctx.fillStyle    = '#1a1a1a';
+        ctx.font         = `bold ${Math.round(r * 1.3)}px Georgia, 'Times New Roman', serif`;
+        ctx.textAlign    = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(item.label, x, y + 1);
+      } else {
+        // Emoji
+        ctx.font         = `${Math.round(r * 1.05)}px sans-serif`;
+        ctx.textAlign    = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(item.label, x, y + 2);
+      }
     } else {
-      // Red circle
-      ctx.beginPath();
-      ctx.arc(x, y, r, 0, Math.PI * 2);
-      ctx.fillStyle   = '#ef4444';
-      ctx.shadowColor = 'rgba(239,68,68,0.55)';
-      ctx.shadowBlur  = 14;
-      ctx.fill();
-      // X mark
-      const arm = r * 0.52;
-      ctx.strokeStyle = '#fff';
-      ctx.lineWidth   = Math.max(1.5, r * 0.2);
-      ctx.lineCap     = 'round';
-      ctx.beginPath();
-      ctx.moveTo(x - arm, y - arm); ctx.lineTo(x + arm, y + arm);
-      ctx.moveTo(x + arm, y - arm); ctx.lineTo(x - arm, y + arm);
-      ctx.stroke();
+      // Classic theme — blue good, red bad
+      if (item.type === 'good') {
+        ctx.beginPath();
+        ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.fillStyle   = '#3b82f6';
+        ctx.shadowColor = 'rgba(59,130,246,0.55)';
+        ctx.shadowBlur  = 14;
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+        ctx.lineWidth   = 2;
+        ctx.stroke();
+      } else {
+        ctx.beginPath();
+        ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.fillStyle   = '#ef4444';
+        ctx.shadowColor = 'rgba(239,68,68,0.55)';
+        ctx.shadowBlur  = 14;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        const arm = r * 0.52;
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth   = Math.max(1.5, r * 0.2);
+        ctx.lineCap     = 'round';
+        ctx.beginPath();
+        ctx.moveTo(x - arm, y - arm); ctx.lineTo(x + arm, y + arm);
+        ctx.moveTo(x + arm, y - arm); ctx.lineTo(x - arm, y + arm);
+        ctx.stroke();
+      }
     }
 
     ctx.restore();
@@ -780,6 +858,21 @@
   btnTime.addEventListener('click',    () => startGame('time'));
   btnEndless.addEventListener('click', () => startGame('endless'));
   btnRestart.addEventListener('click', restartGame);
+
+  // Theme selection
+  const themeDescEl = document.getElementById('fcc-theme-desc');
+  const THEME_DESCS = {
+    letters: 'Catch the letters! Dodge the emojis! / 文字をキャッチ！絵文字を避けて！',
+    classic: 'Catch the blue circles! Dodge the red X! / 青をキャッチ！赤を避けて！',
+  };
+  document.querySelectorAll('.theme-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      gameTheme = btn.dataset.theme;
+      document.querySelectorAll('.theme-btn').forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      themeDescEl.textContent = THEME_DESCS[gameTheme];
+    });
+  });
 
   // ── Init HUD ──────────────────────────────────────────────────────────────
   updateHud();

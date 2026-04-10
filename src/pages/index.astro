@@ -35,10 +35,10 @@ import T from '../components/T.astro';
                     </T>
                 </p>
                 <div class="hero-ctas">
-                    <a href="/game" class="cta-button">
+                    <a href="/game" class="cta-button cta-games">
                         <T>
-                            <span slot="en">English Tools</span>
-                            <span slot="ja">英語ツール</span>
+                            <span slot="en">English Games</span>
+                            <span slot="ja">英語ゲーム</span>
                         </T>
                     </a>
                     <a href="#town-guide" class="cta-button cta-secondary">
@@ -244,6 +244,16 @@ import T from '../components/T.astro';
     .cta-button:active {
         transform: translateY(4px);
         box-shadow: none;
+        animation: none;
+    }
+
+    @keyframes bob {
+        0%, 100% { transform: translateY(0); }
+        50%       { transform: translateY(-5px); }
+    }
+
+    .cta-games {
+        animation: bob 2.4s ease-in-out infinite;
     }
 
     /* Sections */
