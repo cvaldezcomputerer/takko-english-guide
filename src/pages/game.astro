@@ -235,9 +235,12 @@ import T from '../components/T.astro';
                <div class="card-image points-bg">
                   <div class="icon" aria-hidden="true">
                     <svg viewBox="0 0 120 120" role="img" focusable="false">
-                      <circle cx="60" cy="60" r="42" fill="#fff7ed" stroke="#9a3412" stroke-width="4"/>
-                      <path d="M46 47c0-8 6-14 14-14 9 0 14 5 14 12 0 10-10 11-10 18" fill="none" stroke="#7c2d12" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-                      <circle cx="60" cy="84" r="4.5" fill="#7c2d12"/>
+                      <rect x="22" y="22" width="76" height="76" rx="16" fill="#fff7ed" stroke="#9a3412" stroke-width="4"/>
+                      <circle cx="42" cy="42" r="6.5" fill="#9a3412"/>
+                      <circle cx="78" cy="42" r="6.5" fill="#9a3412"/>
+                      <circle cx="60" cy="60" r="6.5" fill="#9a3412"/>
+                      <circle cx="42" cy="78" r="6.5" fill="#9a3412"/>
+                      <circle cx="78" cy="78" r="6.5" fill="#9a3412"/>
                     </svg>
                   </div>
               </div>
@@ -295,6 +298,42 @@ import T from '../components/T.astro';
                       <span slot="ja">今すぐプレイ</span>
                     </T>
                     <i class="fas fa-play"></i>
+                  </span>
+              </div>
+          </a>
+
+          <!-- Blooket/Quizlet Exporter Card -->
+          <a href="/quizlet-creator" class="game-card">
+               <div class="card-image quizlet-bg">
+                  <div class="icon" aria-hidden="true">
+                    <svg viewBox="0 0 120 120" role="img" focusable="false">
+                      <rect x="34" y="20" width="54" height="38" rx="8" fill="#dbeafe" stroke="#2563eb" stroke-width="3.5"/>
+                      <rect x="24" y="30" width="54" height="38" rx="8" fill="white" stroke="#2563eb" stroke-width="3.5"/>
+                      <text x="51" y="53" text-anchor="middle" font-size="13" font-weight="700" fill="#1d4ed8" font-family="sans-serif">あ→A</text>
+                      <path d="M51 76 L51 96" stroke="#2563eb" stroke-width="3.5" stroke-linecap="round"/>
+                      <path d="M41 88 L51 98 L61 88" fill="none" stroke="#2563eb" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </div>
+              </div>
+              <div class="card-content">
+                  <h3>
+                    <T>
+                      <span slot="en">Blooket / Quizlet Exporter</span>
+                      <span slot="ja">エクスポートツール</span>
+                    </T>
+                  </h3>
+                  <p>
+                    <T>
+                      <span slot="en">Make sets for Quizlet or Blooket based on 5th and 6th grade New Horizons vocab.</span>
+                      <span slot="ja">小5・小6のニューホライズンの単語からセットを作れます。</span>
+                    </T>
+                  </p>
+                  <span class="play-btn">
+                    <T>
+                      <span slot="en">Open Tool</span>
+                      <span slot="ja">ツールを開く</span>
+                    </T>
+                    <i class="fas fa-arrow-right"></i>
                   </span>
               </div>
           </a>
@@ -504,6 +543,10 @@ import T from '../components/T.astro';
 
   .color-vote-bg {
     background: #fce7f3;
+  }
+
+  .quizlet-bg {
+    background: #dbeafe;
   }
 
   .facecatch-bg {

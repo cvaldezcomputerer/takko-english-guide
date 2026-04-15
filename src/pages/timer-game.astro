@@ -1,11 +1,10 @@
 ---
-import GameLayout from "../layouts/GameLayout.astro";
+import GameLayout from "../layouts/ToolLayout.astro";
 ---
 
 <GameLayout title="Timer Game">
   <div class="timer-page">
     <main class="timer-shell">
-      <a class="back-link" href="/game">← Back to Games</a>
 
       <section class="timer-panel">
         <div id="timeDisplay" class="time-display">00:30</div>
@@ -184,13 +183,7 @@ import GameLayout from "../layouts/GameLayout.astro";
     padding: 1.25rem;
   }
 
-  .back-link {
-    color: var(--color-primary);
-    text-decoration: none;
-    font-weight: 700;
-  }
-
-  .timer-panel {
+.timer-panel {
     margin-top: 0.9rem;
     border: 2px solid var(--color-secondary);
     border-radius: 14px;

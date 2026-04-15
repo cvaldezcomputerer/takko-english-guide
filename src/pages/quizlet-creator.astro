@@ -1,0 +1,854 @@
+---
+import Layout from '../layouts/ToolLayout.astro';
+import { categories } from '../data/anarika/words';
+const categoriesJson = JSON.stringify(categories);
+---
+
+<Layout title="Blooket/Quizlet Exporter" description="Make sets for Quizlet or Blooket based on vocab from New Horizons books.">
+<div class="wrap">
+
+  <!-- Select Screen -->
+  <div id="screen-select" class="screen">
+    <div class="header-card">
+      <div class="header-icon" aria-hidden="true">
+        <svg viewBox="0 0 80 80" fill="none">
+          <!-- Back card -->
+          <rect x="24" y="10" width="40" height="28" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+          <!-- Front card -->
+          <rect x="14" y="18" width="40" height="28" rx="6" fill="white" stroke="#2563eb" stroke-width="2"/>
+          <!-- Lines suggesting text -->
+          <line x1="22" y1="28" x2="46" y2="28" stroke="#93c5fd" stroke-width="2" stroke-linecap="round"/>
+          <line x1="22" y1="35" x2="40" y2="35" stroke="#bfdbfe" stroke-width="2" stroke-linecap="round"/>
+          <line x1="22" y1="40" x2="44" y2="40" stroke="#bfdbfe" stroke-width="2" stroke-linecap="round"/>
+          <!-- Export arrow -->
+          <path d="M34 52 L34 68" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M26 61 L34 69 L42 61" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <h1 class="page-title">Blooket / Quizlet Exporter<span class="title-ja">エクスポートツール</span></h1>
+      <p class="page-desc">
+        <span class="desc-en">Make sets for Quizlet or Blooket based on 5th and 6th grade New Horizons vocab.</span>
+        <span class="desc-ja">小5・小6のニューホライズンの単語からクイズレット・ブルーケット用のセットを作れます。</span>
+      </p>
+    </div>
+    <div class="category-grid" id="category-grid"></div>
+  </div>
+
+  <!-- Category Modal -->
+  <div id="category-modal" class="modal-overlay hidden" role="dialog" aria-modal="true">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <span class="modal-group-name" id="modal-group-name"></span>
+          <span class="modal-group-ja" id="modal-group-ja"></span>
+        </div>
+        <button class="modal-close" id="modal-close" aria-label="Close">✕</button>
+      </div>
+
+      <label class="select-all-row">
+        <input type="checkbox" id="select-all-cb" />
+        <span>Select all ／ すべてえらぶ</span>
+      </label>
+
+      <div class="modal-subcats" id="modal-subcats"></div>
+
+      <div class="modal-footer">
+        <button class="modal-create-btn" id="modal-create-btn">Create Set ／ セットを作る</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Output Screen -->
+  <div id="screen-output" class="screen hidden">
+    <div class="output-header">
+      <button class="back-btn" id="back-btn">← Back ／ もどる</button>
+      <span class="word-count" id="word-count"></span>
+    </div>
+
+    <div class="output-card">
+      <div class="output-top">
+        <h2 class="output-title">Your Set ／ セット完成</h2>
+        <button class="copy-btn" id="copy-btn">Copy ／ コピー</button>
+      </div>
+      <textarea class="output-area" id="output-area" readonly spellcheck="false"></textarea>
+    </div>
+
+    <div class="instructions">
+      <div class="instr-block">
+        <h3 class="instr-title">Quizlet</h3>
+        <ol class="instr-list">
+          <li>Go to <strong>quizlet.com</strong> → Create</li>
+          <li>Click <strong>Import</strong></li>
+          <li>Paste the text above</li>
+          <li>Separators: Term/Definition = <strong>Tab</strong>, Rows = <strong>New line</strong></li>
+          <li>Click <strong>Import</strong></li>
+        </ol>
+      </div>
+      <div class="instr-block">
+        <h3 class="instr-title">Blooket</h3>
+        <ol class="instr-list">
+          <li>Import to Quizlet first, then make the set <strong>public</strong></li>
+          <li>Go to <strong>blooket.com</strong> → Create → New Set</li>
+          <li>Click <strong>Import from Quizlet</strong></li>
+          <li>Paste the Quizlet set URL</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+</div>
+</Layout>
+
+<script define:vars={{ categoriesJson }}>
+  const categories = JSON.parse(categoriesJson);
+
+  const screenSelect = document.getElementById('screen-select');
+  const screenOutput = document.getElementById('screen-output');
+  const categoryGrid = document.getElementById('category-grid');
+  const modal        = document.getElementById('category-modal');
+  const modalClose   = document.getElementById('modal-close');
+  const modalGroupName = document.getElementById('modal-group-name');
+  const modalGroupJa   = document.getElementById('modal-group-ja');
+  const modalSubcats   = document.getElementById('modal-subcats');
+  const selectAllCb    = document.getElementById('select-all-cb');
+  const modalCreateBtn = document.getElementById('modal-create-btn');
+  const backBtn        = document.getElementById('back-btn');
+  const outputArea     = document.getElementById('output-area');
+  const wordCount      = document.getElementById('word-count');
+  const copyBtn        = document.getElementById('copy-btn');
+
+  function showScreen(id) {
+    [screenSelect, screenOutput].forEach(s => s.classList.add('hidden'));
+    document.getElementById(id).classList.remove('hidden');
+  }
+
+  function formatJapanese(word) {
+    const primary = word.ja[0];
+    const hasKanji = /[\u4e00-\u9fff\u3400-\u4dbf]/.test(primary);
+    if (!hasKanji) return primary;
+    const kana = word.ja.find((r, i) => i > 0 && !/[\u4e00-\u9fff\u3400-\u4dbf]/.test(r));
+    return kana ? `${primary}（${kana}）` : primary;
+  }
+
+  const categoryGroups = [
+    { label: "Food & Drink", ja: "たべもの・のみもの", color: "#e6a817", categories: [
+      { name: "Drinks",               ja: "のみもの" },
+      { name: "Dessert",              ja: "おかし" },
+      { name: "Food",                 ja: "たべもの" },
+      { name: "Japanese Food",        ja: "にほんのたべもの" },
+      { name: "Fruit and Vegetables", ja: "くだもの・やさい" },
+      { name: "Meals",                ja: "しょくじ" },
+      { name: "Ingredients",          ja: "ざいりょう" },
+      { name: "Taste",                ja: "あじ" },
+    ]},
+    { label: "People & Self", ja: "ひと・じぶん", color: "#d64f8a", categories: [
+      { name: "Feelings",       ja: "きもち" },
+      { name: "People",         ja: "ひと" },
+      { name: "Personality",    ja: "せいかく" },
+      { name: "Family",         ja: "かぞく" },
+      { name: "Body Parts",     ja: "からだ" },
+      { name: "Frequency",      ja: "ひんど" },
+      { name: "Daily Routines", ja: "にちじょう" },
+    ]},
+    { label: "Clothes & Belongings", ja: "ふく・もちもの", color: "#7c5cbf", categories: [
+      { name: "Clothes",             ja: "ふく" },
+      { name: "Personal Belongings", ja: "もちもの" },
+      { name: "Stationery",          ja: "ぶんぼうぐ" },
+    ]},
+    { label: "Nature & Animals", ja: "しぜん・どうぶつ", color: "#3a9e5f", categories: [
+      { name: "Animals",              ja: "どうぶつ" },
+      { name: "Sea Animals",          ja: "うみのいきもの" },
+      { name: "Bugs",                 ja: "むし" },
+      { name: "Nature",               ja: "しぜん" },
+      { name: "Environment and 4Rs",  ja: "かんきょう" },
+    ]},
+    { label: "Date / Time", ja: "じかん・にちじ", color: "#1a8fa0", categories: [
+      { name: "Months",  ja: "つき" },
+      { name: "Dates",   ja: "ひにち" },
+      { name: "Days",    ja: "ようび" },
+      { name: "Seasons", ja: "きせつ" },
+      { name: "Weather", ja: "てんき" },
+    ]},
+    { label: "School", ja: "がっこう", color: "#2a6db5", categories: [
+      { name: "School Subjects",  ja: "きょうか" },
+      { name: "School Places",    ja: "がっこうのばしょ" },
+      { name: "Club Activities",  ja: "クラブかつどう" },
+      { name: "School Events",    ja: "がっこうのイベント" },
+    ]},
+    { label: "Arts & Play", ja: "おんがく・あそび", color: "#d9622b", categories: [
+      { name: "Musical Instruments", ja: "がっき" },
+      { name: "Play and Activities", ja: "あそび" },
+      { name: "Sports",              ja: "スポーツ" },
+    ]},
+    { label: "Town & Travel", ja: "まち・いどう", color: "#5a7a8a", categories: [
+      { name: "Town and Places", ja: "まち・ばしょ" },
+      { name: "Vehicles",        ja: "のりもの" },
+      { name: "Directions",      ja: "ほうこう" },
+      { name: "Positions",       ja: "いち" },
+    ]},
+    { label: "Language & Concepts", ja: "ことば・がいねん", color: "#c0394b", categories: [
+      { name: "Jobs",                ja: "しごと" },
+      { name: "Annual Events",       ja: "ねんじゅうぎょうじ" },
+      { name: "Impressions",         ja: "いんしょう" },
+      { name: "Conditions",          ja: "じょうたい" },
+      { name: "Colors",              ja: "いろ" },
+      { name: "Shapes",              ja: "かたち" },
+      { name: "Verbs (5th Grade)",   ja: "どうし（5ねんせい）" },
+      { name: "Verbs (6th Grade)",   ja: "どうし（6ねんせい）" },
+      { name: "Past Tense Verbs",    ja: "かこのどうし" },
+    ]},
+  ];
+
+  // Build category grid
+  categoryGroups.forEach(group => {
+    const header = document.createElement('button');
+    header.className = 'group-header';
+    header.style.borderLeftColor = group.color;
+    header.innerHTML = `
+      <span class="group-header-text">
+        <span class="group-label">${group.label} ／ ${group.ja}</span>
+      </span>
+      <span class="group-chevron">▸</span>
+    `;
+    header.addEventListener('click', () => openModal(group));
+    categoryGrid.appendChild(header);
+  });
+
+  function openModal(group) {
+    modalGroupName.textContent = group.label;
+    modalGroupJa.textContent   = group.ja;
+    modal.style.setProperty('--modal-color', group.color);
+
+    modalSubcats.innerHTML = '';
+    group.categories.forEach(groupCat => {
+      const cat = categories.find(c => c.name === groupCat.name);
+      if (!cat) return;
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'subcat-wrap';
+
+      // --- Row ---
+      const label = document.createElement('label');
+      label.className = 'subcat-row';
+
+      const cb = document.createElement('input');
+      cb.type    = 'checkbox';
+      cb.value   = groupCat.name;
+      cb.checked = true;
+      cb.addEventListener('change', syncSelectAll);
+
+      const info    = document.createElement('span');
+      info.className = 'subcat-info';
+
+      const nameRow = document.createElement('span');
+      nameRow.className = 'subcat-name-row';
+
+      const enSpan = document.createElement('span');
+      enSpan.className   = 'subcat-name-en';
+      enSpan.textContent = groupCat.name;
+
+      const sep = document.createElement('span');
+      sep.className   = 'subcat-sep';
+      sep.textContent = '／';
+
+      const jaSpan = document.createElement('span');
+      jaSpan.className   = 'subcat-name-ja';
+      jaSpan.textContent = groupCat.ja;
+
+      nameRow.appendChild(enSpan);
+      nameRow.appendChild(sep);
+      nameRow.appendChild(jaSpan);
+
+      const countSpan = document.createElement('span');
+      countSpan.className   = 'subcat-count';
+      countSpan.textContent = `${cat.words.length} words ／ ${cat.words.length} たんご`;
+
+      info.appendChild(nameRow);
+      info.appendChild(countSpan);
+
+      // --- Preview button ---
+      const previewBtn = document.createElement('button');
+      previewBtn.type = 'button';
+      previewBtn.className = 'preview-btn';
+      previewBtn.setAttribute('aria-label', 'Preview words');
+      previewBtn.innerHTML = `<svg viewBox="0 0 16 16" fill="none" width="14" height="14" aria-hidden="true"><path d="M1 8c0 0 2.5-5 7-5s7 5 7 5-2.5 5-7 5-7-5-7-5z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="8" cy="8" r="2.2" stroke="currentColor" stroke-width="1.5"/></svg>`;
+
+      // --- Preview panel ---
+      const previewPanel = document.createElement('div');
+      previewPanel.className = 'preview-panel';
+      previewPanel.style.display = 'none';
+
+      const chipsWrap = document.createElement('div');
+      chipsWrap.className = 'word-chips';
+
+      cat.words.forEach(w => {
+        const chip = document.createElement('span');
+        chip.className = 'word-chip';
+        const chipEn = document.createElement('span');
+        chipEn.className   = 'chip-en';
+        chipEn.textContent = w.en;
+        const chipJa = document.createElement('span');
+        chipJa.className   = 'chip-ja';
+        chipJa.textContent = formatJapanese(w);
+        chip.appendChild(chipEn);
+        chip.appendChild(chipJa);
+        chipsWrap.appendChild(chip);
+      });
+
+      previewPanel.appendChild(chipsWrap);
+
+      previewBtn.addEventListener('click', e => {
+        e.preventDefault();
+        e.stopPropagation();
+        const isOpen = previewPanel.style.display !== 'none';
+        previewPanel.style.display = isOpen ? 'none' : 'block';
+        previewBtn.classList.toggle('active', !isOpen);
+      });
+
+      label.appendChild(cb);
+      label.appendChild(info);
+      label.appendChild(previewBtn);
+      wrapper.appendChild(label);
+      wrapper.appendChild(previewPanel);
+      modalSubcats.appendChild(wrapper);
+    });
+
+    selectAllCb.checked       = true;
+    selectAllCb.indeterminate = false;
+    updateCreateBtn();
+
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal() {
+    modal.classList.add('hidden');
+    document.body.style.overflow = '';
+  }
+
+  function syncSelectAll() {
+    const cbs = [...modalSubcats.querySelectorAll('input[type=checkbox]')];
+    const n   = cbs.filter(c => c.checked).length;
+    if (n === 0) {
+      selectAllCb.checked = false; selectAllCb.indeterminate = false;
+    } else if (n === cbs.length) {
+      selectAllCb.checked = true;  selectAllCb.indeterminate = false;
+    } else {
+      selectAllCb.checked = false; selectAllCb.indeterminate = true;
+    }
+    updateCreateBtn();
+  }
+
+  function updateCreateBtn() {
+    const cbs = [...modalSubcats.querySelectorAll('input[type=checkbox]')];
+    modalCreateBtn.disabled = !cbs.some(c => c.checked);
+  }
+
+  selectAllCb.addEventListener('change', () => {
+    modalSubcats.querySelectorAll('input[type=checkbox]').forEach(cb => cb.checked = selectAllCb.checked);
+    selectAllCb.indeterminate = false;
+    updateCreateBtn();
+  });
+
+  modalClose.addEventListener('click', closeModal);
+  modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+  modalCreateBtn.addEventListener('click', () => {
+    const cbs = [...modalSubcats.querySelectorAll('input[type=checkbox]')];
+    const selectedNames = cbs.filter(c => c.checked).map(c => c.value);
+    const merged = [];
+    selectedNames.forEach(name => {
+      const cat = categories.find(c => c.name === name);
+      if (cat) merged.push(...cat.words);
+    });
+    closeModal();
+    showSet(merged);
+  });
+
+  function showSet(words) {
+    outputArea.value = words.map(w => `${w.en}\t${formatJapanese(w)}`).join('\n');
+    wordCount.textContent = `${words.length} words ／ ${words.length} たんご`;
+    showScreen('screen-output');
+  }
+
+  backBtn.addEventListener('click', () => showScreen('screen-select'));
+
+  copyBtn.addEventListener('click', () => {
+    navigator.clipboard.writeText(outputArea.value).then(() => {
+      copyBtn.textContent = 'Copied! ／ コピーしました';
+      copyBtn.classList.add('copied');
+      setTimeout(() => {
+        copyBtn.textContent = 'Copy ／ コピー';
+        copyBtn.classList.remove('copied');
+      }, 2000);
+    });
+  });
+</script>
+
+<style>
+  .wrap {
+    min-height: 100vh;
+    background: #f0f5ff;
+    font-family: 'Andika', sans-serif;
+    padding: 2rem 1rem;
+  }
+
+  .screen { max-width: 800px; margin: 0 auto; }
+  .hidden { display: none !important; }
+
+  /* Header */
+  .header-card {
+    text-align: center;
+    margin-bottom: 2.5rem;
+  }
+
+  .header-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 1rem;
+  }
+
+  .header-icon svg { width: 100%; height: 100%; }
+
+  .page-title {
+    font-size: 2rem;
+    color: #2563eb;
+    margin: 0 0 0.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.15rem;
+  }
+
+  .title-ja {
+    font-size: 1.3rem;
+    color: #2563eb;
+    font-weight: 700;
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+  }
+
+  .page-desc {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+  }
+
+  .desc-en {
+    font-size: 0.95rem;
+    color: #666;
+  }
+
+  .desc-ja {
+    font-size: 0.88rem;
+    color: #888;
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+  }
+
+  /* Category Grid */
+  .category-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.4rem;
+  }
+
+  :global(.group-header) {
+    -webkit-appearance: none;
+    appearance: none;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    height: 56px;
+    background: white;
+    border: 1px solid #eee;
+    border-left: 5px solid #2563eb;
+    border-radius: 0 10px 10px 0;
+    padding: 0 1rem;
+    cursor: pointer;
+    font-family: inherit;
+    text-align: left;
+    transition: background 0.15s;
+    box-sizing: border-box;
+    color: inherit;
+  }
+
+  :global(.group-header:hover) { background: #f5f8ff; }
+
+  :global(.group-header-text) {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  :global(.group-label) {
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: #222;
+  }
+
+  :global(.group-chevron) {
+    font-size: 0.9rem;
+    color: #aaa;
+    flex-shrink: 0;
+  }
+
+  /* Modal */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 1rem;
+  }
+
+  .modal-box {
+    background: white;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 480px;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.2);
+    border-top: 5px solid var(--modal-color, #2563eb);
+  }
+
+  .modal-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 1.25rem 1.25rem 0.75rem;
+    border-bottom: 1px solid #f0f0f0;
+    flex-shrink: 0;
+  }
+
+  .modal-title-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  .modal-group-name {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #222;
+  }
+
+  .modal-group-ja {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #555;
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+  }
+
+  .modal-close {
+    background: none;
+    border: none;
+    font-size: 1.1rem;
+    color: #aaa;
+    cursor: pointer;
+    padding: 0.2rem 0.4rem;
+    line-height: 1;
+    border-radius: 6px;
+    flex-shrink: 0;
+  }
+
+  .modal-close:hover { background: #f5f5f5; color: #555; }
+
+  .select-all-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.75rem 1.25rem;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 0.9rem;
+    color: #555;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .select-all-row input[type=checkbox] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--modal-color, #2563eb);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .modal-subcats {
+    overflow-y: auto;
+    flex: 1;
+    padding: 0.5rem 0;
+  }
+
+  .modal-footer {
+    padding: 1rem 1.25rem;
+    border-top: 1px solid #f0f0f0;
+    flex-shrink: 0;
+  }
+
+  .modal-create-btn {
+    width: 100%;
+    background: var(--modal-color, #2563eb);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    padding: 0.85rem 1rem;
+    font-size: 1rem;
+    font-family: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+
+  .modal-create-btn:hover    { opacity: 0.88; }
+  .modal-create-btn:disabled { opacity: 0.4; cursor: default; }
+
+  /* Subcat rows (JS-created, need :global()) */
+  :global(.subcat-row) {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.7rem 1.25rem;
+    cursor: pointer;
+    transition: background 0.12s;
+  }
+
+  :global(.subcat-row:hover) { background: #f5f8ff; }
+
+  :global(.subcat-row input[type=checkbox]) {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--modal-color, #2563eb);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  :global(.subcat-info) {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+  }
+
+  :global(.subcat-name-row) {
+    display: flex;
+    align-items: baseline;
+    gap: 0.35rem;
+  }
+
+  :global(.subcat-name-en) {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #333;
+  }
+
+  :global(.subcat-sep) {
+    font-size: 0.85rem;
+    color: #ccc;
+  }
+
+  :global(.subcat-name-ja) {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #888;
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+  }
+
+  :global(.subcat-count) {
+    font-size: 0.78rem;
+    color: #aaa;
+  }
+
+  /* Output Screen */
+  .output-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .back-btn {
+    background: none;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    padding: 0.4rem 0.8rem;
+    cursor: pointer;
+    font-family: inherit;
+    color: #666;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .back-btn:hover { border-color: #aaa; }
+
+  .word-count {
+    font-size: 0.9rem;
+    color: #888;
+  }
+
+  .output-card {
+    background: white;
+    border: 2px solid #dbeafe;
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+  }
+
+  .output-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .output-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #2563eb;
+    margin: 0;
+  }
+
+  .copy-btn {
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    padding: 0.5rem 1.1rem;
+    font-size: 0.9rem;
+    font-family: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s;
+    white-space: nowrap;
+  }
+
+  .copy-btn:hover   { background: #1d4ed8; }
+  .copy-btn.copied  { background: #16a34a; }
+
+  .output-area {
+    width: 100%;
+    min-height: 260px;
+    max-height: 400px;
+    padding: 1rem 1.25rem;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    line-height: 1.7;
+    border: none;
+    resize: vertical;
+    color: #333;
+    box-sizing: border-box;
+    background: #fafcff;
+    outline: none;
+  }
+
+  /* Instructions */
+  .instructions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1rem;
+  }
+
+  .instr-block {
+    background: white;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+  }
+
+  .instr-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #2563eb;
+    margin: 0 0 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #dbeafe;
+  }
+
+  .instr-list {
+    margin: 0;
+    padding-left: 1.4rem;
+    color: #555;
+    font-size: 0.9rem;
+    line-height: 1.7;
+  }
+
+  .instr-list strong { color: #333; }
+
+  /* Preview button & panel */
+  :global(.subcat-wrap) {
+    border-bottom: 1px solid #f0f0f0;
+  }
+  :global(.subcat-wrap:last-child) {
+    border-bottom: none;
+  }
+
+  :global(.preview-btn) {
+    background: none;
+    border: 1.5px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 0.3rem 0.4rem;
+    cursor: pointer;
+    color: #bbb;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    margin-left: auto;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+  }
+  :global(.preview-btn:hover) {
+    border-color: var(--modal-color, #2563eb);
+    color: var(--modal-color, #2563eb);
+  }
+  :global(.preview-btn.active) {
+    border-color: var(--modal-color, #2563eb);
+    color: var(--modal-color, #2563eb);
+    background: #f0f5ff;
+  }
+
+  :global(.preview-panel) {
+    padding: 0.6rem 1.25rem 0.85rem 3.4rem;
+    background: #f7f9ff;
+    border-top: 1px solid #eef2ff;
+  }
+
+  :global(.word-chips) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  :global(.word-chip) {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: white;
+    border: 1.5px solid #dbeafe;
+    border-radius: 8px;
+    padding: 0.25rem 0.6rem;
+    line-height: 1.3;
+  }
+  :global(.chip-en) {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #1e3a8a;
+  }
+  :global(.chip-ja) {
+    font-size: 0.72rem;
+    color: #555;
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+  }
+
+  @media (max-width: 600px) {
+    .page-title { font-size: 1.6rem; }
+    .category-grid { grid-template-columns: 1fr; }
+  }
+</style>

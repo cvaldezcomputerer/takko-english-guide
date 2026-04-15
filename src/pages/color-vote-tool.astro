@@ -1,13 +1,11 @@
 ---
-import GameLayout from "../layouts/GameLayout.astro";
+import GameLayout from "../layouts/ToolLayout.astro";
 ---
 
 <GameLayout title="Color Vote Tool">
   <div class="color-vote-page" data-screen="neutral">
     <main class="vote-shell">
-      <a class="back-link" href="/game">← Back to Games</a>
-
-      <section class="vote-controls" aria-label="Answer color buttons">
+<section class="vote-controls" aria-label="Answer color buttons">
         <button type="button" class="vote-btn vote-btn--red" data-color="red">
           <span class="vote-btn__key">A</span>
           <span class="vote-btn__label">Red</span>
@@ -101,14 +99,7 @@ import GameLayout from "../layouts/GameLayout.astro";
     gap: 1rem;
   }
 
-  .back-link {
-    color: var(--color-primary);
-    font-weight: 700;
-    text-decoration: none;
-    width: fit-content;
-  }
-
-  .vote-controls {
+.vote-controls {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     align-self: end;
