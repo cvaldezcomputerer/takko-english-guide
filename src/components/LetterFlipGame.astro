@@ -59,6 +59,19 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
         </div>
         
         <div class="settings-content">
+            <!-- Point Mode Toggle -->
+            <div class="settings-group">
+                <div class="settings-row">
+                    <label class="switch-label" for="lg-point-mode">
+                        <span>Point Mode <small>Cards show points instead of images</small></span>
+                        <div class="switch">
+                            <input type="checkbox" id="lg-point-mode" />
+                            <span class="slider round"></span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
             <!-- Mode Selection -->
             <div class="settings-group">
                 <h3>Game Mode</h3>
@@ -455,6 +468,14 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
       font-weight: 600;
   }
 
+  .switch-label small {
+      display: block;
+      font-weight: 400;
+      font-size: 0.8rem;
+      color: #888;
+      margin-top: 0.1rem;
+  }
+
   .switch {
     position: relative;
     display: inline-block;
@@ -575,6 +596,12 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
     transform: none;
   }
 
+  .letter-game__card--points {
+    background: #1e1b4b !important;
+    border-color: rgba(255, 255, 255, 0.4) !important;
+    transform: none;
+  }
+
   .letter-game__card.color-mode {
       border: 4px solid white;
       box-shadow: inset 0 0 20px rgba(0,0,0,0.2);
@@ -645,6 +672,32 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
     transform: none;
   }
 
+  .points-reveal {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    gap: 0.25rem;
+  }
+
+  .points-number {
+    font-size: clamp(4rem, 18vw, 10rem);
+    font-weight: 800;
+    color: white;
+    line-height: 1;
+  }
+
+  .points-label {
+    font-size: clamp(1rem, 4vw, 1.75rem);
+    font-weight: 700;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    opacity: 0.6;
+  }
+
   .emotion-grid {
       display: flex;
       flex-wrap: wrap;
@@ -704,6 +757,7 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
   const defaultConfig = {
     mode: 'letters', // 'letters' | 'colors' | 'emotions'
+    pointMode: false,
     letters: Array.from("ABCDEFGHIJKLMNOPQRSTUVWXYZ"),
     colors: [...COLOR_NAMES],
     emotionImages: [...imagesFromGlob.emotions],
@@ -741,7 +795,7 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
      ========================================= */
   let elBoard, elCards, elProgress, elToast, elNext, elNextLabel, elNextLoader;
   let elSettingsOverlay, elSettingsBtn, elSettingsClose;
-  let elModeInputs, elLetterCheckboxes, elRandomize;
+  let elModeInputs, elLetterCheckboxes, elRandomize, elPointMode;
   let elLettersSettingsGroup, elColorsSettingsGroup, elColorGrid;
   let elEmotionsSettingsGroup, elEmotionGrid;
 
@@ -896,7 +950,9 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
         currentEmotionCovers = ["", ""];
     }
 
-    // B. Determine Images (Unified Logic for both modes)
+    // B. Skip image fetching entirely in point mode
+    if (config.pointMode) { currentPair = ["", ""]; currentCategory = ""; return; }
+
     // Pick Random Category
     const categories = Object.keys(config.images);
     const validCategories = categories.filter(cat => config.images[cat].length >= 2);
@@ -962,27 +1018,34 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
   function handleFlip(side) {
     if (flippedCards[side]) return;
-    
+
     flippedCards[side] = true;
     const card = elCards[side];
-    const imageUrl = currentPair[side];
-    
+
+    const label = config.mode === 'letters'
+        ? `Letter ${currentLabels[side]}`
+        : currentLabels[side].charAt(0).toUpperCase() + currentLabels[side].slice(1);
+
+    if (config.pointMode) {
+        const points = Math.floor(Math.random() * 10) + 1;
+        card.classList.add("letter-game__card--points");
+        card.innerHTML = `<div class="points-reveal"><span class="points-number">${points}</span></div>`;
+        if (elToast) elToast.textContent = `${label} — ${points} point${points === 1 ? '' : 's'}!`;
+        return;
+    }
+
     card.classList.add("letter-game__card--flipped");
-    
+
+    const imageUrl = currentPair[side];
     const img = new Image();
     img.alt = `${currentCategory} image`;
     img.src = imageUrl;
     img.style.cssText = "width: 100%; height: 100%; object-fit: cover; border-radius: 1rem;";
-    
+
     img.onload = () => {
         card.innerHTML = "";
         card.appendChild(img);
-        updateAttributionUI();
-        
-        const label = config.mode === 'letters'
-            ? `Letter ${currentLabels[side]}`
-            : currentLabels[side].charAt(0).toUpperCase() + currentLabels[side].slice(1);
-        elToast.textContent = `${label} flipped!`;
+        if (elToast) elToast.textContent = `${label} flipped!`;
     };
   }
 
@@ -1029,7 +1092,6 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
     });
 
     flippedCards = [false, false];
-    updateAttributionUI();
     if (elNext) {
       elNext.disabled = false;
     }
@@ -1187,6 +1249,9 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
       // 3. Randomize
       if (elRandomize) elRandomize.checked = config.randomize;
 
+      // 4. Point Mode
+      if (elPointMode) elPointMode.checked = config.pointMode;
+
       // 4. Visibility & Grid Gen
       const showLetters = config.mode === 'letters';
       const showColors = config.mode === 'colors';
@@ -1222,6 +1287,7 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
     elColorGrid = document.getElementById("lg-color-grid");
     elEmotionsSettingsGroup = document.getElementById("emotions-settings");
     elEmotionGrid = document.getElementById("lg-emotion-grid");
+    elPointMode = document.getElementById("lg-point-mode");
 
     // B. Setup Logic
     loadSettings();
@@ -1277,7 +1343,15 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
         elRandomize.addEventListener("change", (e) => {
             config.randomize = e.target.checked;
             saveSettings();
-            resetGame(); 
+            resetGame();
+        });
+    }
+
+    if (elPointMode) {
+        elPointMode.addEventListener("change", (e) => {
+            config.pointMode = e.target.checked;
+            saveSettings();
+            resetGame();
         });
     }
 
