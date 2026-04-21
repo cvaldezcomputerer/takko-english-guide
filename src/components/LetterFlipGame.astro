@@ -18,11 +18,17 @@ const objectsImages = import.meta.glob<string>(
   { eager: true, query: "?url", import: "default" }
 );
 
+const emotionsImages = import.meta.glob<string>(
+  "../assets/letter-game/emotions/*.{jpg,jpeg,png,webp,gif,svg}",
+  { eager: true, query: "?url", import: "default" }
+);
+
 // 2. Data Preparation
 const imagesFromGlob = {
   food: Object.values(foodImages),
   animals: Object.values(animalsImages),
   objects: Object.values(objectsImages),
+  emotions: Object.values(emotionsImages),
 };
 
 const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
@@ -65,6 +71,10 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
                         <input type="radio" name="game-mode" value="colors">
                         <span class="mode-label">Colors</span>
                     </label>
+                    <label class="mode-option">
+                        <input type="radio" name="game-mode" value="emotions">
+                        <span class="mode-label">Emotions</span>
+                    </label>
                 </div>
             </div>
 
@@ -98,7 +108,15 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
                     <!-- Populated by JS -->
                 </div>
             </div>
-            
+
+            <!-- Emotion Grid (Emotions Mode) -->
+            <div class="settings-group" id="emotions-settings" style="display: none;">
+                <h3>Select Emotions</h3>
+                <div class="emotion-grid" id="lg-emotion-grid">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
         </div>
     </div>
   </div>
@@ -562,6 +580,21 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
       box-shadow: inset 0 0 20px rgba(0,0,0,0.2);
   }
 
+  .letter-game__card.emotion-mode {
+      border: 4px solid rgba(255, 255, 255, 0.5);
+      overflow: hidden;
+      padding: 0;
+  }
+
+  .letter-game__card.emotion-mode img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: calc(1.5rem - 4px);
+      display: block;
+      pointer-events: none;
+  }
+
   .letter-game__controls {
     display: flex;
     justify-content: center;
@@ -612,6 +645,35 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
     transform: none;
   }
 
+  .emotion-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+  }
+
+  .emotion-toggle span {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.4rem 0.9rem;
+      height: auto;
+      width: auto;
+      background: #f0f0f0;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      color: #444;
+      font-size: 0.9rem;
+      border: 2px solid transparent;
+      transition: all 0.2s;
+      text-transform: capitalize;
+  }
+
+  .emotion-toggle input:checked + span {
+      background: #667eea;
+      color: white;
+  }
+
   .letter-game__toast {
     text-align: center;
     margin-top: 1rem;
@@ -638,12 +700,13 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
   };
 
   const COLOR_NAMES = Object.keys(COLORS);
-  const LS_KEYS = { config: "lg-config-v3" };
+  const LS_KEYS = { config: "lg-config-v4" };
 
   const defaultConfig = {
-    mode: 'letters', // 'letters' | 'colors'
+    mode: 'letters', // 'letters' | 'colors' | 'emotions'
     letters: Array.from("ABCDEFGHIJKLMNOPQRSTUVWXYZ"),
     colors: [...COLOR_NAMES],
+    emotionImages: [...imagesFromGlob.emotions],
     images: {
       food: [...imagesFromGlob.food],
       animals: [...imagesFromGlob.animals],
@@ -662,9 +725,10 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
      2. Global State
      ========================================= */
   let config = { ...defaultConfig };
-  let currentPair = ["", ""]; 
+  let currentPair = ["", ""];
   let currentLabels = ["", ""];
   let currentColors = ["", ""];
+  let currentEmotionCovers = ["", ""];
   let currentCategory = "";
   let flippedCards = [false, false];
   let roundCount = 0;
@@ -679,10 +743,20 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
   let elSettingsOverlay, elSettingsBtn, elSettingsClose;
   let elModeInputs, elLetterCheckboxes, elRandomize;
   let elLettersSettingsGroup, elColorsSettingsGroup, elColorGrid;
+  let elEmotionsSettingsGroup, elEmotionGrid;
 
   /* =========================================
      4. Utils & Storage
      ========================================= */
+  function emotionNameFromUrl(url) {
+    const filename = url.split('/').pop();
+    const name = filename
+      .replace(/\.[a-f0-9]{8,}\.[a-z]+$/i, '')
+      .replace(/\.[a-z]+$/i, '')
+      .replace(/[-_]/g, ' ');
+    return name.charAt(0).toUpperCase() + name.slice(1);
+  }
+
   function loadSettings() {
     try {
       const stored = localStorage.getItem(LS_KEYS.config);
@@ -690,6 +764,9 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
           const parsed = JSON.parse(stored);
           config = { ...defaultConfig, ...parsed };
           config.images = normalizeImageCategories(config.images);
+          if (!Array.isArray(config.emotionImages) || config.emotionImages.length === 0) {
+              config.emotionImages = [...imagesFromGlob.emotions];
+          }
       }
     } catch (e) { console.error("Failed to load settings", e); }
   }
@@ -796,17 +873,27 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
      6. Game Logic
      ========================================= */
   async function generateNewPair() {
-    // A. Determine Labels (Letters vs Colors)
+    // A. Determine Labels / Covers per mode
     if (config.mode === 'colors') {
         const pool = (config.colors && config.colors.length >= 2) ? config.colors : COLOR_NAMES;
         const [c1, c2] = getRandomPair(pool, currentSeed + roundCount);
         currentLabels = [c1, c2];
         currentColors = [COLORS[c1], COLORS[c2]];
+        currentEmotionCovers = ["", ""];
+    } else if (config.mode === 'emotions') {
+        const pool = (config.emotionImages && config.emotionImages.length >= 2)
+            ? config.emotionImages
+            : imagesFromGlob.emotions;
+        const [e1, e2] = getRandomPair(pool, currentSeed + roundCount);
+        currentEmotionCovers = [e1, e2];
+        currentLabels = [emotionNameFromUrl(e1), emotionNameFromUrl(e2)];
+        currentColors = ["", ""];
     } else {
         const pool = (config.letters && config.letters.length > 0) ? config.letters : defaultConfig.letters;
         const [l1, l2] = getRandomPair(pool, currentSeed + roundCount);
         currentLabels = [l1, l2];
         currentColors = ["", ""];
+        currentEmotionCovers = ["", ""];
     }
 
     // B. Determine Images (Unified Logic for both modes)
@@ -892,9 +979,9 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
         card.appendChild(img);
         updateAttributionUI();
         
-        const label = config.mode === 'colors' 
-            ? currentLabels[side].charAt(0).toUpperCase() + currentLabels[side].slice(1)
-            : `Letter ${currentLabels[side]}`;
+        const label = config.mode === 'letters'
+            ? `Letter ${currentLabels[side]}`
+            : currentLabels[side].charAt(0).toUpperCase() + currentLabels[side].slice(1);
         elToast.textContent = `${label} flipped!`;
     };
   }
@@ -928,6 +1015,13 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
           card.classList.add('color-mode');
           card.style.backgroundColor = currentColors[index];
           card.ariaLabel = `Color ${currentLabels[index]} - click to flip`;
+      } else if (config.mode === 'emotions') {
+          card.classList.add('emotion-mode');
+          const img = document.createElement('img');
+          img.src = currentEmotionCovers[index];
+          img.alt = currentLabels[index];
+          card.appendChild(img);
+          card.ariaLabel = `${currentLabels[index]} - click to flip`;
       } else {
           card.textContent = currentLabels[index];
           card.ariaLabel = `Letter ${currentLabels[index]} - click to flip`;
@@ -1030,6 +1124,51 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
       }
   }
 
+  function generateEmotionGrid() {
+      if (!elEmotionGrid) return;
+      elEmotionGrid.innerHTML = '';
+
+      imagesFromGlob.emotions.forEach(url => {
+          const name = emotionNameFromUrl(url);
+          const label = document.createElement('label');
+          label.className = 'item-toggle emotion-toggle';
+
+          const input = document.createElement('input');
+          input.type = 'checkbox';
+          input.name = 'lg-emotion';
+          input.value = url;
+          input.checked = config.emotionImages.includes(url);
+
+          const span = document.createElement('span');
+          span.textContent = name;
+
+          const updateStyle = (checked) => {
+              span.style.opacity = checked ? '1' : '0.35';
+          };
+          updateStyle(input.checked);
+          input.addEventListener('change', () => {
+              updateStyle(input.checked);
+              updateEmotionSelection();
+          });
+
+          label.appendChild(input);
+          label.appendChild(span);
+          elEmotionGrid.appendChild(label);
+      });
+  }
+
+  function updateEmotionSelection() {
+      const checked = Array.from(document.querySelectorAll('input[name="lg-emotion"]:checked')).map(c => c.value);
+      if (checked.length > 0) {
+          config.emotionImages = checked;
+      } else {
+          const first = document.querySelector('input[name="lg-emotion"]');
+          if (first) { first.checked = true; config.emotionImages = [first.value]; }
+      }
+      saveSettings();
+      resetGame();
+  }
+
   function updateSettingsUI() {
       // 1. Mode
       if (elModeInputs) {
@@ -1037,28 +1176,26 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
               input.checked = input.value === config.mode;
           });
       }
-      
+
       // 2. Letters
       if (elLetterCheckboxes) {
           elLetterCheckboxes.forEach(cb => {
               cb.checked = config.letters.includes(cb.value);
           });
       }
-      
+
       // 3. Randomize
       if (elRandomize) elRandomize.checked = config.randomize;
 
       // 4. Visibility & Grid Gen
-      if (elLettersSettingsGroup && elColorsSettingsGroup) {
-          if (config.mode === 'letters') {
-              elLettersSettingsGroup.style.display = 'block';
-              elColorsSettingsGroup.style.display = 'none';
-          } else {
-              elLettersSettingsGroup.style.display = 'none';
-              elColorsSettingsGroup.style.display = 'block';
-              generateColorGrid(); 
-          }
-      }
+      const showLetters = config.mode === 'letters';
+      const showColors = config.mode === 'colors';
+      const showEmotions = config.mode === 'emotions';
+      if (elLettersSettingsGroup) elLettersSettingsGroup.style.display = showLetters ? 'block' : 'none';
+      if (elColorsSettingsGroup) elColorsSettingsGroup.style.display = showColors ? 'block' : 'none';
+      if (elEmotionsSettingsGroup) elEmotionsSettingsGroup.style.display = showEmotions ? 'block' : 'none';
+      if (showColors) generateColorGrid();
+      if (showEmotions) generateEmotionGrid();
   }
 
   /* =========================================
@@ -1083,6 +1220,8 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
     elLettersSettingsGroup = document.getElementById("letters-settings");
     elColorsSettingsGroup = document.getElementById("colors-settings");
     elColorGrid = document.getElementById("lg-color-grid");
+    elEmotionsSettingsGroup = document.getElementById("emotions-settings");
+    elEmotionGrid = document.getElementById("lg-emotion-grid");
 
     // B. Setup Logic
     loadSettings();
