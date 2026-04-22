@@ -70,6 +70,15 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
                         </div>
                     </label>
                 </div>
+                <div class="settings-row" style="margin-top:1rem">
+                    <label class="switch-label" for="lg-four-corners">
+                        <span>4 Corners <small>Show 4 cards instead of 2</small></span>
+                        <div class="switch">
+                            <input type="checkbox" id="lg-four-corners" />
+                            <span class="slider round"></span>
+                        </div>
+                    </label>
+                </div>
             </div>
 
             <!-- Mode Selection -->
@@ -140,18 +149,16 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
   <!-- Game Board -->
   <section class="letter-game__board" aria-label="Flip cards to reveal images">
     <div class="letter-game__card-wrapper">
-      <button
-        class="letter-game__card"
-        data-testid="card-0"
-        aria-label="Left card - click to flip"
-      ></button>
+      <button class="letter-game__card" data-testid="card-0" aria-label="Card 1 - click to flip"></button>
     </div>
     <div class="letter-game__card-wrapper">
-      <button
-        class="letter-game__card"
-        data-testid="card-1"
-        aria-label="Right card - click to flip"
-      ></button>
+      <button class="letter-game__card" data-testid="card-1" aria-label="Card 2 - click to flip"></button>
+    </div>
+    <div class="letter-game__card-wrapper" style="display:none">
+      <button class="letter-game__card" data-testid="card-2" aria-label="Card 3 - click to flip"></button>
+    </div>
+    <div class="letter-game__card-wrapper" style="display:none">
+      <button class="letter-game__card" data-testid="card-3" aria-label="Card 4 - click to flip"></button>
     </div>
   </section>
 
@@ -544,6 +551,10 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
     min-height: 400px;
   }
   
+  .letter-game__board.four-corners {
+    grid-template-columns: 1fr 1fr;
+  }
+
   @media (max-width: 768px) {
     .letter-game__board {
       grid-template-columns: 1fr;
@@ -551,6 +562,10 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
       min-height: auto;
     }
 
+    .letter-game__board.four-corners {
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
   }
 
   .letter-game__card-wrapper {
@@ -758,6 +773,7 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
   const defaultConfig = {
     mode: 'letters', // 'letters' | 'colors' | 'emotions'
     pointMode: false,
+    fourCorners: false,
     letters: Array.from("ABCDEFGHIJKLMNOPQRSTUVWXYZ"),
     colors: [...COLOR_NAMES],
     emotionImages: [...imagesFromGlob.emotions],
@@ -795,9 +811,10 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
      ========================================= */
   let elBoard, elCards, elProgress, elToast, elNext, elNextLabel, elNextLoader;
   let elSettingsOverlay, elSettingsBtn, elSettingsClose;
-  let elModeInputs, elLetterCheckboxes, elRandomize, elPointMode;
+  let elModeInputs, elLetterCheckboxes, elRandomize, elPointMode, elFourCorners;
   let elLettersSettingsGroup, elColorsSettingsGroup, elColorGrid;
   let elEmotionsSettingsGroup, elEmotionGrid;
+  let elCardWrappers;
 
   /* =========================================
      4. Utils & Storage
@@ -876,19 +893,14 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
     return a;
   }
 
-  function getRandomPair(arr, seed) {
-    if (!arr || arr.length === 0) return [null, null];
+  function getRandomItems(arr, count, seed) {
+    if (!arr || arr.length === 0) return Array(count).fill(null);
     const shuffled = seededShuffle(arr, seed);
-    const item1 = shuffled[Math.floor(Math.random() * shuffled.length)];
-    
-    // Try to find a distinct second item if possible
-    let item2 = item1;
-    if (shuffled.length > 1) {
-        do { 
-            item2 = shuffled[Math.floor(Math.random() * shuffled.length)]; 
-        } while (item2 === item1);
+    const result = [];
+    for (let i = 0; i < count; i++) {
+      result.push(shuffled[i % shuffled.length]);
     }
-    return [item1, item2];
+    return result;
   }
 
   /* =========================================
@@ -927,83 +939,63 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
      6. Game Logic
      ========================================= */
   async function generateNewPair() {
+    const n = config.fourCorners ? 4 : 2;
+    const empty = () => Array(n).fill("");
+
     // A. Determine Labels / Covers per mode
     if (config.mode === 'colors') {
-        const pool = (config.colors && config.colors.length >= 2) ? config.colors : COLOR_NAMES;
-        const [c1, c2] = getRandomPair(pool, currentSeed + roundCount);
-        currentLabels = [c1, c2];
-        currentColors = [COLORS[c1], COLORS[c2]];
-        currentEmotionCovers = ["", ""];
+        const pool = (config.colors && config.colors.length >= n) ? config.colors : COLOR_NAMES;
+        const items = getRandomItems(pool, n, currentSeed + roundCount);
+        currentLabels = items;
+        currentColors = items.map(c => COLORS[c]);
+        currentEmotionCovers = empty();
     } else if (config.mode === 'emotions') {
-        const pool = (config.emotionImages && config.emotionImages.length >= 2)
+        const pool = (config.emotionImages && config.emotionImages.length >= n)
             ? config.emotionImages
             : imagesFromGlob.emotions;
-        const [e1, e2] = getRandomPair(pool, currentSeed + roundCount);
-        currentEmotionCovers = [e1, e2];
-        currentLabels = [emotionNameFromUrl(e1), emotionNameFromUrl(e2)];
-        currentColors = ["", ""];
+        const items = getRandomItems(pool, n, currentSeed + roundCount);
+        currentEmotionCovers = items;
+        currentLabels = items.map(u => emotionNameFromUrl(u));
+        currentColors = empty();
     } else {
         const pool = (config.letters && config.letters.length > 0) ? config.letters : defaultConfig.letters;
-        const [l1, l2] = getRandomPair(pool, currentSeed + roundCount);
-        currentLabels = [l1, l2];
-        currentColors = ["", ""];
-        currentEmotionCovers = ["", ""];
+        currentLabels = getRandomItems(pool, n, currentSeed + roundCount);
+        currentColors = empty();
+        currentEmotionCovers = empty();
     }
 
-    // B. Skip image fetching entirely in point mode
-    if (config.pointMode) { currentPair = ["", ""]; currentCategory = ""; return; }
+    // B. Skip image fetching in point mode
+    if (config.pointMode) { currentPair = empty(); currentCategory = ""; return; }
 
-    // Pick Random Category
-    const categories = Object.keys(config.images);
-    const validCategories = categories.filter(cat => config.images[cat].length >= 2);
-    
-    if (validCategories.length === 0) {
-        currentCategory = "Error"; currentPair = ["", ""]; return;
-    }
-
+    // C. Pick category
+    const validCategories = Object.keys(config.images).filter(cat => config.images[cat].length >= n);
+    if (validCategories.length === 0) { currentCategory = "Error"; currentPair = empty(); return; }
     currentCategory = validCategories[Math.floor(Math.random() * validCategories.length)];
 
-    let img1 = null;
-    let img2 = null;
+    // D. Fetch images
+    let fetched;
     if (currentCategory === 'funny-cats') {
-            img1 = await fetchGiphyCat();
-            img2 = await fetchGiphyCat();
-            if (img1) currentCategory = "Funny Cats! 🐱";
+        fetched = await Promise.all(Array(n).fill(null).map(() => fetchGiphyCat()));
+        if (fetched[0]) currentCategory = "Funny Cats!";
     } else {
-        // Generic Category API Fetch
-        const searchTerm = currentCategory;
-        // Fetch 2 distinct images if possible
-        const [r1, r2] = await Promise.all([
-            fetchUnsplashImage(searchTerm),
-            fetchUnsplashImage(searchTerm)
-        ]);
-        img1 = r1?.url || null;
-        img2 = r2?.url || null;
+        const results = await Promise.all(Array(n).fill(null).map(() => fetchUnsplashImage(currentCategory)));
+        fetched = results.map(r => r?.url || null);
     }
 
-    // C. Final Fallback (Local Images)
-    if (img1 && img2) {
-        currentPair = [img1, img2];
+    // E. Fallback to local images if any fetch failed
+    if (fetched.every(Boolean)) {
+        currentPair = fetched;
     } else {
-        // Fallback to local images
-        const allImages = config.images[currentCategory];
-        // Filter out recently shown
-        const freshImages = allImages ? allImages.filter(img => !recentImages.includes(img)) : [];
-        const pool = freshImages.length >= 2 ? freshImages : (allImages || []);
-        
-        if (pool.length >= 2) {
-            const [local1, local2] = getRandomPair(pool, currentSeed + roundCount);
-            currentPair = [local1, local2];
-        } else {
-            // Emergency fallback
-            currentPair = ["", ""];
-            console.error("No images available for category:", currentCategory);
-        }
+        const allImages = config.images[currentCategory] || [];
+        const fresh = allImages.filter(img => !recentImages.includes(img));
+        const pool = fresh.length >= n ? fresh : allImages;
+        currentPair = pool.length >= n ? getRandomItems(pool, n, currentSeed + roundCount) : empty();
+        if (!currentPair[0]) console.error("No images available for category:", currentCategory);
     }
 
     preloadImages(currentPair);
     recentImages.push(...currentPair);
-    if (recentImages.length > 6) recentImages = recentImages.slice(-6);
+    if (recentImages.length > 12) recentImages = recentImages.slice(-12);
   }
 
   function preloadImages(imageUrls) {
@@ -1066,14 +1058,23 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
      7. UI Rendering
      ========================================= */
   function renderCurrentPair() {
-    if (!elCards || elCards.length < 2) return;
-    
+    if (!elCards || elCards.length < 4) return;
+
+    const n = config.fourCorners ? 4 : 2;
+
+    // Show/hide wrappers and toggle board class
+    if (elCardWrappers) {
+      elCardWrappers.forEach((wrapper, i) => { wrapper.style.display = i < n ? '' : 'none'; });
+    }
+    if (elBoard) elBoard.classList.toggle('four-corners', config.fourCorners);
+
     elCards.forEach((card, index) => {
-      card.className = "letter-game__card"; // reset classes
+      if (index >= n) return;
+      card.className = "letter-game__card";
       card.disabled = false;
       card.innerHTML = "";
-      card.style.background = ""; // clear inline
-      
+      card.style.background = "";
+
       if (config.mode === 'colors') {
           card.classList.add('color-mode');
           card.style.backgroundColor = currentColors[index];
@@ -1091,10 +1092,8 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
       }
     });
 
-    flippedCards = [false, false];
-    if (elNext) {
-      elNext.disabled = false;
-    }
+    flippedCards = Array(n).fill(false);
+    if (elNext) elNext.disabled = false;
   }
 
   function setNextLoading(isLoading) {
@@ -1249,8 +1248,9 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
       // 3. Randomize
       if (elRandomize) elRandomize.checked = config.randomize;
 
-      // 4. Point Mode
+      // 4. Point Mode & 4 Corners
       if (elPointMode) elPointMode.checked = config.pointMode;
+      if (elFourCorners) elFourCorners.checked = config.fourCorners;
 
       // 4. Visibility & Grid Gen
       const showLetters = config.mode === 'letters';
@@ -1288,16 +1288,15 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
     elEmotionsSettingsGroup = document.getElementById("emotions-settings");
     elEmotionGrid = document.getElementById("lg-emotion-grid");
     elPointMode = document.getElementById("lg-point-mode");
+    elFourCorners = document.getElementById("lg-four-corners");
+    elCardWrappers = elBoard ? Array.from(elBoard.querySelectorAll(".letter-game__card-wrapper")) : [];
 
     // B. Setup Logic
     loadSettings();
     updateSettingsUI();
 
     // C. Event Listeners
-    if (elCards.length >= 2) {
-      elCards[0].addEventListener("click", () => handleFlip(0));
-      elCards[1].addEventListener("click", () => handleFlip(1));
-    }
+    elCards.forEach((card, i) => card.addEventListener("click", () => handleFlip(i)));
     if (elNext) elNext.addEventListener("click", goNext);
 
     // Modal Events
@@ -1355,13 +1354,21 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
         });
     }
 
+    if (elFourCorners) {
+        elFourCorners.addEventListener("change", (e) => {
+            config.fourCorners = e.target.checked;
+            saveSettings();
+            resetGame();
+        });
+    }
+
     // D. Start
     resetGame();
   }
 
   function resetGame() {
-    flippedCards = [false, false]; 
-    roundCount = 0; 
+    flippedCards = Array(config.fourCorners ? 4 : 2).fill(false);
+    roundCount = 0;
     recentImages = [];
     currentSeed = Math.floor(Math.random() * 1000000);
     
