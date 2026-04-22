@@ -106,6 +106,30 @@ import T from '../components/T.astro';
                     </p>
                 </div>
                 <div class="card-grid">
+                    <a href="/shrines" class="site-card shrine-card-home">
+                        <div class="card-home-torii" aria-hidden="true">
+                            <svg viewBox="0 0 120 100" xmlns="http://www.w3.org/2000/svg">
+                                <rect x="22" y="28" width="10" height="72" rx="2" fill="currentColor"/>
+                                <rect x="88" y="28" width="10" height="72" rx="2" fill="currentColor"/>
+                                <rect x="18" y="47" width="84" height="8" rx="2" fill="currentColor"/>
+                                <path d="M4,25 L4,17 Q14,3 24,11 L96,11 Q106,3 116,17 L116,25 Z" fill="currentColor"/>
+                                <rect x="18" y="25" width="16" height="5" rx="1" fill="currentColor"/>
+                                <rect x="86" y="25" width="16" height="5" rx="1" fill="currentColor"/>
+                            </svg>
+                        </div>
+                        <h3>
+                            <T>
+                                <span slot="en">Shrines</span>
+                                <span slot="ja">神社</span>
+                            </T>
+                        </h3>
+                        <p>
+                            <T>
+                                <span slot="en">Shinto shrines in and around Takko.</span>
+                                <span slot="ja">田子町の神社を紹介します。</span>
+                            </T>
+                        </p>
+                    </a>
                     <div class="site-card coming-soon">
                         <h3>
                             <T>
@@ -333,6 +357,18 @@ import T from '../components/T.astro';
         font-family: var(--font-hand);
         color: #999 !important;
         font-size: 1rem;
+    }
+
+    .shrine-card-home .card-home-torii {
+        color: #b5291c;
+        width: 44px;
+        height: 37px;
+        margin-bottom: 0.75rem;
+    }
+
+    .shrine-card-home .card-home-torii svg {
+        width: 100%;
+        height: 100%;
     }
 
     @media (max-width: 768px) {
