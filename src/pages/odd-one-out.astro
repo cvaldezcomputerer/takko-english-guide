@@ -1,0 +1,865 @@
+---
+import ToolLayout from '../layouts/ToolLayout.astro';
+import { categories } from '../data/anarika/words';
+const categoriesJson = JSON.stringify(categories);
+---
+
+<ToolLayout title="Odd One Out" description="Find the word that doesn't belong.">
+<div class="wrap">
+
+  <!-- Select Screen -->
+  <div id="screen-select" class="screen">
+    <div class="header-card">
+      <div class="header-icon" aria-hidden="true">
+        <svg viewBox="0 0 80 80" fill="none">
+          <rect x="4"  y="8"  width="33" height="29" rx="6" fill="white" stroke="#557153" stroke-width="2.5"/>
+          <rect x="43" y="8"  width="33" height="29" rx="6" fill="white" stroke="#557153" stroke-width="2.5"/>
+          <rect x="4"  y="43" width="33" height="29" rx="6" fill="white" stroke="#557153" stroke-width="2.5"/>
+          <rect x="43" y="43" width="33" height="29" rx="6" fill="#fef9c3" stroke="#d97706" stroke-width="3"/>
+          <line x1="11" y1="19" x2="30" y2="19" stroke="#94b49f" stroke-width="2" stroke-linecap="round"/>
+          <line x1="11" y1="26" x2="24" y2="26" stroke="#c5d9c5" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="50" y1="19" x2="69" y2="19" stroke="#94b49f" stroke-width="2" stroke-linecap="round"/>
+          <line x1="50" y1="26" x2="63" y2="26" stroke="#c5d9c5" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="11" y1="54" x2="30" y2="54" stroke="#94b49f" stroke-width="2" stroke-linecap="round"/>
+          <line x1="11" y1="61" x2="24" y2="61" stroke="#c5d9c5" stroke-width="1.5" stroke-linecap="round"/>
+          <text x="59.5" y="65" text-anchor="middle" font-size="16" font-weight="800" fill="#d97706" font-family="sans-serif">?</text>
+        </svg>
+      </div>
+      <h1 class="page-title">Odd One Out<span class="title-ja">なかまはずれ</span></h1>
+      <p class="page-desc">
+        <span class="desc-en">Pick a word group. Find the word that doesn't belong!</span>
+        <span class="desc-ja">グループをえらんで、なかまはずれを見つけよう！</span>
+      </p>
+    </div>
+    <div class="category-grid" id="category-grid"></div>
+  </div>
+
+  <!-- Category Modal -->
+  <div id="category-modal" class="modal-overlay hidden" role="dialog" aria-modal="true">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <span class="modal-group-name" id="modal-group-name"></span>
+          <span class="modal-group-ja" id="modal-group-ja"></span>
+        </div>
+        <button class="modal-close" id="modal-close" aria-label="Close">✕</button>
+      </div>
+
+      <label class="select-all-row">
+        <input type="checkbox" id="select-all-cb" />
+        <span>Select all ／ すべてえらぶ</span>
+      </label>
+
+      <div class="modal-subcats" id="modal-subcats"></div>
+
+      <div class="modal-footer">
+        <button class="modal-play-btn" id="modal-play-btn">Play ／ あそぶ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Game Screen -->
+  <div id="screen-game" class="screen hidden">
+    <div class="game-header">
+      <button class="back-btn" id="back-btn">← Back ／ もどる</button>
+      <span class="game-category-label" id="game-category-label"></span>
+    </div>
+    <div class="game-prompt">
+      <p class="prompt-en">Which word doesn't belong?</p>
+      <p class="prompt-ja">なかまはずれはどれ？</p>
+    </div>
+    <div class="word-grid" id="word-grid"></div>
+    <div class="game-bottom">
+      <div class="feedback-area" id="feedback-area"></div>
+      <div class="game-actions">
+        <button class="reveal-btn" id="reveal-btn">Reveal ／ こたえを見る</button>
+        <button class="next-btn hidden" id="next-btn">Next ／ つぎへ</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+</ToolLayout>
+
+<script define:vars={{ categoriesJson }}>
+  const categories = JSON.parse(categoriesJson);
+
+  const screenSelect   = document.getElementById('screen-select');
+  const screenGame     = document.getElementById('screen-game');
+  const categoryGrid   = document.getElementById('category-grid');
+  const modal          = document.getElementById('category-modal');
+  const modalClose     = document.getElementById('modal-close');
+  const modalGroupName = document.getElementById('modal-group-name');
+  const modalGroupJa   = document.getElementById('modal-group-ja');
+  const modalSubcats   = document.getElementById('modal-subcats');
+  const selectAllCb    = document.getElementById('select-all-cb');
+  const modalPlayBtn   = document.getElementById('modal-play-btn');
+  const backBtn        = document.getElementById('back-btn');
+  const wordGrid       = document.getElementById('word-grid');
+  const feedbackArea   = document.getElementById('feedback-area');
+  const revealBtn      = document.getElementById('reveal-btn');
+  const nextBtn        = document.getElementById('next-btn');
+  const gameCategoryLabel = document.getElementById('game-category-label');
+
+  const categoryGroups = [
+    { label: "Food & Drink", ja: "たべもの・のみもの", color: "#e6a817", categories: [
+      { name: "Drinks",               ja: "のみもの" },
+      { name: "Dessert",              ja: "おかし" },
+      { name: "Food",                 ja: "たべもの" },
+      { name: "Japanese Food",        ja: "にほんのたべもの" },
+      { name: "Fruit and Vegetables", ja: "くだもの・やさい" },
+      { name: "Meals",                ja: "しょくじ" },
+      { name: "Ingredients",          ja: "ざいりょう" },
+      { name: "Taste",                ja: "あじ" },
+    ]},
+    { label: "People & Self", ja: "ひと・じぶん", color: "#d64f8a", categories: [
+      { name: "Feelings",       ja: "きもち" },
+      { name: "People",         ja: "ひと" },
+      { name: "Personality",    ja: "せいかく" },
+      { name: "Family",         ja: "かぞく" },
+      { name: "Body Parts",     ja: "からだ" },
+      { name: "Frequency",      ja: "ひんど" },
+      { name: "Daily Routines", ja: "にちじょう" },
+    ]},
+    { label: "Clothes & Belongings", ja: "ふく・もちもの", color: "#7c5cbf", categories: [
+      { name: "Clothes",             ja: "ふく" },
+      { name: "Personal Belongings", ja: "もちもの" },
+      { name: "Stationery",          ja: "ぶんぼうぐ" },
+    ]},
+    { label: "Nature & Animals", ja: "しぜん・どうぶつ", color: "#3a9e5f", categories: [
+      { name: "Animals",             ja: "どうぶつ" },
+      { name: "Sea Animals",         ja: "うみのいきもの" },
+      { name: "Bugs",                ja: "むし" },
+      { name: "Nature",              ja: "しぜん" },
+      { name: "Environment and 4Rs", ja: "かんきょう" },
+    ]},
+    { label: "Date / Time", ja: "じかん・にちじ", color: "#1a8fa0", categories: [
+      { name: "Months",  ja: "つき" },
+      { name: "Dates",   ja: "ひにち" },
+      { name: "Days",    ja: "ようび" },
+      { name: "Seasons", ja: "きせつ" },
+      { name: "Weather", ja: "てんき" },
+    ]},
+    { label: "School", ja: "がっこう", color: "#2a6db5", categories: [
+      { name: "School Subjects", ja: "きょうか" },
+      { name: "School Places",   ja: "がっこうのばしょ" },
+      { name: "Club Activities", ja: "クラブかつどう" },
+      { name: "School Events",   ja: "がっこうのイベント" },
+    ]},
+    { label: "Arts & Play", ja: "おんがく・あそび", color: "#d9622b", categories: [
+      { name: "Musical Instruments", ja: "がっき" },
+      { name: "Play and Activities", ja: "あそび" },
+      { name: "Sports",              ja: "スポーツ" },
+    ]},
+    { label: "Town & Travel", ja: "まち・いどう", color: "#5a7a8a", categories: [
+      { name: "Town and Places", ja: "まち・ばしょ" },
+      { name: "Vehicles",        ja: "のりもの" },
+      { name: "Directions",      ja: "ほうこう" },
+      { name: "Positions",       ja: "いち" },
+    ]},
+    { label: "Language & Concepts", ja: "ことば・がいねん", color: "#c0394b", categories: [
+      { name: "Jobs",              ja: "しごと" },
+      { name: "Annual Events",     ja: "ねんじゅうぎょうじ" },
+      { name: "Impressions",       ja: "いんしょう" },
+      { name: "Conditions",        ja: "じょうたい" },
+      { name: "Colors",            ja: "いろ" },
+      { name: "Shapes",            ja: "かたち" },
+      { name: "Verbs (5th Grade)", ja: "どうし（5ねんせい）" },
+      { name: "Verbs (6th Grade)", ja: "どうし（6ねんせい）" },
+      { name: "Past Tense Verbs",  ja: "かこのどうし" },
+    ]},
+  ];
+
+  let activeGroupIdx   = -1;
+  let selectedCatNames = [];
+  let currentRound     = null; // { words: [{en, isImpostor}], impostorIdx }
+  let gameState        = 'idle'; // 'idle' | 'done'
+
+  function showScreen(id) {
+    [screenSelect, screenGame].forEach(s => s.classList.add('hidden'));
+    document.getElementById(id).classList.remove('hidden');
+  }
+
+  // --- Build category grid ---
+  categoryGroups.forEach((group, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'group-header';
+    btn.style.borderLeftColor = group.color;
+    btn.innerHTML = `
+      <span class="group-header-text">
+        <span class="group-label">${group.label} ／ ${group.ja}</span>
+      </span>
+      <span class="group-chevron">▸</span>
+    `;
+    btn.addEventListener('click', () => openModal(group, idx));
+    categoryGrid.appendChild(btn);
+  });
+
+  // --- Modal ---
+  function openModal(group, groupIdx) {
+    activeGroupIdx = groupIdx;
+    modalGroupName.textContent = group.label;
+    modalGroupJa.textContent   = group.ja;
+    modal.style.setProperty('--modal-color', group.color);
+
+    modalSubcats.innerHTML = '';
+    group.categories.forEach(groupCat => {
+      const cat = categories.find(c => c.name === groupCat.name);
+      if (!cat) return;
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'subcat-wrap';
+
+      const label = document.createElement('label');
+      label.className = 'subcat-row';
+
+      const cb = document.createElement('input');
+      cb.type    = 'checkbox';
+      cb.value   = groupCat.name;
+      cb.checked = true;
+      cb.addEventListener('change', syncSelectAll);
+
+      const info = document.createElement('span');
+      info.className = 'subcat-info';
+
+      const nameRow = document.createElement('span');
+      nameRow.className = 'subcat-name-row';
+
+      const enSpan = document.createElement('span');
+      enSpan.className   = 'subcat-name-en';
+      enSpan.textContent = groupCat.name;
+
+      const sep = document.createElement('span');
+      sep.className   = 'subcat-sep';
+      sep.textContent = '／';
+
+      const jaSpan = document.createElement('span');
+      jaSpan.className   = 'subcat-name-ja';
+      jaSpan.textContent = groupCat.ja;
+
+      nameRow.appendChild(enSpan);
+      nameRow.appendChild(sep);
+      nameRow.appendChild(jaSpan);
+
+      const countSpan = document.createElement('span');
+      countSpan.className   = 'subcat-count';
+      countSpan.textContent = `${cat.words.length} words ／ ${cat.words.length} たんご`;
+
+      info.appendChild(nameRow);
+      info.appendChild(countSpan);
+
+      label.appendChild(cb);
+      label.appendChild(info);
+      wrapper.appendChild(label);
+      modalSubcats.appendChild(wrapper);
+    });
+
+    selectAllCb.checked       = true;
+    selectAllCb.indeterminate = false;
+    updatePlayBtn();
+
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal() {
+    modal.classList.add('hidden');
+    document.body.style.overflow = '';
+  }
+
+  function syncSelectAll() {
+    const cbs = [...modalSubcats.querySelectorAll('input[type=checkbox]')];
+    const n   = cbs.filter(c => c.checked).length;
+    if (n === 0) {
+      selectAllCb.checked = false; selectAllCb.indeterminate = false;
+    } else if (n === cbs.length) {
+      selectAllCb.checked = true;  selectAllCb.indeterminate = false;
+    } else {
+      selectAllCb.checked = false; selectAllCb.indeterminate = true;
+    }
+    updatePlayBtn();
+  }
+
+  function updatePlayBtn() {
+    const cbs = [...modalSubcats.querySelectorAll('input[type=checkbox]')];
+    modalPlayBtn.disabled = !cbs.some(c => c.checked);
+  }
+
+  selectAllCb.addEventListener('change', () => {
+    modalSubcats.querySelectorAll('input[type=checkbox]').forEach(cb => cb.checked = selectAllCb.checked);
+    selectAllCb.indeterminate = false;
+    updatePlayBtn();
+  });
+
+  modalClose.addEventListener('click', closeModal);
+  modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+  modalPlayBtn.addEventListener('click', () => {
+    const cbs = [...modalSubcats.querySelectorAll('input[type=checkbox]')];
+    selectedCatNames = cbs.filter(c => c.checked).map(c => c.value);
+    closeModal();
+    startGame();
+  });
+
+  // --- Game logic ---
+  function shuffle(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function pickImpostor() {
+    const otherGroups = categoryGroups.filter((_, i) => i !== activeGroupIdx);
+    for (let attempt = 0; attempt < 20; attempt++) {
+      const rGroup  = otherGroups[Math.floor(Math.random() * otherGroups.length)];
+      const rSubcat = rGroup.categories[Math.floor(Math.random() * rGroup.categories.length)];
+      const cat     = categories.find(c => c.name === rSubcat.name);
+      if (cat && cat.words.length > 0) {
+        return cat.words[Math.floor(Math.random() * cat.words.length)];
+      }
+    }
+    return null;
+  }
+
+  function startGame() {
+    const pool = [];
+    selectedCatNames.forEach(name => {
+      const cat = categories.find(c => c.name === name);
+      if (cat) pool.push(...cat.words);
+    });
+
+    const mainWords = shuffle(pool).slice(0, 6);
+    const impostor  = pickImpostor();
+    if (!impostor || mainWords.length === 0) return;
+
+    const tagged = [
+      ...mainWords.map(w => ({ en: w.en, isImpostor: false })),
+      { en: impostor.en, isImpostor: true },
+    ];
+    const shuffled = shuffle(tagged);
+
+    currentRound = {
+      words:       shuffled,
+      impostorIdx: shuffled.findIndex(w => w.isImpostor),
+    };
+    gameState = 'idle';
+
+    const group = categoryGroups[activeGroupIdx];
+    gameCategoryLabel.innerHTML =
+      `<span class="label-en">${group.label}</span><span class="label-sep">／</span><span class="label-ja">${group.ja}</span>`;
+
+    renderGame();
+    showScreen('screen-game');
+  }
+
+  function renderGame() {
+    wordGrid.innerHTML       = '';
+    feedbackArea.className   = 'feedback-area';
+    feedbackArea.innerHTML   = '';
+    revealBtn.disabled       = false;
+    revealBtn.classList.remove('hidden');
+    nextBtn.classList.add('hidden');
+
+    currentRound.words.forEach((word, idx) => {
+      const btn = document.createElement('button');
+      btn.className   = 'word-card';
+      btn.textContent = word.en;
+      btn.addEventListener('click', () => onCardClick(idx));
+      wordGrid.appendChild(btn);
+    });
+  }
+
+  function lockCards() {
+    wordGrid.querySelectorAll('.word-card').forEach(c => { c.disabled = true; });
+    revealBtn.classList.add('hidden');
+    nextBtn.classList.remove('hidden');
+  }
+
+  function onCardClick(idx) {
+    if (gameState !== 'idle') return;
+
+    const cards = [...wordGrid.querySelectorAll('.word-card')];
+
+    if (idx === currentRound.impostorIdx) {
+      gameState = 'done';
+      cards[idx].classList.add('card-correct');
+      feedbackArea.innerHTML = '<span class="fb-en">Correct!</span><span class="fb-ja">せいかい！</span>';
+      feedbackArea.className = 'feedback-area feedback-correct';
+      lockCards();
+    } else {
+      cards[idx].classList.add('card-safe');
+      cards[idx].disabled = true;
+      feedbackArea.innerHTML = '<span class="fb-en">That one belongs!</span><span class="fb-ja">それはなかまだよ！</span>';
+      feedbackArea.className = 'feedback-area feedback-safe';
+    }
+  }
+
+  revealBtn.addEventListener('click', () => {
+    if (gameState !== 'idle') return;
+    gameState = 'done';
+    const cards = [...wordGrid.querySelectorAll('.word-card')];
+    cards[currentRound.impostorIdx].classList.add('card-revealed');
+    lockCards();
+  });
+
+  nextBtn.addEventListener('click', startGame);
+  backBtn.addEventListener('click', () => showScreen('screen-select'));
+</script>
+
+<style>
+  .wrap {
+    min-height: 100vh;
+    background: var(--color-bg);
+    font-family: 'Andika', sans-serif;
+    padding: 2rem 1rem;
+  }
+
+  .screen { max-width: 1100px; margin: 0 auto; }
+  .hidden { display: none !important; }
+
+  /* Header */
+  .header-card {
+    text-align: center;
+    margin-bottom: 2.5rem;
+  }
+
+  .header-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 1rem;
+  }
+
+  .header-icon svg { width: 100%; height: 100%; }
+
+  .page-title {
+    font-size: 2rem;
+    color: var(--color-primary);
+    margin: 0 0 0.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.15rem;
+  }
+
+  .title-ja {
+    font-size: 1.3rem;
+    color: var(--color-primary);
+    font-weight: 700;
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+  }
+
+  .page-desc {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+  }
+
+  .desc-en { font-size: 0.95rem; color: #666; }
+  .desc-ja { font-size: 0.88rem; color: #888; font-family: 'M PLUS Rounded 1c', sans-serif; }
+
+  /* Category Grid */
+  .category-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.4rem;
+  }
+
+  :global(.group-header) {
+    -webkit-appearance: none;
+    appearance: none;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    height: 56px;
+    background: white;
+    border: 1px solid #eee;
+    border-left: 5px solid #557153;
+    border-radius: 0 10px 10px 0;
+    padding: 0 1rem;
+    cursor: pointer;
+    font-family: inherit;
+    text-align: left;
+    transition: background 0.15s;
+    box-sizing: border-box;
+    color: inherit;
+  }
+
+  :global(.group-header:hover) { background: #f5f8f5; }
+
+  :global(.group-header-text) {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  :global(.group-label) {
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: #222;
+  }
+
+  :global(.group-chevron) {
+    font-size: 0.9rem;
+    color: #aaa;
+    flex-shrink: 0;
+  }
+
+  /* Modal */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 1rem;
+  }
+
+  .modal-box {
+    background: white;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 480px;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.2);
+    border-top: 5px solid var(--modal-color, #557153);
+  }
+
+  .modal-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 1.25rem 1.25rem 0.75rem;
+    border-bottom: 1px solid #f0f0f0;
+    flex-shrink: 0;
+  }
+
+  .modal-title-wrap { display: flex; flex-direction: column; gap: 0.2rem; }
+
+  .modal-group-name { font-size: 1.2rem; font-weight: 700; color: #222; }
+
+  .modal-group-ja {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #555;
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+  }
+
+  .modal-close {
+    background: none;
+    border: none;
+    font-size: 1.1rem;
+    color: #aaa;
+    cursor: pointer;
+    padding: 0.2rem 0.4rem;
+    line-height: 1;
+    border-radius: 6px;
+    flex-shrink: 0;
+  }
+
+  .modal-close:hover { background: #f5f5f5; color: #555; }
+
+  .select-all-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.75rem 1.25rem;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 0.9rem;
+    color: #555;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .select-all-row input[type=checkbox] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--modal-color, #557153);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .modal-subcats {
+    overflow-y: auto;
+    flex: 1;
+    padding: 0.5rem 0;
+  }
+
+  .modal-footer {
+    padding: 1rem 1.25rem;
+    border-top: 1px solid #f0f0f0;
+    flex-shrink: 0;
+  }
+
+  .modal-play-btn {
+    width: 100%;
+    background: var(--modal-color, #557153);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    padding: 0.85rem 1rem;
+    font-size: 1rem;
+    font-family: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+
+  .modal-play-btn:hover    { opacity: 0.88; }
+  .modal-play-btn:disabled { opacity: 0.4; cursor: default; }
+
+  :global(.subcat-wrap) { border-bottom: 1px solid #f0f0f0; }
+  :global(.subcat-wrap:last-child) { border-bottom: none; }
+
+  :global(.subcat-row) {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.7rem 1.25rem;
+    cursor: pointer;
+    transition: background 0.12s;
+  }
+
+  :global(.subcat-row:hover) { background: #f5f8f5; }
+
+  :global(.subcat-row input[type=checkbox]) {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--modal-color, #557153);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  :global(.subcat-info) { display: flex; flex-direction: column; gap: 0.1rem; }
+
+  :global(.subcat-name-row) { display: flex; align-items: baseline; gap: 0.35rem; }
+
+  :global(.subcat-name-en) { font-size: 0.95rem; font-weight: 700; color: #333; }
+
+  :global(.subcat-sep) { font-size: 0.85rem; color: #ccc; }
+
+  :global(.subcat-name-ja) {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #888;
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+  }
+
+  :global(.subcat-count) { font-size: 0.78rem; color: #aaa; }
+
+  /* Game screen */
+  .game-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.75rem;
+    flex-wrap: wrap;
+  }
+
+  .back-btn {
+    background: none;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    padding: 0.4rem 0.8rem;
+    cursor: pointer;
+    font-family: inherit;
+    color: #666;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: border-color 0.15s;
+  }
+
+  .back-btn:hover { border-color: #aaa; color: #333; }
+
+  .game-category-label {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #555;
+    display: flex;
+    align-items: baseline;
+    gap: 0.35rem;
+    flex-wrap: wrap;
+  }
+
+  .label-en { color: #333; }
+  .label-sep { color: #ccc; font-size: 0.82rem; }
+  .label-ja {
+    color: #888;
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+    font-size: 0.85rem;
+  }
+
+  /* Prompt */
+  .game-prompt {
+    text-align: center;
+    margin-bottom: 2.25rem;
+  }
+
+  .prompt-en {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    margin-bottom: 0.35rem;
+  }
+
+  .prompt-ja {
+    font-size: 1.5rem;
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+    color: #777;
+  }
+
+  /* Word grid */
+  .word-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  :global(.word-card) {
+    background: white;
+    border: 3px solid #c5d9c5;
+    border-radius: 16px;
+    padding: 1.5rem 1rem;
+    font-size: 1.4rem;
+    font-weight: 700;
+    font-family: 'Andika', sans-serif;
+    color: #333;
+    cursor: pointer;
+    min-height: 120px;
+    transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s, background 0.15s;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1.3;
+  }
+
+  :global(.word-card:hover:not(:disabled)) {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(85, 113, 83, 0.15);
+    border-color: var(--color-primary);
+  }
+
+  :global(.word-card:disabled) { cursor: default; }
+
+  :global(.word-card.card-correct) {
+    background: #dcfce7;
+    border-color: #16a34a;
+    color: #166534;
+  }
+
+  :global(.word-card.card-wrong) {
+    background: #fee2e2;
+    border-color: #dc2626;
+    color: #991b1b;
+    animation: shake 0.4s ease;
+  }
+
+  :global(.word-card.card-safe) {
+    background: #eff6ff;
+    border-color: #93c5fd;
+    color: #1e40af;
+    opacity: 0.7;
+  }
+
+  :global(.word-card.card-revealed) {
+    background: #fef9c3;
+    border-color: #d97706;
+    color: #92400e;
+  }
+
+  @keyframes shake {
+    0%,  100% { transform: translateX(0); }
+    20%        { transform: translateX(-7px); }
+    40%        { transform: translateX(7px); }
+    60%        { transform: translateX(-4px); }
+    80%        { transform: translateX(4px); }
+  }
+
+  /* Bottom controls */
+  .game-bottom {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .feedback-area {
+    font-size: 1.6rem;
+    font-weight: 700;
+    min-height: 2.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .feedback-correct { color: #16a34a; }
+  .feedback-wrong   { color: #dc2626; }
+  .feedback-safe    { color: #2563eb; }
+
+  .fb-ja {
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+    font-weight: 700;
+  }
+
+  .game-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .reveal-btn {
+    background: white;
+    border: 2px solid #c5d9c5;
+    border-radius: 50px;
+    padding: 0.9rem 2.2rem;
+    font-size: 1.15rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    color: var(--color-primary);
+    transition: background 0.15s, border-color 0.15s;
+  }
+
+  .reveal-btn:hover { background: #f0f5f0; border-color: var(--color-primary); }
+
+  .next-btn {
+    background: var(--color-primary);
+    border: none;
+    border-radius: 50px;
+    padding: 0.9rem 2.2rem;
+    font-size: 1.15rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    color: white;
+    transition: opacity 0.15s;
+  }
+
+  .next-btn:hover { opacity: 0.88; }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .page-title { font-size: 1.6rem; }
+    .category-grid { grid-template-columns: 1fr; }
+    .word-grid { grid-template-columns: repeat(2, 1fr); }
+    .prompt-en { font-size: 1.4rem; }
+    .prompt-ja { font-size: 1.1rem; }
+    :global(.word-card) { font-size: 1.1rem; min-height: 90px; }
+    .feedback-area { font-size: 1.25rem; }
+  }
+</style>

@@ -183,6 +183,48 @@ import T from '../components/T.astro';
               </div>
           </a>
 
+          <!-- Odd One Out Game Card -->
+          <a href="/odd-one-out" class="game-card">
+              <div class="card-image odd-one-out-bg">
+                  <div class="icon" aria-hidden="true">
+                    <svg viewBox="0 0 120 120" role="img" focusable="false">
+                      <rect x="8"  y="14" width="46" height="38" rx="9" fill="white" stroke="#557153" stroke-width="3.5"/>
+                      <rect x="66" y="14" width="46" height="38" rx="9" fill="white" stroke="#557153" stroke-width="3.5"/>
+                      <rect x="8"  y="68" width="46" height="38" rx="9" fill="white" stroke="#557153" stroke-width="3.5"/>
+                      <rect x="66" y="68" width="46" height="38" rx="9" fill="#fef9c3" stroke="#d97706" stroke-width="4"/>
+                      <line x1="18" y1="29" x2="44" y2="29" stroke="#94b49f" stroke-width="3" stroke-linecap="round"/>
+                      <line x1="18" y1="39" x2="36" y2="39" stroke="#c5d9c5" stroke-width="2.5" stroke-linecap="round"/>
+                      <line x1="76" y1="29" x2="102" y2="29" stroke="#94b49f" stroke-width="3" stroke-linecap="round"/>
+                      <line x1="76" y1="39" x2="94" y2="39" stroke="#c5d9c5" stroke-width="2.5" stroke-linecap="round"/>
+                      <line x1="18" y1="83" x2="44" y2="83" stroke="#94b49f" stroke-width="3" stroke-linecap="round"/>
+                      <line x1="18" y1="93" x2="36" y2="93" stroke="#c5d9c5" stroke-width="2.5" stroke-linecap="round"/>
+                      <text x="89" y="100" text-anchor="middle" font-size="26" font-weight="800" fill="#d97706" font-family="sans-serif">?</text>
+                    </svg>
+                  </div>
+              </div>
+              <div class="card-content">
+                  <h3>
+                    <T>
+                      <span slot="en">Odd One Out</span>
+                      <span slot="ja">なかまはずれ</span>
+                    </T>
+                  </h3>
+                  <p>
+                    <T>
+                      <span slot="en">Find the word that doesn't belong in the group!</span>
+                      <span slot="ja">グループにあわない単語を見つけよう！</span>
+                    </T>
+                  </p>
+                  <span class="play-btn">
+                    <T>
+                      <span slot="en">Play Now</span>
+                      <span slot="ja">今すぐプレイ</span>
+                    </T>
+                    <i class="fas fa-play"></i>
+                  </span>
+              </div>
+          </a>
+
           <!-- Directions Reaction Game Card -->
           <a href="/directions-reaction-game" class="game-card">
                <div class="card-image card-image--screenshot">
@@ -551,6 +593,10 @@ import T from '../components/T.astro';
 
   .facecatch-bg {
     background: linear-gradient(135deg, #1a1a2e 0%, #6c63ff 100%);
+  }
+
+  .odd-one-out-bg {
+    background: #fffbeb;
   }
 
   .icon {
