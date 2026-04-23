@@ -1,7 +1,6 @@
 ---
 import Layout from '../layouts/ToolLayout.astro';
-import { categories } from '../data/anarika/words';
-const categoriesJson = JSON.stringify(categories);
+import WordSelectorModal from '../components/WordSelectorModal.astro';
 ---
 
 <Layout title="Anarika's Challenge" description="A Japanese vocabulary quiz game.">
@@ -21,35 +20,14 @@ const categoriesJson = JSON.stringify(categories);
   </div>
 
   <!-- Category Modal -->
-  <div id="category-modal" class="modal-overlay hidden" role="dialog" aria-modal="true">
-    <div class="modal-box">
-      <div class="modal-header">
-        <div class="modal-title-wrap">
-          <span class="modal-group-name" id="modal-group-name"></span>
-          <span class="modal-group-ja" id="modal-group-ja"></span>
-        </div>
-        <button class="modal-close" id="modal-close" aria-label="Close">✕</button>
-      </div>
-
-      <label class="select-all-row">
-        <input type="checkbox" id="select-all-cb" />
-        <span>Select all ／ すべてえらぶ</span>
-      </label>
-
-      <div class="modal-subcats" id="modal-subcats"></div>
-
-      <div class="mode-select" id="mode-select">
-        <button class="mode-btn active" data-mode="easy">Easy ／ かんたん</button>
-        <button class="mode-btn" data-mode="medium">Medium ／ ふつう</button>
-        <button class="mode-btn" data-mode="hard">Hard ／ むずかしい</button>
-        <button class="mode-btn" data-mode="challenge">Challenge ／ チャレンジ</button>
-      </div>
-
-      <div class="modal-footer">
-        <button class="modal-start-btn" id="modal-start-btn">Start Quiz ／ はじめる</button>
-      </div>
+  <WordSelectorModal>
+    <div class="mode-select" id="mode-select">
+      <button class="mode-btn active" data-mode="easy">Easy ／ かんたん</button>
+      <button class="mode-btn" data-mode="medium">Medium ／ ふつう</button>
+      <button class="mode-btn" data-mode="hard">Hard ／ むずかしい</button>
+      <button class="mode-btn" data-mode="challenge">Challenge ／ チャレンジ</button>
     </div>
-  </div>
+  </WordSelectorModal>
 
   <!-- Quiz Screen -->
   <div id="screen-quiz" class="screen hidden">
@@ -118,280 +96,83 @@ const categoriesJson = JSON.stringify(categories);
 
 </div>
 </Layout>
+<script>
+  import type { QuizWord } from '../data/anarika/words';
+  import { categories } from '../data/anarika/words';
+  import { categoryGroups } from '../data/anarika/groups';
+  import { buildCategoryGrid, openModal, closeModal, initModalListeners, getSelectedWords } from '../scripts/wordSelector';
 
-<script define:vars={{ categoriesJson }}>
-  const categories = JSON.parse(categoriesJson);
+  interface MissedEntry { en: string; yourAnswer: string; correct: string; }
 
-  // State
-  let words = [];
-  let lastWordsForReplay = [];
+  let words: QuizWord[] = [];
+  let lastWordsForReplay: QuizWord[] = [];
   let wordIndex = 0;
   let score = 0;
-  let missed = [];
+  let missed: MissedEntry[] = [];
   let quizMode = 'easy';
   let lastMode = 'easy';
 
-  // Elements
-  const screenSelect  = document.getElementById('screen-select');
-  const screenQuiz    = document.getElementById('screen-quiz');
-  const screenResults = document.getElementById('screen-results');
+  const screenSelect  = document.getElementById('screen-select')!;
+  const screenQuiz    = document.getElementById('screen-quiz')!;
+  const screenResults = document.getElementById('screen-results')!;
 
-  const categoryGrid  = document.getElementById('category-grid');
-  const englishWord   = document.getElementById('english-word');
-  const answerInput   = document.getElementById('answer-input');
-  const submitBtn     = document.getElementById('submit-btn');
-  const feedbackCard  = document.getElementById('feedback-card');
-  const feedbackIcon  = document.getElementById('feedback-icon');
-  const feedbackText  = document.getElementById('feedback-text');
-  const acceptedEl    = document.getElementById('accepted-answers');
-  const nextBtn       = document.getElementById('next-btn');
-  const backBtn       = document.getElementById('back-btn');
-  const progressFill  = document.getElementById('progress-fill');
-  const progressLabel = document.getElementById('progress-label');
-  const scoreDisplay  = document.getElementById('score-display');
-  const questionLabel = document.getElementById('question-label');
-  const choicesGrid   = document.getElementById('choices-grid');
+  const categoryGrid  = document.getElementById('category-grid')!;
+  const englishWord   = document.getElementById('english-word')!;
+  const answerInput   = document.getElementById('answer-input') as HTMLInputElement;
+  const submitBtn     = document.getElementById('submit-btn') as HTMLButtonElement;
+  const feedbackCard  = document.getElementById('feedback-card')!;
+  const feedbackIcon  = document.getElementById('feedback-icon')!;
+  const feedbackText  = document.getElementById('feedback-text')!;
+  const acceptedEl    = document.getElementById('accepted-answers')!;
+  const nextBtn       = document.getElementById('next-btn')!;
+  const backBtn       = document.getElementById('back-btn')!;
+  const progressFill  = document.getElementById('progress-fill')!;
+  const progressLabel = document.getElementById('progress-label')!;
+  const scoreDisplay  = document.getElementById('score-display')!;
+  const questionLabel = document.getElementById('question-label')!;
+  const choicesGrid   = document.getElementById('choices-grid')!;
 
-  const resultTitle   = document.getElementById('result-title');
-  const scoreBig      = document.getElementById('score-big');
-  const missedSection = document.getElementById('missed-section');
-  const missedBody    = document.getElementById('missed-body');
-  const playAgainBtn  = document.getElementById('play-again-btn');
-  const backToSelectBtn = document.getElementById('back-to-select-btn');
+  const resultTitle     = document.getElementById('result-title')!;
+  const scoreBig        = document.getElementById('score-big')!;
+  const missedSection   = document.getElementById('missed-section')!;
+  const missedBody      = document.getElementById('missed-body')!;
+  const playAgainBtn    = document.getElementById('play-again-btn')!;
+  const backToSelectBtn = document.getElementById('back-to-select-btn')!;
 
-  // Modal elements
-  const modal         = document.getElementById('category-modal');
-  const modalClose    = document.getElementById('modal-close');
-  const modalGroupName = document.getElementById('modal-group-name');
-  const modalGroupJa  = document.getElementById('modal-group-ja');
-  const modalSubcats  = document.getElementById('modal-subcats');
-  const selectAllCb   = document.getElementById('select-all-cb');
-  const modalStartBtn = document.getElementById('modal-start-btn');
-  const modeBtns      = document.querySelectorAll('.mode-btn');
+  const modeBtns = document.querySelectorAll<HTMLButtonElement>('.mode-btn');
 
   modeBtns.forEach(btn => {
     btn.addEventListener('click', () => {
-      quizMode = btn.dataset.mode;
+      quizMode = btn.dataset.mode ?? 'easy';
       modeBtns.forEach(b => b.classList.toggle('active', b === btn));
     });
   });
 
-  // Screens
-  function showScreen(id) {
-    [screenSelect, screenQuiz, screenResults].forEach(s => s.classList.add('hidden'));
-    document.getElementById(id).classList.remove('hidden');
-  }
-
-  function normalize(str) {
-    return str.trim().replace(/\s+/g, '');
-  }
-
-  function checkAnswer(input, accepted) {
-    const norm = normalize(input);
-    return accepted.some(a => normalize(a) === norm);
-  }
-
-  const categoryGroups = [
-    { label: "Food & Drink", ja: "たべもの・のみもの", color: "#e6a817", categories: [
-      { name: "Drinks", ja: "のみもの" },
-      { name: "Dessert", ja: "おかし" },
-      { name: "Food", ja: "たべもの" },
-      { name: "Japanese Food", ja: "にほんのたべもの" },
-      { name: "Fruit and Vegetables", ja: "くだもの・やさい" },
-      { name: "Meals", ja: "しょくじ" },
-      { name: "Ingredients", ja: "ざいりょう" },
-      { name: "Taste", ja: "あじ" },
-    ]},
-    { label: "People & Self", ja: "ひと・じぶん", color: "#d64f8a", categories: [
-      { name: "Feelings", ja: "きもち" },
-      { name: "People", ja: "ひと" },
-      { name: "Personality", ja: "せいかく" },
-      { name: "Family", ja: "かぞく" },
-      { name: "Body Parts", ja: "からだ" },
-      { name: "Frequency", ja: "ひんど" },
-      { name: "Daily Routines", ja: "にちじょう" },
-    ]},
-    { label: "Clothes & Belongings", ja: "ふく・もちもの", color: "#7c5cbf", categories: [
-      { name: "Clothes", ja: "ふく" },
-      { name: "Personal Belongings", ja: "もちもの" },
-      { name: "Stationery", ja: "ぶんぼうぐ" },
-    ]},
-    { label: "Nature & Animals", ja: "しぜん・どうぶつ", color: "#3a9e5f", categories: [
-      { name: "Animals", ja: "どうぶつ" },
-      { name: "Sea Animals", ja: "うみのいきもの" },
-      { name: "Bugs", ja: "むし" },
-      { name: "Nature", ja: "しぜん" },
-      { name: "Environment and 4Rs", ja: "かんきょう" },
-    ]},
-    { label: "Date / Time", ja: "じかん・にちじ", color: "#1a8fa0", categories: [
-      { name: "Months", ja: "つき" },
-      { name: "Dates", ja: "ひにち" },
-      { name: "Days", ja: "ようび" },
-      { name: "Seasons", ja: "きせつ" },
-      { name: "Weather", ja: "てんき" },
-    ]},
-    { label: "School", ja: "がっこう", color: "#2a6db5", categories: [
-      { name: "School Subjects", ja: "きょうか" },
-      { name: "School Places", ja: "がっこうのばしょ" },
-      { name: "Club Activities", ja: "クラブかつどう" },
-      { name: "School Events", ja: "がっこうのイベント" },
-    ]},
-    { label: "Arts & Play", ja: "おんがく・あそび", color: "#d9622b", categories: [
-      { name: "Musical Instruments", ja: "がっき" },
-      { name: "Play and Activities", ja: "あそび" },
-      { name: "Sports", ja: "スポーツ" },
-    ]},
-    { label: "Town & Travel", ja: "まち・いどう", color: "#5a7a8a", categories: [
-      { name: "Town and Places", ja: "まち・ばしょ" },
-      { name: "Vehicles", ja: "のりもの" },
-      { name: "Directions", ja: "ほうこう" },
-      { name: "Positions", ja: "いち" },
-    ]},
-    { label: "Language & Concepts", ja: "ことば・がいねん", color: "#c0394b", categories: [
-      { name: "Jobs", ja: "しごと" },
-      { name: "Annual Events", ja: "ねんじゅうぎょうじ" },
-      { name: "Impressions", ja: "いんしょう" },
-      { name: "Conditions", ja: "じょうたい" },
-      { name: "Colors", ja: "いろ" },
-      { name: "Shapes", ja: "かたち" },
-      { name: "Verbs (5th Grade)", ja: "どうし（5ねんせい）" },
-      { name: "Verbs (6th Grade)", ja: "どうし（6ねんせい）" },
-      { name: "Past Tense Verbs", ja: "かこのどうし" },
-    ]},
-  ];
-
-  // Build group header buttons
-  categoryGroups.forEach(group => {
-    const header = document.createElement('button');
-    header.className = 'group-header';
-    header.style.borderLeftColor = group.color;
-    header.innerHTML = `
-      <span class="group-header-text">
-        <span class="group-label">${group.label} ／ ${group.ja}</span>
-      </span>
-      <span class="group-chevron">▸</span>
-    `;
-    header.addEventListener('click', () => openModal(group));
-    categoryGrid.appendChild(header);
+  buildCategoryGrid(categoryGrid, categoryGroups, (group) => {
+    openModal(group, categories);
   });
 
-  // Modal logic
-  function openModal(group) {
-    modalGroupName.textContent = group.label;
-    modalGroupJa.textContent = group.ja;
-    modal.style.setProperty('--modal-color', group.color);
-
-    // Populate subcategory checkboxes
-    modalSubcats.innerHTML = '';
-    group.categories.forEach(groupCat => {
-      const cat = categories.find(c => c.name === groupCat.name);
-      if (!cat) return;
-
-      const label = document.createElement('label');
-      label.className = 'subcat-row';
-
-      const cb = document.createElement('input');
-      cb.type = 'checkbox';
-      cb.value = groupCat.name;
-      cb.checked = true;
-      cb.addEventListener('change', syncSelectAll);
-
-      const info = document.createElement('span');
-      info.className = 'subcat-info';
-
-      const nameRow = document.createElement('span');
-      nameRow.className = 'subcat-name-row';
-      const enSpan = document.createElement('span');
-      enSpan.className = 'subcat-name-en';
-      enSpan.textContent = groupCat.name;
-      const sep = document.createElement('span');
-      sep.className = 'subcat-sep';
-      sep.textContent = '／';
-      const jaSpan = document.createElement('span');
-      jaSpan.className = 'subcat-name-ja';
-      jaSpan.textContent = groupCat.ja;
-      nameRow.appendChild(enSpan);
-      nameRow.appendChild(sep);
-      nameRow.appendChild(jaSpan);
-
-      const countSpan = document.createElement('span');
-      countSpan.className = 'subcat-count';
-      countSpan.textContent = `${cat.words.length} words ／ ${cat.words.length} たんご`;
-
-      info.appendChild(nameRow);
-      info.appendChild(countSpan);
-
-      label.appendChild(cb);
-      label.appendChild(info);
-      modalSubcats.appendChild(label);
-    });
-
-    // Default: all checked
-    selectAllCb.checked = true;
-    selectAllCb.indeterminate = false;
-    updateStartBtn();
-
-    modal.classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-  }
-
-  function closeModal() {
-    modal.classList.add('hidden');
-    document.body.style.overflow = '';
-  }
-
-  function syncSelectAll() {
-    const cbs = [...modalSubcats.querySelectorAll('input[type=checkbox]')];
-    const checkedCount = cbs.filter(c => c.checked).length;
-    if (checkedCount === 0) {
-      selectAllCb.checked = false;
-      selectAllCb.indeterminate = false;
-    } else if (checkedCount === cbs.length) {
-      selectAllCb.checked = true;
-      selectAllCb.indeterminate = false;
-    } else {
-      selectAllCb.checked = false;
-      selectAllCb.indeterminate = true;
-    }
-    updateStartBtn();
-  }
-
-  function updateStartBtn() {
-    const cbs = [...modalSubcats.querySelectorAll('input[type=checkbox]')];
-    const anyChecked = cbs.some(c => c.checked);
-    modalStartBtn.disabled = !anyChecked;
-  }
-
-  selectAllCb.addEventListener('change', () => {
-    const checked = selectAllCb.checked;
-    modalSubcats.querySelectorAll('input[type=checkbox]').forEach(cb => cb.checked = checked);
-    selectAllCb.indeterminate = false;
-    updateStartBtn();
-  });
-
-  modalClose.addEventListener('click', closeModal);
-
-  modal.addEventListener('click', e => {
-    if (e.target === modal) closeModal();
-  });
-
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') closeModal();
-  });
-
-  modalStartBtn.addEventListener('click', () => {
-    const cbs = [...modalSubcats.querySelectorAll('input[type=checkbox]')];
-    const selectedNames = cbs.filter(c => c.checked).map(c => c.value);
-    const merged = [];
-    selectedNames.forEach(name => {
-      const cat = categories.find(c => c.name === name);
-      if (cat) merged.push(...cat.words);
-    });
+  initModalListeners(() => {
+    const merged = getSelectedWords(categories);
     closeModal();
     startQuiz(merged, quizMode);
   });
 
-  function startQuiz(wordsArray, mode) {
+  function showScreen(id: string): void {
+    [screenSelect, screenQuiz, screenResults].forEach(s => s.classList.add('hidden'));
+    document.getElementById(id)!.classList.remove('hidden');
+  }
+
+  function normalize(str: string): string {
+    return str.trim().replace(/\s+/g, '');
+  }
+
+  function checkAnswer(input: string, accepted: string[]): boolean {
+    const norm = normalize(input);
+    return accepted.some(a => normalize(a) === norm);
+  }
+
+  function startQuiz(wordsArray: QuizWord[], mode: string): void {
     words = [...wordsArray];
     lastWordsForReplay = [...wordsArray];
     lastMode = mode;
@@ -402,17 +183,16 @@ const categoriesJson = JSON.stringify(categories);
     showQuestion();
   }
 
-  function getChoices(correctWord) {
+  function getChoices(correctWord: QuizWord): QuizWord[] {
     const pool = words.filter(w => w.en !== correctWord.en);
     const shuffled = pool.sort(() => Math.random() - 0.5).slice(0, 3);
     return [correctWord, ...shuffled].sort(() => Math.random() - 0.5);
   }
 
-  function showQuestion() {
+  function showQuestion(): void {
     feedbackCard.classList.add('hidden');
 
     const word = words[wordIndex];
-
     const pct = (wordIndex / words.length) * 100;
     progressFill.style.width = pct + '%';
     progressLabel.textContent = `${wordIndex + 1} / ${words.length}`;
@@ -440,8 +220,6 @@ const categoriesJson = JSON.stringify(categories);
         choicesGrid.appendChild(btn);
       });
     } else {
-      // hard: show English, type Japanese
-      // challenge: show Japanese, type English
       const isChallenge = lastMode === 'challenge';
       questionLabel.textContent = isChallenge
         ? 'What is this in English? ／ えいごでなんですか？'
@@ -458,8 +236,8 @@ const categoriesJson = JSON.stringify(categories);
     }
   }
 
-  function submitChoiceAnswer(chosenText, correctText, word) {
-    choicesGrid.querySelectorAll('.choice-btn').forEach(btn => {
+  function submitChoiceAnswer(chosenText: string, correctText: string, word: QuizWord): void {
+    choicesGrid.querySelectorAll<HTMLButtonElement>('.choice-btn').forEach(btn => {
       btn.disabled = true;
       if (btn.textContent === correctText) btn.classList.add('choice-correct');
       else if (btn.textContent === chosenText) btn.classList.add('choice-wrong');
@@ -481,10 +259,9 @@ const categoriesJson = JSON.stringify(categories);
     feedbackCard.classList.remove('hidden');
   }
 
-  function submitAnswer() {
+  function submitAnswer(): void {
     const word = words[wordIndex];
     const input = answerInput.value;
-
     if (!input.trim()) return;
 
     answerInput.disabled = true;
@@ -513,7 +290,7 @@ const categoriesJson = JSON.stringify(categories);
     feedbackCard.classList.remove('hidden');
   }
 
-  function nextQuestion() {
+  function nextQuestion(): void {
     wordIndex++;
     if (wordIndex >= words.length) {
       showResults();
@@ -522,7 +299,7 @@ const categoriesJson = JSON.stringify(categories);
     }
   }
 
-  function showResults() {
+  function showResults(): void {
     scoreDisplay.textContent = `${score} / ${words.length}`;
     showScreen('screen-results');
 
@@ -556,7 +333,6 @@ const categoriesJson = JSON.stringify(categories);
     }
   }
 
-  // Events
   submitBtn.addEventListener('click', submitAnswer);
   answerInput.addEventListener('keydown', e => {
     if (e.key === 'Enter') {
@@ -644,146 +420,6 @@ const categoriesJson = JSON.stringify(categories);
     gap: 0.4rem;
   }
 
-  :global(.group-header) {
-    -webkit-appearance: none;
-    appearance: none;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    width: 100%;
-    height: 56px;
-    background: white;
-    border: 1px solid #eee;
-    border-left: 5px solid #c0394b;
-    border-radius: 0 10px 10px 0;
-    padding: 0 1rem;
-    cursor: pointer;
-    font-family: inherit;
-    text-align: left;
-    transition: background 0.15s;
-    box-sizing: border-box;
-    color: inherit;
-  }
-
-  :global(.group-header:hover) { background: #fafafa; }
-
-  :global(.group-header-text) {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 0.15rem;
-  }
-
-  :global(.group-label) {
-    font-weight: 700;
-    font-size: 0.9rem;
-    color: #222;
-  }
-
-  :global(.group-chevron) {
-    font-size: 0.9rem;
-    color: #aaa;
-    flex-shrink: 0;
-  }
-
-  /* Modal */
-  .modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.45);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 100;
-    padding: 1rem;
-  }
-
-  .modal-box {
-    background: white;
-    border-radius: 16px;
-    width: 100%;
-    max-width: 480px;
-    max-height: 85vh;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.2);
-    border-top: 5px solid var(--modal-color, #c0394b);
-  }
-
-  .modal-header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    padding: 1.25rem 1.25rem 0.75rem;
-    border-bottom: 1px solid #f0f0f0;
-    flex-shrink: 0;
-  }
-
-  .modal-title-wrap {
-    display: flex;
-    flex-direction: column;
-    gap: 0.2rem;
-  }
-
-  .modal-group-name {
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: #222;
-  }
-
-  .modal-group-ja {
-    font-size: 1rem;
-    font-weight: 600;
-    color: #555;
-    font-family: 'M PLUS Rounded 1c', sans-serif;
-  }
-
-  .modal-close {
-    background: none;
-    border: none;
-    font-size: 1.1rem;
-    color: #aaa;
-    cursor: pointer;
-    padding: 0.2rem 0.4rem;
-    line-height: 1;
-    border-radius: 6px;
-    flex-shrink: 0;
-  }
-
-  .modal-close:hover { background: #f5f5f5; color: #555; }
-
-  .select-all-row {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    padding: 0.75rem 1.25rem;
-    border-bottom: 1px solid #f0f0f0;
-    font-size: 0.9rem;
-    color: #555;
-    cursor: pointer;
-    flex-shrink: 0;
-  }
-
-  .select-all-row input[type=checkbox] {
-    width: 18px;
-    height: 18px;
-    accent-color: var(--modal-color, #c0394b);
-    cursor: pointer;
-    flex-shrink: 0;
-  }
-
-  .modal-subcats {
-    overflow-y: auto;
-    flex: 1;
-    padding: 0.5rem 0;
-  }
-
-  .modal-footer {
-    padding: 1rem 1.25rem;
-    border-top: 1px solid #f0f0f0;
-    flex-shrink: 0;
-  }
 
   .mode-select {
     display: flex;
@@ -834,78 +470,6 @@ const categoriesJson = JSON.stringify(categories);
     border-color: #7c5cbf;
     color: white;
     font-weight: 700;
-  }
-
-  .modal-start-btn {
-    width: 100%;
-    background: var(--modal-color, #c0394b);
-    color: white;
-    border: none;
-    border-radius: 50px;
-    padding: 0.85rem 1rem;
-    font-size: 1rem;
-    font-family: inherit;
-    font-weight: 700;
-    cursor: pointer;
-    transition: opacity 0.2s;
-  }
-
-  .modal-start-btn:hover { opacity: 0.88; }
-  .modal-start-btn:disabled { opacity: 0.4; cursor: default; }
-
-  /* Subcat rows — created by JS so need :global() */
-  :global(.subcat-row) {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.7rem 1.25rem;
-    cursor: pointer;
-    transition: background 0.12s;
-  }
-
-  :global(.subcat-row:hover) { background: #fafafa; }
-
-  :global(.subcat-row input[type=checkbox]) {
-    width: 18px;
-    height: 18px;
-    accent-color: var(--modal-color, #c0394b);
-    cursor: pointer;
-    flex-shrink: 0;
-  }
-
-  :global(.subcat-info) {
-    display: flex;
-    flex-direction: column;
-    gap: 0.1rem;
-  }
-
-  :global(.subcat-name-row) {
-    display: flex;
-    align-items: baseline;
-    gap: 0.35rem;
-  }
-
-  :global(.subcat-name-en) {
-    font-size: 0.95rem;
-    font-weight: 700;
-    color: #333;
-  }
-
-  :global(.subcat-sep) {
-    font-size: 0.85rem;
-    color: #ccc;
-  }
-
-  :global(.subcat-name-ja) {
-    font-size: 0.88rem;
-    font-weight: 600;
-    color: #888;
-    font-family: 'M PLUS Rounded 1c', sans-serif;
-  }
-
-  :global(.subcat-count) {
-    font-size: 0.78rem;
-    color: #aaa;
   }
 
   /* Quiz Header */

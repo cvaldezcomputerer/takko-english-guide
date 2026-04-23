@@ -37,13 +37,13 @@ import GameLayout from "../layouts/ToolLayout.astro";
   const MAX_SECONDS = 3600;
   const DEFAULT_SECONDS = 30;
 
-  const timeDisplay = document.getElementById("timeDisplay");
-  const statusText = document.getElementById("statusText");
-  const durationInput = document.getElementById("durationInput");
-  const startBtn = document.getElementById("startBtn");
-  const pauseBtn = document.getElementById("pauseBtn");
-  const resetBtn = document.getElementById("resetBtn");
-  const quickButtons = Array.from(document.querySelectorAll(".quick-btn"));
+  const timeDisplay   = document.getElementById("timeDisplay")!;
+  const statusText    = document.getElementById("statusText")!;
+  const durationInput = document.getElementById("durationInput") as HTMLInputElement;
+  const startBtn      = document.getElementById("startBtn")!;
+  const pauseBtn      = document.getElementById("pauseBtn")!;
+  const resetBtn      = document.getElementById("resetBtn")!;
+  const quickButtons  = document.querySelectorAll<HTMLButtonElement>(".quick-btn");
 
   const finalTickSound = new Audio("/audio/directions-reaction-game/countdown-tick.ogg");
   finalTickSound.preload = "auto";
@@ -51,17 +51,17 @@ import GameLayout from "../layouts/ToolLayout.astro";
   doneSound.preload = "auto";
 
   let remainingSeconds = DEFAULT_SECONDS;
-  let timerId = null;
+  let timerId: number | null = null;
   let running = false;
   let paused = false;
 
-  const clampSeconds = (value) => {
+  const clampSeconds = (value: number | string): number => {
     const n = Number.parseInt(String(value), 10);
     if (!Number.isFinite(n)) return DEFAULT_SECONDS;
     return Math.min(MAX_SECONDS, Math.max(1, n));
   };
 
-  const formatTime = (seconds) => {
+  const formatTime = (seconds: number): string => {
     const total = Math.max(0, seconds);
     const h = Math.floor(total / 3600);
     const m = Math.floor((total % 3600) / 60);
@@ -72,22 +72,22 @@ import GameLayout from "../layouts/ToolLayout.astro";
     return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
   };
 
-  const render = () => {
+  const render = (): void => {
     timeDisplay.textContent = formatTime(remainingSeconds);
     const critical = remainingSeconds > 0 && remainingSeconds <= 5 && running;
     timeDisplay.classList.toggle("critical", critical);
     timeDisplay.classList.toggle("finished", remainingSeconds === 0);
   };
 
-  const stopTimer = () => {
-    if (timerId) {
+  const stopTimer = (): void => {
+    if (timerId !== null) {
       window.clearInterval(timerId);
       timerId = null;
     }
     running = false;
   };
 
-  const startTimer = () => {
+  const startTimer = (): void => {
     if (running) return;
 
     if (!paused) {
@@ -124,7 +124,7 @@ import GameLayout from "../layouts/ToolLayout.astro";
     }, 1000);
   };
 
-  const pauseTimer = () => {
+  const pauseTimer = (): void => {
     if (!running) return;
     stopTimer();
     paused = true;
@@ -132,7 +132,7 @@ import GameLayout from "../layouts/ToolLayout.astro";
     render();
   };
 
-  const resetTimer = () => {
+  const resetTimer = (): void => {
     stopTimer();
     paused = false;
     remainingSeconds = clampSeconds(durationInput.value);
@@ -150,7 +150,7 @@ import GameLayout from "../layouts/ToolLayout.astro";
   quickButtons.forEach((btn) => {
     btn.addEventListener("click", () => {
       if (running) return;
-      const value = clampSeconds(btn.dataset.seconds || DEFAULT_SECONDS);
+      const value = clampSeconds(btn.dataset.seconds ?? DEFAULT_SECONDS);
       durationInput.value = String(value);
       remainingSeconds = value;
       paused = false;

@@ -46,10 +46,10 @@ import GameLayout from "../layouts/ToolLayout.astro";
 </GameLayout>
 
 <script>
-  const rollBtn = document.getElementById("rollBtn");
-  const resultText = document.getElementById("resultText");
-  const minPointsText = document.getElementById("minPoints");
-  const maxPointsText = document.getElementById("maxPoints");
+  const rollBtn       = document.getElementById("rollBtn") as HTMLButtonElement;
+  const resultText    = document.getElementById("resultText")!;
+  const minPointsText = document.getElementById("minPoints")!;
+  const maxPointsText = document.getElementById("maxPoints")!;
 
   const countdownTickSrc = "/audio/directions-reaction-game/countdown-tick.ogg";
   const positiveSounds = [
@@ -76,14 +76,14 @@ import GameLayout from "../layouts/ToolLayout.astro";
     { text: "EVENT CARD: Jackpot +1000", tone: "positive" },
   ];
 
-  const randInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+  const randInt = (min: number, max: number): number => Math.floor(Math.random() * (max - min + 1)) + min;
   const minPoints = Math.min(...points);
   const maxPoints = Math.max(...points);
 
   let rolling = false;
-  let drumrollInterval = null;
+  let drumrollInterval: number | null = null;
 
-  const playFeedbackSound = async (tone) => {
+  const playFeedbackSound = async (tone: string): Promise<void> => {
     const pool = tone === "negative" ? negativeSounds : positiveSounds;
     const src = pool[randInt(0, pool.length - 1)];
     const sfx = new Audio(src);
@@ -123,7 +123,7 @@ import GameLayout from "../layouts/ToolLayout.astro";
   };
 
   const stopVisualRoll = () => {
-    if (drumrollInterval) {
+    if (drumrollInterval !== null) {
       window.clearInterval(drumrollInterval);
       drumrollInterval = null;
     }

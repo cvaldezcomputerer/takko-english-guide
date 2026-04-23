@@ -28,10 +28,10 @@ import GameLayout from "../layouts/ToolLayout.astro";
 </GameLayout>
 
 <script>
-  const screen = document.querySelector(".color-vote-page");
-  const buttons = Array.from(document.querySelectorAll(".vote-btn"));
+  const screen = document.querySelector<HTMLElement>(".color-vote-page");
+  const buttons = document.querySelectorAll<HTMLElement>(".vote-btn");
 
-  const setColor = (color) => {
+  const setColor = (color: string): void => {
     if (!screen || !color) return;
 
     screen.dataset.screen = color;
@@ -43,22 +43,22 @@ import GameLayout from "../layouts/ToolLayout.astro";
 
   buttons.forEach((button) => {
     button.addEventListener("click", () => {
-      setColor(button.dataset.color || "");
+      setColor(button.dataset.color ?? "");
     });
   });
 
-  window.addEventListener("keydown", (event) => {
-    const keyMap = {
-      "1": "red",
-      "2": "blue",
-      "3": "yellow",
-      "4": "green",
-      a: "red",
-      b: "blue",
-      c: "yellow",
-      d: "green",
-    };
+  const keyMap: Record<string, string> = {
+    "1": "red",
+    "2": "blue",
+    "3": "yellow",
+    "4": "green",
+    a: "red",
+    b: "blue",
+    c: "yellow",
+    d: "green",
+  };
 
+  window.addEventListener("keydown", (event) => {
     const nextColor = keyMap[event.key.toLowerCase()];
     if (nextColor) {
       setColor(nextColor);

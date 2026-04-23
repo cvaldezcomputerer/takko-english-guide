@@ -141,7 +141,7 @@
 <script>
   import SignaturePad from "signature_pad";
 
-  const canvas = document.getElementById("drawing-canvas");
+  const canvas = document.getElementById("drawing-canvas") as HTMLCanvasElement;
   const playArea = document.getElementById("play-area");
   const clearBtn = document.getElementById("btn-clear-drawing");
   const applyBtn = document.getElementById("btn-apply-drawing");
