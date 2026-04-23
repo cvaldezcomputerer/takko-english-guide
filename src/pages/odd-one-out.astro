@@ -63,6 +63,18 @@ const categoriesJson = JSON.stringify(categories);
     <div class="game-header">
       <button class="back-btn" id="back-btn">← Back ／ もどる</button>
       <span class="game-category-label" id="game-category-label"></span>
+      <div class="header-toggles">
+        <label class="mode-toggle">
+          <input type="checkbox" id="omoji-cb" />
+          <span class="toggle-track"></span>
+          <span class="toggle-label">OMOJI <span class="toggle-ja">おもじ</span></span>
+        </label>
+        <label class="mode-toggle">
+          <input type="checkbox" id="helper-cb" />
+          <span class="toggle-track"></span>
+          <span class="toggle-label">HELPER <span class="toggle-ja">ヒント</span></span>
+        </label>
+      </div>
     </div>
     <div class="game-prompt">
       <p class="prompt-en">Which word doesn't belong?</p>
@@ -100,6 +112,9 @@ const categoriesJson = JSON.stringify(categories);
   const revealBtn      = document.getElementById('reveal-btn');
   const nextBtn        = document.getElementById('next-btn');
   const gameCategoryLabel = document.getElementById('game-category-label');
+  const omojiCb           = document.getElementById('omoji-cb');
+  const helperCb          = document.getElementById('helper-cb');
+  let   helperInterval    = null;
 
   const categoryGroups = [
     { label: "Food & Drink", ja: "たべもの・のみもの", color: "#e6a817", categories: [
@@ -332,7 +347,7 @@ const categoriesJson = JSON.stringify(categories);
       if (cat) pool.push(...cat.words);
     });
 
-    const mainWords = shuffle(pool).slice(0, 6);
+    const mainWords = shuffle(pool).slice(0, 8);
     const impostor  = pickImpostor();
     if (!impostor || mainWords.length === 0) return;
 
@@ -353,10 +368,12 @@ const categoriesJson = JSON.stringify(categories);
       `<span class="label-en">${group.label}</span><span class="label-sep">／</span><span class="label-ja">${group.ja}</span>`;
 
     renderGame();
+    if (helperCb.checked) startHelper();
     showScreen('screen-game');
   }
 
   function renderGame() {
+    stopHelper();
     wordGrid.innerHTML       = '';
     feedbackArea.className   = 'feedback-area';
     feedbackArea.innerHTML   = '';
@@ -374,9 +391,31 @@ const categoriesJson = JSON.stringify(categories);
   }
 
   function lockCards() {
+    stopHelper();
     wordGrid.querySelectorAll('.word-card').forEach(c => { c.disabled = true; });
     revealBtn.classList.add('hidden');
     nextBtn.classList.remove('hidden');
+  }
+
+  function startHelper() {
+    stopHelper();
+    helperInterval = setInterval(fadeOneCard, 5000);
+  }
+
+  function stopHelper() {
+    if (helperInterval) { clearInterval(helperInterval); helperInterval = null; }
+  }
+
+  function fadeOneCard() {
+    if (gameState !== 'idle' || !currentRound) return;
+    const cards = [...wordGrid.querySelectorAll('.word-card')];
+    const eligible = cards.filter((card, idx) =>
+      idx !== currentRound.impostorIdx && !card.disabled
+    );
+    if (eligible.length === 0) { stopHelper(); return; }
+    const target = eligible[Math.floor(Math.random() * eligible.length)];
+    target.classList.add('card-hint');
+    target.disabled = true;
   }
 
   function onCardClick(idx) {
@@ -406,8 +445,17 @@ const categoriesJson = JSON.stringify(categories);
     lockCards();
   });
 
+  omojiCb.addEventListener('change', () => {
+    wordGrid.classList.toggle('omoji-mode', omojiCb.checked);
+  });
+
+  helperCb.addEventListener('change', () => {
+    if (helperCb.checked && gameState === 'idle') startHelper();
+    else stopHelper();
+  });
+
   nextBtn.addEventListener('click', startGame);
-  backBtn.addEventListener('click', () => showScreen('screen-select'));
+  backBtn.addEventListener('click', () => { stopHelper(); showScreen('screen-select'); });
 </script>
 
 <style>
@@ -739,7 +787,7 @@ const categoriesJson = JSON.stringify(categories);
     color: #333;
     cursor: pointer;
     min-height: 120px;
-    transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s, background 0.15s;
+    transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s, background 0.15s, opacity 1s;
     text-align: center;
     display: flex;
     align-items: center;
@@ -787,6 +835,74 @@ const categoriesJson = JSON.stringify(categories);
     40%        { transform: translateX(7px); }
     60%        { transform: translateX(-4px); }
     80%        { transform: translateX(4px); }
+  }
+
+  /* Mode toggles */
+  .header-toggles {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-left: auto;
+  }
+
+  .mode-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    user-select: none;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #555;
+  }
+
+  .mode-toggle input[type=checkbox] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .toggle-track {
+    width: 40px;
+    height: 22px;
+    background: #ddd;
+    border-radius: 11px;
+    position: relative;
+    flex-shrink: 0;
+    transition: background 0.2s;
+  }
+
+  .toggle-track::after {
+    content: '';
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    background: white;
+    border-radius: 50%;
+    top: 2px;
+    left: 2px;
+    transition: transform 0.2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+  }
+
+  .mode-toggle input:checked + .toggle-track { background: var(--color-primary); }
+  .mode-toggle input:checked + .toggle-track::after { transform: translateX(18px); }
+
+  .toggle-ja {
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+    font-size: 0.82rem;
+    color: #888;
+    font-weight: 600;
+  }
+
+  :global(.omoji-mode .word-card) {
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  :global(.word-card.card-hint) {
+    opacity: 0.12;
   }
 
   /* Bottom controls */
