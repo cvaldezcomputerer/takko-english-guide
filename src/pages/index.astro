@@ -2,6 +2,18 @@
 import Layout from '../layouts/Layout.astro';
 import Navbar from '../components/Navbar.astro';
 import T from '../components/T.astro';
+
+const dialectWords = [
+    {
+        dialect: "あいきた",
+        romanji:  "aikita",
+        standard: "よしきた・ほいきた",
+        english:  "alright, got it, sure thing",
+    },
+];
+
+const dayIndex = new Date().getDate() % dialectWords.length;
+const word = dialectWords[dayIndex];
 ---
 
 <Layout
@@ -15,6 +27,28 @@ import T from '../components/T.astro';
 
         <!-- Hero -->
         <header class="hero">
+            <!-- Word of the Day -->
+            <div class="wod-float">
+                <div class="wod-float-header">
+                    <span class="wod-float-title">Takko local dialect word of the day</span>
+                </div>
+                <div class="wod-float-body">
+                    <div class="wod-float-dialect">
+                        <T>
+                            <span slot="en">{word.romanji}</span>
+                            <span slot="ja">{word.dialect}</span>
+                        </T>
+                    </div>
+                    <div class="wod-float-sep">→</div>
+                    <div class="wod-float-standard">
+                        <T>
+                            <span slot="en">{word.english}</span>
+                            <span slot="ja">{word.standard}</span>
+                        </T>
+                    </div>
+                </div>
+            </div>
+
             <div class="hero-content">
                 <span class="welcome-text">
                     <T>
@@ -376,4 +410,96 @@ import T from '../components/T.astro';
         .town-name { font-size: 3.5rem; }
         .hero-ctas { flex-direction: column; align-items: center; }
     }
+
+    /* ── Word of the Day: Floating card ── */
+    .wod-float {
+        position: absolute;
+        bottom: 2.5rem;
+        left: 2.5rem;
+        z-index: 3;
+        width: 250px;
+        border-radius: 6px;
+        overflow: hidden;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        border: 4px double var(--color-secondary);
+        outline: 2px solid var(--color-primary);
+        font-family: var(--font-main);
+    }
+
+    .wod-float-header {
+        background: var(--color-primary);
+        padding: 0 1.5rem;
+        height: 90px;
+        display: flex;
+        align-items: center;
+    }
+
+    .wod-float-title {
+        color: white;
+        font-size: 1.15rem;
+        font-weight: 600;
+        display: block;
+    }
+
+    .wod-float-body {
+        background: #fffbf0;
+        padding: 1.25rem 1.5rem 1.5rem;
+        text-align: center;
+    }
+
+    .wod-float-dialect {
+        display: inline-block;
+        font-size: 2.8rem;
+        font-weight: 600;
+        color: var(--color-accent);
+        line-height: 1;
+        background: #fde8e2;
+        border: 1px solid #f0b8a8;
+        padding: 0.2rem 0.75rem;
+        border-radius: 4px;
+    }
+
+    .wod-float-sep {
+        font-size: 1.25rem;
+        color: #bbb;
+        margin: 0.3rem 0;
+    }
+
+    .wod-float-standard {
+        display: inline-block;
+        font-size: 2.2rem;
+        font-weight: 600;
+        color: var(--color-primary);
+        line-height: 1;
+        background: #e4f0e8;
+        border: 1px solid #a8cdb5;
+        padding: 0.2rem 0.75rem;
+        border-radius: 4px;
+    }
+
+    .wod-float-english {
+        font-size: 0.9rem;
+        font-family: var(--font-hand);
+        color: #888;
+        margin-top: 0.5rem;
+    }
+
+    .wod-float-dialect :global(.t-ja),
+    .wod-float-standard :global(.t-ja) {
+        white-space: nowrap;
+    }
+
+    :global(body.lang-ja) .wod-float {
+        width: fit-content;
+    }
+
+    @media (max-width: 520px) {
+        .wod-float {
+            bottom: 1rem;
+            left: 1rem;
+            width: calc(100% - 2rem);
+        }
+    }
+
+
 </style>
