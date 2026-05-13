@@ -3,17 +3,71 @@ import Layout from '../layouts/Layout.astro';
 import Navbar from '../components/Navbar.astro';
 import T from '../components/T.astro';
 
-const dialectWords = [
-    {
-        dialect: "あいきた",
-        romanji:  "aikita",
-        standard: "よしきた・ほいきた",
-        english:  "alright, got it, sure thing",
-    },
-];
+const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT2r7rHiUTy7tfJNkVnajXQuXoELP_27frVBYS-S0EsXzQBI71VQcWbGmb9n8-J023R_Ldso-XJg5JY/pub?output=csv';
 
-const dayIndex = new Date().getDate() % dialectWords.length;
-const word = dialectWords[dayIndex];
+const FALLBACK = {
+    dialect: 'あいきた',
+    romaji:  'aikita',
+    standard: 'よしきた・ほいきた',
+    english:  'alright, got it, sure thing',
+};
+
+function splitCSVLine(line: string): string[] {
+    const values: string[] = [];
+    let current = '';
+    let inQuotes = false;
+    for (const char of line) {
+        if (char === '"')            inQuotes = !inQuotes;
+        else if (char === ',' && !inQuotes) { values.push(current); current = ''; }
+        else                         current += char;
+    }
+    values.push(current);
+    return values.map(v => v.trim().replace(/^"|"$/g, ''));
+}
+
+function parseCSV(text: string) {
+    const lines = text.trim().split('\n');
+    if (lines.length < 2) return [];
+    const headers = splitCSVLine(lines[0]).map(h => h.toLowerCase());
+    return lines.slice(1)
+        .map(line => Object.fromEntries(headers.map((h, i) => [h, splitCSVLine(line)[i] ?? ''])))
+        .filter(row => Object.values(row).some(v => v));
+}
+
+function pick(row: Record<string, string>, ...keys: string[]): string {
+    for (const key of keys) {
+        const found = Object.keys(row).find(k => k.includes(key));
+        if (found && row[found]) return row[found];
+    }
+    return '';
+}
+
+let word = FALLBACK;
+
+try {
+    const res = await fetch(SHEET_CSV_URL);
+    if (res.ok) {
+        const rows = parseCSV(await res.text());
+        if (rows.length > 0) {
+            const now = new Date();
+            const dayOfYear = Math.floor((now.getTime() - new Date(now.getFullYear(), 0, 0).getTime()) / 86_400_000);
+            const row = rows[dayOfYear % rows.length];
+            word = {
+                dialect:  pick(row, 'dialect_kana'),
+                romaji:   pick(row, 'dialect_romaji'),
+                standard: pick(row, 'standard_japanese'),
+                english:  pick(row, 'english'),
+            };
+        }
+    }
+} catch (_) { /* use fallback */ }
+
+// Cache until midnight JST (UTC+9)
+const nowMs = Date.now();
+const jstMidnight = new Date(nowMs + 9 * 3_600_000);
+jstMidnight.setUTCHours(24, 0, 0, 0);
+const ttl = Math.floor((jstMidnight.getTime() - 9 * 3_600_000 - nowMs) / 1000);
+Astro.response.headers.set('Cache-Control', `public, s-maxage=${ttl}, stale-while-revalidate=60`);
 ---
 
 <Layout
@@ -200,7 +254,7 @@ const word = dialectWords[dayIndex];
                     <div class="wod-card-body">
                         <div class="wod-dialect">
                             <T>
-                                <span slot="en">{word.romanji}</span>
+                                <span slot="en">{word.romaji}</span>
                                 <span slot="ja">{word.dialect}</span>
                             </T>
                         </div>
@@ -479,8 +533,7 @@ const word = dialectWords[dayIndex];
         padding: 0.2rem 0.75rem;
         border-radius: 4px;
         text-align: center;
-        max-width: 100%;
-        word-break: break-word;
+        overflow-wrap: break-word;
     }
 
     .wod-sep {
@@ -499,8 +552,16 @@ const word = dialectWords[dayIndex];
         padding: 0.2rem 0.75rem;
         border-radius: 4px;
         text-align: center;
-        max-width: 100%;
-        word-break: break-word;
+        overflow-wrap: break-word;
+    }
+
+    .wod-dialect :global(.t-ja),
+    .wod-standard :global(.t-ja) {
+        white-space: nowrap;
+    }
+
+    :global(body.lang-ja) .wod-card-body {
+        align-items: center;
     }
 
     @media (max-width: 900px) {
