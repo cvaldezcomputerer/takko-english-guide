@@ -10,7 +10,7 @@ export interface Shrine {
   deity: { en: string; ja: string };
   description: Array<{ en: string; ja: string }>;
   address: { en: string; ja: string };
-  directions: { en: string; ja: string };
+  accessNotes?: { en: string; ja: string };
   coords?: [number, number]; // [lat, lng] — approximate until verified on-site
   mainImage?: string;
   roadViewImage?: string;
@@ -43,10 +43,6 @@ export const shrines: Shrine[] = [
     address: {
       en: '14 Tose, Takko, Sannohe District, Aomori 039-0314, Japan',
       ja: '〒039-0314 青森県三戸郡田子町戸瀬14',
-    },
-    directions: {
-      en: 'Placeholder — add directions here.',
-      ja: 'アクセス情報を追加してください。',
     },
     coords: [40.28441834579857, 141.07665591026574],
     mainImage: '/images/shrines/奉納/front-of-shrine.jpeg',

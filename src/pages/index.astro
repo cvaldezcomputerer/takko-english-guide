@@ -64,6 +64,79 @@ try {
     }
 } catch (_) { /* use fallback */ }
 
+// ── Weather ──
+const WEATHER_API = 'https://api.open-meteo.com/v1/forecast?latitude=40.32&longitude=141.20&current=temperature_2m,weathercode,apparent_temperature&timezone=Asia/Tokyo';
+
+const WMO: Record<number, { en: string; ja: string; icon: string }> = {
+    0:  { en: 'Clear sky',           ja: '快晴',           icon: 'sun' },
+    1:  { en: 'Mostly clear',        ja: '晴れ',           icon: 'sun' },
+    2:  { en: 'Partly cloudy',       ja: '晴れ時々曇り',    icon: 'partly-cloudy' },
+    3:  { en: 'Overcast',            ja: '曇り',           icon: 'cloud' },
+    45: { en: 'Foggy',               ja: '霧',             icon: 'fog' },
+    48: { en: 'Icy fog',             ja: '着氷霧',         icon: 'fog' },
+    51: { en: 'Light drizzle',       ja: '霧雨',           icon: 'rain' },
+    53: { en: 'Drizzle',             ja: '霧雨',           icon: 'rain' },
+    55: { en: 'Heavy drizzle',       ja: '強い霧雨',       icon: 'rain' },
+    61: { en: 'Light rain',          ja: '小雨',           icon: 'rain' },
+    63: { en: 'Rain',                ja: '雨',             icon: 'rain' },
+    65: { en: 'Heavy rain',          ja: '大雨',           icon: 'rain' },
+    71: { en: 'Light snow',          ja: '小雪',           icon: 'snow' },
+    73: { en: 'Snow',                ja: '雪',             icon: 'snow' },
+    75: { en: 'Heavy snow',          ja: '大雪',           icon: 'snow' },
+    77: { en: 'Snow grains',         ja: '細雪',           icon: 'snow' },
+    80: { en: 'Rain showers',        ja: 'にわか雨',       icon: 'rain' },
+    81: { en: 'Rain showers',        ja: 'にわか雨',       icon: 'rain' },
+    82: { en: 'Heavy showers',       ja: '激しいにわか雨', icon: 'rain' },
+    85: { en: 'Snow showers',        ja: 'にわか雪',       icon: 'snow' },
+    86: { en: 'Heavy snow showers',  ja: '大雪',           icon: 'snow' },
+    95: { en: 'Thunderstorm',        ja: '雷雨',           icon: 'thunder' },
+    96: { en: 'Thunderstorm',        ja: '雷雨',           icon: 'thunder' },
+    99: { en: 'Thunderstorm',        ja: '雷雨',           icon: 'thunder' },
+};
+
+function feelsLike(t: number): { en: string; ja: string } {
+    if (t < 0)  return { en: 'Freezing',    ja: '凍える' };
+    if (t < 8)  return { en: 'Very cold',   ja: 'とても寒い' };
+    if (t < 14) return { en: 'Cold',        ja: '寒い' };
+    if (t < 20) return { en: 'Cool',        ja: '涼しい' };
+    if (t < 25) return { en: 'Comfortable', ja: '快適' };
+    if (t < 31) return { en: 'Warm',        ja: '暖かい' };
+    return        { en: 'Hot',          ja: '暑い' };
+}
+
+const WEATHER_ICONS: Record<string, string> = {
+    sun: `<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="9" fill="#e8a838"/><g stroke="#e8a838" stroke-width="2.5" stroke-linecap="round"><line x1="24" y1="5" x2="24" y2="12"/><line x1="24" y1="36" x2="24" y2="43"/><line x1="5" y1="24" x2="12" y2="24"/><line x1="36" y1="24" x2="43" y2="24"/><line x1="10.1" y1="10.1" x2="15.4" y2="15.4"/><line x1="32.6" y1="32.6" x2="37.9" y2="37.9"/><line x1="37.9" y1="10.1" x2="32.6" y2="15.4"/><line x1="15.4" y1="32.6" x2="10.1" y2="37.9"/></g></svg>`,
+    'partly-cloudy': `<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="17" cy="17" r="7" fill="#e8a838"/><g stroke="#e8a838" stroke-width="2" stroke-linecap="round"><line x1="17" y1="4" x2="17" y2="8"/><line x1="17" y1="26" x2="17" y2="30"/><line x1="4" y1="17" x2="8" y2="17"/><line x1="26" y1="17" x2="30" y2="17"/><line x1="8.5" y1="8.5" x2="11.5" y2="11.5"/><line x1="22.5" y1="22.5" x2="25.5" y2="25.5"/><line x1="25.5" y1="8.5" x2="22.5" y2="11.5"/><line x1="11.5" y1="22.5" x2="8.5" y2="25.5"/></g><path d="M16,40 Q10,40 10,34 Q10,28 17,28 Q19,22 25,22 Q31,22 33,27 Q38,27 40,32 Q41,40 35,40Z" fill="#99aab5"/></svg>`,
+    cloud: `<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8,36 Q2,36 2,29 Q2,22 9,22 Q11,14 21,14 Q30,14 33,21 Q40,20 43,26 Q45,36 37,36Z" fill="#99aab5"/></svg>`,
+    rain:  `<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8,30 Q2,30 2,23 Q2,16 9,16 Q11,8 21,8 Q30,8 33,15 Q40,14 43,20 Q45,30 37,30Z" fill="#99aab5"/><g stroke="#5b9bd5" stroke-width="2.5" stroke-linecap="round"><line x1="15" y1="35" x2="12" y2="43"/><line x1="25" y1="35" x2="22" y2="43"/><line x1="35" y1="35" x2="32" y2="43"/></g></svg>`,
+    snow:  `<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8,30 Q2,30 2,23 Q2,16 9,16 Q11,8 21,8 Q30,8 33,15 Q40,14 43,20 Q45,30 37,30Z" fill="#99aab5"/><g stroke="#a8d4f5" stroke-width="2" stroke-linecap="round"><line x1="13" y1="36" x2="13" y2="44"/><line x1="9" y1="40" x2="17" y2="40"/><line x1="25" y1="34" x2="25" y2="42"/><line x1="21" y1="38" x2="29" y2="38"/><line x1="37" y1="36" x2="37" y2="44"/><line x1="33" y1="40" x2="41" y2="40"/></g></svg>`,
+    thunder: `<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8,30 Q2,30 2,23 Q2,16 9,16 Q11,8 21,8 Q30,8 33,15 Q40,14 43,20 Q45,30 37,30Z" fill="#6b7a8d"/><path d="M27,30 L20,41 L25,41 L19,50 L34,37 L28,37Z" fill="#f5c842"/></svg>`,
+    fog:   `<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><g stroke="#aab0bb" stroke-width="3" stroke-linecap="round"><line x1="6" y1="12" x2="42" y2="12"/><line x1="4" y1="20" x2="44" y2="20"/><line x1="6" y1="28" x2="42" y2="28"/><line x1="4" y1="36" x2="44" y2="36"/></g></svg>`,
+};
+
+let weather: {
+    temp: number;
+    descEn: string; descJa: string;
+    icon: string;
+    feels: { en: string; ja: string };
+} | null = null;
+
+try {
+    const wRes = await fetch(WEATHER_API);
+    if (wRes.ok) {
+        const wData = await wRes.json() as any;
+        const c = wData.current;
+        const info = WMO[c.weathercode as number] ?? { en: 'Unknown', ja: '不明', icon: 'cloud' };
+        weather = {
+            temp:   Math.round(c.temperature_2m),
+            descEn: info.en,
+            descJa: info.ja,
+            icon:   info.icon,
+            feels:  feelsLike(c.apparent_temperature),
+        };
+    }
+} catch (_) {}
+
 // Cache until midnight JST (UTC+9)
 const nowMs = Date.now();
 const jstMidnight = new Date(nowMs + 9 * 3_600_000);
@@ -269,6 +342,35 @@ Astro.response.headers.set('Cache-Control', `public, s-maxage=${ttl}, stale-whil
                         </div>
                     </div>
                 </div>
+
+                {weather && (
+                    <div class="weather-card">
+                        <div class="weather-card-header">
+                            <p class="weather-card-title">
+                                <T>
+                                    <span slot="en">Takko Weather</span>
+                                    <span slot="ja">田子の天気</span>
+                                </T>
+                            </p>
+                        </div>
+                        <div class="weather-card-body">
+                            <div class="weather-icon" set:html={WEATHER_ICONS[weather.icon] ?? WEATHER_ICONS.cloud}></div>
+                            <div class="weather-desc">
+                                <T>
+                                    <span slot="en">{weather.descEn}</span>
+                                    <span slot="ja">{weather.descJa}</span>
+                                </T>
+                            </div>
+                            <div class="weather-temp">{weather.temp}°C</div>
+                            <div class="weather-feels">
+                                <T>
+                                    <span slot="en">Feels {weather.feels.en}</span>
+                                    <span slot="ja">{weather.feels.ja}</span>
+                                </T>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </aside>
         </div>
 
@@ -492,8 +594,6 @@ Astro.response.headers.set('Cache-Control', `public, s-maxage=${ttl}, stale-whil
 
     /* ── Word of the Day card ── */
     .wod-card {
-        position: sticky;
-        top: 1.5rem;
         width: 100%;
         border-radius: 8px;
         overflow: hidden;
@@ -600,5 +700,67 @@ Astro.response.headers.set('Cache-Control', `public, s-maxage=${ttl}, stale-whil
         .hero-ctas { flex-direction: column; align-items: center; }
     }
 
+    /* ── Weather card ── */
+    .weather-card {
+        margin-top: 1.5rem;
+        width: 100%;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 3px solid var(--color-secondary);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        font-family: var(--font-main);
+    }
 
+    .weather-card-header {
+        background: #3e6b8f;
+        padding: 0.85rem 1.25rem;
+    }
+
+    .weather-card-title {
+        margin: 0;
+        color: white;
+        font-size: 0.95rem;
+        font-weight: 600;
+        text-align: center;
+    }
+
+    .weather-card-body {
+        background: #fffbf0;
+        padding: 1.25rem 1rem 1.5rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.35rem;
+    }
+
+    .weather-icon {
+        width: 56px;
+        height: 56px;
+        margin-bottom: 0.25rem;
+    }
+
+    .weather-icon svg {
+        width: 100%;
+        height: 100%;
+    }
+
+    .weather-desc {
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: #444;
+        text-align: center;
+    }
+
+    .weather-temp {
+        font-size: 2.2rem;
+        font-weight: 600;
+        color: #3e6b8f;
+        line-height: 1;
+    }
+
+    .weather-feels {
+        font-size: 0.9rem;
+        font-family: var(--font-hand);
+        color: #888;
+    }
 </style>

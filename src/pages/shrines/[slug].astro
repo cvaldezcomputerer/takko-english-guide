@@ -35,12 +35,14 @@ const { shrine } = Astro.props;
                     <svg viewBox="0 0 120 100" xmlns="http://www.w3.org/2000/svg">
                         <ellipse cx="60" cy="54" rx="57" ry="52" fill="#d4a84c" opacity="0.18"/>
                         <ellipse cx="60" cy="54" rx="57" ry="52" fill="none" stroke="#d4a84c" stroke-width="1.5" opacity="0.4"/>
-                        <rect x="22" y="28" width="10" height="72" rx="2" fill="currentColor"/>
-                        <rect x="88" y="28" width="10" height="72" rx="2" fill="currentColor"/>
-                        <rect x="18" y="47" width="84" height="8" rx="2" fill="currentColor"/>
-                        <path d="M4,25 L4,17 Q14,3 24,11 L96,11 Q106,3 116,17 L116,25 Z" fill="currentColor"/>
-                        <rect x="18" y="25" width="16" height="5" rx="1" fill="currentColor"/>
-                        <rect x="86" y="25" width="16" height="5" rx="1" fill="currentColor"/>
+                        <g transform="translate(60,54) scale(0.75) translate(-60,-54)">
+                            <rect x="22" y="28" width="10" height="72" rx="2" fill="currentColor"/>
+                            <rect x="88" y="28" width="10" height="72" rx="2" fill="currentColor"/>
+                            <rect x="18" y="47" width="84" height="8" rx="2" fill="currentColor"/>
+                            <path d="M4,25 L4,17 Q14,3 24,11 L96,11 Q106,3 116,17 L116,25 Z" fill="currentColor"/>
+                            <rect x="18" y="25" width="16" height="5" rx="1" fill="currentColor"/>
+                            <rect x="86" y="25" width="16" height="5" rx="1" fill="currentColor"/>
+                        </g>
                     </svg>
                 </div>
                 <p class="shrine-ja-name">{shrine.name.ja}</p>
@@ -133,30 +135,17 @@ const { shrine } = Astro.props;
                             <T><span slot="en">Location</span><span slot="ja">場所</span></T>
                         </h2>
 
-                        <div class="road-view">
-                            {shrine.roadViewImage
-                                ? <img src={shrine.roadViewImage} alt={`View from the road — ${shrine.name.en}`} class="road-view-img" />
-                                : <div class="road-view-placeholder">
-                                    <svg viewBox="0 0 60 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                        <polygon points="30,8 46,36 14,36" fill="#c8d8c0" opacity="0.6"/>
-                                        <polygon points="42,16 54,36 30,36" fill="#b0c8a8" opacity="0.5"/>
-                                        <rect x="18" y="20" width="3" height="16" rx="1" fill="#b5291c" opacity="0.4"/>
-                                        <rect x="39" y="20" width="3" height="16" rx="1" fill="#b5291c" opacity="0.4"/>
-                                        <rect x="16" y="27" width="28" height="2.5" rx="1" fill="#b5291c" opacity="0.4"/>
-                                        <path d="M13,24 L13,21 Q16,16 19.5,19 L40.5,19 Q44,16 47,21 L47,24 Z" fill="#b5291c" opacity="0.4"/>
-                                    </svg>
-                                    <span class="road-view-label-placeholder">
-                                        <T><span slot="en">Photo</span><span slot="ja">写真</span></T>
-                                    </span>
-                                </div>
-                            }
-                            <p class="road-view-caption">
-                                <T>
-                                    <span slot="en">View from the road</span>
-                                    <span slot="ja">道路からの眺め</span>
-                                </T>
-                            </p>
-                        </div>
+                        {shrine.roadViewImage && (
+                            <div class="road-view">
+                                <img src={shrine.roadViewImage} alt={`View from the road — ${shrine.name.en}`} class="road-view-img" />
+                                <p class="road-view-caption">
+                                    <T>
+                                        <span slot="en">View from the road</span>
+                                        <span slot="ja">道路からの眺め</span>
+                                    </T>
+                                </p>
+                            </div>
+                        )}
 
                         <div class="address-block">
                             <p class="address-label">
@@ -170,17 +159,20 @@ const { shrine } = Astro.props;
                             </p>
                         </div>
 
-                        <div class="address-block">
-                            <p class="address-label">
-                                <T><span slot="en">Access</span><span slot="ja">アクセス</span></T>
-                            </p>
-                            <p class="address-text">
-                                <T>
-                                    <span slot="en">{shrine.directions.en}</span>
-                                    <span slot="ja">{shrine.directions.ja}</span>
-                                </T>
-                            </p>
-                        </div>
+                        {shrine.accessNotes && (
+                            <div class="address-block">
+                                <p class="address-label">
+                                    <T><span slot="en">Access Notes</span><span slot="ja">アクセスメモ</span></T>
+                                </p>
+                                <p class="address-text">
+                                    <T>
+                                        <span slot="en">{shrine.accessNotes.en}</span>
+                                        <span slot="ja">{shrine.accessNotes.ja}</span>
+                                    </T>
+                                </p>
+                            </div>
+                        )}
+
                     </div>
 
                 </div>
@@ -499,28 +491,6 @@ const { shrine } = Astro.props;
         aspect-ratio: 4/3;
         object-fit: cover;
         display: block;
-    }
-
-    .road-view-placeholder {
-        aspect-ratio: 4/3;
-        background: #f0ece3;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-    }
-
-    .road-view-placeholder svg {
-        width: 52px;
-        height: 42px;
-        opacity: 0.7;
-    }
-
-    .road-view-label-placeholder {
-        font-family: var(--font-hand);
-        font-size: 0.95rem;
-        color: #b0a898;
     }
 
     .road-view .road-view-caption {
