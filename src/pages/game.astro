@@ -200,6 +200,34 @@ import T from '../components/T.astro';
               </div>
           </a>
 
+          <!-- Anarika's Challenge Card -->
+          <a href="/anarikas-challenge" class="game-card">
+              <div class="card-image anarika-bg">
+                  <img src="/images/anarika-challenge/anarika-face.png" alt="Anarika" class="anarika-face-img" />
+              </div>
+              <div class="card-content">
+                  <h3>
+                    <T>
+                      <span slot="en">Anarika's Challenge</span>
+                      <span slot="ja">アナリカのちょうせん</span>
+                    </T>
+                  </h3>
+                  <p>
+                    <T>
+                      <span slot="en">A simple English quiz. Choose a category and answer questions!</span>
+                      <span slot="ja">かんたんな英語クイズ。カテゴリーを選んで答えよう！</span>
+                    </T>
+                  </p>
+                  <span class="play-btn">
+                    <T>
+                      <span slot="en">Play Now</span>
+                      <span slot="ja">今すぐプレイ</span>
+                    </T>
+                    <i class="fas fa-play"></i>
+                  </span>
+              </div>
+          </a>
+
           <!-- Directions Reaction Game Card -->
           <a href="/directions-reaction-game" class="game-card">
                <div class="card-image card-image--screenshot">
@@ -552,6 +580,19 @@ import T from '../components/T.astro';
 
   .quizlet-bg {
     background: #dbeafe;
+  }
+
+  .anarika-bg {
+    background: #fff0f2;
+  }
+
+  .anarika-face-img {
+    width: 110px;
+    height: 110px;
+    object-fit: cover;
+    object-position: center top;
+    border-radius: 50%;
+    border: 4px solid #f4a0aa;
   }
 
   .icon {

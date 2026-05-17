@@ -68,40 +68,41 @@ try {
 const WEATHER_API = 'https://api.open-meteo.com/v1/forecast?latitude=40.32&longitude=141.20&current=temperature_2m,weathercode,apparent_temperature&timezone=Asia/Tokyo';
 
 const WMO: Record<number, { en: string; ja: string; icon: string }> = {
-    0:  { en: 'Clear sky',           ja: '快晴',           icon: 'sun' },
-    1:  { en: 'Mostly clear',        ja: '晴れ',           icon: 'sun' },
-    2:  { en: 'Partly cloudy',       ja: '晴れ時々曇り',    icon: 'partly-cloudy' },
-    3:  { en: 'Overcast',            ja: '曇り',           icon: 'cloud' },
-    45: { en: 'Foggy',               ja: '霧',             icon: 'fog' },
-    48: { en: 'Icy fog',             ja: '着氷霧',         icon: 'fog' },
-    51: { en: 'Light drizzle',       ja: '霧雨',           icon: 'rain' },
-    53: { en: 'Drizzle',             ja: '霧雨',           icon: 'rain' },
-    55: { en: 'Heavy drizzle',       ja: '強い霧雨',       icon: 'rain' },
-    61: { en: 'Light rain',          ja: '小雨',           icon: 'rain' },
-    63: { en: 'Rain',                ja: '雨',             icon: 'rain' },
-    65: { en: 'Heavy rain',          ja: '大雨',           icon: 'rain' },
-    71: { en: 'Light snow',          ja: '小雪',           icon: 'snow' },
-    73: { en: 'Snow',                ja: '雪',             icon: 'snow' },
-    75: { en: 'Heavy snow',          ja: '大雪',           icon: 'snow' },
-    77: { en: 'Snow grains',         ja: '細雪',           icon: 'snow' },
-    80: { en: 'Rain showers',        ja: 'にわか雨',       icon: 'rain' },
-    81: { en: 'Rain showers',        ja: 'にわか雨',       icon: 'rain' },
-    82: { en: 'Heavy showers',       ja: '激しいにわか雨', icon: 'rain' },
-    85: { en: 'Snow showers',        ja: 'にわか雪',       icon: 'snow' },
-    86: { en: 'Heavy snow showers',  ja: '大雪',           icon: 'snow' },
-    95: { en: 'Thunderstorm',        ja: '雷雨',           icon: 'thunder' },
-    96: { en: 'Thunderstorm',        ja: '雷雨',           icon: 'thunder' },
-    99: { en: 'Thunderstorm',        ja: '雷雨',           icon: 'thunder' },
+    0:  { en: "It's Sunny!",           ja: '快晴です！',       icon: 'sun' },
+    1:  { en: "It's Sunny!",           ja: '晴れです！',       icon: 'sun' },
+    2:  { en: "It's Partly Cloudy",    ja: '少し曇っています', icon: 'partly-cloudy' },
+    3:  { en: "It's Cloudy",           ja: '曇っています',     icon: 'cloud' },
+    45: { en: "It's Foggy",            ja: '霧です',           icon: 'fog' },
+    48: { en: "It's Foggy",            ja: '霧です',           icon: 'fog' },
+    51: { en: "It's Drizzling",        ja: '霧雨です',         icon: 'rain' },
+    53: { en: "It's Drizzling",        ja: '霧雨です',         icon: 'rain' },
+    55: { en: "It's Drizzling Hard",   ja: '強い霧雨です',     icon: 'rain' },
+    61: { en: "It's Raining Lightly",  ja: '小雨です',         icon: 'rain' },
+    63: { en: "It's Raining!",         ja: '雨です！',         icon: 'rain' },
+    65: { en: "It's Raining Hard!",    ja: '大雨です！',       icon: 'rain' },
+    71: { en: "It's Snowing Lightly",  ja: '小雪です',         icon: 'snow' },
+    73: { en: "It's Snowing!",         ja: '雪です！',         icon: 'snow' },
+    75: { en: "It's Snowing Hard!",    ja: '大雪です！',       icon: 'snow' },
+    77: { en: "It's Snowing",          ja: '雪です',           icon: 'snow' },
+    80: { en: "Rain Showers",          ja: 'にわか雨です',     icon: 'rain' },
+    81: { en: "Rain Showers",          ja: 'にわか雨です',     icon: 'rain' },
+    82: { en: "Heavy Showers!",        ja: '激しいにわか雨！', icon: 'rain' },
+    85: { en: "Snow Showers",          ja: 'にわか雪です',     icon: 'snow' },
+    86: { en: "Heavy Snow Showers!",   ja: '大雪です！',       icon: 'snow' },
+    95: { en: "It's Stormy!",          ja: '雷雨です！',       icon: 'thunder' },
+    96: { en: "It's Stormy!",          ja: '雷雨です！',       icon: 'thunder' },
+    99: { en: "It's Stormy!",          ja: '雷雨です！',       icon: 'thunder' },
 };
 
 function feelsLike(t: number): { en: string; ja: string } {
-    if (t < 0)  return { en: 'Freezing',    ja: '凍える' };
-    if (t < 8)  return { en: 'Very cold',   ja: 'とても寒い' };
-    if (t < 14) return { en: 'Cold',        ja: '寒い' };
-    if (t < 20) return { en: 'Cool',        ja: '涼しい' };
-    if (t < 25) return { en: 'Comfortable', ja: '快適' };
-    if (t < 31) return { en: 'Warm',        ja: '暖かい' };
-    return        { en: 'Hot',          ja: '暑い' };
+    if (t < 0)  return { en: "It's Freezing!",      ja: '凍えそうです！' };
+    if (t < 8)  return { en: "It's Very Cold!",     ja: 'とても寒いです！' };
+    if (t < 14) return { en: "It's Cold!",          ja: '寒いです！' };
+    if (t < 20) return { en: "It's a Little Cool",  ja: '少し涼しいです' };
+    if (t < 25) return { en: "It's Nice!",          ja: '気持ちいいです！' };
+    if (t < 31) return { en: "It's a Little Hot",   ja: '少し暑いです' };
+    if (t < 36) return { en: "It's Hot!",           ja: '暑いです！' };
+    return              { en: "It's Very Hot!",      ja: 'とても暑いです！' };
 }
 
 const WEATHER_ICONS: Record<string, string> = {
@@ -364,7 +365,7 @@ Astro.response.headers.set('Cache-Control', `public, s-maxage=${ttl}, stale-whil
                             <div class="weather-temp">{weather.temp}°C</div>
                             <div class="weather-feels">
                                 <T>
-                                    <span slot="en">Feels {weather.feels.en}</span>
+                                    <span slot="en">{weather.feels.en}</span>
                                     <span slot="ja">{weather.feels.ja}</span>
                                 </T>
                             </div>
@@ -484,20 +485,25 @@ Astro.response.headers.set('Cache-Control', `public, s-maxage=${ttl}, stale-whil
     .page-body {
         display: grid;
         grid-template-columns: 1fr 300px;
-        gap: 0;
+        gap: 1.5rem;
         max-width: 1200px;
-        margin: 0 auto;
-        padding: 0;
-        align-items: stretch;
+        margin: 2rem auto;
+        padding: 0 1.5rem;
+        align-items: start;
     }
 
     .page-main {
         background: var(--color-bg);
+        border-radius: 24px;
         padding: 3rem 3rem 4rem 2rem;
+        box-shadow: 0 4px 24px rgba(0,0,0,0.06);
     }
 
     .page-sidebar {
-        padding: 3rem 1rem 4rem 1rem;
+        background: #edf2ee;
+        border-radius: 24px;
+        padding: 2rem 1.25rem;
+        box-shadow: 0 4px 24px rgba(0,0,0,0.06);
     }
 
     /* ── Sections ── */
