@@ -45,6 +45,7 @@ function pick(row: Record<string, string>, ...keys: string[]): string {
 }
 
 let word = FALLBACK;
+let allWords: typeof FALLBACK[] = [FALLBACK];
 
 try {
     const res = await fetch(SHEET_CSV_URL);
@@ -60,6 +61,12 @@ try {
                 standard: pick(row, 'standard_japanese'),
                 english:  pick(row, 'english'),
             };
+            allWords = rows.map(r => ({
+                dialect:  pick(r, 'dialect_kana'),
+                romaji:   pick(r, 'dialect_romaji'),
+                standard: pick(r, 'standard_japanese'),
+                english:  pick(r, 'english'),
+            })).filter(w => w.dialect || w.romaji);
         }
     }
 } catch (_) { /* use fallback */ }
@@ -346,7 +353,7 @@ Astro.response.headers.set('Cache-Control', `public, s-maxage=${ttl}, stale-whil
             </main>
 
             <aside class="page-sidebar">
-                <div class="wod-card">
+                <div class="wod-card" data-words={JSON.stringify(allWords)}>
                     <div class="wod-card-header">
                         <p class="wod-card-title">
                             <T>
@@ -634,6 +641,19 @@ Astro.response.headers.set('Cache-Control', `public, s-maxage=${ttl}, stale-whil
         border: 3px solid var(--color-secondary);
         box-shadow: 0 4px 20px rgba(0,0,0,0.1);
         font-family: var(--font-main);
+        cursor: pointer;
+        user-select: none;
+        -webkit-user-select: none;
+    }
+
+    @keyframes wod-pop {
+        0%   { transform: scale(var(--wod-inflate, 1.06)); }
+        45%  { transform: scale(1.12); }
+        100% { transform: scale(1); }
+    }
+
+    .wod-card.wod-popping {
+        animation: wod-pop 0.32s cubic-bezier(0.36, 0.07, 0.19, 0.97) forwards;
     }
 
     .wod-card-header {
@@ -798,3 +818,87 @@ Astro.response.headers.set('Cache-Control', `public, s-maxage=${ttl}, stale-whil
         color: #888;
     }
 </style>
+
+<script>
+    const card = document.querySelector<HTMLElement>('.wod-card');
+    if (card) {
+        type Word = { dialect: string; romaji: string; standard: string; english: string };
+        const words: Word[] = JSON.parse(card.dataset.words ?? '[]');
+        const dialectEl  = card.querySelector<HTMLElement>('.wod-dialect');
+        const standardEl = card.querySelector<HTMLElement>('.wod-standard');
+
+        let currentIdx = -1;
+        let raf: number | null = null;
+        let holdStart = 0;
+        const HOLD_MS = 650;
+
+        function setScale(s: number) {
+            card!.style.transform = `scale(${s})`;
+        }
+
+        function swapWord() {
+            if (words.length < 2) return;
+            let next: number;
+            do { next = Math.floor(Math.random() * words.length); } while (next === currentIdx);
+            currentIdx = next;
+            const w = words[next];
+            if (dialectEl) {
+                dialectEl.querySelector('.t-en')!.textContent = w.romaji;
+                dialectEl.querySelector('.t-ja')!.textContent = w.dialect;
+            }
+            if (standardEl) {
+                standardEl.querySelector('.t-en')!.textContent = w.english;
+                standardEl.querySelector('.t-ja')!.textContent = w.standard;
+            }
+        }
+
+        function triggerPop(inflatedScale: number) {
+            raf = null;
+            swapWord();
+            card!.style.setProperty('--wod-inflate', inflatedScale.toString());
+            card!.classList.add('wod-popping');
+            card!.addEventListener('animationend', () => {
+                card!.classList.remove('wod-popping');
+                card!.style.transform = '';
+            }, { once: true });
+        }
+
+        function inflate(now: number) {
+            const t = Math.min((now - holdStart) / HOLD_MS, 1);
+            const scale = 1 + 0.06 * (t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t);
+            setScale(scale);
+            if (t < 1) {
+                raf = requestAnimationFrame(inflate);
+            } else {
+                triggerPop(scale);
+            }
+        }
+
+        function startHold() {
+            if (raf !== null) return;
+            card!.style.transition = '';
+            holdStart = performance.now();
+            raf = requestAnimationFrame(inflate);
+        }
+
+        function cancelHold() {
+            if (raf === null) return;
+            cancelAnimationFrame(raf);
+            raf = null;
+            card!.style.transition = 'transform 0.18s ease-out';
+            setScale(1);
+            card!.addEventListener('transitionend', () => {
+                card!.style.transition = '';
+                card!.style.transform = '';
+            }, { once: true });
+        }
+
+        card.addEventListener('mousedown',  startHold);
+        card.addEventListener('mouseup',    cancelHold);
+        card.addEventListener('mouseleave', cancelHold);
+        card.addEventListener('touchstart', startHold,  { passive: true });
+        card.addEventListener('touchend',   cancelHold);
+        card.addEventListener('touchcancel',cancelHold);
+        card.addEventListener('selectstart', e => e.preventDefault());
+    }
+</script>
