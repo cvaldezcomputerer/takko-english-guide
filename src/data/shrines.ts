@@ -21,6 +21,38 @@ export interface Shrine {
 
 export const shrines: Shrine[] = [
   {
+    slug: 'oyamatsumi',
+    name: {
+      en: 'Oyamatsumi Shrine',
+      ja: '大山祇神社',
+    },
+    deity: {
+      en: 'Dedicated to Oyamatsumi no Okami — deity of mountains, seas, and war',
+      ja: '大山祇大神をお祀りする神社（山・海・戦の神様）',
+    },
+    description: [
+      {
+        en: 'A shrine in Takko Machi dedicated to Oyamatsumi no Okami, one of the great deities of Japan. Oyamatsumi is the god of mountains and the sea, and is revered by farmers, fishermen, and those who work in the mountains. It seems to have been rebuilt recently.',
+        ja: '田子町にある大山祇大神をお祀りする神社です。大山祇大神は日本の偉大な神様のひとつで、山と海の神として、農家・漁師・山で働く人々に広く信仰されています。最近建て替えられたようです。',
+      },
+    ],
+    address: {
+      en: 'Sakanoshita Takko, Sannohe District, Aomori 039-0201, Japan (40.3631, 141.0863)',
+      ja: '〒039-0201 青森県三戸郡田子町坂ノ下（40.3631, 141.0863）',
+    },
+    coords: [40.36309444444444, 141.0862888888889],
+    accessNotes: {
+      en: 'On the road to Soyu-mura 229 Ski Land.',
+      ja: '創遊村229スキーランドへ向かう道沿いにあります。',
+    },
+    mainImage: '/images/shrines/大山祇大神/大山祇大神-header.jpeg',
+    galleryLayout: 'grid',
+    galleryImages: [
+      '/images/shrines/大山祇大神/大山祇大神-closeup.jpeg',
+      '/images/shrines/大山祇大神/大山祇大神-inner-srhine.jpeg',
+    ],
+  },
+  {
     slug: 'hono',
     name: {
       en: 'Hono Inari Shrine',
