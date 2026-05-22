@@ -1,5 +1,6 @@
 ---
 import Logo from './Logo.astro';
+import T from './T.astro';
 ---
 <nav class="main-nav">
   <div class="nav-content">
@@ -12,11 +13,11 @@ import Logo from './Logo.astro';
         <i class="fas fa-bars"></i>
       </button>
     </div>
-    
+
     <div class="nav-links" id="nav-links">
-      <a href="/game" data-translate="game">Games/Tools</a>
-      <a href="https://bloggydoggy.com/" data-translate="blog">Blog</a>
-      <a href="https://bloggydoggy.com/contact/" data-translate="contact">Contact</a>
+      <a href="/game"><T><span slot="en">Games/Tools</span><span slot="ja">ゲームとツール</span></T></a>
+      <a href="https://bloggydoggy.com/"><T><span slot="en">Blog</span><span slot="ja">ブログ</span></T></a>
+      <a href="https://bloggydoggy.com/contact/"><T><span slot="en">Contact</span><span slot="ja">お問い合わせ</span></T></a>
       
       <button class="lang-toggle" id="lang-toggle">
         <i class="fas fa-language"></i>

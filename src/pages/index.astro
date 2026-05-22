@@ -4,6 +4,7 @@ export const prerender = false;
 import Layout from '../layouts/Layout.astro';
 import Navbar from '../components/Navbar.astro';
 import T from '../components/T.astro';
+import MiniWordle from '../components/MiniWordle.astro';
 
 const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT2r7rHiUTy7tfJNkVnajXQuXoELP_27frVBYS-S0EsXzQBI71VQcWbGmb9n8-J023R_Ldso-XJg5JY/pub?output=csv';
 
@@ -407,6 +408,7 @@ Astro.response.headers.set('Cache-Control', `public, s-maxage=${ttl}, stale-whil
                         </div>
                     </div>
                 )}
+                <MiniWordle />
             </aside>
         </div>
 
