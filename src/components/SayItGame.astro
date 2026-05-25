@@ -1,0 +1,916 @@
+---
+// No imports needed
+---
+
+<!-- Config screen -->
+<div class="config-screen" id="sig-config">
+  <div class="config-card">
+    <h1 class="config-title">Letter or Not?</h1>
+    <p class="config-sub">Is it a letter? Say <strong>YES</strong> or <strong>NO</strong>!</p>
+    <p class="config-sub-jp">文字なら YES、違うなら NO！</p>
+
+    <div class="config-section">
+      <p class="config-label">Mode</p>
+      <div class="seg-ctrl" id="sig-mode-ctrl">
+        <button class="seg-btn active" data-mode="time">Timed</button>
+        <button class="seg-btn" data-mode="endless">Endless</button>
+      </div>
+    </div>
+
+    <div class="config-section" id="sig-duration-section">
+      <p class="config-label">Time / 時間</p>
+      <div class="seg-ctrl" id="sig-time-btns">
+        <button class="seg-btn active" data-time="60">1 min</button>
+        <button class="seg-btn" data-time="180">3 min</button>
+      </div>
+    </div>
+
+    <button class="play-btn" id="sig-btn-play">Play</button>
+    <p class="config-note">Microphone required / マイクが必要です</p>
+  </div>
+</div>
+
+<!-- Game screen (full viewport when active) -->
+<div class="game-screen hidden" id="sig-game">
+
+  <div class="hud">
+    <div class="hud-item">
+      <span class="hud-label">Score</span>
+      <span class="hud-value" id="sig-score">0</span>
+    </div>
+    <div class="hud-item">
+      <span class="hud-label" id="sig-mid-label">Time</span>
+      <span class="hud-value" id="sig-mid-val">60</span>
+    </div>
+    <div class="hud-item">
+      <span class="hud-label">Best</span>
+      <span class="hud-value" id="sig-best">0</span>
+    </div>
+  </div>
+
+  <div class="symbol-area">
+    <div class="symbol-wrap" id="sig-symbol-wrap">
+      <svg class="timer-ring" viewBox="0 0 200 200">
+        <circle cx="100" cy="100" r="88" class="ring-track"/>
+        <circle cx="100" cy="100" r="88" class="ring-fill" id="sig-ring"/>
+      </svg>
+      <span class="symbol-text" id="sig-symbol"></span>
+    </div>
+  </div>
+
+  <div class="mic-area">
+    <div class="mic-row">
+      <svg class="mic-svg" id="sig-mic-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <rect x="9" y="2" width="6" height="12" rx="3" fill="currentColor"/>
+        <path d="M5 11a7 7 0 0014 0" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>
+        <line x1="12" y1="18" x2="12" y2="22" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <line x1="9" y1="22" x2="15" y2="22" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <p class="instruction">Say <strong>YES</strong> or <strong>NO</strong> / <strong>YES</strong> か <strong>NO</strong> と言ってね</p>
+    </div>
+    <p class="heard-text" id="sig-heard"></p>
+  </div>
+
+  <!-- Game overlays -->
+  <div class="game-overlay hidden" id="sig-loading">
+    <div class="spinner"></div>
+    <p class="overlay-msg" id="sig-loading-msg">Requesting microphone…</p>
+  </div>
+
+  <div class="game-overlay hidden" id="sig-countdown">
+    <p class="countdown-num" id="sig-count-num">3</p>
+  </div>
+
+  <div class="game-overlay hidden" id="sig-gameover">
+    <div class="gameover-card">
+      <p class="gameover-label" id="sig-gameover-label">Time Up!</p>
+      <p class="gameover-score" id="sig-final-score">0</p>
+      <p class="gameover-meta">points</p>
+      <p class="gameover-best" id="sig-gameover-best"></p>
+      <div class="gameover-btns">
+        <button class="play-btn" id="sig-btn-restart">Play Again</button>
+        <button class="settings-btn" id="sig-btn-settings">Settings</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<style>
+  :root {
+    --sig-bg: #0d0d1e;
+    --sig-panel: rgba(255, 255, 255, 0.06);
+    --sig-border: rgba(255, 255, 255, 0.1);
+    --sig-ink: #e8eaf6;
+    --sig-muted: #9fa8da;
+    --sig-blue: #2979ff;
+    --sig-green: #00e676;
+    --sig-red: #ff5252;
+    --sig-yellow: #ffd740;
+  }
+
+  /* ── Config screen ─────────────────────────────────────────────────────────── */
+  .config-screen {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--sig-bg);
+    font-family: "Andika", "Trebuchet MS", "Segoe UI", sans-serif;
+    color: var(--sig-ink);
+    padding: 1rem;
+    z-index: 100;
+  }
+
+  .config-screen.hidden { display: none; }
+
+  .config-card {
+    width: min(400px, 100%);
+    display: flex;
+    flex-direction: column;
+    gap: 1.4rem;
+    align-items: stretch;
+    text-align: center;
+  }
+
+  .config-title {
+    margin: 0;
+    font-size: clamp(2.5rem, 8vw, 3.5rem);
+    font-weight: 900;
+    line-height: 1;
+    color: var(--sig-ink);
+  }
+
+  .config-sub {
+    margin: -0.8rem 0 0;
+    font-size: 1rem;
+    color: var(--sig-muted);
+    line-height: 1.5;
+  }
+
+  .config-sub strong { color: var(--sig-ink); }
+
+  .config-sub-jp {
+    margin: -1rem 0 0;
+    font-size: 0.85rem;
+    color: rgba(159, 168, 218, 0.65);
+  }
+
+  .config-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  .config-label {
+    margin: 0;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--sig-muted);
+  }
+
+  /* Segmented control */
+  .seg-ctrl {
+    display: flex;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--sig-border);
+    border-radius: 10px;
+    padding: 3px;
+    gap: 3px;
+    width: 100%;
+  }
+
+  .seg-btn {
+    flex: 1;
+    border: none;
+    border-radius: 7px;
+    background: transparent;
+    color: var(--sig-muted);
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 700;
+    padding: 0.55rem 1rem;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+
+  .seg-btn.active {
+    background: #fff;
+    color: #0d0d1e;
+  }
+
+  .config-note {
+    margin: -0.6rem 0 0;
+    font-size: 0.75rem;
+    color: rgba(159, 168, 218, 0.45);
+  }
+
+  /* Play button */
+  .play-btn {
+    border: none;
+    border-radius: 12px;
+    background: var(--sig-blue);
+    color: #fff;
+    font-family: inherit;
+    font-size: 1.1rem;
+    font-weight: 800;
+    padding: 0.9rem;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    transition: filter 0.12s, transform 0.1s;
+  }
+
+  .play-btn:hover { filter: brightness(1.18); transform: scale(1.02); }
+  .play-btn:active { transform: scale(0.97); }
+
+  /* ── Game screen ───────────────────────────────────────────────────────────── */
+  .game-screen {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: var(--sig-bg);
+    font-family: "Andika", "Trebuchet MS", "Segoe UI", sans-serif;
+    color: var(--sig-ink);
+    z-index: 100;
+  }
+
+  .game-screen.hidden { display: none; }
+
+  /* HUD */
+  .hud {
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+    padding: 1.2rem 2rem 0.8rem;
+    border-bottom: 1px solid var(--sig-border);
+    flex-shrink: 0;
+  }
+
+  .hud-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.15rem;
+  }
+
+  .hud-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--sig-muted);
+  }
+
+  .hud-value {
+    font-size: 1.6rem;
+    font-weight: 900;
+    line-height: 1;
+  }
+
+  /* Symbol area */
+  .symbol-area {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .symbol-wrap {
+    position: relative;
+    width: clamp(220px, 45vmin, 360px);
+    height: clamp(220px, 45vmin, 360px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .timer-ring {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .ring-track {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.07);
+    stroke-width: 8;
+  }
+
+  .ring-fill {
+    fill: none;
+    stroke: var(--sig-blue);
+    stroke-width: 8;
+    stroke-linecap: round;
+    stroke-dasharray: 552.9; /* 2 * pi * 88 */
+    stroke-dashoffset: 0;
+    transform: rotate(-90deg);
+    transform-origin: center;
+    transition: stroke 0.2s;
+  }
+
+  .ring-fill.draining {
+    animation: drain-ring var(--answer-time, 3.5s) linear forwards;
+  }
+
+  .symbol-text {
+    position: relative;
+    z-index: 1;
+    font-size: clamp(6rem, 18vmin, 11rem);
+    font-weight: 700;
+    font-family: "Andika", "M PLUS Rounded 1c", sans-serif;
+    line-height: 1;
+    color: #fff;
+    transition: color 0.15s;
+    user-select: none;
+  }
+
+  /* Symbol feedback states */
+  .symbol-wrap.popped {
+    animation: symbol-pop 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .symbol-wrap.correct .symbol-text { color: var(--sig-green); }
+  .symbol-wrap.correct .ring-fill   { stroke: var(--sig-green); }
+
+  .symbol-wrap.wrong .symbol-text   { color: var(--sig-red); }
+  .symbol-wrap.wrong .ring-fill     { stroke: var(--sig-red); animation: none; }
+  .symbol-wrap.wrong                { animation: shake 0.45s ease both; }
+
+  .symbol-wrap.timeout .symbol-text { color: var(--sig-yellow); }
+  .symbol-wrap.timeout .ring-fill   { stroke: var(--sig-yellow); animation: none; }
+
+  /* Mic area */
+  .mic-area {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 1rem 1rem 2rem;
+    text-align: center;
+  }
+
+  .mic-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .mic-svg {
+    width: 20px;
+    height: 20px;
+    color: var(--sig-muted);
+    flex-shrink: 0;
+  }
+
+  .mic-svg.listening {
+    color: var(--sig-blue);
+    animation: mic-pulse 1.2s ease-in-out infinite;
+  }
+
+  .instruction {
+    margin: 0;
+    font-size: 1rem;
+    color: var(--sig-muted);
+  }
+
+  .instruction strong { color: var(--sig-ink); }
+
+  .heard-text {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 700;
+    min-height: 1.4em;
+    color: var(--sig-ink);
+    letter-spacing: 0.04em;
+  }
+
+  /* Game overlays */
+  .game-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    background: rgba(13, 13, 30, 0.88);
+    backdrop-filter: blur(6px);
+    text-align: center;
+  }
+
+  .game-overlay.hidden { display: none; }
+
+  .spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid rgba(255, 255, 255, 0.12);
+    border-top-color: var(--sig-blue);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  .overlay-msg {
+    margin: 0;
+    font-size: 1rem;
+    color: var(--sig-muted);
+    font-family: "Andika", sans-serif;
+  }
+
+  .countdown-num {
+    margin: 0;
+    font-size: clamp(6rem, 22vmin, 13rem);
+    font-weight: 900;
+    color: #fff;
+    font-family: "Andika", sans-serif;
+    animation: pop 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  /* Game Over card */
+  .gameover-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--sig-border);
+    border-radius: 24px;
+    padding: 2.5rem 3rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: "Andika", sans-serif;
+  }
+
+  .gameover-label {
+    margin: 0;
+    font-size: 0.85rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--sig-muted);
+  }
+
+  .gameover-score {
+    margin: 0.2rem 0 0;
+    font-size: clamp(4rem, 14vw, 7rem);
+    font-weight: 900;
+    line-height: 1;
+  }
+
+  .gameover-meta {
+    margin: 0;
+    font-size: 1rem;
+    color: var(--sig-muted);
+  }
+
+  .gameover-best {
+    margin: 0.3rem 0 0.6rem;
+    font-size: 0.95rem;
+    color: var(--sig-yellow);
+    font-weight: 700;
+    min-height: 1.2em;
+  }
+
+  .gameover-btns {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    width: 100%;
+    margin-top: 0.4rem;
+  }
+
+  .settings-btn {
+    border: 1px solid var(--sig-border);
+    border-radius: 10px;
+    background: transparent;
+    color: var(--sig-muted);
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 0.6rem;
+    cursor: pointer;
+    transition: background 0.12s, color 0.12s;
+  }
+
+  .settings-btn:hover { background: var(--sig-panel); color: var(--sig-ink); }
+
+  /* Keyframes */
+  @keyframes pop {
+    0%   { opacity: 0; transform: scale(0.5); }
+    60%  { opacity: 1; transform: scale(1.1); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+
+  @keyframes symbol-pop {
+    0%   { opacity: 0; transform: scale(0.2); }
+    65%  { opacity: 1; transform: scale(1.08); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%       { transform: translateX(-12px); }
+    40%       { transform: translateX(12px); }
+    60%       { transform: translateX(-8px); }
+    80%       { transform: translateX(8px); }
+  }
+
+  @keyframes drain-ring {
+    from { stroke-dashoffset: 0; }
+    to   { stroke-dashoffset: 552.9; }
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  @keyframes mic-pulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.4; }
+  }
+</style>
+
+<script type="module" is:inline>
+  // ── DOM refs ────────────────────────────────────────────────────────────────
+  const configScreen  = document.getElementById('sig-config');
+  const gameScreen    = document.getElementById('sig-game');
+  const scoreEl       = document.getElementById('sig-score');
+  const midLabelEl    = document.getElementById('sig-mid-label');
+  const midValEl      = document.getElementById('sig-mid-val');
+  const bestEl        = document.getElementById('sig-best');
+  const overlayLoad   = document.getElementById('sig-loading');
+  const overlayCount  = document.getElementById('sig-countdown');
+  const overlayOver   = document.getElementById('sig-gameover');
+  const loadMsgEl     = document.getElementById('sig-loading-msg');
+  const countNumEl    = document.getElementById('sig-count-num');
+  const finalScoreEl  = document.getElementById('sig-final-score');
+  const gameoverBest  = document.getElementById('sig-gameover-best');
+  const gameoverLbl   = document.getElementById('sig-gameover-label');
+  const btnPlay       = document.getElementById('sig-btn-play');
+  const btnRestart    = document.getElementById('sig-btn-restart');
+  const btnSettings   = document.getElementById('sig-btn-settings');
+  const symbolWrap    = document.getElementById('sig-symbol-wrap');
+  const symbolEl      = document.getElementById('sig-symbol');
+  const ringEl        = document.getElementById('sig-ring');
+  const micIconEl     = document.getElementById('sig-mic-icon');
+  const heardEl       = document.getElementById('sig-heard');
+  const durationSection = document.getElementById('sig-duration-section');
+
+  // ── Item pools ──────────────────────────────────────────────────────────────
+  const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+
+  const NON_LETTERS = [
+    '0','1','2','3','4','5','6','7','8','9',
+    '@','#','$','%','&','*','+','=','?','!','~','^','/','|','<','>',
+    '÷','×','±','∞','√','π','≠','≤','≥','∑',
+    '¥','€','£',
+    '♠','♣','♦','★','☆','✓','✗','◆','▲','●',
+  ];
+
+  // ── Game config ─────────────────────────────────────────────────────────────
+  const ANSWER_TIME  = 3500;
+  const FEEDBACK_MS  = 750;
+  const DEAF_MS      = 1000; // ignore mic for this long after each new item appears
+  const MAX_LIVES    = 3;
+  const LETTER_RATIO = 0.5;
+  let   TIME_LIMIT   = 60;
+  let   gameMode     = 'time';
+
+  // ── Audio ───────────────────────────────────────────────────────────────────
+  const SFX_BASE = '/audio/directions-reaction-game/feedback/';
+  const GOOD_SFX = ['good-yeah-5','good-great-4','good-ohyeah-3','good-nice-2','good-nice-1']
+    .map(n => { const a = new Audio(`${SFX_BASE}${n}.mp3`); a.preload = 'auto'; return a; });
+  const BAD_SFX = ['bad-woops-3','bad-ohno-1','bad-ohno-2']
+    .map(n => { const a = new Audio(`${SFX_BASE}${n}.mp3`); a.preload = 'auto'; return a; });
+
+  function playSound(pool) {
+    const snd = pool[Math.floor(Math.random() * pool.length)];
+    snd.currentTime = 0;
+    snd.play().catch(() => {});
+  }
+
+  // ── Speech recognition ──────────────────────────────────────────────────────
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  let recognition = null;
+  let recognitionActive = false;
+
+  function initRecognition() {
+    if (!SpeechRecognition) return false;
+    recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.continuous = true;
+    recognition.interimResults = true;
+
+    recognition.onstart = () => { recognitionActive = true; };
+
+    recognition.onend = () => {
+      recognitionActive = false;
+      if (state === 'playing') {
+        try { recognition.start(); } catch (_) {}
+      }
+    };
+
+    recognition.onerror = (e) => {
+      if (e.error === 'no-speech' || e.error === 'aborted') return;
+      heardEl.textContent = `Mic error: ${e.error}`;
+    };
+
+    recognition.onresult = (event) => {
+      if (!awaitingAnswer) return;
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const text = event.results[i][0].transcript.toLowerCase().trim();
+        if (text.includes('yes') || text.includes('yeah') || text.includes('yep') || text.includes('yea')) {
+          handleAnswer(true);
+          return;
+        }
+        if (text.includes('no') || text.includes('nope') || text.includes('nah')) {
+          handleAnswer(false);
+          return;
+        }
+      }
+    };
+
+    return true;
+  }
+
+  // ── Game state ───────────────────────────────────────────────────────────────
+  let state          = 'idle';
+  let score          = 0;
+  let lives          = MAX_LIVES;
+  let bestScore      = 0;
+  let awaitingAnswer = false;
+  let answerTimer    = null;
+  let gameTimer      = null;
+  let gameStartTime  = 0;
+  let timeLeft       = TIME_LIMIT;
+  let currentIsLetter = false;
+
+  // ── Persistence ──────────────────────────────────────────────────────────────
+  const LS_TIME    = 'sig-best-time';
+  const LS_ENDLESS = 'sig-best-endless';
+
+  function lsKey() { return gameMode === 'endless' ? LS_ENDLESS : LS_TIME; }
+  function loadBest() { bestScore = parseInt(localStorage.getItem(lsKey()) ?? '0', 10); }
+  function saveBest() { localStorage.setItem(lsKey(), String(bestScore)); }
+
+  // ── Helpers ──────────────────────────────────────────────────────────────────
+  const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+  function showConfig() {
+    configScreen.classList.remove('hidden');
+    gameScreen.classList.add('hidden');
+  }
+
+  function showGame(overlay) {
+    configScreen.classList.add('hidden');
+    gameScreen.classList.remove('hidden');
+    overlayLoad.classList.add('hidden');
+    overlayCount.classList.add('hidden');
+    overlayOver.classList.add('hidden');
+    if (overlay === 'loading')   overlayLoad.classList.remove('hidden');
+    if (overlay === 'countdown') overlayCount.classList.remove('hidden');
+    if (overlay === 'gameover')  overlayOver.classList.remove('hidden');
+  }
+
+  function updateHud() {
+    scoreEl.textContent = String(score);
+    bestEl.textContent  = String(bestScore);
+    if (gameMode === 'endless') {
+      midLabelEl.textContent = 'Lives';
+      midValEl.textContent   = '♥'.repeat(lives) + '♡'.repeat(MAX_LIVES - lives);
+    } else {
+      midLabelEl.textContent = 'Time';
+      midValEl.textContent   = String(Math.ceil(timeLeft));
+    }
+  }
+
+  function pickItem() {
+    const isLetter = Math.random() < LETTER_RATIO;
+    const pool = isLetter ? LETTERS : NON_LETTERS;
+    return { char: pool[Math.floor(Math.random() * pool.length)], isLetter };
+  }
+
+  // ── Ring animation ────────────────────────────────────────────────────────────
+  function startRing() {
+    ringEl.style.setProperty('--answer-time', `${ANSWER_TIME / 1000}s`);
+    ringEl.classList.remove('draining');
+    void ringEl.offsetWidth;
+    ringEl.classList.add('draining');
+  }
+
+  function stopRing() {
+    ringEl.classList.remove('draining');
+  }
+
+  // ── Gameplay ──────────────────────────────────────────────────────────────────
+  function showNextItem() {
+    if (state !== 'playing') return;
+
+    symbolWrap.classList.remove('correct', 'wrong', 'timeout', 'popped');
+    heardEl.textContent = '';
+
+    const { char, isLetter } = pickItem();
+    currentIsLetter = isLetter;
+    symbolEl.textContent = char;
+
+    void symbolWrap.offsetWidth;
+    symbolWrap.classList.add('popped');
+    startRing();
+
+    const itemStart = performance.now();
+    setTimeout(() => {
+      if (state !== 'playing') return;
+      awaitingAnswer = true;
+      micIconEl.classList.add('listening');
+      answerTimer = setTimeout(() => {
+        if (awaitingAnswer) handleTimeout();
+      }, ANSWER_TIME - (performance.now() - itemStart));
+    }, DEAF_MS);
+  }
+
+  function handleAnswer(saidYes) {
+    if (!awaitingAnswer) return;
+    awaitingAnswer = false;
+    micIconEl.classList.remove('listening');
+    clearTimeout(answerTimer);
+    stopRing();
+
+    const correct = (saidYes === currentIsLetter);
+    const word = saidYes ? 'YES' : 'NO';
+
+    if (correct) {
+      score += 10;
+      heardEl.textContent = `${word} — correct!`;
+      symbolWrap.classList.add('correct');
+      playSound(GOOD_SFX);
+    } else {
+      heardEl.textContent = `${word} — wrong`;
+      symbolWrap.classList.add('wrong');
+      playSound(BAD_SFX);
+      if (gameMode === 'endless') {
+        lives--;
+        if (lives <= 0) { updateHud(); endGame(); return; }
+      } else {
+        score = Math.max(0, score - 1);
+      }
+    }
+
+    updateHud();
+    setTimeout(() => { if (state === 'playing') showNextItem(); }, FEEDBACK_MS);
+  }
+
+  function handleTimeout() {
+    awaitingAnswer = false;
+    micIconEl.classList.remove('listening');
+    clearTimeout(answerTimer);
+
+    heardEl.textContent = 'Too slow!';
+    symbolWrap.classList.add('timeout');
+    playSound(BAD_SFX);
+
+    if (gameMode === 'endless') {
+      lives--;
+      if (lives <= 0) { updateHud(); endGame(); return; }
+    } else {
+      score = Math.max(0, score - 1);
+    }
+
+    updateHud();
+    setTimeout(() => { if (state === 'playing') showNextItem(); }, FEEDBACK_MS);
+  }
+
+  // ── Game lifecycle ────────────────────────────────────────────────────────────
+  function endGame() {
+    state = 'gameover';
+    awaitingAnswer = false;
+    micIconEl.classList.remove('listening');
+    clearTimeout(answerTimer);
+    clearInterval(gameTimer);
+    if (recognition && recognitionActive) recognition.abort();
+
+    if (score > bestScore) { bestScore = score; saveBest(); }
+    gameoverLbl.textContent = gameMode === 'endless' ? 'Game Over' : 'Time Up! / 終了！';
+    finalScoreEl.textContent = String(score);
+    const savedBest = parseInt(localStorage.getItem(lsKey()) ?? '0', 10);
+    gameoverBest.textContent = score > 0 && score >= savedBest ? 'New Best!' : `Best: ${bestScore}`;
+    showGame('gameover');
+  }
+
+  async function runCountdown() {
+    showGame('countdown');
+    for (let n = 3; n >= 1; n--) {
+      countNumEl.textContent = String(n);
+      countNumEl.style.animation = 'none';
+      void countNumEl.offsetWidth;
+      countNumEl.style.animation = '';
+      await sleep(850);
+    }
+    countNumEl.textContent = 'GO!';
+    countNumEl.style.animation = 'none';
+    void countNumEl.offsetWidth;
+    countNumEl.style.animation = '';
+    await sleep(550);
+  }
+
+  function startGameTimer() {
+    if (gameMode === 'endless') return;
+    gameTimer = setInterval(() => {
+      if (state !== 'playing') return;
+      timeLeft = TIME_LIMIT - (performance.now() - gameStartTime) / 1000;
+      if (timeLeft <= 0) {
+        timeLeft = 0;
+        updateHud();
+        awaitingAnswer = false;
+        clearTimeout(answerTimer);
+        endGame();
+      } else {
+        updateHud();
+      }
+    }, 250);
+  }
+
+  async function startGame() {
+    loadBest();
+    score = 0; lives = MAX_LIVES; timeLeft = TIME_LIMIT;
+    awaitingAnswer = false;
+    updateHud();
+
+    state = 'loading';
+    showGame('loading');
+    loadMsgEl.textContent = 'Requesting microphone… / マイクを確認中…';
+
+    if (!SpeechRecognition) {
+      loadMsgEl.textContent = 'Speech recognition is not supported. Try Chrome or Safari.';
+      return;
+    }
+
+    try {
+      if (!recognition) initRecognition();
+      if (!recognitionActive) recognition.start();
+      await sleep(400);
+    } catch (err) {
+      loadMsgEl.textContent = `Microphone error: ${err.message}`;
+      return;
+    }
+
+    await runCountdown();
+    state = 'playing';
+    gameStartTime = performance.now();
+    showGame(null);
+    startGameTimer();
+    showNextItem();
+  }
+
+  async function restartGame() {
+    clearTimeout(answerTimer);
+    clearInterval(gameTimer);
+    awaitingAnswer = false;
+    micIconEl.classList.remove('listening');
+    score = 0; lives = MAX_LIVES; timeLeft = TIME_LIMIT;
+    symbolWrap.classList.remove('correct', 'wrong', 'timeout', 'popped');
+    heardEl.textContent = '';
+    updateHud();
+
+    await runCountdown();
+    state = 'playing';
+    gameStartTime = performance.now();
+    showGame(null);
+    startGameTimer();
+
+    if (!recognitionActive) {
+      try { recognition.start(); } catch (_) {}
+    }
+
+    showNextItem();
+  }
+
+  // ── Config controls ───────────────────────────────────────────────────────────
+  document.querySelectorAll('#sig-mode-ctrl .seg-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      gameMode = btn.dataset.mode;
+      document.querySelectorAll('#sig-mode-ctrl .seg-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      durationSection.style.display = gameMode === 'endless' ? 'none' : '';
+    });
+  });
+
+  document.querySelectorAll('#sig-time-btns .seg-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      TIME_LIMIT = parseInt(btn.dataset.time, 10);
+      document.querySelectorAll('#sig-time-btns .seg-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+
+  btnPlay.addEventListener('click', startGame);
+  btnRestart.addEventListener('click', restartGame);
+  btnSettings.addEventListener('click', () => {
+    state = 'idle';
+    clearTimeout(answerTimer);
+    clearInterval(gameTimer);
+    if (recognition && recognitionActive) recognition.abort();
+    showConfig();
+  });
+</script>

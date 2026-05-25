@@ -155,6 +155,34 @@ import T from '../components/T.astro';
               </div>
           </a>
 
+          <!-- Say It Game Card -->
+          <a href="/say-it-game" class="game-card">
+              <div class="card-image card-image--screenshot">
+                  <img src="/images/game-screenshots/letter-or-not-game.png" alt="Say It game screenshot" loading="lazy" />
+              </div>
+              <div class="card-content">
+                  <h3>
+                    <T>
+                      <span slot="en">Letter or Not?</span>
+                      <span slot="ja">文字？それとも違う？</span>
+                    </T>
+                  </h3>
+                  <p>
+                    <T>
+                      <span slot="en">Is it a letter? Say YES or NO into the microphone!</span>
+                      <span slot="ja">文字かな？マイクに向かって YES か NO と言おう！</span>
+                    </T>
+                  </p>
+                  <span class="play-btn">
+                    <T>
+                      <span slot="en">Play Now</span>
+                      <span slot="ja">今すぐプレイ</span>
+                    </T>
+                    <i class="fas fa-play"></i>
+                  </span>
+              </div>
+          </a>
+
           <!-- Odd One Out Game Card -->
           <a href="/odd-one-out" class="game-card">
               <div class="card-image card-image--screenshot">
@@ -538,7 +566,7 @@ import T from '../components/T.astro';
     background: #fff0f2;
   }
 
-  .anarika-face-img {
+.anarika-face-img {
     width: 110px;
     height: 110px;
     object-fit: cover;
