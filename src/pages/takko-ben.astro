@@ -1,0 +1,818 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navbar from '../components/Navbar.astro';
+import T from '../components/T.astro';
+
+type Cell = { katakana: string; phonetic: string; hepburn?: string; merged?: boolean };
+type Row  = { label: string; cells: (Cell | null)[] };
+
+const standardRows: Row[] = [
+  { label: 'V',   cells: [{ katakana:'ア',phonetic:'a'},{katakana:'イ',phonetic:'i'},{katakana:'ウ',phonetic:'u'},{katakana:'エ',phonetic:'e'},{katakana:'オ',phonetic:'o'}] },
+  { label: 'K',   cells: [{ katakana:'カ',phonetic:'ka'},{katakana:'キ',phonetic:'ki'},{katakana:'ク',phonetic:'ku'},{katakana:'ケ',phonetic:'ke'},{katakana:'コ',phonetic:'ko'}] },
+  { label: 'G',   cells: [{ katakana:'ガ',phonetic:'ga'},{katakana:'ギ',phonetic:'gi'},{katakana:'グ',phonetic:'gu'},{katakana:'ゲ',phonetic:'ge'},{katakana:'ゴ',phonetic:'go'}] },
+  { label: 'S',   cells: [{ katakana:'サ',phonetic:'sa'},{katakana:'シ',phonetic:'si',hepburn:'shi'},{katakana:'ス',phonetic:'su'},{katakana:'セ',phonetic:'se'},{katakana:'ソ',phonetic:'so'}] },
+  { label: 'Z',   cells: [{ katakana:'ザ',phonetic:'za'},{katakana:'ジ',phonetic:'zi',hepburn:'ji'},{katakana:'ズ',phonetic:'zu'},{katakana:'ゼ',phonetic:'ze'},{katakana:'ゾ',phonetic:'zo'}] },
+  { label: 'T/C', cells: [{ katakana:'タ',phonetic:'ta'},{katakana:'チ',phonetic:'ci',hepburn:'chi'},{katakana:'ツ',phonetic:'cu',hepburn:'tsu'},{katakana:'テ',phonetic:'te'},{katakana:'ト',phonetic:'to'}] },
+  { label: 'D',   cells: [{ katakana:'ダ',phonetic:'da'},{katakana:'ジ',phonetic:'zi',hepburn:'ji',merged:true},{katakana:'ズ',phonetic:'zu',merged:true},{katakana:'デ',phonetic:'de'},{katakana:'ド',phonetic:'do'}] },
+  { label: 'N',   cells: [{ katakana:'ナ',phonetic:'na'},{katakana:'ニ',phonetic:'ni'},{katakana:'ヌ',phonetic:'nu'},{katakana:'ネ',phonetic:'ne'},{katakana:'ノ',phonetic:'no'}] },
+  { label: 'H',   cells: [{ katakana:'ハ',phonetic:'ha'},{katakana:'ヒ',phonetic:'hi'},{katakana:'フ',phonetic:'hu',hepburn:'fu'},{katakana:'ヘ',phonetic:'he'},{katakana:'ホ',phonetic:'ho'}] },
+  { label: 'B',   cells: [{ katakana:'バ',phonetic:'ba'},{katakana:'ビ',phonetic:'bi'},{katakana:'ブ',phonetic:'bu'},{katakana:'ベ',phonetic:'be'},{katakana:'ボ',phonetic:'bo'}] },
+  { label: 'P',   cells: [{ katakana:'パ',phonetic:'pa'},{katakana:'ピ',phonetic:'pi'},{katakana:'プ',phonetic:'pu'},{katakana:'ペ',phonetic:'pe'},{katakana:'ポ',phonetic:'po'}] },
+  { label: 'M',   cells: [{ katakana:'マ',phonetic:'ma'},{katakana:'ミ',phonetic:'mi'},{katakana:'ム',phonetic:'mu'},{katakana:'メ',phonetic:'me'},{katakana:'モ',phonetic:'mo'}] },
+  { label: 'Y',   cells: [{ katakana:'ヤ',phonetic:'ya'},null,{katakana:'ユ',phonetic:'yu'},null,{katakana:'ヨ',phonetic:'yo'}] },
+  { label: 'R',   cells: [{ katakana:'ラ',phonetic:'ra'},{katakana:'リ',phonetic:'ri'},{katakana:'ル',phonetic:'ru'},{katakana:'レ',phonetic:'re'},{katakana:'ロ',phonetic:'ro'}] },
+  { label: 'W/N', cells: [{ katakana:'ワ',phonetic:'wa'},null,null,null,{katakana:'ン',phonetic:'n'}] },
+];
+
+const notationDiffs = [
+  { phonetic: 'si', hepburn: 'shi', katakana: 'シ' },
+  { phonetic: 'ci', hepburn: 'chi', katakana: 'チ' },
+  { phonetic: 'cu', hepburn: 'tsu', katakana: 'ツ' },
+  { phonetic: 'hu', hepburn: 'fu',  katakana: 'フ' },
+  { phonetic: 'zi', hepburn: 'ji',  katakana: 'ジ' },
+];
+
+const symbols = [
+  {
+    symbol: 'ŋ',
+    name: 'ng / velar nasal',
+    nameJa: '鼻濁音（ng）',
+    sound: 'The velar nasal — like the "ng" at the end of "sing".',
+    soundJa: '「が」を鼻から声を出すように発音した音。東北弁の鼻濁音（びだくおん）と同じ。',
+  },
+  {
+    symbol: 'ε',
+    name: 'epsilon',
+    nameJa: 'イプシロン',
+    sound: 'An open "e" vowel — like "e" in "bed" but more open.',
+    soundJa: '「エ」より口を大きく開けた母音。',
+  },
+  {
+    symbol: 'æ',
+    name: 'ash',
+    nameJa: 'アッシュ',
+    sound: 'Between "a" and "e" — like the "a" in "cat".',
+    soundJa: '「ア」と「エ」の中間のような母音。',
+  },
+  {
+    symbol: 'ə',
+    name: 'schwa',
+    nameJa: 'シュワ',
+    sound: 'A neutral, unstressed vowel.',
+    soundJa: '「ア」に近い、力の抜けた短い母音。',
+  },
+];
+
+type SoundCell = { katakana: string; phonetic: string; hepburn?: string };
+
+const ngRow: SoundCell[] = [
+  { katakana: 'カ゚', phonetic: 'ŋa' },
+  { katakana: 'キ゚', phonetic: 'ŋi' },
+  { katakana: 'ク゚', phonetic: 'ŋu' },
+  { katakana: 'ケ゚', phonetic: 'ŋe' },
+  { katakana: 'コ゚', phonetic: 'ŋo' },
+  { katakana: 'キ゚ャ', phonetic: 'ŋja', hepburn: 'ŋya' },
+  { katakana: 'キ゚ュ', phonetic: 'ŋju', hepburn: 'ŋyu' },
+  { katakana: 'キ゚ョ', phonetic: 'ŋjo', hepburn: 'ŋyo' },
+];
+
+const epsilonSounds: SoundCell[] = [
+  { katakana: 'エァ',  phonetic: 'ε' },
+  { katakana: 'ケァ',  phonetic: 'kε' },
+  { katakana: 'ゲァ',  phonetic: 'gε' },
+  { katakana: 'ケ゚ァ', phonetic: 'ŋε' },
+  { katakana: 'ゼァ',  phonetic: 'zε' },
+  { katakana: 'テァ',  phonetic: 'tε' },
+  { katakana: 'ネァ',  phonetic: 'nε' },
+  { katakana: 'ヘァ',  phonetic: 'hε' },
+  { katakana: 'ペァ',  phonetic: 'pε' },
+  { katakana: 'ミァ',  phonetic: 'mε' },
+  { katakana: 'レァ',  phonetic: 'rε' },
+];
+
+const ashSounds: SoundCell[] = [
+  { katakana: 'ケェ', phonetic: 'kæ' },
+  { katakana: 'セァ', phonetic: 'sæ' },
+  { katakana: 'メェ', phonetic: 'mæ' },
+  { katakana: 'レェ', phonetic: 'ræ' },
+];
+
+const splitAffricates: SoundCell[] = [
+  { katakana: 'ティ', phonetic: 'ti' },
+  { katakana: 'トゥ', phonetic: 'tu' },
+  { katakana: 'ディ', phonetic: 'di' },
+  { katakana: 'ドゥ', phonetic: 'du' },
+];
+---
+
+<Layout
+  title="Takko-ben — TakkoTaco"
+  description="A pronunciation guide to Takko-ben, the local dialect of Takko Machi."
+>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Patrick+Hand&display=swap" rel="stylesheet">
+
+  <div class="tb-body">
+    <Navbar />
+
+    <header class="page-header">
+      <div class="page-header-inner">
+        <h1>
+          <T><span slot="en">Takko-ben</span><span slot="ja">田子弁</span></T>
+        </h1>
+        <p class="header-sub">
+          <T>
+            <span slot="en">The local dialect of Takko Machi</span>
+            <span slot="ja">田子町の方言</span>
+          </T>
+        </p>
+        <p class="header-intro">
+          <T>
+            <span slot="en">
+              Takko Machi has its own dialect, <strong>Takko-ben</strong>, with sounds not found
+              in standard Japanese. This page focuses on what makes it different.
+            </span>
+            <span slot="ja">
+              田子町には<strong>田子弁</strong>という方言があります。標準語にはない独特の音があります。このページではその違いを紹介します。
+            </span>
+          </T>
+        </p>
+      </div>
+    </header>
+
+    <!-- Info row: notation key + symbol legend -->
+    <div class="info-row">
+      <div class="info-box notation-box">
+        <h3 class="info-box-title">
+          <T>
+            <span slot="en">How sounds are written here</span>
+            <span slot="ja">このチャートの表記について</span>
+          </T>
+        </h3>
+        <p class="info-box-sub">
+          <T>
+            <span slot="en">This chart uses a phonetic spelling that differs from Hepburn romanization in a few places. These are notation choices, not new sounds.</span>
+            <span slot="ja">このチャートは一部のヘボン式ローマ字と異なる表記を使用しています。これは記法の違いであり、新しい音ではありません。</span>
+          </T>
+        </p>
+        <div class="notation-tags">
+          {notationDiffs.map(n => (
+            <span class="notation-tag">
+              <span class="nt-phonetic">{n.phonetic}</span>
+              <span class="nt-eq">=</span>
+              <span class="nt-hepburn">{n.hepburn}</span>
+              <span class="nt-kana">{n.katakana}</span>
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <div class="info-box symbol-box">
+        <h3 class="info-box-title">
+          <T>
+            <span slot="en">Special symbols</span>
+            <span slot="ja">特殊な記号</span>
+          </T>
+        </h3>
+        <div class="symbol-list">
+          {symbols.map(s => (
+            <div class="symbol-row">
+              <span class="sym-glyph">{s.symbol}</span>
+              <div class="sym-text">
+                <span class="sym-name"><T><span slot="en">{s.name}</span><span slot="ja">{s.nameJa}</span></T></span>
+                <span class="sym-sound"><T><span slot="en">{s.sound}</span><span slot="ja">{s.soundJa}</span></T></span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+
+    <!-- Standard sounds — collapsed reference -->
+    <div class="standard-wrapper">
+      <details class="standard-details">
+        <summary class="standard-summary">
+          <span class="summary-label">
+            <T>
+              <span slot="en">Standard Japanese sounds — for reference</span>
+              <span slot="ja">標準の五十音（参考）</span>
+            </T>
+          </span>
+          <span class="summary-arrow" aria-hidden="true"></span>
+        </summary>
+        <div class="standard-grid-wrap">
+          <p class="standard-note">
+            <T>
+              <span slot="en">D (i, u): In Takko-ben, di and du are pronounced the same as zi and zu.</span>
+              <span slot="ja">ダ行のdiとduは、田子弁ではziとzuと同じ発音になります。</span>
+            </T>
+          </p>
+          <div class="chart-scroll">
+            <table class="sound-grid">
+              <thead>
+                <tr>
+                  <th class="rh"></th>
+                  <th>a</th><th>i</th><th>u</th><th>e</th><th>o</th>
+                </tr>
+              </thead>
+              <tbody>
+                {standardRows.map(row => (
+                  <tr>
+                    <td class="row-label">{row.label}</td>
+                    {row.cells.map(cell => (
+                      <td class={`sc ${!cell ? 'empty' : ''} ${cell?.merged ? 'merged' : ''}`}>
+                        {cell && <>
+                          <span class="ck">{cell.katakana}</span>
+                          <span class="cp">{cell.phonetic}</span>
+                          {cell.hepburn && <span class="ch">({cell.hepburn})</span>}
+                        </>}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </details>
+    </div>
+
+    <!-- Main divider -->
+    <div class="main-divider">
+      <span class="divider-label">
+        <T>
+          <span slot="en">What's different in Takko-ben</span>
+          <span slot="ja">田子弁で違う音</span>
+        </T>
+      </span>
+    </div>
+
+    <!-- Dialect feature sections -->
+    <div class="dialect-body">
+
+      <!-- ŋ — Nasal K -->
+      <section class="feature-section">
+        <div class="feature-header">
+          <span class="feature-symbol">ŋ</span>
+          <div class="feature-text">
+            <h2 class="feature-title">
+              <T>
+                <span slot="en">Nasal K sounds</span>
+                <span slot="ja">鼻濁音（カ行）</span>
+              </T>
+            </h2>
+            <p class="feature-desc">
+              <T>
+                <span slot="en">
+                  Some K sounds in Takko-ben become a nasal — the same nasal G (鼻濁音) heard
+                  in traditional Tohoku speech. The katakana uses a small circle (゜) instead
+                  of the standard two-dot dakuten (゛). The first five are the basic row;
+                  the last three are the palatalized forms.
+                </span>
+                <span slot="ja">
+                  田子弁では、カ行の一部が鼻濁音になります。東北弁に伝わる鼻濁音と同じ音です。カタカナでは通常の濁点（゛）の代わりに半濁点（゜）を使います。最初の5つが基本形で、残りの3つは拗音です。
+                </span>
+              </T>
+            </p>
+          </div>
+        </div>
+        <div class="sound-chips">
+          {ngRow.map(s => (
+            <div class="chip">
+              <span class="chip-kana">{s.katakana}</span>
+              <span class="chip-phonetic">{s.phonetic}</span>
+              {s.hepburn && <span class="chip-hepburn">({s.hepburn})</span>}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <!-- ε — Open E -->
+      <section class="feature-section">
+        <div class="feature-header">
+          <span class="feature-symbol">ε</span>
+          <div class="feature-text">
+            <h2 class="feature-title">
+              <T>
+                <span slot="en">Open E sounds</span>
+                <span slot="ja">開いたエ（ε）の音</span>
+              </T>
+            </h2>
+            <p class="feature-desc">
+              <T>
+                <span slot="en">
+                  Takko-ben has an open-E vowel (ε) that does not exist in standard Japanese.
+                  It can appear alone or after most consonants. Standard Japanese doesn't have
+                  a way to write these sounds, so the dialect uses non-standard combinations
+                  of a base character + small ァ.
+                </span>
+                <span slot="ja">
+                  田子弁には標準語にない「開いたエ（ε）」という母音があります。単独でも、子音の後にも現れます。標準語にはこの音を表すカタカナがないため、田子弁では基本文字＋小さい「ァ」の組み合わせという独自の表記を使います。
+                </span>
+              </T>
+            </p>
+          </div>
+        </div>
+        <div class="sound-chips">
+          {epsilonSounds.map(s => (
+            <div class="chip">
+              <span class="chip-kana">{s.katakana}</span>
+              <span class="chip-phonetic">{s.phonetic}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <!-- æ — Ash -->
+      <section class="feature-section">
+        <div class="feature-header">
+          <span class="feature-symbol">æ</span>
+          <div class="feature-text">
+            <h2 class="feature-title">
+              <T>
+                <span slot="en">Ash sounds</span>
+                <span slot="ja">アとエの中間の音（æ）</span>
+              </T>
+            </h2>
+            <p class="feature-desc">
+              <T>
+                <span slot="en">
+                  A vowel between "a" and "e" that appears only after k, s, m, and r in Takko-ben —
+                  unlike ε, which pairs with almost every consonant. Dialect-only, written with
+                  non-standard katakana combinations.
+                </span>
+                <span slot="ja">
+                  「ア」と「エ」の中間の母音ですが、εと違い、k・s・m・rの後にしか現れません。標準語にはない音で、独自のカタカナ表記を使います。
+                </span>
+              </T>
+            </p>
+          </div>
+        </div>
+        <div class="sound-chips">
+          {ashSounds.map(s => (
+            <div class="chip">
+              <span class="chip-kana">{s.katakana}</span>
+              <span class="chip-phonetic">{s.phonetic}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <!-- Split affricates -->
+      <section class="feature-section">
+        <div class="feature-header">
+          <span class="feature-symbol" style="font-size:1.6rem; letter-spacing:-0.05em">ti tu</span>
+          <div class="feature-text">
+            <h2 class="feature-title">
+              <T>
+                <span slot="en">Split affricates: ti, tu, di, du</span>
+                <span slot="ja">分かれた音：ti・tu・di・du</span>
+              </T>
+            </h2>
+            <p class="feature-desc">
+              <T>
+                <span slot="en">
+                  Standard Japanese merged タ-row: <em>ti</em> became <em>chi</em> (チ) and <em>tu</em> became <em>tsu</em> (ツ).
+                  In Takko-ben, the original ti, tu, di, and du survive as separate sounds — distinct
+                  from chi, tsu, ji, and zu.
+                </span>
+                <span slot="ja">
+                  標準語では、タ行の「ti」が「チ（chi）」に、「tu」が「ツ（tsu）」に変化しました。田子弁ではそれ以前の音 ti・tu・di・du が残っており、チ・ツ・ジ・ズとは別の音として区別されます。
+                </span>
+              </T>
+            </p>
+          </div>
+        </div>
+        <div class="sound-chips">
+          {splitAffricates.map(s => (
+            <div class="chip">
+              <span class="chip-kana">{s.katakana}</span>
+              <span class="chip-phonetic">{s.phonetic}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <!-- ə -->
+      <section class="feature-section">
+        <div class="feature-header">
+          <span class="feature-symbol">ə</span>
+          <div class="feature-text">
+            <h2 class="feature-title">
+              <T>
+                <span slot="en">Schwa sound: dəe</span>
+                <span slot="ja">シュワ音：dəe</span>
+              </T>
+            </h2>
+            <p class="feature-desc">
+              <T>
+                <span slot="en">
+                  One confirmed dialect-only sound documented in the source: <strong>dəe</strong>,
+                  written デァ. It combines D with a schwa (ə) and open-E. It appears once in the chart
+                  with no pattern around it — possibly a single attested word rather than a
+                  productive part of the phonology.
+                </span>
+                <span slot="ja">
+                  資料に記録されている方言特有の音：<strong>dəe</strong>（デァ）。D子音にシュワ（ə）と開いたエを組み合わせた音です。チャートにこの音は一度しか登場せず、一つの単語に由来する可能性があります。
+                </span>
+              </T>
+            </p>
+          </div>
+        </div>
+        <div class="sound-chips">
+          <div class="chip">
+            <span class="chip-kana">デァ</span>
+            <span class="chip-phonetic">dəe</span>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .tb-body {
+    --color-bg: #fffbf0;
+    --color-primary: #4a7c59;
+    --color-secondary: #d4a373;
+    --color-accent: #e76f51;
+    --color-dialect: #6b5ea8;
+    --font-main: 'Fredoka', sans-serif;
+    --font-hand: 'Patrick Hand', cursive;
+
+    background-color: var(--color-bg);
+    font-family: var(--font-main);
+    color: #333;
+    min-height: 100vh;
+  }
+
+  h1, h2, h3 { font-family: var(--font-main); }
+
+  /* ── Header ── */
+  .page-header {
+    background-color: var(--color-bg);
+    border-bottom: 4px solid var(--color-primary);
+    padding: 4rem 2rem 3rem;
+    text-align: center;
+  }
+
+  .page-header-inner { max-width: 660px; margin: 0 auto; }
+
+  .page-header h1 {
+    font-size: 3rem;
+    color: var(--color-primary);
+    margin-bottom: 0.3rem;
+  }
+
+  .header-sub {
+    font-size: 1.1rem;
+    color: #999;
+    font-family: var(--font-hand);
+    margin-bottom: 1.25rem;
+  }
+
+  .header-intro {
+    font-size: 1rem;
+    color: #555;
+    line-height: 1.65;
+  }
+
+  /* ── Info row ── */
+  .info-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    border-bottom: 3px solid var(--color-primary);
+  }
+
+  .info-box {
+    padding: 2rem 2.5rem;
+  }
+
+  .notation-box {
+    border-right: 3px solid var(--color-primary);
+  }
+
+  .info-box-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-bottom: 0.5rem;
+  }
+
+  .info-box-sub {
+    font-family: var(--font-hand);
+    font-size: 0.9rem;
+    color: #777;
+    margin-bottom: 1rem;
+    line-height: 1.5;
+  }
+
+  .notation-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .notation-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    background: white;
+    border: 1.5px solid #ddd;
+    border-radius: 6px;
+    padding: 0.25rem 0.6rem;
+    font-size: 0.9rem;
+  }
+
+  .nt-phonetic { font-weight: 700; color: #333; }
+  .nt-eq { color: #bbb; font-size: 0.8rem; }
+  .nt-hepburn { color: var(--color-primary); }
+  .nt-kana { color: #888; font-size: 0.85rem; }
+
+  /* Symbol list */
+  .symbol-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+  }
+
+  .symbol-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.85rem;
+  }
+
+  .sym-glyph {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--color-dialect);
+    flex-shrink: 0;
+    width: 1.8rem;
+    line-height: 1;
+    padding-top: 0.1rem;
+  }
+
+  .sym-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+  }
+
+  .sym-name {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .sym-sound {
+    font-size: 0.9rem;
+    color: #555;
+    line-height: 1.4;
+  }
+
+  /* ── Standard grid (collapsed) ── */
+  .standard-wrapper {
+    background: #f7f7f4;
+    border-bottom: 2px solid #ddd;
+  }
+
+  .standard-details { width: 100%; }
+
+  .standard-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.85rem 2.5rem;
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+    color: #999;
+    font-size: 0.9rem;
+    font-family: var(--font-hand);
+    gap: 0.75rem;
+  }
+
+  .standard-summary::-webkit-details-marker { display: none; }
+
+  .summary-label { flex: 1; }
+
+  .summary-arrow {
+    display: inline-block;
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 6px solid #bbb;
+    flex-shrink: 0;
+    transition: transform 0.2s;
+  }
+
+  .standard-details[open] .summary-arrow {
+    transform: rotate(180deg);
+  }
+
+  .standard-details[open] .standard-summary {
+    color: #777;
+  }
+
+  .standard-grid-wrap {
+    padding: 0 2.5rem 2rem;
+  }
+
+  .standard-note {
+    font-family: var(--font-hand);
+    font-size: 0.85rem;
+    color: #999;
+    margin-bottom: 1rem;
+  }
+
+  .chart-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .sound-grid {
+    border-collapse: collapse;
+    min-width: 480px;
+    font-family: var(--font-main);
+    opacity: 0.75;
+  }
+
+  .sound-grid thead th {
+    padding: 0.4rem 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #999;
+    border-bottom: 2px solid #ccc;
+    text-align: center;
+    background: transparent;
+  }
+
+  .sound-grid thead th.rh { border-bottom-color: transparent; }
+
+  .row-label {
+    padding: 0.3rem 0.75rem 0.3rem 0;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #aaa;
+    white-space: nowrap;
+    text-align: right;
+    vertical-align: middle;
+  }
+
+  .sc {
+    padding: 0.3rem 0.3rem;
+    text-align: center;
+    vertical-align: middle;
+    border: 1px solid #e4e4e0;
+    min-width: 64px;
+  }
+
+  .sc.empty { background: #f2f2ef; }
+  .sc.merged { background: #fef4ee; }
+
+  .ck { display: block; font-size: 1.3rem; line-height: 1.1; color: #555; }
+  .cp { display: block; font-size: 0.7rem; color: #aaa; font-weight: 600; margin-top: 0.1rem; }
+  .ch { display: block; font-size: 0.65rem; color: #ccc; }
+
+  /* ── Main divider ── */
+  .main-divider {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0 2.5rem;
+    margin: 3rem 0 0;
+  }
+
+  .main-divider::before,
+  .main-divider::after {
+    content: '';
+    flex: 1;
+    height: 3px;
+    background: var(--color-dialect);
+  }
+
+  .divider-label {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--color-dialect);
+    white-space: nowrap;
+    font-family: var(--font-main);
+  }
+
+  /* ── Dialect features ── */
+  .dialect-body {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 1.5rem 2.5rem 5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .feature-section {
+    padding: 2.5rem 0;
+    border-bottom: 2px solid #eee;
+  }
+
+  .feature-section:last-child { border-bottom: none; }
+
+  .feature-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .feature-symbol {
+    font-size: 2.8rem;
+    font-weight: 700;
+    color: var(--color-dialect);
+    flex-shrink: 0;
+    line-height: 1;
+    padding-top: 0.15rem;
+    min-width: 3rem;
+  }
+
+  .feature-title {
+    font-size: 1.4rem;
+    color: #333;
+    margin-bottom: 0.4rem;
+  }
+
+  .feature-desc {
+    font-family: var(--font-hand);
+    font-size: 0.95rem;
+    color: #666;
+    line-height: 1.6;
+    margin: 0;
+    max-width: 620px;
+  }
+
+  .feature-desc em { font-style: normal; font-weight: 600; color: #444; }
+
+  /* Sound chips */
+  .sound-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    padding-left: 4.3rem;
+  }
+
+  .chip {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: white;
+    border: 2px solid #c8bde8;
+    border-radius: 10px;
+    padding: 0.5rem 0.75rem;
+    min-width: 56px;
+  }
+
+  .chip-kana {
+    font-size: 1.5rem;
+    line-height: 1.1;
+    color: #222;
+  }
+
+  .chip-kana-plain {
+    font-size: 1.1rem;
+    color: #bbb;
+  }
+
+  .chip-phonetic {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--color-dialect);
+    margin-top: 0.15rem;
+  }
+
+  .chip-hepburn {
+    font-size: 0.68rem;
+    color: #aaa;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 720px) {
+    .info-row {
+      grid-template-columns: 1fr;
+    }
+    .notation-box {
+      border-right: none;
+      border-bottom: 3px solid var(--color-primary);
+    }
+    .page-header h1 { font-size: 2.2rem; }
+    .standard-summary { padding: 0.85rem 1.25rem; }
+    .standard-grid-wrap { padding: 0 1.25rem 1.5rem; }
+    .main-divider { padding: 0 1.25rem; }
+    .dialect-body { padding: 1rem 1.25rem 3rem; }
+    .sound-chips { padding-left: 0; }
+    .feature-symbol { font-size: 2rem; min-width: 2.4rem; }
+  }
+</style>
