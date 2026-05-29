@@ -4,7 +4,6 @@ export const prerender = false;
 import Layout from '../layouts/Layout.astro';
 import Navbar from '../components/Navbar.astro';
 import T from '../components/T.astro';
-import MiniWordle from '../components/MiniWordle.astro';
 
 const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT2r7rHiUTy7tfJNkVnajXQuXoELP_27frVBYS-S0EsXzQBI71VQcWbGmb9n8-J023R_Ldso-XJg5JY/pub?output=csv';
 
@@ -145,6 +144,16 @@ try {
         };
     }
 } catch (_) {}
+
+// ── Today's Date ──
+const todayJST = new Date(Date.now() + 9 * 3_600_000);
+const EN_MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const todayDate = todayJST.getUTCDate();
+const ordinalSuffix = (d: number) => {
+    const t = d % 100;
+    if (t >= 11 && t <= 13) return 'th';
+    return ['th','st','nd','rd','th','th','th','th','th','th'][d % 10];
+};
 
 // Cache until midnight JST (UTC+9)
 const nowMs = Date.now();
@@ -354,6 +363,57 @@ Astro.response.headers.set('Cache-Control', `public, s-maxage=${ttl}, stale-whil
             </main>
 
             <aside class="page-sidebar">
+                {weather && (
+                    <div class="weather-card">
+                        <div class="weather-card-header">
+                            <p class="weather-card-title">
+                                <T>
+                                    <span slot="en">Takko Weather</span>
+                                    <span slot="ja">田子の天気</span>
+                                </T>
+                            </p>
+                        </div>
+                        <div class="weather-zone-icon">
+                            <div class="weather-icon" set:html={WEATHER_ICONS[weather.icon] ?? WEATHER_ICONS.cloud}></div>
+                            <div class="weather-desc">
+                                <T>
+                                    <span slot="en">{weather.descEn}</span>
+                                    <span slot="ja">{weather.descJa}</span>
+                                </T>
+                            </div>
+                        </div>
+                        <div class="weather-zone-temp">
+                            <div class="weather-temp">{weather.temp}°C</div>
+                            <div class="weather-feels">
+                                <T>
+                                    <span slot="en">{weather.feels.en}</span>
+                                    <span slot="ja">{weather.feels.ja}</span>
+                                </T>
+                            </div>
+                        </div>
+                    </div>
+                )}
+                <div class="date-card">
+                    <div class="date-card-header">
+                        <p class="date-card-title">
+                            <T>
+                                <span slot="en">Today's Date</span>
+                                <span slot="ja">今日の日付</span>
+                            </T>
+                        </p>
+                    </div>
+                    <div class="date-card-body">
+                        <div class="cal-block">
+                            <div class="cal-month">
+                                <T>
+                                    <span slot="en">{EN_MONTHS[todayJST.getUTCMonth()]}</span>
+                                    <span slot="ja">{todayJST.getUTCMonth() + 1}月</span>
+                                </T>
+                            </div>
+                            <div class="cal-day">{todayDate}<span class="cal-ordinal">{ordinalSuffix(todayDate)}</span></div>
+                        </div>
+                    </div>
+                </div>
                 <div class="wod-card" data-words={JSON.stringify(allWords)}>
                     <div class="wod-card-header">
                         <p class="wod-card-title">
@@ -379,36 +439,6 @@ Astro.response.headers.set('Cache-Control', `public, s-maxage=${ttl}, stale-whil
                         </div>
                     </div>
                 </div>
-
-                {weather && (
-                    <div class="weather-card">
-                        <div class="weather-card-header">
-                            <p class="weather-card-title">
-                                <T>
-                                    <span slot="en">Takko Weather</span>
-                                    <span slot="ja">田子の天気</span>
-                                </T>
-                            </p>
-                        </div>
-                        <div class="weather-card-body">
-                            <div class="weather-icon" set:html={WEATHER_ICONS[weather.icon] ?? WEATHER_ICONS.cloud}></div>
-                            <div class="weather-desc">
-                                <T>
-                                    <span slot="en">{weather.descEn}</span>
-                                    <span slot="ja">{weather.descJa}</span>
-                                </T>
-                            </div>
-                            <div class="weather-temp">{weather.temp}°C</div>
-                            <div class="weather-feels">
-                                <T>
-                                    <span slot="en">{weather.feels.en}</span>
-                                    <span slot="ja">{weather.feels.ja}</span>
-                                </T>
-                            </div>
-                        </div>
-                    </div>
-                )}
-                <MiniWordle />
             </aside>
         </div>
 
@@ -637,6 +667,7 @@ Astro.response.headers.set('Cache-Control', `public, s-maxage=${ttl}, stale-whil
 
     /* ── Word of the Day card ── */
     .wod-card {
+        margin-top: 1.5rem;
         width: 100%;
         border-radius: 8px;
         overflow: hidden;
@@ -659,7 +690,7 @@ Astro.response.headers.set('Cache-Control', `public, s-maxage=${ttl}, stale-whil
     }
 
     .wod-card-header {
-        background: var(--color-primary);
+        background: #7a4f8a;
         padding: 0.85rem 1.25rem;
     }
 
@@ -758,7 +789,6 @@ Astro.response.headers.set('Cache-Control', `public, s-maxage=${ttl}, stale-whil
 
     /* ── Weather card ── */
     .weather-card {
-        margin-top: 1.5rem;
         width: 100%;
         border-radius: 8px;
         overflow: hidden;
@@ -780,19 +810,27 @@ Astro.response.headers.set('Cache-Control', `public, s-maxage=${ttl}, stale-whil
         text-align: center;
     }
 
-    .weather-card-body {
-        background: #fffbf0;
-        padding: 1.25rem 1rem 1.5rem;
+    .weather-zone-icon {
+        background: #dce8f0;
+        padding: 1rem;
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 0.35rem;
+        gap: 0.3rem;
+    }
+
+    .weather-zone-temp {
+        background: white;
+        padding: 0.9rem 1rem 1.1rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.2rem;
     }
 
     .weather-icon {
-        width: 56px;
-        height: 56px;
-        margin-bottom: 0.25rem;
+        width: 52px;
+        height: 52px;
     }
 
     .weather-icon svg {
@@ -801,15 +839,16 @@ Astro.response.headers.set('Cache-Control', `public, s-maxage=${ttl}, stale-whil
     }
 
     .weather-desc {
-        font-size: 1.05rem;
+        font-size: 1rem;
         font-weight: 600;
-        color: #444;
+        color: #2d4f6b;
         text-align: center;
     }
 
     .weather-temp {
         font-size: 2.2rem;
         font-weight: 600;
+        font-family: system-ui, -apple-system, sans-serif;
         color: #3e6b8f;
         line-height: 1;
     }
@@ -818,6 +857,68 @@ Astro.response.headers.set('Cache-Control', `public, s-maxage=${ttl}, stale-whil
         font-size: 0.9rem;
         font-family: var(--font-hand);
         color: #888;
+    }
+
+    /* ── Date card ── */
+    .date-card {
+        margin-top: 1.5rem;
+        width: 100%;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 3px solid var(--color-secondary);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        font-family: var(--font-main);
+    }
+
+    .date-card-header {
+        background: var(--color-primary);
+        padding: 0.85rem 1.25rem;
+    }
+
+    .date-card-title {
+        margin: 0;
+        color: white;
+        font-size: 0.95rem;
+        font-weight: 600;
+        text-align: center;
+    }
+
+    .date-card-body {
+        background: white;
+        padding: 1.1rem 1.25rem 1.3rem;
+        display: flex;
+        justify-content: center;
+    }
+
+    .cal-block {
+        width: 100%;
+        text-align: center;
+    }
+
+    .cal-month {
+        color: #3a6348;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: system-ui, -apple-system, sans-serif;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        padding-bottom: 0.4rem;
+        border-bottom: 2px solid #c2dbc9;
+    }
+
+    .cal-day {
+        color: #2a2a2a;
+        font-size: 2rem;
+        font-weight: 700;
+        font-family: system-ui, -apple-system, sans-serif;
+        line-height: 1;
+        padding-top: 0.4rem;
+    }
+
+    .cal-ordinal {
+        font-size: 1rem;
+        font-weight: 600;
+        vertical-align: super;
     }
 </style>
 
