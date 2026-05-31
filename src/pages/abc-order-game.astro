@@ -1,0 +1,801 @@
+---
+import GameLayout from "../layouts/GameLayout.astro";
+---
+
+<GameLayout title="ABC Order Game">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Crete+Round&display=swap"
+    rel="stylesheet"
+  />
+
+  <!-- START SCREEN -->
+  <div id="start-screen" class="screen">
+    <div class="start-card">
+      <h1 class="game-title">ABC ORDER</h1>
+      <p class="title-ja">ABC順に並べよう</p>
+      <div class="rules">
+        <p id="instruction-text">Click the letters in ABC order.</p>
+        <p class="ja" id="instruction-ja">ABC順にクリックしましょう。</p>
+      </div>
+
+      <div class="settings-area">
+
+        <div class="setting-row">
+          <span class="setting-label">Difficulty / むずかしさ</span>
+          <div class="opt-group" id="opt-difficulty">
+            <button class="opt-btn active" data-value="easy">Easy</button>
+            <button class="opt-btn" data-value="normal">Normal</button>
+            <button class="opt-btn" data-value="hard">Hard</button>
+            <button class="opt-btn" data-value="super">Super</button>
+          </div>
+        </div>
+
+        <div class="setting-row">
+          <span class="setting-label">Song / 歌</span>
+          <div class="opt-group" id="opt-song">
+            <button class="opt-btn active" data-value="modern">Modern</button>
+            <button class="opt-btn" data-value="classic">Classic</button>
+          </div>
+        </div>
+
+        <div class="setting-row">
+          <span class="setting-label">Sound / 音</span>
+          <div class="opt-group" id="opt-sound">
+            <button class="opt-btn active" data-value="on">On</button>
+            <button class="opt-btn" data-value="off">Off</button>
+          </div>
+        </div>
+
+        <div class="setting-row">
+          <span class="setting-label">Input / 入力</span>
+          <div class="opt-group" id="opt-input">
+            <button class="opt-btn active" data-value="click">Click</button>
+            <button class="opt-btn" data-value="keyboard">Keyboard</button>
+          </div>
+        </div>
+
+      </div>
+
+      <button id="start-btn" class="btn">START</button>
+    </div>
+  </div>
+
+  <!-- WIN SCREEN -->
+  <div id="win-screen" class="screen hidden">
+    <div class="win-card">
+      <p class="win-label">GREAT JOB!</p>
+      <p class="win-label-ja">よくできました！</p>
+      <div id="win-alphabet" class="win-alphabet"></div>
+      <button id="play-again-btn" class="btn">PLAY AGAIN</button>
+    </div>
+  </div>
+
+  <!-- GAME SCREEN -->
+  <div id="game-screen" class="screen hidden">
+    <div class="shelf-area">
+      <div class="shelf-header">
+        <span class="shelf-title">ABC ORDER</span>
+        <span class="progress-text"><span id="prog">0</span> / 26</span>
+      </div>
+      <div id="shelf" class="shelf"></div>
+    </div>
+    <div id="play-area" class="play-area"></div>
+  </div>
+</GameLayout>
+
+<style>
+  :global(body) {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background: #faf8f2;
+  }
+
+  .screen {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .hidden {
+    display: none !important;
+  }
+
+  /* ─── Start Screen ─── */
+  .start-card {
+    background: white;
+    border: 3px solid #c5b99a;
+    border-radius: 16px;
+    padding: 3rem 4rem;
+    text-align: center;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    max-width: 520px;
+    width: 90%;
+  }
+
+  .game-title {
+    font-family: "Crete Round", serif;
+    font-size: 3.5rem;
+    font-weight: 700;
+    color: #2c3e50;
+    letter-spacing: 0.15em;
+    margin: 0;
+  }
+
+  .title-ja {
+    font-size: 1.2rem;
+    color: #888;
+    margin: 0;
+  }
+
+  .rules p {
+    margin: 0.2rem 0;
+    color: #555;
+    font-size: 1rem;
+  }
+
+  .rules .ja {
+    color: #aaa;
+    font-size: 0.9rem;
+  }
+
+  .settings-area {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    border-top: 2px solid #ede8de;
+    padding-top: 1rem;
+    margin-top: 0.25rem;
+    text-align: left;
+  }
+
+  .setting-row {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
+  }
+
+  .setting-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #555;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+  }
+
+  .opt-group {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .opt-btn {
+    padding: 0.32rem 0.85rem;
+    border: 2px solid #ccc5b8;
+    border-radius: 50px;
+    background: #f5f2eb;
+    color: #555;
+    font-family: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: background 0.12s, border-color 0.12s, color 0.12s;
+  }
+
+  .opt-btn.active {
+    background: #e76f51;
+    border-color: #e76f51;
+    color: white;
+    font-weight: 600;
+  }
+
+  .opt-btn:hover:not(.active) {
+    border-color: #a89880;
+    color: #333;
+    background: #ede8de;
+  }
+
+  .btn {
+    margin-top: 0.5rem;
+    padding: 0.85rem 2.5rem;
+    background: #e76f51;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-family: "Crete Round", serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.1em;
+    box-shadow: 0 4px 0 #b54e35;
+    transition: transform 0.1s, box-shadow 0.1s;
+  }
+
+  .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 0 #b54e35;
+  }
+
+  .btn:active {
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 #b54e35;
+  }
+
+  /* ─── Win Screen ─── */
+  .win-card {
+    background: white;
+    border: 3px solid #c5b99a;
+    border-radius: 16px;
+    padding: 3rem 4rem;
+    text-align: center;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    max-width: 600px;
+    width: 90%;
+  }
+
+  .win-label {
+    font-family: "Crete Round", serif;
+    font-size: 3rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin: 0;
+    letter-spacing: 0.1em;
+  }
+
+  .win-label-ja {
+    font-size: 1.3rem;
+    color: #888;
+    margin: 0;
+  }
+
+  .win-alphabet {
+    font-family: "Crete Round", serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    line-height: 2;
+  }
+
+  /* ─── Game Screen ─── */
+  #game-screen {
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+  }
+
+  /* Shelf */
+  .shelf-area {
+    height: 25vh;
+    min-height: 100px;
+    background: #f0ece0;
+    border-bottom: 3px solid #c5b99a;
+    display: flex;
+    flex-direction: column;
+    padding: 0.4rem 0.75rem 0.5rem;
+    box-sizing: border-box;
+    gap: 0.3rem;
+  }
+
+  .shelf-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .shelf-title {
+    font-family: "Crete Round", serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #b0a090;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  .progress-text {
+    font-size: 0.85rem;
+    color: #b0a090;
+    font-family: system-ui, sans-serif;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .shelf {
+    display: grid;
+    grid-template-columns: repeat(26, 1fr);
+    gap: 3px;
+    flex: 1;
+    align-content: stretch;
+  }
+
+  /* Play Area */
+  .play-area {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    background: #faf8f2;
+  }
+
+  /* ─── Dynamic elements (created by JS) ─── */
+  :global(.shelf-slot) {
+    border: 2px dashed #c5b99a;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "Crete Round", serif;
+    font-weight: 700;
+    font-size: clamp(11px, 2.6vw, 28px);
+    color: #2c3e50;
+    transition:
+      background 0.15s,
+      border-color 0.15s,
+      box-shadow 0.15s;
+    overflow: hidden;
+  }
+
+  :global(.shelf-slot.next) {
+    border-style: solid;
+    border-color: #e76f51;
+    box-shadow: 0 0 0 2px rgba(231, 111, 81, 0.25);
+  }
+
+  :global(.shelf-slot.filled) {
+    background: white;
+    border-style: solid;
+    color: var(--token-color, #2c3e50);
+    border-color: var(--token-color, #c5b99a);
+  }
+
+  :global(.letter-token) {
+    position: absolute;
+    transform: translate(-50%, -50%) rotate(var(--tilt, 0deg));
+    width: min(14vw, 17vh);
+    height: min(14vw, 17vh);
+    background: white;
+    border: 3px solid var(--token-color, #c5b99a);
+    border-radius: min(1.6vw, 2vh);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "Crete Round", serif;
+    font-weight: 700;
+    font-size: 54px;
+    color: #2c3e50;
+    cursor: pointer;
+    box-shadow:
+      0 2px 8px rgba(0, 0, 0, 0.1),
+      0 3px 0 var(--token-color, #c5b99a);
+    padding: 0;
+    line-height: 1;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: transform 0.12s;
+  }
+
+  :global(.letter-token:hover) {
+    transform: translate(-50%, -50%) rotate(var(--tilt, 0deg)) scale(1.1);
+  }
+
+  :global(.letter-token.wrong) {
+    animation: token-wrong 0.4s ease forwards;
+  }
+
+  @keyframes token-wrong {
+    0%,
+    100% {
+      transform: translate(-50%, -50%) rotate(var(--tilt, 0deg));
+      background: white;
+    }
+    15% {
+      transform: translate(calc(-50% - 8px), -50%) rotate(var(--tilt, 0deg));
+      background: #fecaca;
+    }
+    35% {
+      transform: translate(calc(-50% + 8px), -50%) rotate(var(--tilt, 0deg));
+    }
+    55% {
+      transform: translate(calc(-50% - 5px), -50%) rotate(var(--tilt, 0deg));
+      background: #fecaca;
+    }
+    75% {
+      transform: translate(calc(-50% + 5px), -50%) rotate(var(--tilt, 0deg));
+    }
+    90% {
+      transform: translate(calc(-50% - 2px), -50%) rotate(var(--tilt, 0deg));
+    }
+  }
+
+  :global(.fly-clone) {
+    pointer-events: none !important;
+    cursor: default !important;
+  }
+
+  :global(.letter-token svg) {
+    display: block;
+    width: 78%;
+    height: 78%;
+  }
+
+  :global(.shelf-slot svg) {
+    display: block;
+    width: 90%;
+    height: 90%;
+  }
+
+  @media (max-width: 600px) {
+    .game-title {
+      font-size: 2.5rem;
+    }
+    .win-label {
+      font-size: 2.2rem;
+    }
+    /* token size already responsive via min(vw,vh) — no override needed */
+  }
+</style>
+
+<script>
+  const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+  const COLORS = ["#e76f51", "#2a9d8f", "#e9c46a", "#457b9d", "#8338ec"];
+
+  // ── Settings ───────────────────────────────────────────────────────────────
+
+  const settings = { difficulty: "easy", song: "modern", sound: true, input: "click" };
+
+  document.querySelectorAll<HTMLElement>(".opt-group").forEach((group) => {
+    group.querySelectorAll<HTMLButtonElement>(".opt-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        group.querySelectorAll(".opt-btn").forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        const v = btn.dataset.value!;
+        if (group.id === "opt-difficulty") settings.difficulty = v;
+        if (group.id === "opt-song")       settings.song = v;
+        if (group.id === "opt-sound")      settings.sound = v === "on";
+        if (group.id === "opt-input") {
+          settings.input = v;
+          const instrEN = document.getElementById("instruction-text");
+          const instrJA = document.getElementById("instruction-ja");
+          if (instrEN) instrEN.textContent =
+            v === "keyboard" ? "Type the letters in ABC order."
+                             : "Click the letters in ABC order.";
+          if (instrJA) instrJA.textContent =
+            v === "keyboard" ? "ABC順にキーボードで入力しましょう。"
+                             : "ABC順にクリックしましょう。";
+        }
+      });
+    });
+  });
+
+  import { LETTER_PATHS } from "../letter-paths";
+
+  function makeSVG(letter: string): string {
+    const d = LETTER_PATHS[letter];
+    if (!d) return letter;
+    return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="${d}" fill="currentColor"/></svg>`;
+  }
+
+  let currentIndex = 0;
+  const tokens: Record<string, HTMLElement> = {};
+  const slots: Record<string, HTMLElement> = {};
+
+  function getColor(letter: string): string {
+    return COLORS[LETTERS.indexOf(letter) % COLORS.length];
+  }
+
+  function generatePositions(
+    container: HTMLElement,
+    count: number
+  ): { x: number; y: number }[] {
+    const w = container.offsetWidth;
+    const h = container.offsetHeight;
+
+    // Measure actual rendered token size so positions match CSS
+    const probe = document.createElement("button") as HTMLButtonElement;
+    probe.className = "letter-token";
+    probe.style.cssText = "visibility:hidden;pointer-events:none;position:absolute";
+    container.appendChild(probe);
+    const tokenSize = probe.offsetWidth || 130;
+    container.removeChild(probe);
+
+    const HALF = Math.ceil(tokenSize / 2) + 10;
+    const spacing = tokenSize * 1.15;
+    const COLS = Math.max(5, Math.floor(w / spacing));
+    const ROWS = Math.max(4, Math.floor(h / spacing));
+    const cellW = w / COLS;
+    const cellH = h / ROWS;
+
+    const cells: { r: number; c: number }[] = [];
+    for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+        cells.push({ r, c });
+      }
+    }
+    cells.sort(() => Math.random() - 0.5);
+
+    return cells.slice(0, count).map(({ r, c }) => ({
+      x: Math.max(
+        HALF,
+        Math.min(
+          w - HALF,
+          (c + 0.5) * cellW + (Math.random() - 0.5) * cellW * 0.5
+        )
+      ),
+      y: Math.max(
+        HALF,
+        Math.min(
+          h - HALF,
+          (r + 0.5) * cellH + (Math.random() - 0.5) * cellH * 0.5
+        )
+      ),
+    }));
+  }
+
+  // ── Audio ──────────────────────────────────────────────────────────────────
+
+  // Both modes use the same verified note mapping (user-confirmed against sheet music).
+  // The "classic vs modern" distinction is about pacing (fast LMNOP vs slow),
+  // which doesn't apply in a click-based game — so notes are identical.
+  //   A–G  : C C G G A A G
+  //   H–P  : F F E E D D D D C  (LMNOP = D D D D C)
+  //   Q–V  : G G F E E D
+  //   W–Z  : G G G F E E D  →  W=G X=F Y=E Z=D
+  const SONG_NOTES: Record<string, number> = {
+    A: 523.25, B: 523.25, C: 783.99, D: 783.99, E: 880.00, F: 880.00, G: 783.99,
+    H: 698.46, I: 698.46, J: 659.25, K: 659.25,
+    L: 587.33, M: 587.33, N: 587.33, O: 587.33, P: 523.25,
+    Q: 783.99, R: 783.99, S: 698.46, T: 659.25, U: 659.25, V: 587.33,
+    W: 783.99, X: 698.46, Y: 659.25, Z: 587.33,
+  };
+  const MODERN_NOTES = SONG_NOTES;
+  const CLASSIC_NOTES = SONG_NOTES;
+
+  let audioCtx: AudioContext | null = null;
+
+  function getCtx(): AudioContext {
+    if (!audioCtx) audioCtx = new AudioContext();
+    if (audioCtx.state === "suspended") audioCtx.resume();
+    return audioCtx;
+  }
+
+  function playNote(letter: string) {
+    if (!settings.sound) return;
+    const map = settings.song === "classic" ? CLASSIC_NOTES : MODERN_NOTES;
+    const freq = map[letter];
+    if (!freq) return;
+    const ctx = getCtx();
+    const now = ctx.currentTime;
+
+    // Triangle wave fundamental — warm, xylophone-like
+    const osc1 = ctx.createOscillator();
+    const g1 = ctx.createGain();
+    osc1.type = "triangle";
+    osc1.frequency.setValueAtTime(freq, now);
+    g1.gain.setValueAtTime(0.55, now);
+    g1.gain.exponentialRampToValueAtTime(0.001, now + 0.9);
+    osc1.connect(g1); g1.connect(ctx.destination);
+    osc1.start(now); osc1.stop(now + 0.9);
+
+    // Sine at 2× frequency — adds bell shimmer
+    const osc2 = ctx.createOscillator();
+    const g2 = ctx.createGain();
+    osc2.type = "sine";
+    osc2.frequency.setValueAtTime(freq * 2, now);
+    g2.gain.setValueAtTime(0.2, now);
+    g2.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+    osc2.connect(g2); g2.connect(ctx.destination);
+    osc2.start(now); osc2.stop(now + 0.4);
+  }
+
+  function playWrong() {
+    if (!settings.sound) return;
+    const ctx = getCtx();
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const g = ctx.createGain();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(220, now);
+    osc.frequency.exponentialRampToValueAtTime(160, now + 0.18);
+    g.gain.setValueAtTime(0.3, now);
+    g.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+    osc.connect(g); g.connect(ctx.destination);
+    osc.start(now); osc.stop(now + 0.18);
+  }
+
+  // ── Game logic ─────────────────────────────────────────────────────────────
+
+  function updateHighlight() {
+    LETTERS.forEach((l, i) => {
+      const s = slots[l];
+      if (s) s.classList.toggle("next", i === currentIndex);
+    });
+  }
+
+  function handleClick(letter: string) {
+    if (letter !== LETTERS[currentIndex]) {
+      playWrong();
+      const t = tokens[letter];
+      t.classList.remove("wrong");
+      void (t as HTMLElement).offsetWidth;
+      t.classList.add("wrong");
+      t.addEventListener("animationend", () => t.classList.remove("wrong"), {
+        once: true,
+      });
+      return;
+    }
+    playNote(letter);
+    const t = tokens[letter];
+    t.style.pointerEvents = "none";
+
+    // Advance state immediately — next letter is clickable without waiting for animation
+    currentIndex++;
+    const prog = document.getElementById("prog");
+    if (prog) prog.textContent = String(currentIndex);
+    if (currentIndex < 26) updateHighlight();
+
+    animateToShelf(letter, t);
+  }
+
+  function animateToShelf(letter: string, token: HTMLElement) {
+    const tr = token.getBoundingClientRect();
+    const slot = slots[letter];
+    const sr = slot.getBoundingClientRect();
+
+    const srcCX = tr.left + tr.width / 2;
+    const srcCY = tr.top + tr.height / 2;
+    const dstCX = sr.left + sr.width / 2;
+    const dstCY = sr.top + sr.height / 2;
+
+    const fly = document.createElement("div") as HTMLDivElement;
+    fly.className = "letter-token fly-clone";
+    fly.innerHTML = token.innerHTML;
+    fly.style.setProperty("--token-color", getColor(letter));
+    fly.style.position = "fixed";
+    fly.style.left = `${srcCX}px`;
+    fly.style.top = `${srcCY}px`;
+    fly.style.width = `${tr.width}px`;
+    fly.style.height = `${tr.height}px`;
+    fly.style.zIndex = "9999";
+    fly.style.margin = "0";
+    // Start at the token's current tilt, will straighten as it flies
+    const startTilt = token.dataset.tilt ?? "0";
+    fly.style.transform = `translate(-50%, -50%) rotate(${startTilt}deg)`;
+    document.body.appendChild(fly);
+
+    token.style.visibility = "hidden";
+
+    // Force reflow before starting transition
+    fly.getBoundingClientRect();
+
+    fly.style.transition = [
+      "left 0.45s cubic-bezier(0.4,0,0.2,1)",
+      "top 0.45s cubic-bezier(0.4,0,0.2,1)",
+      "width 0.45s cubic-bezier(0.4,0,0.2,1)",
+      "height 0.45s cubic-bezier(0.4,0,0.2,1)",
+      "border-radius 0.45s",
+      "transform 0.45s cubic-bezier(0.4,0,0.2,1)",
+    ].join(", ");
+
+    fly.style.left = `${dstCX}px`;
+    fly.style.top = `${dstCY}px`;
+    fly.style.width = `${sr.width}px`;
+    fly.style.height = `${sr.height}px`;
+    fly.style.borderRadius = "5px";
+    fly.style.transform = "translate(-50%, -50%) rotate(0deg)";
+
+    fly.addEventListener(
+      "transitionend",
+      () => {
+        fly.remove();
+        slot.innerHTML = makeSVG(letter);
+        slot.classList.add("filled");
+        slot.classList.remove("next");
+        slot.style.setProperty("--token-color", getColor(letter));
+        if (currentIndex === 26) setTimeout(showWin, 350);
+      },
+      { once: true }
+    );
+  }
+
+  // ── Keyboard input ─────────────────────────────────────────────────────────
+
+  let kbHandler: ((e: KeyboardEvent) => void) | null = null;
+
+  function attachKeyboard() {
+    if (kbHandler) return;
+    kbHandler = (e: KeyboardEvent) => {
+      if (settings.input !== "keyboard") return;
+      const letter = e.key.toUpperCase();
+      if (!/^[A-Z]$/.test(letter)) return;
+      const token = tokens[letter];
+      if (!token || token.style.visibility === "hidden") return;
+      handleClick(letter);
+    };
+    document.addEventListener("keydown", kbHandler);
+  }
+
+  function detachKeyboard() {
+    if (kbHandler) { document.removeEventListener("keydown", kbHandler); kbHandler = null; }
+  }
+
+  // ── Win / Lose ─────────────────────────────────────────────────────────────
+
+  function showWin() {
+    detachKeyboard();
+    const alphaEl = document.getElementById("win-alphabet");
+    if (alphaEl) {
+      alphaEl.innerHTML = LETTERS.map(
+        (l) => `<span style="color:${getColor(l)}">${l}</span>`
+      ).join("");
+    }
+    document.getElementById("game-screen")!.classList.add("hidden");
+    document.getElementById("win-screen")!.classList.remove("hidden");
+  }
+
+  function init() {
+    detachKeyboard();
+    attachKeyboard();
+    currentIndex = 0;
+    Object.keys(tokens).forEach((k) => delete tokens[k]);
+    Object.keys(slots).forEach((k) => delete slots[k]);
+
+    const shelf = document.getElementById("shelf")!;
+    const playArea = document.getElementById("play-area")!;
+    const prog = document.getElementById("prog");
+
+    shelf.innerHTML = "";
+    playArea.innerHTML = "";
+    if (prog) prog.textContent = "0";
+
+    LETTERS.forEach((l) => {
+      const slot = document.createElement("div") as HTMLDivElement;
+      slot.className = "shelf-slot";
+      shelf.appendChild(slot);
+      slots[l] = slot;
+    });
+    updateHighlight();
+
+    const shuffled = [...LETTERS].sort(() => Math.random() - 0.5);
+
+    requestAnimationFrame(() => {
+      const positions = generatePositions(playArea, 26);
+      shuffled.forEach((letter, i) => {
+        const token = document.createElement("button") as HTMLButtonElement;
+        token.className = "letter-token";
+        token.setAttribute("aria-label", `Letter ${letter}`);
+        token.innerHTML = makeSVG(letter);
+        token.style.setProperty("--token-color", getColor(letter));
+        token.style.zIndex = String(LETTERS.length - LETTERS.indexOf(letter));
+        const tilt = (Math.random() * 40 - 20).toFixed(1);
+        token.style.setProperty("--tilt", `${tilt}deg`);
+        token.dataset.tilt = tilt;
+        token.style.left = `${positions[i].x}px`;
+        token.style.top = `${positions[i].y}px`;
+        token.addEventListener("click", () => handleClick(letter));
+        playArea.appendChild(token);
+        tokens[letter] = token;
+      });
+    });
+  }
+
+  document.getElementById("start-btn")!.addEventListener("click", () => {
+    document.getElementById("start-screen")!.classList.add("hidden");
+    document.getElementById("game-screen")!.classList.remove("hidden");
+    init();
+  });
+
+  document.getElementById("play-again-btn")!.addEventListener("click", () => {
+    document.getElementById("win-screen")!.classList.add("hidden");
+    document.getElementById("game-screen")!.classList.remove("hidden");
+    init();
+  });
+</script>

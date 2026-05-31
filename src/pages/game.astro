@@ -239,6 +239,49 @@ import T from '../components/T.astro';
               </div>
           </a>
 
+          <!-- ABC Order Game Card -->
+          <a href="/abc-order-game" class="game-card">
+              <div class="card-image abc-order-bg">
+                  <div class="icon" aria-hidden="true">
+                    <svg viewBox="0 0 120 120" role="img" focusable="false" xmlns="http://www.w3.org/2000/svg">
+                      <!-- Shelf -->
+                      <rect x="10" y="76" width="100" height="32" rx="5" fill="#f0ece0" stroke="#c5b99a" stroke-width="2.5"/>
+                      <text x="22" y="99" font-family="Georgia, serif" font-size="22" font-weight="700" fill="#e76f51">A</text>
+                      <text x="49" y="99" font-family="Georgia, serif" font-size="22" font-weight="700" fill="#2a9d8f">B</text>
+                      <text x="76" y="99" font-family="Georgia, serif" font-size="22" font-weight="700" fill="#e9c46a">C</text>
+                      <!-- Scattered tiles -->
+                      <rect x="14" y="22" width="30" height="30" rx="6" fill="white" stroke="#457b9d" stroke-width="2.5"/>
+                      <text x="20" y="44" font-family="Georgia, serif" font-size="22" font-weight="700" fill="#457b9d">F</text>
+                      <rect x="52" y="12" width="30" height="30" rx="6" fill="white" stroke="#8338ec" stroke-width="2.5"/>
+                      <text x="58" y="34" font-family="Georgia, serif" font-size="22" font-weight="700" fill="#8338ec">D</text>
+                      <rect x="80" y="30" width="28" height="28" rx="6" fill="white" stroke="#e76f51" stroke-width="2.5"/>
+                      <text x="86" y="51" font-family="Georgia, serif" font-size="20" font-weight="700" fill="#e76f51">E</text>
+                    </svg>
+                  </div>
+              </div>
+              <div class="card-content">
+                  <h3>
+                    <T>
+                      <span slot="en">ABC Order</span>
+                      <span slot="ja">ABC順ゲーム</span>
+                    </T>
+                  </h3>
+                  <p>
+                    <T>
+                      <span slot="en">Click all 26 letters in ABC order to line them up!</span>
+                      <span slot="ja">26文字をABC順にクリックして並べよう！</span>
+                    </T>
+                  </p>
+                  <span class="play-btn">
+                    <T>
+                      <span slot="en">Play Now</span>
+                      <span slot="ja">今すぐプレイ</span>
+                    </T>
+                    <i class="fas fa-play"></i>
+                  </span>
+              </div>
+          </a>
+
           <!-- Directions Reaction Game Card -->
           <a href="/directions-reaction-game" class="game-card">
                <div class="card-image card-image--screenshot">
@@ -564,6 +607,10 @@ import T from '../components/T.astro';
 
   .anarika-bg {
     background: #fff0f2;
+  }
+
+  .abc-order-bg {
+    background: #f5f2eb;
   }
 
 .anarika-face-img {
