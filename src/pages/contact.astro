@@ -1,0 +1,235 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navbar from '../components/Navbar.astro';
+import T from '../components/T.astro';
+---
+
+<Layout
+    title="Contact — TakkoTaco"
+    description="Send a message to TakkoTaco."
+>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Patrick+Hand&display=swap" rel="stylesheet">
+
+    <div class="contact-body">
+        <Navbar />
+
+        <main class="contact-main">
+            <div class="contact-card">
+                <h1>
+                    <T>
+                        <span slot="en">Contact</span>
+                        <span slot="ja">お問い合わせ</span>
+                    </T>
+                </h1>
+                <p class="contact-intro">
+                    <T>
+                        <span slot="en">Have a question or comment? Send a message.</span>
+                        <span slot="ja">質問やご意見があればメッセージをどうぞ。</span>
+                    </T>
+                </p>
+
+                <form id="contact-form" novalidate>
+                    <input type="hidden" name="access_key" value="c276c80a-1816-4287-b0e9-5a7810b1d42d">
+                    <input type="hidden" name="subject" value="TakkoTaco Contact Form">
+                    <input type="checkbox" name="botcheck" style="display:none">
+
+                    <div class="field">
+                        <label for="name">
+                            <T>
+                                <span slot="en">Name</span>
+                                <span slot="ja">お名前</span>
+                            </T>
+                        </label>
+                        <input type="text" id="name" name="name" required autocomplete="name">
+                    </div>
+
+                    <div class="field">
+                        <label for="email">
+                            <T>
+                                <span slot="en">Email</span>
+                                <span slot="ja">メールアドレス</span>
+                            </T>
+                        </label>
+                        <input type="email" id="email" name="email" required autocomplete="email">
+                    </div>
+
+                    <div class="field">
+                        <label for="message">
+                            <T>
+                                <span slot="en">Message</span>
+                                <span slot="ja">メッセージ</span>
+                            </T>
+                        </label>
+                        <textarea id="message" name="message" rows="6" required></textarea>
+                    </div>
+
+                    <button type="submit" id="submit-btn">
+                        <T>
+                            <span slot="en">Send</span>
+                            <span slot="ja">送信</span>
+                        </T>
+                    </button>
+
+                    <p id="form-status" class="form-status" aria-live="polite"></p>
+                </form>
+            </div>
+        </main>
+    </div>
+</Layout>
+
+<script>
+    const form = document.getElementById('contact-form') as HTMLFormElement;
+    const btn = document.getElementById('submit-btn') as HTMLButtonElement;
+    const status = document.getElementById('form-status') as HTMLParagraphElement;
+
+    const isJa = () => document.body.classList.contains('lang-ja');
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        btn.disabled = true;
+        status.textContent = isJa() ? '送信中...' : 'Sending...';
+        status.className = 'form-status';
+
+        const data = Object.fromEntries(new FormData(form));
+
+        try {
+            const res = await fetch('https://api.web3forms.com/submit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+                body: JSON.stringify(data),
+            });
+            const json = await res.json() as { success: boolean; message?: string };
+            if (json.success) {
+                status.textContent = isJa() ? 'メッセージを送りました。ありがとうございます！' : 'Message sent. Thank you!';
+                status.className = 'form-status status-ok';
+                form.reset();
+            } else {
+                throw new Error(json.message);
+            }
+        } catch {
+            status.textContent = isJa() ? '送信できませんでした。もう一度お試しください。' : 'Something went wrong. Please try again.';
+            status.className = 'form-status status-err';
+        } finally {
+            btn.disabled = false;
+        }
+    });
+</script>
+
+<style>
+    .contact-body {
+        --color-primary: #4a7c59;
+        --color-secondary: #d4a373;
+        --color-accent: #e76f51;
+        --font-main: 'Fredoka', sans-serif;
+
+        background: #fff;
+        font-family: var(--font-main);
+        color: #333;
+        min-height: 100vh;
+        border-bottom: 8px solid var(--color-primary);
+    }
+
+    .contact-main {
+        max-width: 640px;
+        margin: 3rem auto;
+        padding: 0 1.5rem;
+    }
+
+    .contact-card {
+        background: #fffbf0;
+        border-radius: 24px;
+        padding: 3rem 2.5rem;
+        box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+    }
+
+    h1 {
+        font-family: var(--font-main);
+        font-size: 2.4rem;
+        color: var(--color-primary);
+        margin: 0 0 0.5rem;
+    }
+
+    .contact-intro {
+        color: #666;
+        font-size: 1rem;
+        margin: 0 0 2rem;
+    }
+
+    .field {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+        margin-bottom: 1.5rem;
+    }
+
+    label {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--color-primary);
+    }
+
+    input[type="text"],
+    input[type="email"],
+    textarea {
+        font-family: var(--font-main);
+        font-size: 1rem;
+        border: 2px solid var(--color-secondary);
+        border-radius: 10px;
+        padding: 0.65rem 0.9rem;
+        background: #fff;
+        color: #333;
+        outline: none;
+        transition: border-color 0.15s;
+        resize: vertical;
+    }
+
+    input:focus,
+    textarea:focus {
+        border-color: var(--color-primary);
+    }
+
+    button[type="submit"] {
+        font-family: var(--font-main);
+        font-size: 1.1rem;
+        font-weight: 600;
+        background: var(--color-accent);
+        color: white;
+        border: none;
+        border-radius: 50px;
+        padding: 0.75rem 2.5rem;
+        cursor: pointer;
+        box-shadow: 0 3px 0 #c05035;
+        transition: transform 0.15s, box-shadow 0.15s;
+    }
+
+    button[type="submit"]:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 0 #c05035;
+    }
+
+    button[type="submit"]:active:not(:disabled) {
+        transform: translateY(3px);
+        box-shadow: none;
+    }
+
+    button[type="submit"]:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .form-status {
+        margin-top: 1rem;
+        font-size: 0.95rem;
+        min-height: 1.4rem;
+    }
+
+    .status-ok  { color: var(--color-primary); font-weight: 600; }
+    .status-err { color: #c0392b; }
+
+    @media (max-width: 600px) {
+        .contact-card {
+            padding: 2rem 1.25rem;
+        }
+        h1 { font-size: 2rem; }
+    }
+</style>
