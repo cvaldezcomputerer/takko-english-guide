@@ -1,9 +1,9 @@
----
-import Layout from '../layouts/ToolLayout.astro';
-import WordSelectorModal from '../components/WordSelectorModal.astro';
+﻿---
+import GameLayout from '../../layouts/GameLayout.astro';
+import WordSelectorModal from '../../components/WordSelectorModal.astro';
 ---
 
-<Layout title="Anarika's Challenge" description="A Japanese vocabulary quiz game.">
+<GameLayout showBackBar title="Anarika's Challenge" description="A Japanese vocabulary quiz game.">
 <div class="game-wrap">
 
   <!-- Category Select -->
@@ -95,7 +95,7 @@ import WordSelectorModal from '../components/WordSelectorModal.astro';
   </div>
 
 </div>
-</Layout>
+</GameLayout>
 <script>
   import type { QuizWord } from '../data/anarika/words';
   import { categories } from '../data/anarika/words';
@@ -358,7 +358,6 @@ import WordSelectorModal from '../components/WordSelectorModal.astro';
   }
 
   .screen { max-width: 800px; margin: 0 auto; }
-  .hidden { display: none !important; }
 
   /* Anarika Card */
   .anarika-card {

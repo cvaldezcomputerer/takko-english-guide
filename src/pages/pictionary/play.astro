@@ -1,4 +1,4 @@
----
+﻿---
 import Layout from '../../layouts/Layout.astro';
 ---
 
@@ -78,13 +78,13 @@ import Layout from '../../layouts/Layout.astro';
         </div>
         <div class="brush-sizes">
           <button class="brush-btn brush-btn--active" data-width="4" title="Small">
-            <span class="brush-dot" style="width:6px;height:6px"></span>
+            <span class="brush-dot brush-dot--sm"></span>
           </button>
           <button class="brush-btn" data-width="10" title="Medium">
-            <span class="brush-dot" style="width:12px;height:12px"></span>
+            <span class="brush-dot brush-dot--md"></span>
           </button>
           <button class="brush-btn" data-width="20" title="Large">
-            <span class="brush-dot" style="width:20px;height:20px"></span>
+            <span class="brush-dot brush-dot--lg"></span>
           </button>
         </div>
         <button id="clear-my-canvas" class="clear-btn" title="Clear canvas">🗑️</button>
@@ -644,7 +644,6 @@ import Layout from '../../layouts/Layout.astro';
   input:focus { outline: none; border-color: var(--color-secondary); }
 
   .error-msg { color: #e03d2f; font-size: 0.9rem; margin-top: 0.5rem; }
-  .hidden { display: none; }
 
   /* ── Lobby ───────────────────────────────────────────── */
   #screen-lobby {
@@ -781,6 +780,10 @@ import Layout from '../../layouts/Layout.astro';
     background: #222;
     flex-shrink: 0;
   }
+
+  .brush-dot--sm { width: 6px; height: 6px; }
+  .brush-dot--md { width: 12px; height: 12px; }
+  .brush-dot--lg { width: 20px; height: 20px; }
 
   .brush-btn--active .brush-dot { background: var(--color-primary); }
 

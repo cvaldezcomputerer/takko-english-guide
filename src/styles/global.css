@@ -50,6 +50,14 @@ h1, h2, h3, h4 {
   50% { transform: translateY(-5px); }
 }
 
+.game-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.hidden { display: none !important; }
+
 a:not([class]) {
   text-decoration-skip-ink: auto;
 }

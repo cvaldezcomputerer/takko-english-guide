@@ -1,9 +1,9 @@
----
-import Layout from '../layouts/ToolLayout.astro';
-import WordSelectorModal from '../components/WordSelectorModal.astro';
+﻿---
+import GameLayout from '../../layouts/GameLayout.astro';
+import WordSelectorModal from '../../components/WordSelectorModal.astro';
 ---
 
-<Layout title="Blooket/Quizlet Exporter" description="Make sets for Quizlet or Blooket based on vocab from New Horizons books.">
+<GameLayout showBackBar title="Blooket/Quizlet Exporter" description="Make sets for Quizlet or Blooket based on vocab from New Horizons books.">
 <div class="wrap">
 
   <!-- Select Screen -->
@@ -79,7 +79,7 @@ import WordSelectorModal from '../components/WordSelectorModal.astro';
   </div>
 
 </div>
-</Layout>
+</GameLayout>
 
 <script>
   import type { QuizWord } from '../data/anarika/words';
@@ -161,7 +161,6 @@ import WordSelectorModal from '../components/WordSelectorModal.astro';
   }
 
   .screen { max-width: 800px; margin: 0 auto; }
-  .hidden { display: none !important; }
 
   /* Header */
   .header-card {

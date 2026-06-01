@@ -4,11 +4,13 @@ import "../styles/global.css";
 interface Props {
   title?: string;
   description?: string;
+  showBackBar?: boolean;
 }
 
 const {
   title = "Takkotaco",
   description = "Takkotaco is the unofficial English website for Takko Machi.",
+  showBackBar = false,
 } = Astro.props;
 ---
 
@@ -28,6 +30,16 @@ const {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   </head>
   <body class="game-layout-body">
+    {showBackBar && (
+      <a href="/game" class="tool-back-bar">
+        <svg viewBox="0 0 16 16" fill="none" width="14" height="14" aria-hidden="true">
+          <path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="back-en">Games &amp; Tools</span>
+        <span class="back-sep">/</span>
+        <span class="back-ja">ゲーム・ツール一覧</span>
+      </a>
+    )}
     <slot />
   </body>
 </html>
@@ -36,5 +48,42 @@ const {
   .game-layout-body {
     margin: 0;
     min-height: 100vh;
+  }
+
+  .tool-back-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.45rem 1rem;
+    background: #f5f5f5;
+    border-bottom: 1px solid #e4e4e4;
+    text-decoration: none;
+    color: #555;
+    font-family: 'Andika', sans-serif;
+    font-size: 0.82rem;
+    transition: background 0.15s, color 0.15s;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .tool-back-bar:hover {
+    background: #eaeaea;
+    color: #1a1a1a;
+  }
+
+  .back-sep {
+    color: #ccc;
+    font-size: 0.75rem;
+  }
+
+  .back-ja {
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+    font-size: 0.78rem;
+    color: #888;
+  }
+
+  .tool-back-bar:hover .back-ja {
+    color: #444;
   }
 </style>

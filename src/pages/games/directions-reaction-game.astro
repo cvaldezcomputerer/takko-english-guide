@@ -1,0 +1,19 @@
+﻿---
+import GameLayout from "../../layouts/GameLayout.astro";
+import DirectionsGame from "../../components/DirectionsReactionGame.astro";
+---
+
+<GameLayout title="Directions Reaction Game">
+  <div class="directions-page game-page">
+    <main>
+      <DirectionsGame />
+    </main>
+  </div>
+</GameLayout>
+
+<style>
+  .directions-page {
+    background: var(--color-bg);
+    padding-bottom: 1.5rem;
+  }
+</style>

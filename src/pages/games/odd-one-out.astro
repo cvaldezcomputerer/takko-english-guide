@@ -1,9 +1,9 @@
----
-import ToolLayout from '../layouts/ToolLayout.astro';
-import WordSelectorModal from '../components/WordSelectorModal.astro';
+﻿---
+import GameLayout from '../../layouts/GameLayout.astro';
+import WordSelectorModal from '../../components/WordSelectorModal.astro';
 ---
 
-<ToolLayout title="Odd One Out" description="Find the word that doesn't belong.">
+<GameLayout showBackBar title="Odd One Out" description="Find the word that doesn't belong.">
 <div class="wrap">
 
   <!-- Select Screen -->
@@ -73,7 +73,7 @@ import WordSelectorModal from '../components/WordSelectorModal.astro';
   </div>
 
 </div>
-</ToolLayout>
+</GameLayout>
 
 <script>
   import type { QuizWord } from '../data/anarika/words';
@@ -299,7 +299,6 @@ import WordSelectorModal from '../components/WordSelectorModal.astro';
   }
 
   .screen { max-width: 1100px; margin: 0 auto; }
-  .hidden { display: none !important; }
 
   /* Header */
   .header-card {
