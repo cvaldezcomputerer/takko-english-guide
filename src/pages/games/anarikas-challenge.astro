@@ -97,10 +97,10 @@ import WordSelectorModal from '../../components/WordSelectorModal.astro';
 </div>
 </GameLayout>
 <script>
-  import type { QuizWord } from '../data/anarika/words';
-  import { categories } from '../data/anarika/words';
-  import { categoryGroups } from '../data/anarika/groups';
-  import { buildCategoryGrid, openModal, closeModal, initModalListeners, getSelectedWords } from '../scripts/wordSelector';
+  import type { QuizWord } from '../../data/anarika/words';
+  import { categories } from '../../data/anarika/words';
+  import { categoryGroups } from '../../data/anarika/groups';
+  import { buildCategoryGrid, openModal, closeModal, initModalListeners, getSelectedWords } from '../../scripts/wordSelector';
 
   interface MissedEntry { en: string; yourAnswer: string; correct: string; }
 

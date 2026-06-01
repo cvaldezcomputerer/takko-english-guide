@@ -82,10 +82,10 @@ import WordSelectorModal from '../../components/WordSelectorModal.astro';
 </GameLayout>
 
 <script>
-  import type { QuizWord } from '../data/anarika/words';
-  import { categories } from '../data/anarika/words';
-  import { categoryGroups } from '../data/anarika/groups';
-  import { buildCategoryGrid, openModal, closeModal, initModalListeners, getSelectedWords, formatJapanese } from '../scripts/wordSelector';
+  import type { QuizWord } from '../../data/anarika/words';
+  import { categories } from '../../data/anarika/words';
+  import { categoryGroups } from '../../data/anarika/groups';
+  import { buildCategoryGrid, openModal, closeModal, initModalListeners, getSelectedWords, formatJapanese } from '../../scripts/wordSelector';
 
   const screenSelect = document.getElementById('screen-select')!;
   const screenOutput = document.getElementById('screen-output')!;
