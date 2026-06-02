@@ -3,6 +3,7 @@ export const prerender = false;
 
 import Layout from '../layouts/Layout.astro';
 import Navbar from '../components/Navbar.astro';
+import AnimatedLogo from '../components/AnimatedLogo.astro';
 import T from '../components/T.astro';
 
 const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT2r7rHiUTy7tfJNkVnajXQuXoELP_27frVBYS-S0EsXzQBI71VQcWbGmb9n8-J023R_Ldso-XJg5JY/pub?output=csv';
@@ -170,7 +171,7 @@ Astro.response.headers.set('Cache-Control', `public, s-maxage=${ttl}, stale-whil
     title="TakkoTaco"
     description="TakkoTaco is the unofficial English website for Takko Machi — English learning tools for students, and an English guide to the town."
 >
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Patrick+Hand&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Patrick+Hand&family=Crete+Round&display=swap" rel="stylesheet">
 
     <div class="town-guide-body">
         <Navbar />
@@ -305,7 +306,8 @@ Astro.response.headers.set('Cache-Control', `public, s-maxage=${ttl}, stale-whil
                                 </T>
                             </p>
                         </a>
-                        <a href="/takko-ben" class="site-card">
+                        <a href="/takko-ben" class="site-card dialect-card-home">
+                            <AnimatedLogo class="card-home-cat" aria-hidden="true" />
                             <h3>
                                 <T>
                                     <span slot="en">Town Dialect</span>
@@ -497,6 +499,18 @@ Astro.response.headers.set('Cache-Control', `public, s-maxage=${ttl}, stale-whil
     .hero-content {
         position: relative;
         z-index: 2;
+    }
+
+    .dialect-card-home .card-home-cat {
+        font-size: 3.2rem;
+        color: var(--color-primary);
+        margin-bottom: 0.75rem;
+    }
+
+    .dialect-card-home:hover :global(.mouth-closed),
+    .dialect-card-home:hover :global(.mouth-open),
+    .dialect-card-home:hover :global(.al-pupil) {
+        animation-play-state: paused;
     }
 
     .welcome-text {
@@ -861,15 +875,15 @@ Astro.response.headers.set('Cache-Control', `public, s-maxage=${ttl}, stale-whil
 
     .weather-temp {
         font-size: 2.2rem;
-        font-weight: 600;
-        font-family: system-ui, -apple-system, sans-serif;
+        font-weight: 400;
+        font-family: 'Crete Round', serif;
         color: #3e6b8f;
         line-height: 1;
     }
 
     .weather-feels {
         font-size: 0.9rem;
-        font-family: var(--font-hand);
+        font-family: 'Crete Round', serif;
         color: #888;
     }
 
@@ -912,8 +926,8 @@ Astro.response.headers.set('Cache-Control', `public, s-maxage=${ttl}, stale-whil
     .cal-weekday {
         color: #2a2a2a;
         font-size: 1.25rem;
-        font-weight: 700;
-        font-family: system-ui, -apple-system, sans-serif;
+        font-weight: 400;
+        font-family: 'Crete Round', serif;
         line-height: 1;
         padding-bottom: 0.55rem;
         border-bottom: 2px solid #c2dbc9;
@@ -930,16 +944,16 @@ Astro.response.headers.set('Cache-Control', `public, s-maxage=${ttl}, stale-whil
     .cal-month {
         color: #2a2a2a;
         font-size: 2rem;
-        font-weight: 700;
-        font-family: system-ui, -apple-system, sans-serif;
+        font-weight: 400;
+        font-family: 'Crete Round', serif;
         line-height: 1;
     }
 
     .cal-day {
         color: #2a2a2a;
         font-size: 2rem;
-        font-weight: 700;
-        font-family: system-ui, -apple-system, sans-serif;
+        font-weight: 400;
+        font-family: 'Crete Round', serif;
         line-height: 1;
     }
 

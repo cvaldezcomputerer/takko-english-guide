@@ -1,0 +1,86 @@
+---
+const { class: className, ...props } = Astro.props;
+---
+
+<svg class:list={["anim-logo", className]} viewBox="120 140 780 750" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+  <g>
+    <g id="al-head">
+      <path d="M199 468C257.592 409.289 296.829 383.891 378 352M199 468C174.118 374.842 171 252.5 187 231C206 224.5 320.888 290.902 378 352M199 468C136.885 532.312 124 583 143 680C191.5 772 243 783 346 792C399.466 819.505 433 839 502 839C579 836 598.935 822.763 652.5 792C784.385 779.941 838 749 863 648.5C866 571.5 847.902 515.187 795.5 461.5M378 352C408.38 336.495 421.494 325.085 439.5 301C455.5 265.5 465.5 227.5 465.5 191L531 147C522.5 204.5 543.23 277.333 567 312C586.176 332.053 597.464 341.182 620 348M620 348C706.5 271.5 788 231 814 236.5C826 252.5 824.561 374.668 795.5 461.5M620 348C693.486 383.276 731.75 408.424 795.5 461.5" stroke="currentColor" stroke-width="17" stroke-linejoin="round" stroke-linecap="round"/>
+    </g>
+    <g id="al-right-eye">
+      <path d="M575 524H694" stroke="currentColor" stroke-width="22" stroke-linecap="round" fill="none"/>
+      <path class="al-pupil" d="M638 524V635.5" stroke="currentColor" stroke-width="22" stroke-linecap="round" fill="none"/>
+    </g>
+    <g id="al-left-eye">
+      <path d="M296.5 523.5H415.5" stroke="currentColor" stroke-width="22" stroke-linecap="round" fill="none"/>
+      <path class="al-pupil" d="M359.5 523.5V635" stroke="currentColor" stroke-width="22" stroke-linecap="round" fill="none"/>
+    </g>
+    <g id="al-whiskers">
+      <path d="M191 587.5L271 600.5M189.5 667L271 651.5" stroke="currentColor" stroke-width="20" stroke-linecap="round" fill="none"/>
+      <path d="M801 588L721 601M802.5 667.5L721 652" stroke="currentColor" stroke-width="20" stroke-linecap="round" fill="none"/>
+    </g>
+    <!-- closed mouth (nose + W-shape) -->
+    <g class="mouth-closed">
+      <path d="M510 626H485.5L488 645L498.5 654.5L508.5 645L510 626Z" fill="currentColor"/>
+      <path d="M451 714.5C470.702 710.853 481.081 703.062 498.5 690M498.5 690C515.387 703.979 525.654 711.774 545.5 714.5M498.5 690V654.5M498.5 654.5L488 645L485.5 626H510L508.5 645L498.5 654.5Z" stroke="currentColor" stroke-width="13" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    </g>
+    <!-- open mouth: big O, hidden until animation fires -->
+    <ellipse class="mouth-open" cx="499" cy="700" rx="105" ry="80" fill="currentColor"/>
+  </g>
+</svg>
+
+<style>
+  .anim-logo {
+    display: block;
+    width: 1em;
+    height: 1em;
+  }
+
+  /* Open mouth hidden by default */
+  .mouth-open {
+    opacity: 0;
+    transform-box: fill-box;
+    transform-origin: center;
+    transform: scale(0.05);
+  }
+
+  /*
+    1.2 s cycle:
+      0 – 52 %  (≈ 0.62 s)  closed, resting
+      52 – 55 % (≈ 0.04 s)  snap open
+      55 – 82 % (≈ 0.32 s)  mouth wide open, hold
+      82 – 85 % (≈ 0.04 s)  snap shut
+      85 – 100% (≈ 0.18 s)  closed, reset
+  */
+  .mouth-closed {
+    animation: meme-close 0.56s ease-in-out infinite;
+  }
+
+  .mouth-open {
+    animation: meme-open 0.56s ease-in-out infinite;
+  }
+
+  .al-pupil {
+    animation: pupil-hide 0.56s ease-in-out infinite;
+  }
+
+  @keyframes pupil-hide {
+    0%, 48%   { opacity: 1; }
+    50%, 98%  { opacity: 0; }
+    100%      { opacity: 1; }
+  }
+
+  @keyframes meme-close {
+    0%, 48%   { opacity: 1; }
+    50%, 98%  { opacity: 0; }
+    100%      { opacity: 1; }
+  }
+
+  @keyframes meme-open {
+    0%, 48%   { opacity: 0; transform: scale(0.05); }
+    50%       { opacity: 1; transform: scale(1.22); }
+    55%       { transform: scale(0.95); }
+    59%, 96%  { opacity: 1; transform: scale(1);    }
+    98%, 100% { opacity: 0; transform: scale(0.05); }
+  }
+</style>
