@@ -19,10 +19,11 @@ const abcColors = abcAlpha.map(
     rel="stylesheet"
   />
 
+  <!-- Back button — fixed, shown on every screen (start / game / win / lose) -->
+  <a href="/game" class="back-link" data-astro-reload>← Back</a>
+
   <!-- START SCREEN -->
   <div id="start-screen" class="screen">
-    <a href="/game" class="back-link" data-astro-reload>← Back</a>
-
     <div class="deco-letters" aria-hidden="true">
       {abcAlpha.map((L, i) => (
         <div class="deco-cell" style={`--i:${i}`}>
@@ -43,12 +44,12 @@ const abcColors = abcAlpha.map(
 
         <div class="setting-row">
           <span class="setting-label">Difficulty / むずかしさ</span>
-          <span class="setting-desc">How many letters appear on screen at once / 一度に表示される文字数</span>
+          <span class="setting-desc">Higher levels add a timer, flipped letters, and tricks / レベルが上がると制限時間や反転文字などが追加されます</span>
           <div class="opt-group" id="opt-difficulty">
             <button class="opt-btn active" data-value="easy">Easy</button>
-            <button class="opt-btn" data-value="normal">Normal</button>
+            <button class="opt-btn" data-value="medium">Medium</button>
             <button class="opt-btn" data-value="hard">Hard</button>
-            <button class="opt-btn" data-value="super">Super</button>
+            <button class="opt-btn" data-value="super">Super Hard</button>
           </div>
         </div>
 
@@ -72,8 +73,19 @@ const abcColors = abcAlpha.map(
     <div class="win-card">
       <p class="win-label">GREAT JOB!</p>
       <p class="win-label-ja">よくできました！</p>
+      <p id="win-time" class="win-time hidden">Time / タイム: <span id="win-time-val">0:00</span></p>
       <div id="win-alphabet" class="win-alphabet"></div>
       <button id="play-again-btn" class="btn">PLAY AGAIN</button>
+    </div>
+  </div>
+
+  <!-- LOSE SCREEN -->
+  <div id="lose-screen" class="screen hidden">
+    <div class="win-card lose-card">
+      <p class="win-label" id="lose-label">GAME OVER</p>
+      <p class="win-label-ja" id="lose-label-ja">ゲームオーバー</p>
+      <p class="lose-sub">You reached <span id="lose-prog">0</span> / 26</p>
+      <button id="retry-btn" class="btn">TRY AGAIN</button>
     </div>
   </div>
 
@@ -82,6 +94,8 @@ const abcColors = abcAlpha.map(
     <div class="shelf-area">
       <div class="shelf-header">
         <span class="shelf-title">ABC ORDER</span>
+        <span id="hud-timer" class="hud-timer hidden">2:00</span>
+        <span id="hud-lives" class="hud-lives hidden"></span>
         <span class="progress-text"><span id="prog">0</span> / 26</span>
       </div>
       <div id="shelf" class="shelf"></div>
@@ -113,15 +127,24 @@ const abcColors = abcAlpha.map(
     pointer-events: none;
     overflow: hidden;
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
+    /* 3 columns on the left, an empty gutter for the menu, 3 columns on the right */
+    grid-template-columns: repeat(3, 1fr) 34% repeat(3, 1fr);
     grid-auto-rows: 1fr;
     place-items: center;
     padding: 3% 2%;
     gap: 0.5rem;
   }
 
+  /* Place each letter so they fill left 3, then right 3, skipping the center gutter */
+  .deco-cell:nth-child(6n + 1) { grid-column: 1; }
+  .deco-cell:nth-child(6n + 2) { grid-column: 2; }
+  .deco-cell:nth-child(6n + 3) { grid-column: 3; }
+  .deco-cell:nth-child(6n + 4) { grid-column: 5; }
+  .deco-cell:nth-child(6n + 5) { grid-column: 6; }
+  .deco-cell:nth-child(6n + 6) { grid-column: 7; }
+
   .deco-cell {
-    width: 62%;
+    width: 52%;
     opacity: 0;
     animation: deco-appear 1.2s ease forwards;
     animation-delay: calc(var(--i) * 0.55s);
@@ -323,6 +346,15 @@ const abcColors = abcAlpha.map(
     margin: 0;
   }
 
+  .win-time {
+    margin: 0;
+    font-family: "Crete Round", serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #4a7c59;
+    font-variant-numeric: tabular-nums;
+  }
+
   .win-alphabet {
     font-family: "Crete Round", serif;
     font-size: 1.4rem;
@@ -374,11 +406,56 @@ const abcColors = abcAlpha.map(
     font-variant-numeric: tabular-nums;
   }
 
+  .hud-timer {
+    display: inline-block;
+    font-family: "Crete Round", serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #4a7c59;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.05em;
+  }
+
+  .hud-lives {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  /* .life imgs are created in JS, so they need :global to dodge Astro scoping.
+     Transparent cutout — just the floating head, no frame. */
+  .hud-lives :global(.life) {
+    height: 32px;
+    width: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.35));
+    transition: filter 0.2s, opacity 0.2s;
+  }
+
+  .hud-lives :global(.life.lost) {
+    filter: grayscale(1) drop-shadow(0 1px 1px rgba(0, 0, 0, 0.25));
+    opacity: 0.3;
+  }
+
+  /* ─── Lose Screen ─── */
+  .lose-card {
+    border-color: #e76f51;
+  }
+
+  .lose-sub {
+    font-size: 1.1rem;
+    color: #777;
+    margin: 0;
+    font-variant-numeric: tabular-nums;
+  }
+
   .shelf {
     display: grid;
-    grid-template-columns: repeat(26, 1fr);
-    gap: 3px;
+    grid-template-columns: repeat(13, minmax(0, 1fr));
+    grid-template-rows: repeat(2, minmax(0, 1fr));
+    gap: 4px;
     flex: 1;
+    min-height: 0;
     align-content: stretch;
   }
 
@@ -423,7 +500,7 @@ const abcColors = abcAlpha.map(
 
   :global(.letter-token) {
     position: absolute;
-    transform: translate(-50%, -50%) rotate(var(--tilt, 0deg));
+    transform: translate(-50%, -50%) rotate(var(--tilt, 0deg)) scaleX(var(--flip, 1));
     width: min(14vw, 17vh);
     height: min(14vw, 17vh);
     background: white;
@@ -448,9 +525,30 @@ const abcColors = abcAlpha.map(
   }
 
   :global(.letter-token:hover) {
-    transform: translate(-50%, -50%) rotate(var(--tilt, 0deg)) scale(1.1);
+    transform: translate(-50%, -50%) rotate(var(--tilt, 0deg)) scaleX(var(--flip, 1)) scale(1.1);
   }
 
+  /* ─── Super Hard: spinning tokens ─── */
+  :global(.letter-token.spin) {
+    animation: token-spin var(--spin-dur, 6s) linear infinite;
+    animation-direction: var(--spin-dir, normal);
+  }
+
+  @keyframes token-spin {
+    from { transform: translate(-50%, -50%) rotate(0deg) scaleX(var(--flip, 1)); }
+    to   { transform: translate(-50%, -50%) rotate(360deg) scaleX(var(--flip, 1)); }
+  }
+
+  /* ─── Symbol decoys (Super Hard) ─── */
+  :global(.symbol-token) {
+    color: #9b8c74;
+    border-color: #c5b99a;
+    box-shadow:
+      0 2px 8px rgba(0, 0, 0, 0.1),
+      0 3px 0 #c5b99a;
+  }
+
+  /* .wrong placed after .spin so the shake overrides the spin while it plays */
   :global(.letter-token.wrong) {
     animation: token-wrong 0.4s ease forwards;
   }
@@ -458,25 +556,25 @@ const abcColors = abcAlpha.map(
   @keyframes token-wrong {
     0%,
     100% {
-      transform: translate(-50%, -50%) rotate(var(--tilt, 0deg));
+      transform: translate(-50%, -50%) rotate(var(--tilt, 0deg)) scaleX(var(--flip, 1));
       background: white;
     }
     15% {
-      transform: translate(calc(-50% - 8px), -50%) rotate(var(--tilt, 0deg));
+      transform: translate(calc(-50% - 8px), -50%) rotate(var(--tilt, 0deg)) scaleX(var(--flip, 1));
       background: #fecaca;
     }
     35% {
-      transform: translate(calc(-50% + 8px), -50%) rotate(var(--tilt, 0deg));
+      transform: translate(calc(-50% + 8px), -50%) rotate(var(--tilt, 0deg)) scaleX(var(--flip, 1));
     }
     55% {
-      transform: translate(calc(-50% - 5px), -50%) rotate(var(--tilt, 0deg));
+      transform: translate(calc(-50% - 5px), -50%) rotate(var(--tilt, 0deg)) scaleX(var(--flip, 1));
       background: #fecaca;
     }
     75% {
-      transform: translate(calc(-50% + 5px), -50%) rotate(var(--tilt, 0deg));
+      transform: translate(calc(-50% + 5px), -50%) rotate(var(--tilt, 0deg)) scaleX(var(--flip, 1));
     }
     90% {
-      transform: translate(calc(-50% - 2px), -50%) rotate(var(--tilt, 0deg));
+      transform: translate(calc(-50% - 2px), -50%) rotate(var(--tilt, 0deg)) scaleX(var(--flip, 1));
     }
   }
 
@@ -515,6 +613,26 @@ const abcColors = abcAlpha.map(
   // ── Settings ───────────────────────────────────────────────────────────────
 
   const settings = { difficulty: "easy", sound: true };
+
+  // Per-difficulty modifiers. Easy = original game.
+  type Mods = {
+    timed: boolean;
+    scramble: boolean; // random rotation / flip on tokens
+    symbols: number;   // number of symbol decoys
+    spin: boolean;     // tokens spin continuously
+    lives: number;     // 0 = unlimited (no life system)
+  };
+  const DIFFICULTY: Record<string, Mods> = {
+    easy:   { timed: false, scramble: false, symbols: 0, spin: false, lives: 0 },
+    medium: { timed: true,  scramble: false, symbols: 0, spin: false, lives: 0 },
+    hard:   { timed: true,  scramble: true,  symbols: 0, spin: false, lives: 0 },
+    super:  { timed: true,  scramble: true,  symbols: 6, spin: true,  lives: 3 },
+  };
+  const SYMBOLS = ["#", "@", "&", "%", "?", "*", "!", "+", "="];
+
+  function mods(): Mods {
+    return DIFFICULTY[settings.difficulty] ?? DIFFICULTY.easy;
+  }
 
   document.querySelectorAll<HTMLElement>(".opt-group").forEach((group) => {
     group.querySelectorAll<HTMLButtonElement>(".opt-btn").forEach((btn) => {
@@ -660,6 +778,57 @@ const abcColors = abcAlpha.map(
     osc.start(now); osc.stop(now + 0.18);
   }
 
+  // ── Timer & lives ────────────────────────────────────────────────────────────
+
+  let timerId: number | null = null;
+  let timeElapsed = 0; // seconds, counts up — for future high scores
+  let lives = 0;
+  let gameActive = false;
+
+  const timerEl = document.getElementById("hud-timer")!;
+  const livesEl = document.getElementById("hud-lives")!;
+  const backLink = document.querySelector<HTMLElement>(".back-link")!;
+
+  function formatTime(s: number): string {
+    const m = Math.floor(s / 60);
+    const sec = s % 60;
+    return `${m}:${sec.toString().padStart(2, "0")}`;
+  }
+
+  function stopTimer() {
+    if (timerId !== null) { clearInterval(timerId); timerId = null; }
+  }
+
+  function startTimer() {
+    timeElapsed = 0;
+    timerEl.textContent = formatTime(timeElapsed);
+    timerEl.classList.remove("hidden");
+    stopTimer();
+    timerId = window.setInterval(() => {
+      timeElapsed++;
+      timerEl.textContent = formatTime(timeElapsed);
+    }, 1000);
+  }
+
+  function renderLives() {
+    livesEl.innerHTML = "";
+    const total = mods().lives;
+    for (let i = 0; i < total; i++) {
+      const img = document.createElement("img");
+      img.className = "life" + (i >= lives ? " lost" : "");
+      img.src = "/images/selfies/selfie-suit.png"; // transparent cutout
+      img.alt = "life";
+      livesEl.appendChild(img);
+    }
+  }
+
+  function loseLife() {
+    if (lives <= 0) return;
+    lives--;
+    renderLives();
+    if (lives <= 0) showLose("GAME OVER", "ゲームオーバー");
+  }
+
   // ── Game logic ─────────────────────────────────────────────────────────────
 
   function updateHighlight() {
@@ -669,16 +838,27 @@ const abcColors = abcAlpha.map(
     });
   }
 
+  function shakeToken(t: HTMLElement) {
+    t.classList.remove("wrong");
+    void t.offsetWidth;
+    t.classList.add("wrong");
+    t.addEventListener("animationend", () => t.classList.remove("wrong"), {
+      once: true,
+    });
+  }
+
+  function handleSymbolClick(token: HTMLElement) {
+    if (!gameActive) return;
+    playWrong();
+    shakeToken(token);
+    loseLife();
+  }
+
   function handleClick(letter: string) {
+    if (!gameActive) return;
     if (letter !== LETTERS[currentIndex]) {
       playWrong();
-      const t = tokens[letter];
-      t.classList.remove("wrong");
-      void (t as HTMLElement).offsetWidth;
-      t.classList.add("wrong");
-      t.addEventListener("animationend", () => t.classList.remove("wrong"), {
-        once: true,
-      });
+      shakeToken(tokens[letter]);
       return;
     }
     playNote(letter);
@@ -778,7 +958,17 @@ const abcColors = abcAlpha.map(
   // ── Win / Lose ─────────────────────────────────────────────────────────────
 
   function showWin() {
+    gameActive = false;
+    stopTimer();
     detachKeyboard();
+    backLink.classList.remove("hidden");
+    const winTime = document.getElementById("win-time")!;
+    if (mods().timed) {
+      document.getElementById("win-time-val")!.textContent = formatTime(timeElapsed);
+      winTime.classList.remove("hidden");
+    } else {
+      winTime.classList.add("hidden");
+    }
     const alphaEl = document.getElementById("win-alphabet");
     if (alphaEl) {
       alphaEl.innerHTML = LETTERS.map(
@@ -789,10 +979,48 @@ const abcColors = abcAlpha.map(
     document.getElementById("win-screen")!.classList.remove("hidden");
   }
 
+  function showLose(label: string, labelJa: string) {
+    if (!gameActive) return; // avoid double-trigger (e.g. timer + lives)
+    gameActive = false;
+    stopTimer();
+    detachKeyboard();
+    backLink.classList.remove("hidden");
+    document.getElementById("lose-label")!.textContent = label;
+    document.getElementById("lose-label-ja")!.textContent = labelJa;
+    document.getElementById("lose-prog")!.textContent = String(currentIndex);
+    document.getElementById("game-screen")!.classList.add("hidden");
+    document.getElementById("lose-screen")!.classList.remove("hidden");
+  }
+
+  // Apply rotation / flip / spin to a token based on the active difficulty.
+  function applyOrientation(token: HTMLElement, m: Mods) {
+    let tilt: number;
+    if (m.scramble) {
+      // Quarter-turns (incl. upside down) plus jitter → "mixed up" look.
+      tilt = Math.floor(Math.random() * 4) * 90 + (Math.random() * 20 - 10);
+      if (Math.random() < 0.5) token.style.setProperty("--flip", "-1");
+    } else {
+      tilt = Math.random() * 40 - 20;
+    }
+    token.style.setProperty("--tilt", `${tilt.toFixed(1)}deg`);
+
+    if (m.spin) {
+      token.classList.add("spin");
+      token.style.setProperty("--spin-dur", `${(4 + Math.random() * 4).toFixed(1)}s`);
+      token.style.setProperty("--spin-dir", Math.random() < 0.5 ? "normal" : "reverse");
+      token.dataset.tilt = "0"; // spinning — fly-out clone just starts upright
+    } else {
+      token.dataset.tilt = tilt.toFixed(1);
+    }
+  }
+
   function init() {
+    const m = mods();
     detachKeyboard();
     attachKeyboard();
+    stopTimer();
     currentIndex = 0;
+    gameActive = true;
     Object.keys(tokens).forEach((k) => delete tokens[k]);
     Object.keys(slots).forEach((k) => delete slots[k]);
 
@@ -803,6 +1031,14 @@ const abcColors = abcAlpha.map(
     shelf.innerHTML = "";
     playArea.innerHTML = "";
     if (prog) prog.textContent = "0";
+
+    // Back button is for the menu screens only — hide it while playing.
+    backLink.classList.add("hidden");
+
+    // HUD: timer + lives, shown only when the difficulty uses them.
+    timerEl.classList.toggle("hidden", !m.timed);
+    livesEl.classList.toggle("hidden", m.lives === 0);
+    if (m.lives > 0) { lives = m.lives; renderLives(); }
 
     LETTERS.forEach((l) => {
       const slot = document.createElement("div") as HTMLDivElement;
@@ -815,7 +1051,7 @@ const abcColors = abcAlpha.map(
     const shuffled = [...LETTERS].sort(() => Math.random() - 0.5);
 
     requestAnimationFrame(() => {
-      const positions = generatePositions(playArea, 26);
+      const positions = generatePositions(playArea, 26 + m.symbols);
       shuffled.forEach((letter, i) => {
         const token = document.createElement("button") as HTMLButtonElement;
         token.className = "letter-token";
@@ -823,15 +1059,31 @@ const abcColors = abcAlpha.map(
         token.innerHTML = makeSVG(letter);
         token.style.setProperty("--token-color", getColor(letter));
         token.style.zIndex = String(LETTERS.length - LETTERS.indexOf(letter));
-        const tilt = (Math.random() * 40 - 20).toFixed(1);
-        token.style.setProperty("--tilt", `${tilt}deg`);
-        token.dataset.tilt = tilt;
+        applyOrientation(token, m);
         token.style.left = `${positions[i].x}px`;
         token.style.top = `${positions[i].y}px`;
         token.addEventListener("click", () => handleClick(letter));
         playArea.appendChild(token);
         tokens[letter] = token;
       });
+
+      // Symbol decoys (Super Hard) — clicking one costs a life.
+      const symbolSet = [...SYMBOLS].sort(() => Math.random() - 0.5).slice(0, m.symbols);
+      symbolSet.forEach((sym, i) => {
+        const pos = positions[26 + i];
+        if (!pos) return;
+        const token = document.createElement("button") as HTMLButtonElement;
+        token.className = "letter-token symbol-token";
+        token.setAttribute("aria-label", "Wrong symbol");
+        token.textContent = sym;
+        applyOrientation(token, m);
+        token.style.left = `${pos.x}px`;
+        token.style.top = `${pos.y}px`;
+        token.addEventListener("click", () => handleSymbolClick(token));
+        playArea.appendChild(token);
+      });
+
+      if (m.timed) startTimer();
     });
   }
 
@@ -843,6 +1095,12 @@ const abcColors = abcAlpha.map(
 
   document.getElementById("play-again-btn")!.addEventListener("click", () => {
     document.getElementById("win-screen")!.classList.add("hidden");
+    document.getElementById("game-screen")!.classList.remove("hidden");
+    init();
+  });
+
+  document.getElementById("retry-btn")!.addEventListener("click", () => {
+    document.getElementById("lose-screen")!.classList.add("hidden");
     document.getElementById("game-screen")!.classList.remove("hidden");
     init();
   });

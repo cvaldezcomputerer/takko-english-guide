@@ -148,6 +148,9 @@ try {
 // ── Today's Date ──
 const todayJST = new Date(Date.now() + 9 * 3_600_000);
 const EN_MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const EN_DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const JA_DAYS = ['日曜日','月曜日','火曜日','水曜日','木曜日','金曜日','土曜日'];
+const todayWeekday = todayJST.getUTCDay();
 const todayDate = todayJST.getUTCDate();
 const ordinalSuffix = (d: number) => {
     const t = d % 100;
@@ -404,13 +407,21 @@ Astro.response.headers.set('Cache-Control', `public, s-maxage=${ttl}, stale-whil
                     </div>
                     <div class="date-card-body">
                         <div class="cal-block">
-                            <div class="cal-month">
+                            <div class="cal-weekday">
                                 <T>
-                                    <span slot="en">{EN_MONTHS[todayJST.getUTCMonth()]}</span>
-                                    <span slot="ja">{todayJST.getUTCMonth() + 1}月</span>
+                                    <span slot="en">{EN_DAYS[todayWeekday]}</span>
+                                    <span slot="ja">{JA_DAYS[todayWeekday]}</span>
                                 </T>
                             </div>
-                            <div class="cal-day">{todayDate}<span class="cal-ordinal">{ordinalSuffix(todayDate)}</span></div>
+                            <div class="cal-monthday">
+                                <div class="cal-month">
+                                    <T>
+                                        <span slot="en">{EN_MONTHS[todayJST.getUTCMonth()]}</span>
+                                        <span slot="ja">{todayJST.getUTCMonth() + 1}月</span>
+                                    </T>
+                                </div>
+                                <div class="cal-day">{todayDate}<span class="cal-ordinal">{ordinalSuffix(todayDate)}</span></div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -620,7 +631,10 @@ Astro.response.headers.set('Cache-Control', `public, s-maxage=${ttl}, stale-whil
         text-decoration: none;
         color: inherit;
         transition: transform 0.2s, box-shadow 0.2s;
-        display: block;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
     }
 
     .site-card:not(.coming-soon):hover {
@@ -895,15 +909,30 @@ Astro.response.headers.set('Cache-Control', `public, s-maxage=${ttl}, stale-whil
         text-align: center;
     }
 
-    .cal-month {
-        color: #3a6348;
-        font-size: 0.85rem;
-        font-weight: 600;
+    .cal-weekday {
+        color: #2a2a2a;
+        font-size: 1.25rem;
+        font-weight: 700;
         font-family: system-ui, -apple-system, sans-serif;
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-        padding-bottom: 0.4rem;
+        line-height: 1;
+        padding-bottom: 0.55rem;
         border-bottom: 2px solid #c2dbc9;
+    }
+
+    .cal-monthday {
+        display: flex;
+        align-items: baseline;
+        justify-content: center;
+        gap: 0.5rem;
+        padding-top: 0.55rem;
+    }
+
+    .cal-month {
+        color: #2a2a2a;
+        font-size: 2rem;
+        font-weight: 700;
+        font-family: system-ui, -apple-system, sans-serif;
+        line-height: 1;
     }
 
     .cal-day {
@@ -912,7 +941,6 @@ Astro.response.headers.set('Cache-Control', `public, s-maxage=${ttl}, stale-whil
         font-weight: 700;
         font-family: system-ui, -apple-system, sans-serif;
         line-height: 1;
-        padding-top: 0.4rem;
     }
 
     .cal-ordinal {
