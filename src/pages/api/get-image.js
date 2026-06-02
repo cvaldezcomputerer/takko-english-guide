@@ -14,72 +14,65 @@ function withUnsplashReferral(url) {
   }
 }
 
-export async function GET(context) {
-  const { request } = context;
-  const url = new URL(request.url);
-  const type = url.searchParams.get("type"); // 'giphy-cat' or 'unsplash'
-  const query = url.searchParams.get("query"); // e.g. 'fruit'
+function json(body, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { "Content-Type": "application/json" },
+  });
+}
 
-  // Access Cloudflare environment variables correctly
+// Read API keys from Cloudflare env (production) or process.env (local/node).
+function getKeys(context) {
   const runtimeEnv = context.locals?.runtime?.env || {};
+  return {
+    GIPHY_KEY: runtimeEnv.GIPHY_KEY || import.meta.env.GIPHY_KEY || process.env.GIPHY_KEY,
+    UNSPLASH_KEY: runtimeEnv.UNSPLASH_KEY || import.meta.env.UNSPLASH_KEY || process.env.UNSPLASH_KEY,
+  };
+}
 
-  // Load keys from Cloudflare 'env' object (production) or process.env (local/node)
-  const GIPHY_KEY = runtimeEnv.GIPHY_KEY || import.meta.env.GIPHY_KEY || process.env.GIPHY_KEY;
-  const UNSPLASH_KEY = runtimeEnv.UNSPLASH_KEY || import.meta.env.UNSPLASH_KEY || process.env.UNSPLASH_KEY;
+async function fetchGiphyCat(url, key) {
+  if (!key) throw new Error("Missing Giphy Key");
+  const tag = url.searchParams.get("tag") || "funny cat";
+  // Random offset gives more variety than the 'random' endpoint.
+  const offset = Math.floor(Math.random() * 50);
+  const res = await fetch(
+    `https://api.giphy.com/v1/gifs/search?api_key=${key}&q=${tag}&limit=1&offset=${offset}&rating=g`
+  );
+  const data = await res.json();
+  return { url: data.data?.[0]?.images?.original?.url };
+}
 
-  if (type === "giphy-cat" && !GIPHY_KEY) {
-    console.error("Giphy API call failed: GIPHY_KEY is missing in the current environment.");
-  }
-  if (type === "unsplash" && !UNSPLASH_KEY) {
-    console.error("Unsplash API call failed: UNSPLASH_KEY is missing in the current environment.");
-  }
+async function fetchUnsplash(url, key) {
+  if (!key) throw new Error("Missing Unsplash Key");
+  const query = url.searchParams.get("query");
+  const res = await fetch(
+    `https://api.unsplash.com/photos/random?query=${query}&orientation=squarish&content_filter=high&featured=true&client_id=${key}`,
+    { headers: { "Accept-Version": "v1" } }
+  );
+  const data = await res.json();
+  return {
+    source: "unsplash",
+    url: data.urls?.small,
+    attribution: {
+      photographerName: data.user?.name || "Unknown",
+      photographerUrl: withUnsplashReferral(data.user?.links?.html),
+      photoUrl: withUnsplashReferral(data.links?.html),
+      unsplashUrl: withUnsplashReferral("https://unsplash.com/"),
+    },
+  };
+}
+
+export async function GET(context) {
+  const url = new URL(context.request.url);
+  const type = url.searchParams.get("type"); // 'giphy-cat' or 'unsplash'
+  const { GIPHY_KEY, UNSPLASH_KEY } = getKeys(context);
 
   try {
-    if (type === "giphy-cat") {
-      if (!GIPHY_KEY) throw new Error("Missing Giphy Key");
-      const tag = url.searchParams.get("tag") || "funny cat";
-      // Use a random offset to get more variety from the search endpoint instead of just 'random'
-      const offset = Math.floor(Math.random() * 50);
-      const res = await fetch(
-        `https://api.giphy.com/v1/gifs/search?api_key=${GIPHY_KEY}&q=${tag}&limit=1&offset=${offset}&rating=g`
-      );
-      const data = await res.json();
-      return new Response(JSON.stringify({ url: data.data?.[0]?.images?.original?.url }), {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      });
-    } 
-    
-    else if (type === "unsplash") {
-      if (!UNSPLASH_KEY) throw new Error("Missing Unsplash Key");
-      const res = await fetch(
-        `https://api.unsplash.com/photos/random?query=${query}&orientation=squarish&content_filter=high&featured=true&client_id=${UNSPLASH_KEY}`,
-        {
-          headers: {
-            "Accept-Version": "v1",
-          },
-        }
-      );
-      const data = await res.json();
-      return new Response(JSON.stringify({
-        source: "unsplash",
-        url: data.urls?.small,
-        attribution: {
-          photographerName: data.user?.name || "Unknown",
-          photographerUrl: withUnsplashReferral(data.user?.links?.html),
-          photoUrl: withUnsplashReferral(data.links?.html),
-          unsplashUrl: withUnsplashReferral("https://unsplash.com/"),
-        },
-      }), {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
-
-    return new Response(JSON.stringify({ error: "Invalid type" }), { status: 400 });
-
+    if (type === "giphy-cat") return json(await fetchGiphyCat(url, GIPHY_KEY));
+    if (type === "unsplash") return json(await fetchUnsplash(url, UNSPLASH_KEY));
+    return json({ error: "Invalid type" }, 400);
   } catch (error) {
     console.error("API Error:", error);
-    return new Response(JSON.stringify({ error: error.message }), { status: 500 });
+    return json({ error: error.message }, 500);
   }
 }

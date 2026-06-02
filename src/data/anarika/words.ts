@@ -889,5 +889,3 @@ export const categories: QuizCategory[] = [
     ],
   },
 ];
-
-export const categoryNames = categories.map(c => c.name);
