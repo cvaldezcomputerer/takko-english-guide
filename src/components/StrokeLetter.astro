@@ -1,0 +1,133 @@
+---
+/**
+ * StrokeLetter — renders a capital letter A–Z from the stroke-based set in
+ * `src/letter-strokes.ts`. Each pen stroke is a separate <path> in writing order.
+ *
+ * Usage:
+ *   import StrokeLetter from "../components/StrokeLetter.astro";
+ *   <StrokeLetter letter="B" />              // static
+ *   <StrokeLetter letter="B" animate />      // loops a writing animation
+ *   <StrokeLetter letter="g" color="#2c3e50" size="120px" stroke={9} />
+ *   <StrokeLetter letter="g" outline="#000" />   // colored letter with a black edge
+ *
+ * The SVG fills its container by default; pass `size` for a fixed square.
+ * Note: `outline` is meant for static letters; combining it with `animate`
+ * throws off the per-stroke draw timing (extra paths shift :nth-of-type).
+ */
+import { letterStrokes } from "../letter-strokes";
+
+interface Props {
+  letter: string;
+  animate?: boolean;
+  color?: string;
+  stroke?: number;
+  size?: string;
+  /** Draw a wider outline of this color behind each stroke, e.g. "#000". */
+  outline?: string;
+  /** How far the outline extends past the stroke on each side (px). */
+  outlineWidth?: number;
+  /** Animation-delay for the draw loop, e.g. "-2s". Useful for staggering. */
+  delay?: string;
+  /** Length of one draw+hold+loop cycle, e.g. "8s". Defaults to 5s. */
+  duration?: string;
+  class?: string;
+}
+
+const {
+  letter,
+  animate = false,
+  color = "#e76f51",
+  stroke = 11,
+  size,
+  outline,
+  outlineWidth = 3.5,
+  delay,
+  duration,
+  class: className = "",
+} = Astro.props;
+
+const strokes = letterStrokes[(letter ?? "").toUpperCase()] ?? [];
+const style = [
+  size ? `width:${size};height:${size};` : "",
+  delay ? `--sl-delay:${delay};` : "",
+  duration ? `--sl-duration:${duration};` : "",
+].join("");
+---
+
+<svg
+  class:list={["stroke-letter", { draw: animate }, className]}
+  viewBox="0 0 100 100"
+  xmlns="http://www.w3.org/2000/svg"
+  style={style}
+  aria-label={letter}
+  role="img"
+>
+  {
+    outline &&
+      strokes.map((d) => (
+        <path
+          d={d}
+          fill="none"
+          stroke={outline}
+          stroke-width={stroke + outlineWidth * 2}
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      ))
+  }
+  {
+    strokes.map((d) => (
+      <path
+        d={d}
+        pathLength="1"
+        fill="none"
+        stroke={color}
+        stroke-width={stroke}
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+    ))
+  }
+</svg>
+
+<style>
+  .stroke-letter {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1;
+  }
+
+  /* Writing animation: each <path> draws in DOM order, then the whole letter
+     holds and the 5s loop repeats. Gap (2) > path (1) and a hidden offset of
+     1.05 keep the round linecap from rendering a dot while a stroke is hidden. */
+  .stroke-letter.draw path {
+    stroke-dasharray: 1 2;
+    stroke-dashoffset: 1.05;
+    animation: sl-draw1 var(--sl-duration, 5s) ease-in-out infinite;
+    animation-delay: var(--sl-delay, 0s);
+  }
+  .stroke-letter.draw path:nth-of-type(2) { animation-name: sl-draw2; }
+  .stroke-letter.draw path:nth-of-type(3) { animation-name: sl-draw3; }
+  .stroke-letter.draw path:nth-of-type(4) { animation-name: sl-draw4; }
+
+  @keyframes sl-draw1 {
+    0%   { stroke-dashoffset: 1.05; }
+    14%  { stroke-dashoffset: 0; }
+    100% { stroke-dashoffset: 0; }
+  }
+  @keyframes sl-draw2 {
+    0%, 16% { stroke-dashoffset: 1.05; }
+    30%     { stroke-dashoffset: 0; }
+    100%    { stroke-dashoffset: 0; }
+  }
+  @keyframes sl-draw3 {
+    0%, 32% { stroke-dashoffset: 1.05; }
+    46%     { stroke-dashoffset: 0; }
+    100%    { stroke-dashoffset: 0; }
+  }
+  @keyframes sl-draw4 {
+    0%, 48% { stroke-dashoffset: 1.05; }
+    62%     { stroke-dashoffset: 0; }
+    100%    { stroke-dashoffset: 0; }
+  }
+</style>

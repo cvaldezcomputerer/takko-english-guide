@@ -2,10 +2,38 @@
 import Layout from '../layouts/Layout.astro';
 import Navbar from '../components/Navbar.astro';
 import T from '../components/T.astro';
+import StrokeLetter from '../components/StrokeLetter.astro';
+import Logo from '../components/Logo.astro';
+
+// Background side letters live in a hidden pool: all 26 letters + the logo. The
+// client script below picks 11 random letters + the logo on every page load,
+// places them down the sides, colors each randomly, and times them so they're
+// written one stroke at a time in order, hold, then un-draw in order.
+const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+// One full-width 4-line guide row per letter (12 total), at staggered positions
+// down the two sides. The script drops one letter onto each row (its side).
+const LEFT_TOPS = [5, 20, 35, 51, 66, 82];
+const RIGHT_TOPS = [12, 27, 42, 58, 73, 89];
+// 11 rows (dropped the bottom-most so it doesn't dip into the footer).
+const slots = Array.from({ length: 11 }, (_, i) => {
+  const side = i % 2 === 0 ? "left" : "right";
+  const row = Math.floor(i / 2);
+  return { side, top: side === "left" ? LEFT_TOPS[row] : RIGHT_TOPS[row] };
+});
 ---
 
 <Layout title="Takko Town Games and Tools">
   <Navbar />
+
+  <div class="abc-side-deco" aria-hidden="true">
+    {slots.map((s) => <div class="guide-row" data-side={s.side} style={`top:${s.top}%`}></div>)}
+    <div class="deco-pool" hidden>
+      {alphabet.map((L) => (
+        <div class="pool-item" data-kind="letter"><StrokeLetter letter={L} color="currentColor" /></div>
+      ))}
+      <div class="pool-item" data-kind="logo"><Logo /></div>
+    </div>
+  </div>
 
   <div class="container">
     <main class="content">
@@ -487,8 +515,30 @@ import T from '../components/T.astro';
 </Layout>
 
 <style>
+  /* Decorative drawing letters down the page sides. Absolute (not fixed) so they
+     scroll with the page; body is the containing block. The script below fills
+     .abc-side-deco from the hidden pool on each load; per-item layout + the draw
+     animation live in the is:global block (the script creates those at runtime). */
+  :global(body) { position: relative; }
+
+  .abc-side-deco {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: -1;
+  }
+
+  /* On smaller screens keep the writing lines but drop the letters — they
+     don't fit beside the full-width content card. */
+  @media (max-width: 1100px) {
+    .abc-side-deco .sd { display: none; }
+  }
+
   /* Container */
   .container {
+    position: relative;
+    z-index: 1;
     max-width: 1200px;
     margin: 0 auto;
     padding: 2rem;
@@ -806,3 +856,137 @@ import T from '../components/T.astro';
     }
   }
 </style>
+
+<!-- Side-letter deco internals. Global (not scoped) because the script creates
+     these elements/classes at runtime; all rules are confined to .abc-side-deco,
+     which only exists on this page. -->
+<style is:global>
+  /* Japanese-style English 4-line writing guides: full-width rows across the
+     page (three rows of writing space each). Lines are the site tan "paper";
+     the baseline (line 3) is red, as on real Japanese English notebooks. The
+     letters sit on these lines (the guides sit under the letters). */
+  .abc-side-deco .guide-row {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 124px;
+    opacity: 0.5;
+    box-sizing: border-box;
+    border-top: 1.5px solid #333;    /* line 1 (top) */
+    border-bottom: 1.5px solid #333; /* line 4 (bottom) */
+  }
+  .abc-side-deco .guide-row::before,
+  .abc-side-deco .guide-row::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    border-top: 1.5px solid #333;
+  }
+  .abc-side-deco .guide-row::before {
+    top: 33.33%;                 /* line 2 (midline) */
+    border-top-style: dashed;
+  }
+  .abc-side-deco .guide-row::after {
+    top: 66.66%;                  /* line 3 (baseline) */
+    border-top-color: #d94b3e;   /* red baseline */
+  }
+
+  /* letter/logo cell: no lines of its own; same height as a row, placed on the
+     row the script assigns, so its baseline lands on the red line. */
+  .abc-side-deco .sd {
+    position: absolute;
+    width: 124px;
+    height: 124px;
+    opacity: 0.6;
+  }
+  .abc-side-deco .sd-left { left: 2%; }
+  .abc-side-deco .sd-right { right: 2%; }
+  .abc-side-deco .sd svg {
+    position: absolute;
+    top: -6%;       /* cap on line 1, baseline on line 3 */
+    left: 10%;
+    width: 80%;
+    height: 80%;
+    display: block;
+  }
+  .abc-side-deco #nose { display: none; } /* logo nose is a fill — not drawable */
+
+  /* One shared keyframe; each stroke is offset by an inline animation-delay the
+     script sets (= its global stroke index × slot). Constant draw→un-draw gap,
+     so this produces: write all in order → hold → un-draw in order → loop. */
+  .abc-side-deco .sd-draw {
+    stroke-dasharray: 1 2;
+    stroke-dashoffset: 1.05;
+    animation: sd-cycle var(--sd-cycle, 60s) linear infinite;
+  }
+  @keyframes sd-cycle {
+    0%    { stroke-dashoffset: 1.05; }  /* hidden */
+    1.5%  { stroke-dashoffset: 0; }     /* this stroke draws on (stays on) */
+    48%   { stroke-dashoffset: 0; }     /* all drawn — hold */
+    49.5% { stroke-dashoffset: 1.05; }  /* un-draw (reverse) */
+    100%  { stroke-dashoffset: 1.05; }  /* all gone — pause, then loop */
+  }
+</style>
+
+<script>
+  // Build the side-letter background on each load: pick 11 random letters + the
+  // logo from the hidden pool, lay them down the sides, color each randomly, and
+  // set per-stroke delays so they're written one stroke at a time in order, hold,
+  // then un-draw in order. Just rearranges build-rendered SVGs — no SVG gen here.
+  const SPEED = 3.2;         // overall slowness (higher = slower)
+  const SS = 0.35 * SPEED;   // seconds between consecutive strokes
+  const PALETTE = ["#e63946", "#2a9d8f", "#457b9d"]; // red / green / blue
+
+  function shuffle<T>(arr: T[]): T[] {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  function buildDeco() {
+    const deco = document.querySelector<HTMLElement>(".abc-side-deco");
+    const pool = deco && deco.querySelector<HTMLElement>(".deco-pool");
+    if (!deco || !pool) return;
+
+    const items = Array.from(pool.children) as HTMLElement[];
+    const logo = items.find((el) => el.dataset.kind === "logo");
+    const letters = shuffle(items.filter((el) => el.dataset.kind === "letter"));
+
+    // One letter per full-width guide row, placed on that row's side/position.
+    const rows = Array.from(deco.querySelectorAll<HTMLElement>(".guide-row"));
+    const chosen = shuffle([logo, ...letters.slice(0, rows.length - 1)]).filter(Boolean) as HTMLElement[];
+
+    let cursor = 0; // running global stroke index
+    rows.forEach((row, i) => {
+      const item = chosen[i];
+      if (!item) return;
+      const side = row.dataset.side === "right" ? "right" : "left";
+      item.className = "sd sd-" + side;
+      item.style.top = row.style.top;
+      item.style.color = PALETTE[(Math.random() * PALETTE.length) | 0];
+
+      const strokes = Array.from(
+        item.querySelectorAll<SVGPathElement>("path"),
+      ).filter((p) => {
+        const s = p.getAttribute("stroke");
+        return s && s !== "none";
+      });
+      strokes.forEach((p, j) => {
+        p.setAttribute("pathLength", "1");
+        p.classList.add("sd-draw");
+        p.style.animationDelay = ((cursor + j) * SS).toFixed(2) + "s";
+      });
+      cursor += strokes.length;
+      deco.appendChild(item); // lift out of the (hidden) pool
+    });
+
+    const cycle = ((cursor - 1) * SS + 2 * SPEED) / 0.48;
+    deco.style.setProperty("--sd-cycle", cycle.toFixed(1) + "s");
+    pool.remove();
+  }
+
+  buildDeco();
+</script>
