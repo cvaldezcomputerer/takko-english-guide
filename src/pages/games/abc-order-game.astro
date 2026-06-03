@@ -49,7 +49,6 @@ const abcColors = abcAlpha.map(
             <button class="opt-btn active" data-value="easy">Easy</button>
             <button class="opt-btn" data-value="medium">Medium</button>
             <button class="opt-btn" data-value="hard">Hard</button>
-            <button class="opt-btn" data-value="super">Super Hard</button>
           </div>
         </div>
 
@@ -624,9 +623,8 @@ const abcColors = abcAlpha.map(
   };
   const DIFFICULTY: Record<string, Mods> = {
     easy:   { timed: false, scramble: false, symbols: 0, spin: false, lives: 0 },
-    medium: { timed: true,  scramble: false, symbols: 0, spin: false, lives: 0 },
-    hard:   { timed: true,  scramble: true,  symbols: 0, spin: false, lives: 0 },
-    super:  { timed: true,  scramble: true,  symbols: 6, spin: true,  lives: 3 },
+    medium: { timed: true,  scramble: true,  symbols: 0, spin: false, lives: 0 },
+    hard:   { timed: true,  scramble: true,  symbols: 6, spin: true,  lives: 3 },
   };
   const SYMBOLS = ["#", "@", "&", "%", "?", "*", "!", "+", "="];
 
