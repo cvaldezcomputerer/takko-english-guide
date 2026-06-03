@@ -49,7 +49,7 @@ let word = FALLBACK;
 let allWords: typeof FALLBACK[] = [FALLBACK];
 
 try {
-    const res = await fetch(SHEET_CSV_URL);
+    const res = await fetch(SHEET_CSV_URL, { signal: AbortSignal.timeout(5000) });
     if (res.ok) {
         const rows = parseCSV(await res.text());
         if (rows.length > 0) {
@@ -102,17 +102,6 @@ const WMO: Record<number, { en: string; ja: string; icon: string }> = {
     99: { en: "It's Stormy!",          ja: '雷雨です！',       icon: 'thunder' },
 };
 
-function feelsLike(t: number): { en: string; ja: string } {
-    if (t < 0)  return { en: "It's Freezing!",      ja: '凍えそうです！' };
-    if (t < 8)  return { en: "It's Very Cold!",     ja: 'とても寒いです！' };
-    if (t < 14) return { en: "It's Cold!",          ja: '寒いです！' };
-    if (t < 20) return { en: "It's a Little Cool",  ja: '少し涼しいです' };
-    if (t < 25) return { en: "It's Nice!",          ja: '気持ちいいです！' };
-    if (t < 31) return { en: "It's a Little Hot",   ja: '少し暑いです' };
-    if (t < 36) return { en: "It's Hot!",           ja: '暑いです！' };
-    return              { en: "It's Very Hot!",      ja: 'とても暑いです！' };
-}
-
 const WEATHER_ICONS: Record<string, string> = {
     sun: `<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="9" fill="#e8a838"/><g stroke="#e8a838" stroke-width="2.5" stroke-linecap="round"><line x1="24" y1="5" x2="24" y2="12"/><line x1="24" y1="36" x2="24" y2="43"/><line x1="5" y1="24" x2="12" y2="24"/><line x1="36" y1="24" x2="43" y2="24"/><line x1="10.1" y1="10.1" x2="15.4" y2="15.4"/><line x1="32.6" y1="32.6" x2="37.9" y2="37.9"/><line x1="37.9" y1="10.1" x2="32.6" y2="15.4"/><line x1="15.4" y1="32.6" x2="10.1" y2="37.9"/></g></svg>`,
     'partly-cloudy': `<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="17" cy="17" r="7" fill="#e8a838"/><g stroke="#e8a838" stroke-width="2" stroke-linecap="round"><line x1="17" y1="4" x2="17" y2="8"/><line x1="17" y1="26" x2="17" y2="30"/><line x1="4" y1="17" x2="8" y2="17"/><line x1="26" y1="17" x2="30" y2="17"/><line x1="8.5" y1="8.5" x2="11.5" y2="11.5"/><line x1="22.5" y1="22.5" x2="25.5" y2="25.5"/><line x1="25.5" y1="8.5" x2="22.5" y2="11.5"/><line x1="11.5" y1="22.5" x2="8.5" y2="25.5"/></g><path d="M16,40 Q10,40 10,34 Q10,28 17,28 Q19,22 25,22 Q31,22 33,27 Q38,27 40,32 Q41,40 35,40Z" fill="#99aab5"/></svg>`,
@@ -122,29 +111,6 @@ const WEATHER_ICONS: Record<string, string> = {
     thunder: `<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8,30 Q2,30 2,23 Q2,16 9,16 Q11,8 21,8 Q30,8 33,15 Q40,14 43,20 Q45,30 37,30Z" fill="#6b7a8d"/><path d="M27,30 L20,41 L25,41 L19,50 L34,37 L28,37Z" fill="#f5c842"/></svg>`,
     fog:   `<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><g stroke="#aab0bb" stroke-width="3" stroke-linecap="round"><line x1="6" y1="12" x2="42" y2="12"/><line x1="4" y1="20" x2="44" y2="20"/><line x1="6" y1="28" x2="42" y2="28"/><line x1="4" y1="36" x2="44" y2="36"/></g></svg>`,
 };
-
-let weather: {
-    temp: number;
-    descEn: string; descJa: string;
-    icon: string;
-    feels: { en: string; ja: string };
-} | null = null;
-
-try {
-    const wRes = await fetch(WEATHER_API);
-    if (wRes.ok) {
-        const wData = await wRes.json() as any;
-        const c = wData.current;
-        const info = WMO[c.weathercode as number] ?? { en: 'Unknown', ja: '不明', icon: 'cloud' };
-        weather = {
-            temp:   Math.round(c.temperature_2m),
-            descEn: info.en,
-            descJa: info.ja,
-            icon:   info.icon,
-            feels:  feelsLike(c.apparent_temperature),
-        };
-    }
-} catch (_) {}
 
 // ── Today's Date ──
 const todayJST = new Date(Date.now() + 9 * 3_600_000);
@@ -368,36 +334,6 @@ Astro.response.headers.set('Cache-Control', `public, s-maxage=${ttl}, stale-whil
             </main>
 
             <aside class="page-sidebar">
-                {weather && (
-                    <div class="weather-card">
-                        <div class="weather-card-header">
-                            <p class="weather-card-title">
-                                <T>
-                                    <span slot="en">Takko Weather</span>
-                                    <span slot="ja">田子の天気</span>
-                                </T>
-                            </p>
-                        </div>
-                        <div class="weather-zone-icon">
-                            <div class="weather-icon" set:html={WEATHER_ICONS[weather.icon] ?? WEATHER_ICONS.cloud}></div>
-                            <div class="weather-desc">
-                                <T>
-                                    <span slot="en">{weather.descEn}</span>
-                                    <span slot="ja">{weather.descJa}</span>
-                                </T>
-                            </div>
-                        </div>
-                        <div class="weather-zone-temp">
-                            <div class="weather-temp">{weather.temp}°C</div>
-                            <div class="weather-feels">
-                                <T>
-                                    <span slot="en">{weather.feels.en}</span>
-                                    <span slot="ja">{weather.feels.ja}</span>
-                                </T>
-                            </div>
-                        </div>
-                    </div>
-                )}
                 <div class="date-card">
                     <div class="date-card-header">
                         <p class="date-card-title">
@@ -424,6 +360,34 @@ Astro.response.headers.set('Cache-Control', `public, s-maxage=${ttl}, stale-whil
                                 </div>
                                 <div class="cal-day">{todayDate}<span class="cal-ordinal">{ordinalSuffix(todayDate)}</span></div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="weather-card is-loading">
+                    <div class="weather-card-header">
+                        <p class="weather-card-title">
+                            <T>
+                                <span slot="en">Takko Weather</span>
+                                <span slot="ja">田子の天気</span>
+                            </T>
+                        </p>
+                    </div>
+                    <div class="weather-zone-icon">
+                        <div class="weather-icon"></div>
+                        <div class="weather-desc">
+                            <T>
+                                <span slot="en"></span>
+                                <span slot="ja"></span>
+                            </T>
+                        </div>
+                    </div>
+                    <div class="weather-zone-temp">
+                        <div class="weather-temp"></div>
+                        <div class="weather-feels">
+                            <T>
+                                <span slot="en"></span>
+                                <span slot="ja"></span>
+                            </T>
                         </div>
                     </div>
                 </div>
@@ -592,6 +556,9 @@ Astro.response.headers.set('Cache-Control', `public, s-maxage=${ttl}, stale-whil
     }
 
     .page-sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
         background: #edf2ee;
         border-radius: 24px;
         padding: 2rem 1.25rem;
@@ -695,7 +662,6 @@ Astro.response.headers.set('Cache-Control', `public, s-maxage=${ttl}, stale-whil
 
     /* ── Word of the Day card ── */
     .wod-card {
-        margin-top: 1.5rem;
         width: 100%;
         border-radius: 8px;
         overflow: hidden;
@@ -887,9 +853,43 @@ Astro.response.headers.set('Cache-Control', `public, s-maxage=${ttl}, stale-whil
         color: #888;
     }
 
+    /* ── Weather loading skeleton (pulse, no gradient) ── */
+    .weather-icon {
+        min-height: 52px;
+    }
+
+    @keyframes wx-pulse {
+        0%, 100% { opacity: 1; }
+        50%      { opacity: 0.45; }
+    }
+
+    .weather-card.is-loading .weather-icon,
+    .weather-card.is-loading .weather-desc,
+    .weather-card.is-loading .weather-temp,
+    .weather-card.is-loading .weather-feels {
+        background: #c3d4e0;
+        border-radius: 6px;
+        color: transparent;
+        animation: wx-pulse 1.2s ease-in-out infinite;
+    }
+
+    .weather-card.is-loading .weather-icon  { width: 52px; border-radius: 50%; }
+    .weather-card.is-loading .weather-desc  { width: 70%;  height: 1.1rem; }
+    .weather-card.is-loading .weather-temp  { width: 90px; height: 2.2rem; }
+    .weather-card.is-loading .weather-feels { width: 60%;  height: 0.9rem; }
+
+    .weather-card.is-error .weather-desc {
+        font-size: 0.9rem;
+        font-weight: 400;
+        color: #888;
+    }
+
+    .weather-card.is-error .weather-temp {
+        color: #c3cdd6;
+    }
+
     /* ── Date card ── */
     .date-card {
-        margin-top: 1.5rem;
         width: 100%;
         border-radius: 8px;
         overflow: hidden;
@@ -963,6 +963,59 @@ Astro.response.headers.set('Cache-Control', `public, s-maxage=${ttl}, stale-whil
         vertical-align: super;
     }
 </style>
+
+<script is:inline define:vars={{ WEATHER_API, WMO, WEATHER_ICONS }}>
+    const wxCard = document.querySelector('.weather-card');
+    if (wxCard) {
+        const iconEl  = wxCard.querySelector('.weather-icon');
+        const descEn  = wxCard.querySelector('.weather-desc .t-en');
+        const descJa  = wxCard.querySelector('.weather-desc .t-ja');
+        const tempEl  = wxCard.querySelector('.weather-temp');
+        const feelsEn = wxCard.querySelector('.weather-feels .t-en');
+        const feelsJa = wxCard.querySelector('.weather-feels .t-ja');
+
+        function feelsLike(t) {
+            if (t < 0)  return { en: "It's Freezing!",     ja: '凍えそうです！' };
+            if (t < 8)  return { en: "It's Very Cold!",    ja: 'とても寒いです！' };
+            if (t < 14) return { en: "It's Cold!",         ja: '寒いです！' };
+            if (t < 20) return { en: "It's a Little Cool", ja: '少し涼しいです' };
+            if (t < 25) return { en: "It's Nice!",         ja: '気持ちいいです！' };
+            if (t < 31) return { en: "It's a Little Hot",  ja: '少し暑いです' };
+            if (t < 36) return { en: "It's Hot!",          ja: '暑いです！' };
+            return            { en: "It's Very Hot!",      ja: 'とても暑いです！' };
+        }
+
+        async function loadWeather() {
+            try {
+                const res = await fetch(WEATHER_API, { signal: AbortSignal.timeout(5000) });
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                const c = (await res.json()).current;
+                const info = WMO[c.weathercode] ?? { en: 'Unknown', ja: '不明', icon: 'cloud' };
+                const feels = feelsLike(c.apparent_temperature);
+
+                iconEl.innerHTML  = WEATHER_ICONS[info.icon] ?? WEATHER_ICONS.cloud;
+                descEn.textContent  = info.en;
+                descJa.textContent  = info.ja;
+                tempEl.textContent  = Math.round(c.temperature_2m) + '°C';
+                feelsEn.textContent = feels.en;
+                feelsJa.textContent = feels.ja;
+                wxCard.classList.remove('is-loading');
+            } catch (err) {
+                console.warn('Weather fetch failed:', err);
+                iconEl.innerHTML  = WEATHER_ICONS.cloud;
+                descEn.textContent  = 'Weather unavailable';
+                descJa.textContent  = '天気を取得できません';
+                tempEl.textContent  = '—';
+                feelsEn.textContent = '';
+                feelsJa.textContent = '';
+                wxCard.classList.remove('is-loading');
+                wxCard.classList.add('is-error');
+            }
+        }
+
+        loadWeather();
+    }
+</script>
 
 <script>
     const card = document.querySelector<HTMLElement>('.wod-card');
