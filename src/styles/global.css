@@ -90,32 +90,35 @@ select {
   }
 }
 
-/* Variables */
+/* ──────────────────────────────────────────────────────────────
+   Design tokens — single source of truth for the whole site.
+   Do NOT redefine --color-* per page. Add new shared values here.
+   ────────────────────────────────────────────────────────────── */
 :root {
-  /* Colors */
-  --color-primary: #557153; /* dark green */
-  --color-secondary: #94b49f; /* light green */
-  --color-accent: #ff7e33;
+  /* Brand palette */
+  --color-bg: #fffbf0;        /* page background (warm off-white) */
+  --color-primary: #4a7c59;   /* brand green */
+  --color-secondary: #d4a373; /* tan — card borders / accents */
+  --color-accent: #e76f51;    /* terracotta — buttons, highlights */
+  --color-torii: #b5291c;     /* shrine red */
+  --color-dialect: #6b5ea8;   /* dialect purple */
+
+  /* Neutrals */
   --color-text: #333;
-  --color-bg: #f8f3e6; /* light beige */
   --color-white: #fff;
+  --color-dark-teal: #2d3a3a; /* footer text */
+  --color-beige: #f8f3e6;     /* games section background */
   --color-nav-bg: rgba(255, 255, 255, 0.9);
-  --color-banner-overlay: rgba(47, 79, 47, 0.9);
-  
-  /* Palette from site */
-  --color-beige: #f8f3e6;
-  --color-dark-green: #557153;
-  --color-light-green: #94b49f;
-  --color-dark-teal: #2d3a3a;
-  --color-red: #ff6b6b;
-  --color-blue: #4ecdc4;
-  --color-yellow: #ffd93d;
-  --color-mint: #95e1d3;
-  --color-pink: #ff8b94;
+
+  /* Legacy aliases — keep nav/footer greens in sync with the brand */
+  --color-dark-green: var(--color-primary);
+  --color-light-green: #94b49f; /* nav link hover */
 
   /* Fonts */
   --font-body: 'Andika', 'M PLUS Rounded 1c', 'Comic Sans MS', cursive, sans-serif;
   --font-heading: var(--font-body);
+  --font-main: 'Fredoka', sans-serif;       /* town-guide / page headings */
+  --font-hand: 'Patrick Hand', cursive;     /* handwritten accents */
 }
 
 .site-footer {

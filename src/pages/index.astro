@@ -424,13 +424,6 @@ Astro.response.headers.set('Cache-Control', `public, s-maxage=${ttl}, stale-whil
 
 <style>
     .town-guide-body {
-        --color-bg: #fffbf0;
-        --color-primary: #4a7c59;
-        --color-secondary: #d4a373;
-        --color-accent: #e76f51;
-        --font-main: 'Fredoka', sans-serif;
-        --font-hand: 'Patrick Hand', cursive;
-
         background-color: #fff;
         font-family: var(--font-main);
         color: #333;
@@ -471,10 +464,17 @@ Astro.response.headers.set('Cache-Control', `public, s-maxage=${ttl}, stale-whil
         margin-bottom: 0.75rem;
     }
 
+    /* Cat is static by default, animates only on hover. */
+    .dialect-card-home :global(.mouth-closed),
+    .dialect-card-home :global(.mouth-open),
+    .dialect-card-home :global(.al-pupil) {
+        animation-play-state: paused;
+    }
+
     .dialect-card-home:hover :global(.mouth-closed),
     .dialect-card-home:hover :global(.mouth-open),
     .dialect-card-home:hover :global(.al-pupil) {
-        animation-play-state: paused;
+        animation-play-state: running;
     }
 
     .welcome-text {
@@ -606,27 +606,32 @@ Astro.response.headers.set('Cache-Control', `public, s-maxage=${ttl}, stale-whil
 
     .site-card {
         background: white;
-        border: 3px solid var(--color-secondary);
-        border-radius: 16px;
+        border: 3px solid var(--color-primary);
+        border-radius: 12px;
         padding: 2rem;
         text-decoration: none;
         color: inherit;
-        transition: transform 0.2s, box-shadow 0.2s;
+        /* Hard offset "sticker" shadow, matching the CTA buttons —
+           deliberately not the generic soft-float card. */
+        box-shadow: 6px 6px 0 var(--color-secondary);
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
         display: flex;
         flex-direction: column;
         align-items: center;
         text-align: center;
     }
 
+    /* Hover presses the card down into its shadow. */
     .site-card:not(.coming-soon):hover {
-        transform: translateY(-4px);
-        box-shadow: 0 8px 20px rgba(74, 124, 89, 0.15);
-        border-color: var(--color-primary);
+        transform: translate(3px, 3px);
+        box-shadow: 3px 3px 0 var(--color-primary);
     }
 
     .site-card.coming-soon {
-        opacity: 0.6;
+        opacity: 0.65;
         border-style: dashed;
+        border-color: var(--color-secondary);
+        box-shadow: none;
         cursor: default;
     }
 
