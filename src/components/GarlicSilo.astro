@@ -1,0 +1,18 @@
+---
+// Closed outer silhouette of the garlic/cat logo — fillable with no holes.
+// Derived from Logo.astro by stitching the outer contour as one closed path:
+// body-bottom → reversed right-ear → reversed center/sprout → reversed left-ear → Z
+const { class: className, ...props } = Astro.props;
+---
+
+<svg class:list={["garlic-silo", className]} viewBox="120 140 780 750" fill="currentColor" xmlns="http://www.w3.org/2000/svg" {...props}>
+  <path d="M199 468C136.885 532.312 124 583 143 680C191.5 772 243 783 346 792C399.466 819.505 433 839 502 839C579 836 598.935 822.763 652.5 792C784.385 779.941 838 749 863 648.5C866 571.5 847.902 515.187 795.5 461.5C824.561 374.668 826 252.5 814 236.5C788 231 706.5 271.5 620 348C597.464 341.182 586.176 332.053 567 312C543.23 277.333 522.5 204.5 531 147L465.5 191C465.5 227.5 455.5 265.5 439.5 301C421.494 325.085 408.38 336.495 378 352C320.888 290.902 206 224.5 187 231C171 252.5 174.118 374.842 199 468Z"/>
+</svg>
+
+<style>
+  .garlic-silo {
+    display: block;
+    width: 1em;
+    height: 1em;
+  }
+</style>
