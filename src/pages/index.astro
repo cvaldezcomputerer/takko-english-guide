@@ -334,7 +334,7 @@ Astro.response.headers.set('Cache-Control', `public, s-maxage=${ttl}, stale-whil
             </main>
 
             <aside class="page-sidebar">
-                <div class="date-card">
+                <a class="date-card" href="/date">
                     <div class="date-card-header">
                         <p class="date-card-title">
                             <T>
@@ -362,8 +362,8 @@ Astro.response.headers.set('Cache-Control', `public, s-maxage=${ttl}, stale-whil
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="weather-card is-loading">
+                </a>
+                <a class="weather-card is-loading" href="/weather">
                     <div class="weather-card-header">
                         <p class="weather-card-title">
                             <T>
@@ -390,8 +390,8 @@ Astro.response.headers.set('Cache-Control', `public, s-maxage=${ttl}, stale-whil
                             </T>
                         </div>
                     </div>
-                </div>
-                <div class="wod-card" data-words={JSON.stringify(allWords)}>
+                </a>
+                <a class="wod-card" href="/takko-ben" data-words={JSON.stringify(allWords)}>
                     <div class="wod-card-header">
                         <p class="wod-card-title">
                             <T>
@@ -415,7 +415,7 @@ Astro.response.headers.set('Cache-Control', `public, s-maxage=${ttl}, stale-whil
                             </T>
                         </div>
                     </div>
-                </div>
+                </a>
             </aside>
         </div>
 
@@ -667,12 +667,15 @@ Astro.response.headers.set('Cache-Control', `public, s-maxage=${ttl}, stale-whil
 
     /* ── Word of the Day card ── */
     .wod-card {
+        display: block;
         width: 100%;
         border-radius: 8px;
         overflow: hidden;
         border: 3px solid var(--color-secondary);
         box-shadow: 0 4px 20px rgba(0,0,0,0.1);
         font-family: var(--font-main);
+        color: inherit;
+        text-decoration: none;
         cursor: pointer;
         user-select: none;
         -webkit-user-select: none;
@@ -788,12 +791,17 @@ Astro.response.headers.set('Cache-Control', `public, s-maxage=${ttl}, stale-whil
 
     /* ── Weather card ── */
     .weather-card {
+        display: block;
         width: 100%;
         border-radius: 8px;
         overflow: hidden;
         border: 3px solid var(--color-secondary);
         box-shadow: 0 4px 20px rgba(0,0,0,0.1);
         font-family: var(--font-main);
+        color: inherit;
+        text-decoration: none;
+        cursor: pointer;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
     }
 
     .weather-card-header {
@@ -895,12 +903,23 @@ Astro.response.headers.set('Cache-Control', `public, s-maxage=${ttl}, stale-whil
 
     /* ── Date card ── */
     .date-card {
+        display: block;
         width: 100%;
         border-radius: 8px;
         overflow: hidden;
         border: 3px solid var(--color-secondary);
         box-shadow: 0 4px 20px rgba(0,0,0,0.1);
         font-family: var(--font-main);
+        color: inherit;
+        text-decoration: none;
+        cursor: pointer;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .date-card:hover,
+    .weather-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.14);
     }
 
     .date-card-header {
@@ -1033,6 +1052,7 @@ Astro.response.headers.set('Cache-Control', `public, s-maxage=${ttl}, stale-whil
         let currentIdx = -1;
         let raf: number | null = null;
         let holdStart = 0;
+        let suppressClick = false; // set when a hold shuffles, so it doesn't also navigate
         const HOLD_MS = 650;
 
         function setScale(s: number) {
@@ -1057,6 +1077,7 @@ Astro.response.headers.set('Cache-Control', `public, s-maxage=${ttl}, stale-whil
 
         function triggerPop(inflatedScale: number) {
             raf = null;
+            suppressClick = true;
             swapWord();
             card!.style.setProperty('--wod-inflate', inflatedScale.toString());
             card!.classList.add('wod-popping');
@@ -1103,5 +1124,13 @@ Astro.response.headers.set('Cache-Control', `public, s-maxage=${ttl}, stale-whil
         card.addEventListener('touchend',   cancelHold);
         card.addEventListener('touchcancel',cancelHold);
         card.addEventListener('selectstart', e => e.preventDefault());
+
+        // A quick click/tap follows the link; a press-and-hold shuffles instead of navigating.
+        card.addEventListener('click', (e) => {
+            if (suppressClick) {
+                e.preventDefault();
+                suppressClick = false;
+            }
+        });
     }
 </script>

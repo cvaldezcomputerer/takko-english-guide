@@ -1,0 +1,76 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navbar from '../components/Navbar.astro';
+import T from '../components/T.astro';
+---
+
+<Layout
+    title="Takko Weather — TakkoTaco"
+    description="Today's weather in Takko Machi."
+>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Patrick+Hand&display=swap" rel="stylesheet">
+
+    <div class="info-body">
+        <Navbar />
+
+        <main class="info-main">
+            <div class="info-card">
+                <h1>
+                    <T>
+                        <span slot="en">Takko Weather</span>
+                        <span slot="ja">田子の天気</span>
+                    </T>
+                </h1>
+                <p class="info-intro">
+                    <T>
+                        <span slot="en">A closer look at the weather in Takko. More coming soon.</span>
+                        <span slot="ja">田子の天気をくわしく見るページです。準備中です。</span>
+                    </T>
+                </p>
+            </div>
+        </main>
+    </div>
+</Layout>
+
+<style>
+    .info-body {
+        background: #fff;
+        font-family: var(--font-main);
+        color: #333;
+        min-height: 100vh;
+        border-bottom: 8px solid var(--color-primary);
+    }
+
+    .info-main {
+        max-width: 640px;
+        margin: 3rem auto;
+        padding: 0 1.5rem;
+    }
+
+    .info-card {
+        background: var(--color-bg);
+        border-radius: 24px;
+        padding: 3rem 2.5rem;
+        box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+    }
+
+    h1 {
+        font-family: var(--font-main);
+        font-size: 2.4rem;
+        color: var(--color-primary);
+        margin: 0 0 0.5rem;
+    }
+
+    .info-intro {
+        color: #666;
+        font-size: 1rem;
+        margin: 0;
+    }
+
+    @media (max-width: 600px) {
+        .info-card {
+            padding: 2rem 1.25rem;
+        }
+        h1 { font-size: 2rem; }
+    }
+</style>
