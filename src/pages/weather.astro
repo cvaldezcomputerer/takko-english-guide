@@ -2,75 +2,787 @@
 import Layout from '../layouts/Layout.astro';
 import Navbar from '../components/Navbar.astro';
 import T from '../components/T.astro';
+
+// ── Speaker icon (reused on the question + every word card) ──
+const SPEAKER = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 5V4L8 9H4z" fill="currentColor"/><path d="M16.5 8.5a4.5 4.5 0 0 1 0 7" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>`;
+
+// Word art will be irasutoya images dropped into /public/images/weather/.
+// Until they're added, the card shows an empty placeholder box.
+const IMG_BASE = '/images/weather';
+
+const weatherWords = [
+    { word: 'sunny',  en: 'sunny',  ja: 'はれ' },
+    { word: 'cloudy', en: 'cloudy', ja: 'くもり' },
+    { word: 'rainy',  en: 'rainy',  ja: 'あめ' },
+    { word: 'snowy',  en: 'snowy',  ja: 'ゆき' },
+    { word: 'windy',  en: 'windy',  ja: 'かぜ' },
+];
+
+const feelingWords = [
+    { word: 'hot',  en: 'hot',  ja: 'あつい' },
+    { word: 'warm', en: 'warm', ja: 'あたたかい' },
+    { word: 'cool', en: 'cool', ja: 'すずしい' },
+    { word: 'cold', en: 'cold', ja: 'さむい' },
+];
+
+// Garlic-silo divider mark (same one used between sections on the home page)
+const GARLIC_SILO_PATH = "M199 468C136.885 532.312 124 583 143 680C191.5 772 243 783 346 792C399.466 819.505 433 839 502 839C579 836 598.935 822.763 652.5 792C784.385 779.941 838 749 863 648.5C866 571.5 847.902 515.187 795.5 461.5C824.561 374.668 826 252.5 814 236.5C788 231 706.5 271.5 620 348C597.464 341.182 586.176 332.053 567 312C543.23 277.333 522.5 204.5 531 147L465.5 191C465.5 227.5 455.5 265.5 439.5 301C421.494 325.085 408.38 336.495 378 352C320.888 290.902 206 224.5 187 231C171 252.5 174.118 374.842 199 468Z";
 ---
 
 <Layout
-    title="Takko Weather — TakkoTaco"
-    description="Today's weather in Takko Machi."
+    title="How's the Weather? — TakkoTaco"
+    description="A daily warm-up for English class: how's the weather today, and how does it feel?"
 >
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Patrick+Hand&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600&family=Patrick+Hand&display=swap" rel="stylesheet">
 
-    <div class="info-body">
+    <div class="weather-body">
         <Navbar />
 
-        <main class="info-main">
-            <div class="info-card">
-                <h1>
+        <main class="weather-main">
+            <!-- Clickable question (plays the teacher's voice) -->
+            <header class="weather-head">
+                <button class="question" id="question-btn" data-audio="/audio/weather/how-is-the-weather.mp3" data-say="How's the weather today?">
+                    <span class="question-text">
+                        <T>
+                            <span slot="en">How's the weather today?</span>
+                            <span slot="ja">きょうの天気はどうですか？</span>
+                        </T>
+                    </span>
+                    <span class="question-speaker" set:html={SPEAKER}></span>
+                </button>
+                <p class="question-hint">
+                    <span class="question-speaker-sm" set:html={SPEAKER}></span>
                     <T>
-                        <span slot="en">Takko Weather</span>
-                        <span slot="ja">田子の天気</span>
-                    </T>
-                </h1>
-                <p class="info-intro">
-                    <T>
-                        <span slot="en">A closer look at the weather in Takko. More coming soon.</span>
-                        <span slot="ja">田子の天気をくわしく見るページです。準備中です。</span>
+                        <span slot="en">Click to hear</span>
+                        <span slot="ja">クリックして聞いてね</span>
                     </T>
                 </p>
+            </header>
+
+            <!-- Answer sentence with drop slots -->
+            <div class="answers">
+                <div class="answer-line">
+                <div class="answer-row">
+                    <p class="sentence">
+                        <span class="sentence-start">It's</span>
+                        <span class="drop-slot" data-accept="weather">
+                            <span class="slot-hint">
+                                <T><span slot="en">drag here</span><span slot="ja">ここへ</span></T>
+                            </span>
+                        </span>
+                        <span class="sentence-word">and</span>
+                        <span class="drop-slot" data-accept="feeling">
+                            <span class="slot-hint">
+                                <T><span slot="en">drag here</span><span slot="ja">ここへ</span></T>
+                            </span>
+                        </span>
+                        <span class="sentence-end">.</span>
+                    </p>
+                </div>
+                <button class="sentence-play" id="sentence-play" disabled aria-label="Read the sentence">
+                    <span class="sp-icon" set:html={SPEAKER}></span>
+                    <T><span slot="en">Read it</span><span slot="ja">読んでみよう</span></T>
+                </button>
+                </div>
+            </div>
+
+            <!-- Word bank -->
+            <div class="banks">
+                <section class="bank-group">
+                    <div class="word-bank" data-category="weather">
+                        {weatherWords.map((w, i) => (
+                            <div class="word-card" data-category="weather" data-order={i}>
+                                <span class="card-icon">
+                                    <img src={`${IMG_BASE}/${w.word}.webp`} alt="" loading="lazy" onerror="this.classList.add('img-missing')" />
+                                </span>
+                                <span class="card-label">
+                                    <T><span slot="en">{w.en}</span><span slot="ja">{w.ja}</span></T>
+                                </span>
+                                <button class="play-btn card-play" data-audio={`/audio/weather/${w.word}.mp3`} data-say={w.en} aria-label={`Play ${w.en}`} set:html={SPEAKER}></button>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+
+                <div class="bank-divider" aria-hidden="true">
+                    <span class="bank-div-line"></span>
+                    <svg viewBox="120 140 780 750" class="bank-div-icon" xmlns="http://www.w3.org/2000/svg"><path d={GARLIC_SILO_PATH} fill="currentColor"/></svg>
+                    <svg viewBox="120 140 780 750" class="bank-div-icon" xmlns="http://www.w3.org/2000/svg"><path d={GARLIC_SILO_PATH} fill="currentColor"/></svg>
+                    <svg viewBox="120 140 780 750" class="bank-div-icon" xmlns="http://www.w3.org/2000/svg"><path d={GARLIC_SILO_PATH} fill="currentColor"/></svg>
+                    <span class="bank-div-line"></span>
+                </div>
+
+                <section class="bank-group">
+                    <div class="word-bank" data-category="feeling">
+                        {feelingWords.map((w, i) => (
+                            <div class="word-card" data-category="feeling" data-order={i}>
+                                <span class="card-icon">
+                                    <img src={`${IMG_BASE}/${w.word}.webp`} alt="" loading="lazy" onerror="this.classList.add('img-missing')" />
+                                </span>
+                                <span class="card-label">
+                                    <T><span slot="en">{w.en}</span><span slot="ja">{w.ja}</span></T>
+                                </span>
+                                <button class="play-btn card-play" data-audio={`/audio/weather/${w.word}.mp3`} data-say={w.en} aria-label={`Play ${w.en}`} set:html={SPEAKER}></button>
+                            </div>
+                        ))}
+                    </div>
+                </section>
             </div>
         </main>
+
+        <!-- Audio-not-ready note -->
+        <div class="toast" id="audio-toast" role="status" aria-live="polite">
+            <T>
+                <span slot="en">Voice not available</span>
+                <span slot="ja">音声を再生できません</span>
+            </T>
+        </div>
     </div>
 </Layout>
 
+<script>
+    // ── Audio (files are added later — fail softly until then) ──
+    const toast = document.getElementById('audio-toast');
+    let toastTimer: number | undefined;
+    function showToast() {
+        if (!toast) return;
+        toast.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = window.setTimeout(() => toast.classList.remove('show'), 2200);
+    }
+    // Speak with the browser's built-in voice (placeholder until real recordings exist).
+    function speak(text: string | undefined) {
+        if (!text || !('speechSynthesis' in window)) { showToast(); return; }
+        window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = 'en-US';
+        u.rate = 0.9;
+        window.speechSynthesis.speak(u);
+    }
+
+    // Try the recorded clip first; if it isn't there yet, fall back to the browser voice.
+    function play(el: HTMLElement) {
+        const src = el.dataset.audio;
+        const say = el.dataset.say;
+        if (!src) { speak(say); return; }
+        const a = new Audio(src);
+        let handled = false;
+        const fallback = () => { if (!handled) { handled = true; speak(say); } };
+        a.addEventListener('error', fallback, { once: true });
+        a.play().catch(fallback);
+    }
+
+    // Question + every word's speaker button
+    document.getElementById('question-btn')?.addEventListener('click', (e) => {
+        play(e.currentTarget as HTMLElement);
+    });
+    document.querySelectorAll<HTMLButtonElement>('.play-btn').forEach((btn) => {
+        btn.addEventListener('pointerdown', (e) => e.stopPropagation());
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            play(btn);
+        });
+    });
+
+    // ── Drag & drop (pointer events → works with mouse and touch) ──
+    const bankByCategory: Record<string, HTMLElement> = {};
+    document.querySelectorAll<HTMLElement>('.word-bank').forEach((bank) => {
+        bankByCategory[bank.dataset.category ?? ''] = bank;
+    });
+    const slots = Array.from(document.querySelectorAll<HTMLElement>('.drop-slot'));
+    const slotByCategory: Record<string, HTMLElement> = {};
+    slots.forEach((s) => { slotByCategory[s.dataset.accept ?? ''] = s; });
+
+    const CLICK_THRESHOLD = 6;   // px of movement below which a quick release counts as a click
+    const DRAG_HOLD_MS = 500;    // press-and-hold this long to pick a card up for dragging
+    let dragEl: HTMLElement | null = null;
+    let dragActive = false;
+    let holdTimer: number | undefined;
+    let originSlot: HTMLElement | null = null;
+    let offsetX = 0;
+    let offsetY = 0;
+    let startX = 0;
+    let startY = 0;
+    let lastX = 0;
+    let lastY = 0;
+    let ghostEl: HTMLElement | null = null;
+
+    function removeGhost() {
+        ghostEl?.remove();
+        ghostEl = null;
+    }
+
+    function insertSorted(bank: HTMLElement, card: HTMLElement) {
+        const order = Number(card.dataset.order ?? 0);
+        const after = Array.from(bank.querySelectorAll<HTMLElement>('.word-card'))
+            .find((c) => Number(c.dataset.order ?? 0) > order);
+        bank.insertBefore(card, after ?? null);
+    }
+
+    // While a card lives in a slot, a faded clone holds its place in the bank
+    // so the bank never reshuffles (whether the card was clicked or dragged there).
+    const homeGhosts = new Map<HTMLElement, HTMLElement>();
+
+    function makeHomeGhost(card: HTMLElement) {
+        if (homeGhosts.has(card)) return;
+        const bank = bankByCategory[card.dataset.category ?? ''];
+        if (!bank) return;
+        const ghost = card.cloneNode(true) as HTMLElement;
+        ghost.classList.add('card-ghost');
+        ghost.classList.remove('arming', 'dragging');
+        ghost.dataset.order = card.dataset.order;
+        insertSorted(bank, ghost);
+        homeGhosts.set(card, ghost);
+    }
+
+    function removeHomeGhost(card: HTMLElement) {
+        homeGhosts.get(card)?.remove();
+        homeGhosts.delete(card);
+    }
+
+    function returnCard(card: HTMLElement) {
+        removeHomeGhost(card);
+        const bank = bankByCategory[card.dataset.category ?? ''];
+        if (bank) insertSorted(bank, card);
+    }
+
+    function clearSlot(slot: HTMLElement) {
+        const existing = slot.querySelector<HTMLElement>('.word-card:not(.card-ghost)');
+        if (existing) returnCard(existing);
+        slot.classList.remove('filled');
+    }
+
+    function placeInSlot(card: HTMLElement, slot: HTMLElement) {
+        clearSlot(slot);
+        makeHomeGhost(card);
+        slot.appendChild(card);
+        slot.classList.add('filled');
+    }
+
+    function slotUnderPoint(x: number, y: number): HTMLElement | null {
+        for (const slot of slots) {
+            const r = slot.getBoundingClientRect();
+            if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) return slot;
+        }
+        return null;
+    }
+
+    function highlight(active: HTMLElement | null, category: string) {
+        slots.forEach((s) => {
+            const ok = s === active && s.dataset.accept === category;
+            s.classList.toggle('drop-hover', ok);
+        });
+    }
+
+    // Promote a held card into an actual drag: lift it out of flow under the pointer.
+    function activateDrag() {
+        if (!dragEl || dragActive) return;
+        const card = dragEl;
+        dragActive = true;
+        card.classList.remove('arming');
+
+        const r = card.getBoundingClientRect();
+        offsetX = lastX - r.left;
+        offsetY = lastY - r.top;
+
+        // Keep the original spot occupied by a faded clone while dragging.
+        if (originSlot) {
+            // dragging out of a slot: hold the slot with a temporary ghost
+            const ghost = card.cloneNode(true) as HTMLElement;
+            ghost.classList.add('card-ghost');
+            ghost.classList.remove('arming', 'dragging');
+            originSlot.insertBefore(ghost, card);
+            ghostEl = ghost;
+        } else {
+            // dragging out of the bank: its persistent home ghost holds the spot
+            makeHomeGhost(card);
+        }
+
+        card.style.width = `${r.width}px`;
+        card.style.left = `${r.left}px`;
+        card.style.top = `${r.top}px`;
+        card.classList.add('dragging');
+        document.body.appendChild(card);
+
+        // show where this word goes back to
+        bankByCategory[card.dataset.category ?? '']?.classList.add('bank-return');
+    }
+
+    function endInteraction() {
+        removeGhost();
+        clearTimeout(holdTimer);
+        holdTimer = undefined;
+        window.removeEventListener('pointermove', onPointerMove);
+        window.removeEventListener('pointerup', onPointerUp);
+        dragEl = null;
+        dragActive = false;
+        originSlot = null;
+        updateSentenceButton();
+    }
+
+    function onPointerMove(e: PointerEvent) {
+        if (!dragEl) return;
+        lastX = e.clientX;
+        lastY = e.clientY;
+        if (dragActive) {
+            dragEl.style.left = `${e.clientX - offsetX}px`;
+            dragEl.style.top = `${e.clientY - offsetY}px`;
+            highlight(slotUnderPoint(e.clientX, e.clientY), dragEl.dataset.category ?? '');
+        }
+    }
+
+    function onPointerUp(e: PointerEvent) {
+        if (!dragEl) return;
+        const card = dragEl;
+        const category = card.dataset.category ?? '';
+
+        if (dragActive) {
+            // released after a real drag → drop on a matching slot, else send home
+            removeGhost();
+            if (originSlot) originSlot.classList.remove('filled');
+            card.classList.remove('dragging');
+            card.style.left = card.style.top = card.style.width = '';
+            const target = slotUnderPoint(e.clientX, e.clientY);
+            if (target && target.dataset.accept === category) placeInSlot(card, target);
+            else returnCard(card);
+            highlight(null, category);
+            bankByCategory[category]?.classList.remove('bank-return');
+        } else {
+            // released before the hold armed → treat a still press as a click toggle
+            card.classList.remove('arming');
+            const isClick = Math.hypot(e.clientX - startX, e.clientY - startY) < CLICK_THRESHOLD;
+            if (isClick) {
+                if (originSlot) {
+                    originSlot.classList.remove('filled');
+                    returnCard(card);               // in a slot → snap down to the bank
+                } else {
+                    const slot = slotByCategory[category];
+                    if (slot) placeInSlot(card, slot); // in the bank → snap up into its slot
+                }
+            }
+        }
+
+        endInteraction();
+    }
+
+    function onPointerDown(e: PointerEvent) {
+        const card = (e.target as HTMLElement).closest<HTMLElement>('.word-card');
+        if (!card || (e.button !== undefined && e.button !== 0)) return;
+        e.preventDefault();
+
+        originSlot = card.parentElement?.classList.contains('drop-slot')
+            ? card.parentElement
+            : null;
+
+        startX = lastX = e.clientX;
+        startY = lastY = e.clientY;
+        dragEl = card;
+        dragActive = false;
+
+        // arm: hold long enough and it lifts into a drag (a quick release = click)
+        card.classList.add('arming');
+        clearTimeout(holdTimer);
+        holdTimer = window.setTimeout(activateDrag, DRAG_HOLD_MS);
+
+        window.addEventListener('pointermove', onPointerMove);
+        window.addEventListener('pointerup', onPointerUp);
+    }
+
+    document.querySelectorAll<HTMLElement>('.word-card').forEach((card) => {
+        card.addEventListener('pointerdown', onPointerDown);
+    });
+
+    // ── "Read it" button: speaks the whole sentence once both slots are filled ──
+    const sentenceBtn = document.getElementById('sentence-play') as HTMLButtonElement | null;
+
+    function placedWord(category: string): string {
+        const card = slotByCategory[category]?.querySelector<HTMLElement>('.word-card:not(.card-ghost)');
+        return card?.querySelector<HTMLElement>('.card-play')?.dataset.say ?? '';
+    }
+
+    function updateSentenceButton() {
+        if (!sentenceBtn) return;
+        sentenceBtn.disabled = !(placedWord('weather') && placedWord('feeling'));
+    }
+
+    sentenceBtn?.addEventListener('click', () => {
+        const w = placedWord('weather');
+        const f = placedWord('feeling');
+        if (w && f) speak(`It's ${w} and ${f}.`);
+    });
+
+    updateSentenceButton();
+</script>
+
 <style>
-    .info-body {
-        background: #fff;
+    /* The whole tool is sized to fit one screen — no scrolling in class. */
+    .weather-body {
+        background: var(--color-bg);
         font-family: var(--font-main);
-        color: #333;
+        color: var(--color-text);
         min-height: 100vh;
+        display: flex;
+        flex-direction: column;
         border-bottom: 8px solid var(--color-primary);
     }
 
-    .info-main {
-        max-width: 640px;
-        margin: 3rem auto;
-        padding: 0 1.5rem;
+    .weather-main {
+        flex: 1;
+        width: 100%;
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: clamp(1rem, 2.5vh, 2.25rem) clamp(1rem, 3vw, 2.5rem);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: clamp(1rem, 3vh, 2.5rem);
     }
 
-    .info-card {
-        background: var(--color-bg);
-        border-radius: 24px;
-        padding: 3rem 2.5rem;
-        box-shadow: 0 4px 24px rgba(0,0,0,0.06);
-    }
+    /* ── Clickable question ── */
+    .weather-head { text-align: center; }
 
-    h1 {
+    .question {
+        display: inline-flex;
+        align-items: center;
+        gap: clamp(0.5rem, 1.2vw, 1rem);
+        margin: 0 auto;
+        border: none;
+        background: none;
+        cursor: pointer;
         font-family: var(--font-main);
-        font-size: 2.4rem;
+        font-weight: 600;
         color: var(--color-primary);
-        margin: 0 0 0.5rem;
+        line-height: 1.15;
+        padding: 0.2rem 0.4rem;
+        transition: transform 0.12s, color 0.15s;
+    }
+    .question-text {
+        font-size: clamp(1.7rem, 5vw, 3.4rem);
+        border-bottom: 3px dashed transparent;
+    }
+    .question:hover { transform: scale(1.02); }
+    .question:hover .question-text { border-bottom-color: var(--color-secondary); }
+    .question:active { transform: scale(0.99); }
+
+    .question-speaker {
+        flex: 0 0 auto;
+        width: clamp(2rem, 4.5vw, 3rem);
+        height: clamp(2rem, 4.5vw, 3rem);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: var(--color-primary);
+        color: #fff;
+    }
+    .question-speaker :global(svg) { width: 58%; height: 58%; }
+
+    .question-hint {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        margin: clamp(0.35rem, 1vh, 0.7rem) 0 0;
+        font-size: clamp(0.8rem, 1.6vw, 1.05rem);
+        color: #9a8a63;
+    }
+    .question-speaker-sm {
+        width: 1em;
+        height: 1em;
+        display: inline-flex;
+        color: var(--color-secondary);
+    }
+    .question-speaker-sm :global(svg) { width: 100%; height: 100%; }
+
+    /* ── Answer sentences ── */
+    .answers {
+        display: flex;
+        flex-direction: column;
+        gap: clamp(0.6rem, 1.6vh, 1.1rem);
+        align-items: center;
     }
 
-    .info-intro {
-        color: #666;
-        font-size: 1rem;
+    .answer-line {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: clamp(0.6rem, 1.5vw, 1rem);
+        width: 100%;
+    }
+
+    .answer-row {
+        display: flex;
+        align-items: center;
+        gap: clamp(0.6rem, 1.5vw, 1rem);
+        max-width: 640px;
+        background: #fff;
+        border: 2px solid #efe7d6;
+        border-radius: 18px;
+        padding: clamp(0.6rem, 1.6vh, 1.1rem) clamp(0.9rem, 2vw, 1.4rem);
+    }
+
+    .sentence {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.5rem;
         margin: 0;
+        font-size: clamp(1.3rem, 3.2vw, 2.2rem);
+        font-weight: 500;
+    }
+    .sentence-end { margin-left: -0.25rem; }
+
+    .drop-slot {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: clamp(120px, 16vw, 200px);
+        min-height: clamp(56px, 9vh, 90px);
+        padding: 0.2rem 0.5rem;
+        border: 3px dashed var(--color-secondary);
+        border-radius: 16px;
+        background: #fdfaf2;
+        transition: background 0.15s, border-color 0.15s, transform 0.1s;
+    }
+    .drop-slot.filled {
+        border-color: transparent;
+        background: transparent;
+        min-width: 0;
+        min-height: 0;
+        padding: 0;
+    }
+    .drop-slot.drop-hover {
+        border-color: var(--color-accent);
+        background: #fdeee8;
+        transform: scale(1.03);
+    }
+    .slot-hint {
+        font-size: clamp(0.8rem, 1.5vw, 1rem);
+        font-weight: 400;
+        color: #b9a87f;
+        pointer-events: none;
+    }
+    .drop-slot.filled .slot-hint { display: none; }
+
+    /* ── "Read it" sentence button ── */
+    .sentence-play {
+        flex: 0 0 auto;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        border: none;
+        border-radius: 999px;
+        background: var(--color-primary);
+        color: #fff;
+        font-family: var(--font-main);
+        font-weight: 500;
+        font-size: clamp(0.85rem, 1.6vw, 1.05rem);
+        padding: 0.5rem 1.3rem 0.5rem 1rem;
+        cursor: pointer;
+        transition: background 0.15s, opacity 0.15s, transform 0.12s;
+    }
+    .sentence-play:hover:not(:disabled) {
+        background: #3c6749;
+        transform: scale(1.03);
+    }
+    .sentence-play:disabled {
+        background: #d9d4c7;
+        cursor: not-allowed;
+        opacity: 0.65;
+    }
+    .sp-icon {
+        width: 1.2em;
+        height: 1.2em;
+        display: inline-flex;
+    }
+    .sp-icon :global(svg) { width: 100%; height: 100%; }
+
+    /* ── Word bank ── */
+    .banks {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: clamp(0.5rem, 1.5vh, 1rem);
+    }
+
+    .bank-group {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* garlic-silo divider between the two word groups */
+    .bank-divider {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 6px;
+        width: 100%;
+        max-width: 420px;
+        color: var(--color-secondary);
+    }
+    .bank-div-line {
+        flex: 1;
+        height: 2px;
+        background: currentColor;
+        opacity: 0.5;
+        border-radius: 1px;
+    }
+    .bank-div-icon {
+        width: clamp(14px, 1.6vw, 20px);
+        height: clamp(14px, 1.6vw, 20px);
+        flex-shrink: 0;
+    }
+
+    .word-bank {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: clamp(0.5rem, 1.4vw, 1rem);
+        padding: clamp(0.4rem, 1vh, 0.7rem);
+        border: 2px dashed transparent;
+        border-radius: 18px;
+        transition: background 0.15s, border-color 0.15s;
+    }
+    /* the home bank lights up while you drag its word, showing where it returns */
+    .word-bank.bank-return {
+        border-color: var(--color-secondary);
+        background: #fdf7ea;
+    }
+
+    /* ── Word cards (vertical: icon over label, speaker in corner) ── */
+    .word-card {
+        position: relative;
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: clamp(0.15rem, 0.6vh, 0.4rem);
+        width: clamp(80px, 11vw, 150px);
+        background: #fff;
+        border: 2px solid #efe7d6;
+        border-radius: 18px;
+        padding: clamp(0.55rem, 1.4vh, 1rem) clamp(0.4rem, 1vw, 0.8rem);
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.06);
+        cursor: grab;
+        touch-action: none;
+        user-select: none;
+        transition: box-shadow 0.15s, border-color 0.15s, transform 0.12s;
+    }
+    .word-card:hover {
+        border-color: var(--color-secondary);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+        transform: translateY(-2px);
+    }
+    /* "charging up" while held — duration matches DRAG_HOLD_MS so it lands as the drag lifts */
+    .word-card.arming {
+        transform: scale(1.08);
+        transition: transform 0.5s ease;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.14);
+    }
+    /* faded placeholder left behind in the original spot during a drag */
+    .word-card.card-ghost {
+        opacity: 0.4;
+        pointer-events: none;
+        box-shadow: none;
+        cursor: default;
+        transform: none;
+    }
+    .word-card.dragging {
+        position: fixed;
+        z-index: 1000;
+        cursor: grabbing;
+        box-shadow: 0 14px 30px rgba(0, 0, 0, 0.22);
+        transform: rotate(-2deg) scale(1.05);
+        pointer-events: none;
+    }
+
+    .card-icon {
+        width: clamp(40px, 7vh, 80px);
+        height: clamp(40px, 7vh, 80px);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        /* placeholder look until the irasutoya image is dropped in */
+        background: #f1ede3;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+    .card-icon img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+    /* hide the broken-image glyph while the real art is missing */
+    .card-icon img.img-missing { visibility: hidden; }
+
+    .card-label {
+        font-size: clamp(1rem, 2vw, 1.6rem);
+        font-weight: 500;
+    }
+
+    .card-play {
+        position: absolute;
+        top: clamp(0.3rem, 0.8vh, 0.5rem);
+        right: clamp(0.3rem, 0.8vh, 0.5rem);
+        width: clamp(22px, 2.4vw, 30px);
+        height: clamp(22px, 2.4vw, 30px);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        border-radius: 50%;
+        background: #eef3ee;
+        color: var(--color-primary);
+        cursor: pointer;
+        padding: 0;
+        transition: transform 0.12s, background 0.15s;
+    }
+    .card-play:hover { background: var(--color-primary); color: #fff; transform: scale(1.1); }
+    .card-play svg { width: 58%; height: 58%; }
+
+    /* A card resting inside a sentence slot → compact, horizontal */
+    .drop-slot .word-card {
+        flex-direction: row;
+        width: auto;
+        gap: clamp(0.3rem, 0.8vw, 0.6rem);
+        padding: clamp(0.4rem, 1vh, 0.7rem) clamp(0.7rem, 1.5vw, 1.1rem);
+        padding-right: clamp(1.8rem, 3vw, 2.4rem);
+        border-color: var(--color-primary);
+        background: #f3f8f3;
+    }
+    .drop-slot .card-icon {
+        width: clamp(34px, 4vw, 52px);
+        height: clamp(34px, 4vw, 52px);
+        background: transparent;
+    }
+
+    /* ── Toast ── */
+    .toast {
+        position: fixed;
+        left: 50%;
+        bottom: 1.5rem;
+        transform: translate(-50%, 1.5rem);
+        background: var(--color-text);
+        color: #fff;
+        font-family: var(--font-main);
+        font-size: 0.95rem;
+        padding: 0.7rem 1.3rem;
+        border-radius: 999px;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s, transform 0.2s;
+        z-index: 2000;
+    }
+    .toast.show {
+        opacity: 1;
+        transform: translate(-50%, 0);
     }
 
     @media (max-width: 600px) {
-        .info-card {
-            padding: 2rem 1.25rem;
+        .answer-row {
+            align-items: center;
+            gap: 0.5rem;
         }
-        h1 { font-size: 2rem; }
     }
 </style>
