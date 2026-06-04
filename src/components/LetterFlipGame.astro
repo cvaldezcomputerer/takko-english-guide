@@ -37,9 +37,9 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 <div class="letter-game">
   <!-- Header & Nav -->
   <div class="letter-game__header">
+    <a href="/game" class="letter-game__back-link" data-astro-reload> ← Back </a>
     <h1 class="letter-game__title">Letter Flip Game</h1>
     <div class="header-controls">
-        <a href="/" class="letter-game__back-link" data-astro-reload> ← Back </a>
         <button
           class="letter-game__settings-btn"
           id="settings-btn"
@@ -407,7 +407,7 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
   /* "On" State - Letters */
   #lg-letter-grid .item-toggle input:checked + span {
-      background: #667eea;
+      background: var(--color-primary);
       color: white;
   }
   
@@ -521,7 +521,7 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
   }
 
   input:checked + .slider {
-    background-color: #667eea;
+    background-color: var(--color-primary);
   }
 
   input:checked + .slider:before {
@@ -612,7 +612,7 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
   }
 
   .letter-game__card--points {
-    background: #1e1b4b !important;
+    background: var(--color-dark-teal) !important;
     border-color: rgba(255, 255, 255, 0.4) !important;
     transform: none;
   }
@@ -646,7 +646,7 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
   .letter-game__next {
     background: white;
-    color: #667eea;
+    color: var(--color-accent);
     border: none;
     padding: 1rem 3rem;
     border-radius: 2rem;
@@ -738,7 +738,7 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
   }
 
   .emotion-toggle input:checked + span {
-      background: #667eea;
+      background: var(--color-primary);
       color: white;
   }
 

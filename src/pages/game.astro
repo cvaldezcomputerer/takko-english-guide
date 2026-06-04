@@ -276,23 +276,8 @@ const slots = Array.from({ length: 11 }, (_, i) => {
 
           <!-- ABC Order Game Card -->
           <a href="/games/abc-order-game" class="game-card">
-              <div class="card-image abc-order-bg">
-                  <div class="icon" aria-hidden="true">
-                    <svg viewBox="0 0 120 120" role="img" focusable="false" xmlns="http://www.w3.org/2000/svg">
-                      <!-- Shelf -->
-                      <rect x="10" y="76" width="100" height="32" rx="5" fill="#f0ece0" stroke="#c5b99a" stroke-width="2.5"/>
-                      <text x="22" y="99" font-family="Georgia, serif" font-size="22" font-weight="700" fill="#e76f51">A</text>
-                      <text x="49" y="99" font-family="Georgia, serif" font-size="22" font-weight="700" fill="#2a9d8f">B</text>
-                      <text x="76" y="99" font-family="Georgia, serif" font-size="22" font-weight="700" fill="#e9c46a">C</text>
-                      <!-- Scattered tiles -->
-                      <rect x="14" y="22" width="30" height="30" rx="6" fill="white" stroke="#457b9d" stroke-width="2.5"/>
-                      <text x="20" y="44" font-family="Georgia, serif" font-size="22" font-weight="700" fill="#457b9d">F</text>
-                      <rect x="52" y="12" width="30" height="30" rx="6" fill="white" stroke="#8338ec" stroke-width="2.5"/>
-                      <text x="58" y="34" font-family="Georgia, serif" font-size="22" font-weight="700" fill="#8338ec">D</text>
-                      <rect x="80" y="30" width="28" height="28" rx="6" fill="white" stroke="#e76f51" stroke-width="2.5"/>
-                      <text x="86" y="51" font-family="Georgia, serif" font-size="20" font-weight="700" fill="#e76f51">E</text>
-                    </svg>
-                  </div>
+              <div class="card-image card-image--screenshot">
+                  <img src="/images/game-screenshots/abc-order-game.png" alt="ABC Order game screenshot" loading="lazy" />
               </div>
               <div class="card-content">
                   <h3>
@@ -508,6 +493,35 @@ const slots = Array.from({ length: 11 }, (_, i) => {
                   </span>
               </div>
           </a>
+
+          <!-- Weather Tool Card -->
+          <a href="/weather" class="game-card">
+              <div class="card-image card-image--screenshot">
+                  <img src="/images/game-screenshots/weather-tool.png" alt="How's the Weather tool screenshot" loading="lazy" />
+              </div>
+              <div class="card-content">
+                  <h3>
+                    <T>
+                      <span slot="en">How's the Weather?</span>
+                      <span slot="ja">今日の天気は？</span>
+                    </T>
+                  </h3>
+                  <p class="card-topics">Weather · Feelings</p>
+                  <p class="card-desc">
+                    <T>
+                      <span slot="en">A daily warm-up to say the weather and how it feels.</span>
+                      <span slot="ja">天気と気温を英語で言う、毎日のウォームアップ。</span>
+                    </T>
+                  </p>
+                  <span class="play-btn">
+                    <T>
+                      <span slot="en">Play Now</span>
+                      <span slot="ja">今すぐプレイ</span>
+                    </T>
+                    <i class="fas fa-play"></i>
+                  </span>
+              </div>
+          </a>
         </div>
       </section>
     </main>
@@ -666,10 +680,6 @@ const slots = Array.from({ length: 11 }, (_, i) => {
 
   .anarika-bg {
     background: #fff0f2;
-  }
-
-  .abc-order-bg {
-    background: #f5f2eb;
   }
 
   .anarika-face-img {
