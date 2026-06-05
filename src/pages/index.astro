@@ -73,7 +73,9 @@ try {
 } catch (_) { /* use fallback */ }
 
 // ── Weather ──
-const WEATHER_API = 'https://api.open-meteo.com/v1/forecast?latitude=40.32&longitude=141.20&current=temperature_2m,weathercode,apparent_temperature&timezone=Asia/Tokyo';
+// Served via our own edge endpoint (src/pages/api/weather.js), which caches
+// Open-Meteo at the Cloudflare edge so visitors don't hit the API directly.
+const WEATHER_API = '/api/weather';
 
 const WMO: Record<number, { en: string; ja: string; icon: string }> = {
     0:  { en: "It's Sunny!",           ja: '快晴です！',       icon: 'sun' },
@@ -1054,31 +1056,63 @@ const GARLIC_SILO_PATH = "M199 468C136.885 532.312 124 583 143 680C191.5 772 243
             return            { en: "It's Very Hot!",      ja: 'とても暑いです！' };
         }
 
-        async function loadWeather() {
+        // Keep a fetched reading for a while so revisiting/refreshing the page
+        // doesn't hammer the API (and isn't at the mercy of a slow response).
+        const CACHE_KEY = 'wx-current';
+        const FRESH_MS  = 60 * 60 * 1000; // re-fetch at most once an hour
+
+        function readCache() {
             try {
-                const res = await fetch(WEATHER_API, { signal: AbortSignal.timeout(5000) });
+                const saved = JSON.parse(localStorage.getItem(CACHE_KEY) ?? 'null');
+                if (saved && typeof saved.t === 'number' && saved.c) return saved;
+            } catch (_) { /* ignore corrupt cache */ }
+            return null;
+        }
+
+        function render(c) {
+            const info = WMO[c.weathercode] ?? { en: 'Unknown', ja: '不明', icon: 'cloud' };
+            const feels = feelsLike(c.apparent_temperature);
+            iconEl.innerHTML  = WEATHER_ICONS[info.icon] ?? WEATHER_ICONS.cloud;
+            descEn.textContent  = info.en;
+            descJa.textContent  = info.ja;
+            tempEl.textContent  = Math.round(c.temperature_2m) + '°C';
+            feelsEn.textContent = feels.en;
+            feelsJa.textContent = feels.ja;
+            wxCard.classList.remove('is-loading', 'is-error');
+        }
+
+        function showError() {
+            iconEl.innerHTML  = WEATHER_ICONS.cloud;
+            descEn.textContent  = 'Weather unavailable';
+            descJa.textContent  = '天気を取得できません';
+            tempEl.textContent  = '—';
+            feelsEn.textContent = '';
+            feelsJa.textContent = '';
+            wxCard.classList.remove('is-loading');
+            wxCard.classList.add('is-error');
+        }
+
+        async function loadWeather() {
+            const cached = readCache();
+            // Fresh enough → show it and skip the network entirely.
+            if (cached && Date.now() - cached.t < FRESH_MS) {
+                render(cached.c);
+                return;
+            }
+
+            // The browser now hits our own edge-cached /api/weather worker, so a
+            // single fetch is enough — no retry needed.
+            try {
+                const res = await fetch(WEATHER_API, { signal: AbortSignal.timeout(8000) });
                 if (!res.ok) throw new Error('HTTP ' + res.status);
                 const c = (await res.json()).current;
-                const info = WMO[c.weathercode] ?? { en: 'Unknown', ja: '不明', icon: 'cloud' };
-                const feels = feelsLike(c.apparent_temperature);
-
-                iconEl.innerHTML  = WEATHER_ICONS[info.icon] ?? WEATHER_ICONS.cloud;
-                descEn.textContent  = info.en;
-                descJa.textContent  = info.ja;
-                tempEl.textContent  = Math.round(c.temperature_2m) + '°C';
-                feelsEn.textContent = feels.en;
-                feelsJa.textContent = feels.ja;
-                wxCard.classList.remove('is-loading');
+                render(c);
+                try { localStorage.setItem(CACHE_KEY, JSON.stringify({ t: Date.now(), c })); } catch (_) {}
             } catch (err) {
                 console.warn('Weather fetch failed:', err);
-                iconEl.innerHTML  = WEATHER_ICONS.cloud;
-                descEn.textContent  = 'Weather unavailable';
-                descJa.textContent  = '天気を取得できません';
-                tempEl.textContent  = '—';
-                feelsEn.textContent = '';
-                feelsJa.textContent = '';
-                wxCard.classList.remove('is-loading');
-                wxCard.classList.add('is-error');
+                // Fall back to the last good reading rather than an error, if we have one.
+                if (cached) render(cached.c);
+                else showError();
             }
         }
 
