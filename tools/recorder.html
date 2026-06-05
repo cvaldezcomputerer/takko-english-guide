@@ -1,0 +1,665 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Voice Clip Recorder</title>
+<!-- Client-side mp3 encoder. Pinned version, loaded from CDN (needs internet the first time). -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.2.1/lame.min.js"></script>
+<style>
+  :root {
+    --bg: #14181d;
+    --panel: #1d232b;
+    --panel2: #252d37;
+    --line: #333d49;
+    --text: #e7ecf1;
+    --muted: #8b97a5;
+    --accent: #4f9cf0;
+    --rec: #e0564f;
+    --ok: #4caf78;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.5;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 24px 20px 80px; }
+  h1 { font-size: 20px; margin: 0 0 2px; }
+  .sub { color: var(--muted); font-size: 13px; margin: 0 0 20px; }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 18px; margin-bottom: 16px; }
+  .panel h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 0 0 14px; font-weight: 600; }
+  label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+  input[type=text], input[type=number], select {
+    width: 100%; background: var(--panel2); border: 1px solid var(--line); color: var(--text);
+    border-radius: 8px; padding: 9px 11px; font-size: 14px; font-family: inherit;
+  }
+  input:focus, select:focus { outline: none; border-color: var(--accent); }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  .row:last-child, .row3:last-child { margin-bottom: 0; }
+  .field { min-width: 0; }
+  .check { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text); margin: 0; cursor: pointer; }
+  .check input { width: 16px; height: 16px; accent-color: var(--accent); }
+  button {
+    font-family: inherit; font-size: 14px; border: 1px solid var(--line); background: var(--panel2);
+    color: var(--text); border-radius: 8px; padding: 9px 14px; cursor: pointer;
+  }
+  button:hover { border-color: var(--accent); }
+  button:disabled { opacity: .45; cursor: not-allowed; }
+  .btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+  .recbar { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .recbtn {
+    width: 72px; height: 72px; border-radius: 50%; border: 3px solid var(--line);
+    background: var(--panel2); display: flex; align-items: center; justify-content: center; cursor: pointer;
+    flex: 0 0 auto;
+  }
+  .recbtn .dot { width: 26px; height: 26px; border-radius: 50%; background: var(--rec); transition: all .12s; }
+  .recbtn.armed { border-color: var(--rec); }
+  .recbtn.recording { border-color: var(--rec); animation: pulse 1s infinite; }
+  .recbtn.recording .dot { border-radius: 5px; width: 22px; height: 22px; }
+  @keyframes pulse { 0%,100%{ box-shadow: 0 0 0 0 rgba(224,86,79,.5);} 50%{ box-shadow: 0 0 0 10px rgba(224,86,79,0);} }
+  .timer { font-variant-numeric: tabular-nums; font-size: 28px; font-weight: 600; min-width: 90px; }
+  .meter { flex: 1 1 140px; height: 10px; background: var(--panel2); border-radius: 6px; overflow: hidden; min-width: 120px; }
+  .meter > div { height: 100%; width: 0%; background: var(--ok); transition: width .05s; }
+  .hint { font-size: 12px; color: var(--muted); margin-top: 10px; }
+  .dest { font-size: 13px; color: var(--muted); margin-top: 10px; word-break: break-all; }
+  .dest b { color: var(--text); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; color: var(--muted); font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; padding: 0 8px 8px; }
+  td { padding: 7px 8px; border-top: 1px solid var(--line); vertical-align: middle; }
+  td.name { font-family: ui-monospace, monospace; }
+  .iconbtn { padding: 5px 9px; font-size: 12px; }
+  .tag { display: inline-block; font-size: 11px; padding: 2px 7px; border-radius: 5px; background: var(--panel2); color: var(--muted); }
+  .tag.sample { color: #d9b35b; }
+  .empty { color: var(--muted); font-size: 13px; padding: 10px 8px; }
+  kbd { background: var(--panel2); border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 1px 6px; font-size: 12px; font-family: ui-monospace, monospace; }
+  .warn { color: var(--rec); font-size: 12px; margin-top: 8px; min-height: 16px; }
+  .browser { background: var(--panel2); border: 1px solid var(--line); border-radius: 8px; padding: 12px; }
+  .crumbs { display: flex; flex-wrap: wrap; gap: 2px; align-items: center; margin-bottom: 12px; }
+  .crumb { background: transparent; border: none; color: var(--accent); padding: 2px 5px; cursor: pointer; font-size: 13px; border-radius: 5px; }
+  .crumb:hover { background: var(--panel); }
+  .crumb.cur { color: var(--text); font-weight: 600; cursor: default; }
+  .crumb.cur:hover { background: transparent; }
+  .sep { color: var(--muted); font-size: 13px; }
+  .folders { display: flex; flex-wrap: wrap; gap: 8px; }
+  .folderbtn { display: inline-flex; align-items: center; gap: 7px; padding: 8px 12px; font-size: 13px; background: var(--panel); }
+  .folderbtn svg { flex: 0 0 auto; color: #d9b35b; }
+  .folders .none { color: var(--muted); font-size: 12px; padding: 6px 2px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Voice Clip Recorder</h1>
+  <p class="sub">Records short clips straight into your site. Chrome / Edge only.</p>
+
+  <!-- DESTINATION -->
+  <div class="panel">
+    <h2>Destination</h2>
+    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+      <button id="pickRoot" class="btn-primary">Choose project folder…</button>
+      <button id="jumpAudio" disabled>Go to public/audio</button>
+      <button id="jumpSamples" disabled>Go to voice-samples</button>
+    </div>
+
+    <div class="browser" id="browser" style="display:none; margin-top:14px;">
+      <div class="crumbs" id="crumbs"></div>
+      <div class="folders" id="folderList"></div>
+      <div style="margin-top:12px;">
+        <button id="newFolder" class="iconbtn">+ New folder here</button>
+      </div>
+    </div>
+
+    <div class="field" style="margin-top:14px;">
+      <label>Base file name</label>
+      <input type="text" id="filename" placeholder="library" />
+    </div>
+    <div class="dest" id="destPath">No folder chosen yet.</div>
+    <div class="warn" id="warn"></div>
+  </div>
+
+  <!-- RECORD -->
+  <div class="panel">
+    <h2>Record</h2>
+    <div class="recbar">
+      <div class="recbtn" id="recBtn" title="Record / stop"><div class="dot"></div></div>
+      <div class="timer" id="timer">0.0s</div>
+      <div class="meter"><div id="meterFill"></div></div>
+      <button id="saveBtn" class="btn-primary" disabled>Save</button>
+      <button id="discardBtn" disabled>Discard</button>
+    </div>
+    <audio id="preview" controls style="width:100%; margin-top:14px; display:none;"></audio>
+    <div class="hint">Press <kbd>Space</kbd> to start / stop. After saving, the number on the end of the name auto-bumps (library &rarr; library-2) when auto-number is on.</div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="panel">
+    <h2>Settings</h2>
+    <div class="row3">
+      <div class="field">
+        <label>Microphone</label>
+        <select id="micSelect"></select>
+      </div>
+      <div class="field">
+        <label>Sample rate</label>
+        <select id="sampleRate">
+          <option value="22050">22.05 kHz (small, fine for voice)</option>
+          <option value="44100" selected>44.1 kHz</option>
+          <option value="48000">48 kHz</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>MP3 bitrate</label>
+        <select id="bitrate">
+          <option value="64">64 kbps</option>
+          <option value="96" selected>96 kbps</option>
+          <option value="128">128 kbps</option>
+        </select>
+      </div>
+    </div>
+    <div class="row3">
+      <label class="check"><input type="checkbox" id="optTrim" checked /> Auto-trim silence</label>
+      <label class="check"><input type="checkbox" id="optNormalize" checked /> Normalize volume</label>
+      <label class="check"><input type="checkbox" id="optAutoNum" checked /> Auto-number names</label>
+    </div>
+    <div class="row3">
+      <label class="check"><input type="checkbox" id="optNoise" checked /> Noise suppression</label>
+      <label class="check"><input type="checkbox" id="optEcho" /> Echo cancellation</label>
+      <label class="check"><input type="checkbox" id="optAutoPlay" checked /> Auto-play after record</label>
+    </div>
+    <div class="row3">
+      <div class="field">
+        <label>Trim threshold (0–0.1)</label>
+        <input type="number" id="trimThresh" min="0" max="0.1" step="0.005" value="0.015" />
+      </div>
+      <div class="field">
+        <label>Keep padding (ms)</label>
+        <input type="number" id="padMs" min="0" max="500" step="10" value="80" />
+      </div>
+      <div class="field">
+        <label>Max length (s, 0 = none)</label>
+        <input type="number" id="maxLen" min="0" max="60" step="1" value="0" />
+      </div>
+    </div>
+  </div>
+
+  <!-- SAVED -->
+  <div class="panel">
+    <h2>Saved this session</h2>
+    <table>
+      <thead><tr><th>File</th><th>Where</th><th>Length</th><th>Size</th><th></th></tr></thead>
+      <tbody id="savedRows"><tr><td colspan="5" class="empty">Nothing saved yet.</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+// ---------- tiny state ----------
+const S = {
+  rootHandle: null,      // the chosen project root directory handle
+  pathHandles: [],       // directory handles from root -> current folder
+  path: [],              // folder names from root -> current folder (the save target)
+  mediaStream: null,
+  recorder: null,
+  chunks: [],
+  recording: false,
+  startTime: 0,
+  rafTimer: 0,
+  analyser: null,
+  rafMeter: 0,
+  lastBlob: null,        // processed mp3 blob awaiting save
+  lastBuffer: null,      // processed AudioBuffer (for length display)
+};
+
+const $ = (id) => document.getElementById(id);
+
+// ---------- settings persistence ----------
+const SETTING_IDS = ["filename","sampleRate","bitrate","optTrim","optNormalize",
+  "optAutoNum","optNoise","optEcho","optAutoPlay","trimThresh","padMs","maxLen"];
+let savedPath = [];
+function loadSettings() {
+  let saved = {};
+  try { saved = JSON.parse(localStorage.getItem("recorderSettings") || "{}"); } catch {}
+  for (const id of SETTING_IDS) {
+    if (saved[id] === undefined) continue;
+    const el = $(id);
+    if (el.type === "checkbox") el.checked = saved[id]; else el.value = saved[id];
+  }
+  savedPath = Array.isArray(saved.path) ? saved.path : [];
+}
+function saveSettings() {
+  const out = { path: S.path };
+  for (const id of SETTING_IDS) {
+    const el = $(id);
+    out[id] = el.type === "checkbox" ? el.checked : el.value;
+  }
+  localStorage.setItem("recorderSettings", JSON.stringify(out));
+}
+SETTING_IDS.forEach((id) => $(id).addEventListener("change", () => { saveSettings(); updateDest(); }));
+
+// ---------- IndexedDB: remember the chosen folder across reloads ----------
+function idb(mode, fn) {
+  return new Promise((res, rej) => {
+    const open = indexedDB.open("recorderDB", 1);
+    open.onupgradeneeded = () => open.result.createObjectStore("handles");
+    open.onerror = () => rej(open.error);
+    open.onsuccess = () => {
+      const tx = open.result.transaction("handles", mode);
+      const req = fn(tx.objectStore("handles"));
+      req.onsuccess = () => res(req.result);
+      req.onerror = () => rej(req.error);
+    };
+  });
+}
+const storeHandle = (h) => idb("readwrite", (s) => s.put(h, "root"));
+const readHandle = () => idb("readonly", (s) => s.get("root"));
+
+function sanitize(s) {
+  return (s || "").trim().toLowerCase().replace(/[^a-z0-9._-]+/g, "-").replace(/^-+|-+$/g, "");
+}
+function escapeHtml(s) {
+  return s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+}
+function folderSvg() {
+  return '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">' +
+    '<path d="M1.5 3.5A1.5 1.5 0 0 1 3 2h3l1.5 1.5H13A1.5 1.5 0 0 1 14.5 5v6A1.5 1.5 0 0 1 13 12.5H3A1.5 1.5 0 0 1 1.5 11z"/></svg>';
+}
+
+// ---------- folder navigation ----------
+function currentDir() { return S.pathHandles[S.pathHandles.length - 1] || null; }
+function currentPath() { return S.path.slice(); }
+
+function updateDest() {
+  const name = sanitize($("filename").value) || "<name>";
+  if (!S.rootHandle) { $("destPath").textContent = "No folder chosen yet."; return; }
+  const p = [S.rootHandle.name, ...S.path].join("/");
+  $("destPath").innerHTML = "Saves to <b>" + p + "/" + name + ".mp3</b>";
+}
+
+async function renderBrowser() {
+  const browser = $("browser");
+  if (!S.rootHandle) { browser.style.display = "none"; return; }
+  browser.style.display = "block";
+
+  // breadcrumbs (click any segment to jump back up to it)
+  const c = $("crumbs"); c.innerHTML = "";
+  const crumb = (label, idx, cur) => {
+    const b = document.createElement("button");
+    b.className = "crumb" + (cur ? " cur" : "");
+    b.textContent = label;
+    if (!cur) b.addEventListener("click", () => goCrumb(idx));
+    return b;
+  };
+  c.appendChild(crumb(S.rootHandle.name, 0, S.path.length === 0));
+  S.path.forEach((seg, i) => {
+    const sep = document.createElement("span"); sep.className = "sep"; sep.textContent = "/";
+    c.appendChild(sep);
+    c.appendChild(crumb(seg, i + 1, i === S.path.length - 1));
+  });
+
+  // subfolders of the current folder
+  const list = $("folderList"); list.innerHTML = "";
+  const dirs = [];
+  try { for await (const [name, h] of currentDir().entries()) if (h.kind === "directory") dirs.push(name); }
+  catch {}
+  dirs.sort((a, b) => a.localeCompare(b));
+  if (!dirs.length) {
+    const e = document.createElement("div"); e.className = "none";
+    e.textContent = "No subfolders here. Files will save into this folder.";
+    list.appendChild(e);
+  }
+  for (const name of dirs) {
+    const b = document.createElement("button");
+    b.className = "folderbtn";
+    b.innerHTML = folderSvg() + "<span>" + escapeHtml(name) + "</span>";
+    b.addEventListener("click", () => enterDir(name));
+    list.appendChild(b);
+  }
+  updateDest();
+  saveSettings();
+}
+
+async function enterDir(name) {
+  try {
+    const h = await currentDir().getDirectoryHandle(name);
+    S.pathHandles.push(h); S.path.push(name);
+    await renderBrowser(); checkOverwrite();
+  } catch (e) { setWarn("Can't open folder: " + e.message); }
+}
+function goCrumb(idx) { // idx 0 = root
+  S.pathHandles = S.pathHandles.slice(0, idx + 1);
+  S.path = S.path.slice(0, idx);
+  renderBrowser(); checkOverwrite();
+}
+
+// Walk from root, creating folders as needed; sets that as the current location.
+async function jumpTo(segments) {
+  if (!S.rootHandle) return;
+  const handles = [S.rootHandle]; const names = [];
+  let dir = S.rootHandle;
+  try {
+    for (const seg of segments) { dir = await dir.getDirectoryHandle(seg, { create: true }); handles.push(dir); names.push(seg); }
+    S.pathHandles = handles; S.path = names;
+    await renderBrowser(); checkOverwrite();
+  } catch (e) { setWarn("Can't open " + segments.join("/") + ": " + e.message); }
+}
+
+// Walk from root to an existing folder (no creating) — used by save-list deletes.
+async function dirFor(segments) {
+  let dir = S.rootHandle;
+  for (const seg of segments) dir = await dir.getDirectoryHandle(seg);
+  return dir;
+}
+
+async function setRoot(h) {
+  S.rootHandle = h;
+  S.pathHandles = [h]; S.path = [];
+  $("jumpAudio").disabled = false; $("jumpSamples").disabled = false;
+  await renderBrowser();
+  // Convenience: if this is the site repo, restore last spot or drop into public/audio.
+  if (savedPath.length) { await jumpTo(savedPath).catch(() => {}); savedPath = []; return; }
+  try { await h.getDirectoryHandle("public"); await jumpTo(["public", "audio"]); } catch {}
+}
+
+$("pickRoot").addEventListener("click", async () => {
+  try {
+    const h = await window.showDirectoryPicker({ id: "siteRoot", mode: "readwrite" });
+    await storeHandle(h);
+    await setRoot(h);
+  } catch (e) { /* user cancelled */ }
+});
+$("jumpAudio").addEventListener("click", () => jumpTo(["public", "audio"]));
+$("jumpSamples").addEventListener("click", () => jumpTo(["tools", "voice-samples"]));
+$("newFolder").addEventListener("click", async () => {
+  const name = sanitize(prompt("New folder name:") || "");
+  if (!name) return;
+  try { await currentDir().getDirectoryHandle(name, { create: true }); await enterDir(name); }
+  catch (e) { setWarn("Couldn't make folder: " + e.message); }
+});
+
+async function restoreHandle() {
+  try {
+    const h = await readHandle();
+    if (!h) return;
+    const perm = await h.queryPermission({ mode: "readwrite" });
+    if (perm === "granted") { await setRoot(h); }
+    else {
+      // Needs a click to re-grant; show a soft prompt on the button.
+      $("pickRoot").textContent = "Reconnect project folder…";
+      $("pickRoot").addEventListener("click", async function once() {
+        if (await h.requestPermission({ mode: "readwrite" }) === "granted") {
+          await setRoot(h);
+          $("pickRoot").textContent = "Choose project folder…";
+          $("pickRoot").removeEventListener("click", once);
+        }
+      }, { once: true });
+    }
+  } catch {}
+}
+
+// ---------- microphone ----------
+async function listMics() {
+  try {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const sel = $("micSelect");
+    sel.innerHTML = "";
+    devices.filter((d) => d.kind === "audioinput").forEach((d, i) => {
+      const o = document.createElement("option");
+      o.value = d.deviceId; o.textContent = d.label || ("Microphone " + (i + 1));
+      sel.appendChild(o);
+    });
+  } catch {}
+}
+
+async function getStream() {
+  if (S.mediaStream) S.mediaStream.getTracks().forEach((t) => t.stop());
+  const constraints = { audio: {
+    deviceId: $("micSelect").value ? { exact: $("micSelect").value } : undefined,
+    noiseSuppression: $("optNoise").checked,
+    echoCancellation: $("optEcho").checked,
+    autoGainControl: false,
+  } };
+  S.mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+  return S.mediaStream;
+}
+
+// ---------- recording ----------
+async function startRecording() {
+  if (S.recording) return;
+  clearPreview();
+  let stream;
+  try { stream = await getStream(); }
+  catch (e) { setWarn("Mic blocked: " + e.message); return; }
+  setWarn("");
+
+  // level meter
+  const ac = new AudioContext();
+  const src = ac.createMediaStreamSource(stream);
+  S.analyser = ac.createAnalyser(); S.analyser.fftSize = 512;
+  src.connect(S.analyser);
+  meterLoop();
+
+  S.chunks = [];
+  S.recorder = new MediaRecorder(stream);
+  S.recorder.ondataavailable = (e) => { if (e.data.size) S.chunks.push(e.data); };
+  S.recorder.onstop = () => { ac.close(); processRecording(); };
+  S.recorder.start();
+  S.recording = true;
+  S.startTime = performance.now();
+  $("recBtn").classList.add("recording");
+  timerLoop();
+
+  const max = parseFloat($("maxLen").value) || 0;
+  if (max > 0) setTimeout(() => { if (S.recording) stopRecording(); }, max * 1000);
+}
+
+function stopRecording() {
+  if (!S.recording) return;
+  S.recording = false;
+  cancelAnimationFrame(S.rafTimer);
+  cancelAnimationFrame(S.rafMeter);
+  $("recBtn").classList.remove("recording");
+  $("meterFill").style.width = "0%";
+  try { S.recorder.stop(); } catch {}
+  if (S.mediaStream) S.mediaStream.getTracks().forEach((t) => t.stop());
+}
+
+function timerLoop() {
+  $("timer").textContent = ((performance.now() - S.startTime) / 1000).toFixed(1) + "s";
+  S.rafTimer = requestAnimationFrame(timerLoop);
+}
+function meterLoop() {
+  const buf = new Uint8Array(S.analyser.frequencyBinCount);
+  const tick = () => {
+    S.analyser.getByteTimeDomainData(buf);
+    let peak = 0;
+    for (let i = 0; i < buf.length; i++) peak = Math.max(peak, Math.abs(buf[i] - 128));
+    $("meterFill").style.width = Math.min(100, (peak / 128) * 140) + "%";
+    S.rafMeter = requestAnimationFrame(tick);
+  };
+  tick();
+}
+
+$("recBtn").addEventListener("click", () => S.recording ? stopRecording() : startRecording());
+$("saveBtn").addEventListener("click", saveClip);
+$("discardBtn").addEventListener("click", clearPreview);
+document.addEventListener("keydown", (e) => {
+  if (e.code === "Space" && e.target.tagName !== "INPUT" && e.target.tagName !== "SELECT") {
+    e.preventDefault();
+    S.recording ? stopRecording() : startRecording();
+  }
+});
+
+// ---------- DSP: decode -> mono/resample -> trim -> normalize -> mp3 ----------
+async function processRecording() {
+  const raw = new Blob(S.chunks, { type: S.chunks[0]?.type || "audio/webm" });
+  const targetRate = parseInt($("sampleRate").value, 10);
+  const arrBuf = await raw.arrayBuffer();
+
+  // decode at native rate
+  const decodeCtx = new AudioContext();
+  const decoded = await decodeCtx.decodeAudioData(arrBuf);
+  decodeCtx.close();
+
+  // mono mixdown + resample via OfflineAudioContext
+  const frames = Math.ceil(decoded.duration * targetRate);
+  const off = new OfflineAudioContext(1, frames, targetRate);
+  const node = off.createBufferSource();
+  node.buffer = decoded; node.connect(off.destination); node.start();
+  const rendered = await off.startRendering();
+  let data = rendered.getChannelData(0).slice(); // Float32
+
+  if ($("optTrim").checked) data = trimSilence(data, targetRate);
+  if ($("optNormalize").checked) normalize(data);
+
+  S.lastBuffer = { length: data.length, rate: targetRate };
+  S.lastBlob = encodeMp3(data, targetRate, parseInt($("bitrate").value, 10));
+
+  const url = URL.createObjectURL(S.lastBlob);
+  const a = $("preview");
+  a.src = url; a.style.display = "block";
+  if ($("optAutoPlay").checked) a.play().catch(() => {});
+  $("saveBtn").disabled = false; $("discardBtn").disabled = false;
+  $("timer").textContent = (data.length / targetRate).toFixed(1) + "s";
+  checkOverwrite();
+}
+
+function trimSilence(data, rate) {
+  const thr = parseFloat($("trimThresh").value) || 0.015;
+  const pad = Math.round((parseFloat($("padMs").value) || 0) / 1000 * rate);
+  let start = 0, end = data.length - 1;
+  while (start < data.length && Math.abs(data[start]) < thr) start++;
+  while (end > start && Math.abs(data[end]) < thr) end--;
+  if (start >= end) return data; // all quiet, leave as-is
+  start = Math.max(0, start - pad);
+  end = Math.min(data.length - 1, end + pad);
+  return data.slice(start, end + 1);
+}
+
+function normalize(data) {
+  let peak = 0;
+  for (let i = 0; i < data.length; i++) peak = Math.max(peak, Math.abs(data[i]));
+  if (peak < 0.0001) return;
+  const gain = 0.95 / peak;
+  for (let i = 0; i < data.length; i++) data[i] *= gain;
+}
+
+function encodeMp3(float32, rate, kbps) {
+  const enc = new lamejs.Mp3Encoder(1, rate, kbps);
+  const int16 = new Int16Array(float32.length);
+  for (let i = 0; i < float32.length; i++) {
+    const s = Math.max(-1, Math.min(1, float32[i]));
+    int16[i] = s < 0 ? s * 0x8000 : s * 0x7fff;
+  }
+  const out = [];
+  const block = 1152;
+  for (let i = 0; i < int16.length; i += block) {
+    const buf = enc.encodeBuffer(int16.subarray(i, i + block));
+    if (buf.length) out.push(buf);
+  }
+  const end = enc.flush();
+  if (end.length) out.push(end);
+  return new Blob(out, { type: "audio/mp3" });
+}
+
+function clearPreview() {
+  S.lastBlob = null; S.lastBuffer = null;
+  const a = $("preview"); a.pause(); a.removeAttribute("src"); a.style.display = "none";
+  $("saveBtn").disabled = true; $("discardBtn").disabled = true;
+  $("timer").textContent = "0.0s";
+  setWarn("");
+}
+
+// ---------- saving ----------
+async function fileExists(dir, name) {
+  try { await dir.getFileHandle(name); return true; } catch { return false; }
+}
+async function checkOverwrite() {
+  if (!currentDir()) { setWarn("Choose your project folder before saving."); return; }
+  const name = sanitize($("filename").value);
+  if (!name) { setWarn(""); return; }
+  if (await fileExists(currentDir(), name + ".mp3")) setWarn("Heads up: " + name + ".mp3 already exists here and will be overwritten.");
+  else setWarn("");
+}
+
+async function saveClip() {
+  if (!S.lastBlob) return;
+  if (!currentDir()) { setWarn("Choose your project folder first."); return; }
+  const name = sanitize($("filename").value);
+  if (!name) { setWarn("Enter a file name."); return; }
+  try {
+    const fh = await currentDir().getFileHandle(name + ".mp3", { create: true });
+    const w = await fh.createWritable();
+    await w.write(S.lastBlob); await w.close();
+    addSavedRow(name + ".mp3", currentPath(), S.lastBuffer, S.lastBlob.size);
+    clearPreview();
+    if ($("optAutoNum").checked) bumpName();
+    saveSettings();
+    renderBrowser();
+  } catch (e) { setWarn("Save failed: " + e.message); }
+}
+
+// library -> library-2 -> library-3 ; turn-left-1 -> turn-left-2
+function bumpName() {
+  const el = $("filename");
+  const m = sanitize(el.value).match(/^(.*?)(\d+)$/);
+  if (m) el.value = m[1] + (parseInt(m[2], 10) + 1);
+  else el.value = sanitize(el.value) + "-2";
+  updateDest();
+}
+
+function addSavedRow(name, pathArr, buf, size) {
+  const tb = $("savedRows");
+  if (tb.querySelector(".empty")) tb.innerHTML = "";
+  const where = pathArr.join("/");
+  const tr = document.createElement("tr");
+  const len = buf ? (buf.length / buf.rate).toFixed(1) + "s" : "";
+  const kb = (size / 1024).toFixed(0) + " KB";
+  const isSample = pathArr.includes("voice-samples");
+  const tag = isSample ? '<span class="tag sample">sample</span>' : '<span class="tag">clip</span>';
+  tr.innerHTML =
+    '<td class="name">' + escapeHtml(name) + '</td>' +
+    '<td>' + tag + ' ' + escapeHtml(where) + '</td>' +
+    '<td>' + len + '</td>' +
+    '<td>' + kb + '</td>' +
+    '<td></td>';
+  const td = tr.lastElementChild;
+  const del = document.createElement("button");
+  del.className = "iconbtn"; del.textContent = "Delete file";
+  del.addEventListener("click", async () => {
+    try { const d = await dirFor(pathArr); await d.removeEntry(name); tr.remove();
+      if (!tb.children.length) tb.innerHTML = '<tr><td colspan="5" class="empty">Nothing saved yet.</td></tr>';
+      renderBrowser();
+    } catch (e) { alert("Could not delete: " + e.message); }
+  });
+  td.appendChild(del);
+  tb.prepend(tr);
+}
+
+function setWarn(msg) { $("warn").textContent = msg; }
+
+// ---------- live dest updates ----------
+$("filename").addEventListener("input", updateDest);
+$("filename").addEventListener("blur", checkOverwrite);
+$("micSelect").addEventListener("change", saveSettings);
+
+// ---------- boot ----------
+(async function init() {
+  if (!window.showDirectoryPicker) {
+    document.querySelector(".wrap").insertAdjacentHTML("afterbegin",
+      '<div class="panel" style="border-color:var(--rec)"><b>This browser can’t write files.</b> Open this page in Chrome or Edge.</div>');
+  }
+  if (typeof lamejs === "undefined") {
+    setWarn("MP3 encoder didn’t load — check your internet connection, then reload.");
+  }
+  loadSettings();
+  // labels for mics need permission first; ask once quietly
+  try { (await navigator.mediaDevices.getUserMedia({ audio: true })).getTracks().forEach(t => t.stop()); } catch {}
+  await listMics();
+  await restoreHandle();
+  updateDest();
+})();
+</script>
+</body>
+</html>

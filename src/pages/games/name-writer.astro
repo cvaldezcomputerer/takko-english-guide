@@ -1,0 +1,441 @@
+---
+import GameLayout from '../../layouts/GameLayout.astro';
+import T from '../../components/T.astro';
+import StrokeLetter from '../../components/StrokeLetter.astro';
+import { letterOutlines } from '../../letter-outlines';
+
+// ── TEMP lowercase preview (a–z) ──────────────────────────────────────────
+// Option A = drawable centerline strokes (letterStrokes, via StrokeLetter).
+// Option B = exact font outlines (letterOutlines). Remove this block and the
+// matching markup section below once reviewed.
+const previewLetters = 'abcdefghijklmnopqrstuvwxyz'.split('');
+---
+
+<GameLayout
+  title="Write Your Name in English — Takkotaco"
+  description="Type your name in kana and see it big in English letters on writing lines, ready to copy onto paper."
+  showBackBar={true}
+>
+  <main class="nw-main">
+    <header class="nw-head">
+      <h1 class="nw-title">
+        <T>
+          <span slot="en">Write Your Name</span>
+          <span slot="ja">なまえを英語で書こう</span>
+        </T>
+      </h1>
+      <p class="nw-sub">
+        <T>
+          <span slot="en">Type your name in kana.</span>
+          <span slot="ja">ひらがな・カタカナで名前を入力してね。</span>
+        </T>
+      </p>
+    </header>
+
+    <div class="nw-input-wrap">
+      <input
+        id="nw-input"
+        class="nw-input"
+        type="text"
+        lang="ja"
+        autocomplete="off"
+        autocapitalize="off"
+        spellcheck="false"
+        placeholder="さとう"
+        aria-label="Your name in kana"
+      />
+    </div>
+
+    <!-- The big name sits on the 4-line writing guide (SVG, so the baseline is exact). -->
+    <div class="nw-card">
+      <div class="nw-stage" id="nw-stage" aria-live="polite">
+        <p class="nw-placeholder" id="nw-placeholder">
+          <T>
+            <span slot="en">Your name appears here</span>
+            <span slot="ja">ここに名前が出ます</span>
+          </T>
+        </p>
+      </div>
+    </div>
+
+    <!-- Spelling options, most common first. -->
+    <div class="nw-options" id="nw-options" hidden>
+      <p class="nw-options-label">
+        <T>
+          <span slot="en">Choose a spelling</span>
+          <span slot="ja">スペルを選んでね</span>
+        </T>
+      </p>
+      <div class="nw-chips" id="nw-chips" role="group" aria-label="Spelling options"></div>
+    </div>
+
+    <!-- TEMP: lowercase letter preview (a–z) — remove after review. -->
+    <section class="nw-preview">
+      <h2 class="nw-preview-title">Lowercase preview — a–z</h2>
+
+      <div class="nw-preview-row">
+        <p class="nw-preview-label">Option A — drawable strokes (StrokeLetter, auto width 9)</p>
+        <div class="nw-preview-grid">
+          {previewLetters.map((L) => (
+            <div class="nw-glyph">
+              <StrokeLetter letter={L} color="#2d3a3a" />
+              <span>{L}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div class="nw-preview-row">
+        <p class="nw-preview-label">Option B — exact font outline (static)</p>
+        <div class="nw-preview-grid">
+          {previewLetters.map((L) => (
+            <div class="nw-glyph">
+              <svg viewBox="0 0 100 100" aria-label={L}>
+                <path d={letterOutlines[L]} fill="#2d3a3a" />
+              </svg>
+              <span>{L}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  </main>
+</GameLayout>
+
+<script>
+  // ── Kana → romaji engine ───────────────────────────────────────────────
+  // A small Hepburn map. Katakana is folded to hiragana first, so one table
+  // covers both. The value-add over a plain transliterator is the long-vowel
+  // variants below (さとう → Sato / Satou / Satoh), ranked most-common first.
+
+  const BASE: Record<string, string> = {
+    あ:'a', い:'i', う:'u', え:'e', お:'o',
+    か:'ka', き:'ki', く:'ku', け:'ke', こ:'ko',
+    さ:'sa', し:'shi', す:'su', せ:'se', そ:'so',
+    た:'ta', ち:'chi', つ:'tsu', て:'te', と:'to',
+    な:'na', に:'ni', ぬ:'nu', ね:'ne', の:'no',
+    は:'ha', ひ:'hi', ふ:'fu', へ:'he', ほ:'ho',
+    ま:'ma', み:'mi', む:'mu', め:'me', も:'mo',
+    や:'ya', ゆ:'yu', よ:'yo',
+    ら:'ra', り:'ri', る:'ru', れ:'re', ろ:'ro',
+    わ:'wa', ゐ:'i', ゑ:'e', を:'o', ん:'n',
+    が:'ga', ぎ:'gi', ぐ:'gu', げ:'ge', ご:'go',
+    ざ:'za', じ:'ji', ず:'zu', ぜ:'ze', ぞ:'zo',
+    だ:'da', ぢ:'ji', づ:'zu', で:'de', ど:'do',
+    ば:'ba', び:'bi', ぶ:'bu', べ:'be', ぼ:'bo',
+    ぱ:'pa', ぴ:'pi', ぷ:'pu', ぺ:'pe', ぽ:'po',
+    ゔ:'vu',
+    ぁ:'a', ぃ:'i', ぅ:'u', ぇ:'e', ぉ:'o',
+    ゃ:'ya', ゅ:'yu', ょ:'yo', ゎ:'wa',
+    '　':' ',
+  };
+
+  const YOUON: Record<string, string> = {
+    きゃ:'kya', きゅ:'kyu', きょ:'kyo',
+    しゃ:'sha', しゅ:'shu', しょ:'sho',
+    ちゃ:'cha', ちゅ:'chu', ちょ:'cho',
+    にゃ:'nya', にゅ:'nyu', にょ:'nyo',
+    ひゃ:'hya', ひゅ:'hyu', ひょ:'hyo',
+    みゃ:'mya', みゅ:'myu', みょ:'myo',
+    りゃ:'rya', りゅ:'ryu', りょ:'ryo',
+    ぎゃ:'gya', ぎゅ:'gyu', ぎょ:'gyo',
+    じゃ:'ja', じゅ:'ju', じょ:'jo',
+    ぢゃ:'ja', ぢゅ:'ju', ぢょ:'jo',
+    びゃ:'bya', びゅ:'byu', びょ:'byo',
+    ぴゃ:'pya', ぴゅ:'pyu', ぴょ:'pyo',
+  };
+
+  const SMALL_Y = new Set(['ゃ', 'ゅ', 'ょ']);
+
+  function kanaToRomaji(input: string): string {
+    // Fold katakana → hiragana (keep the long mark ー and everything else).
+    let s = '';
+    for (const ch of input) {
+      const code = ch.codePointAt(0)!;
+      s += code >= 0x30a1 && code <= 0x30f6 ? String.fromCodePoint(code - 0x60) : ch;
+    }
+
+    let out = '';
+    let sokuon = false; // small っ → double the next consonant
+    for (let i = 0; i < s.length; i++) {
+      const ch = s[i];
+
+      if (ch === 'ー') {                       // long mark: repeat the last vowel
+        const m = out.match(/[aeiou]$/);
+        if (m) out += m[0];
+        continue;
+      }
+      if (ch === 'っ' || ch === 'ッ') { sokuon = true; continue; }
+
+      let rom: string;
+      const pair = s.slice(i, i + 2);
+      if (SMALL_Y.has(s[i + 1]) && YOUON[pair]) { rom = YOUON[pair]; i++; }
+      else if (BASE[ch] !== undefined) { rom = BASE[ch]; }
+      else { rom = ch; }                        // unknown (kanji, punctuation) → as-is
+
+      if (sokuon) {
+        if (rom.startsWith('ch')) out += 't';   // っち → tch (matcha)
+        else if (/^[a-z]/.test(rom)) out += rom[0];
+        sokuon = false;
+      }
+      out += rom;
+    }
+    return out;
+  }
+
+  function titleCase(r: string): string {
+    return r.replace(/\b[a-z]/g, (c) => c.toUpperCase());
+  }
+
+  // Build the spelling options for a name, most common first.
+  function spellings(kana: string): string[] {
+    const literal = kanaToRomaji(kana.trim()).trim();
+    if (!literal) return [];
+
+    // "Passport / everyday" Hepburn drops long o and u — the most common style.
+    const collapsed = literal
+      .replace(/ou/g, 'o').replace(/oo/g, 'o')
+      .replace(/uu/g, 'u').replace(/aa/g, 'a').replace(/ii/g, 'i');
+    const hasLongO = /ou|oo/.test(literal);
+    const ohStyle = literal.replace(/ou/g, 'oh').replace(/oo/g, 'oh');
+
+    const list: string[] = [];
+    const add = (v: string) => { if (v && !list.includes(v)) list.push(v); };
+    add(collapsed);          // 1. Sato   (most common)
+    add(literal);            // 2. Satou  (literal)
+    if (hasLongO) add(ohStyle); // 3. Satoh
+    return list.map(titleCase);
+  }
+
+  // ── Rendering ──────────────────────────────────────────────────────────
+  const SVGNS = 'http://www.w3.org/2000/svg';
+  // viewBox is 120 tall; four lines at even spacing, baseline (line 3) is red.
+  const Y_TOP = 12, Y_MID = 44, Y_BASE = 76, Y_BOTTOM = 108, VH = 120;
+  const FS = 84, PAD = 24;
+
+  const input = document.getElementById('nw-input') as HTMLInputElement;
+  const stage = document.getElementById('nw-stage')!;
+  const placeholder = document.getElementById('nw-placeholder')!;
+  const optionsBox = document.getElementById('nw-options') as HTMLElement;
+  const chipsBox = document.getElementById('nw-chips')!;
+
+  function drawName(text: string) {
+    const svg = document.createElementNS(SVGNS, 'svg');
+    svg.setAttribute('class', 'nw-svg');
+
+    const t = document.createElementNS(SVGNS, 'text');
+    t.setAttribute('y', String(Y_BASE));
+    t.setAttribute('font-size', String(FS));
+    t.setAttribute('font-family', 'Andika, sans-serif');
+    t.setAttribute('text-anchor', 'middle');
+    t.setAttribute('fill', '#333');
+    t.textContent = text;
+    svg.appendChild(t);
+
+    // Measure: append off-stage, read the text width, then size the viewBox.
+    svg.setAttribute('viewBox', `0 0 100 ${VH}`);
+    stage.replaceChildren(svg);
+    const w = (t as SVGTextElement).getComputedTextLength();
+    const W = Math.max(w + PAD * 2, 120);
+
+    svg.setAttribute('viewBox', `0 0 ${W} ${VH}`);
+    t.setAttribute('x', String(W / 2));
+
+    const line = (y: number, color: string, dashed = false) => {
+      const l = document.createElementNS(SVGNS, 'line');
+      l.setAttribute('x1', '0'); l.setAttribute('x2', String(W));
+      l.setAttribute('y1', String(y)); l.setAttribute('y2', String(y));
+      l.setAttribute('stroke', color); l.setAttribute('stroke-width', '1.5');
+      if (dashed) l.setAttribute('stroke-dasharray', '6 7');
+      return l;
+    };
+    // Lines go under the text.
+    svg.insertBefore(line(Y_BOTTOM, '#333'), t);
+    svg.insertBefore(line(Y_BASE, '#d94b3e'), t);   // red baseline
+    svg.insertBefore(line(Y_MID, '#333', true), t); // dashed midline
+    svg.insertBefore(line(Y_TOP, '#333'), t);
+  }
+
+  function selectChip(idx: number, options: string[]) {
+    Array.from(chipsBox.children).forEach((c, i) =>
+      c.classList.toggle('is-selected', i === idx)
+    );
+    drawName(options[idx]);
+  }
+
+  function render() {
+    const options = spellings(input.value);
+    if (options.length === 0) {
+      stage.replaceChildren(placeholder);
+      optionsBox.hidden = true;
+      chipsBox.replaceChildren();
+      return;
+    }
+
+    chipsBox.replaceChildren();
+    options.forEach((opt, i) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'nw-chip';
+      b.textContent = opt;
+      b.addEventListener('click', () => selectChip(i, options));
+      chipsBox.appendChild(b);
+    });
+    // One spelling = no choice to make; hide the chips row entirely.
+    optionsBox.hidden = options.length < 2;
+    selectChip(0, options);
+  }
+
+  input.addEventListener('input', render);
+  render();
+</script>
+
+<style>
+  .nw-main {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: clamp(1.25rem, 4vw, 2.5rem) clamp(1rem, 4vw, 2rem) 3rem;
+    font-family: var(--font-body);
+    color: var(--color-text);
+  }
+
+  .nw-head { text-align: center; }
+  .nw-title {
+    font-family: var(--font-main);
+    color: var(--color-primary);
+    font-size: clamp(1.6rem, 5vw, 2.6rem);
+    margin: 0 0 0.3rem;
+  }
+  .nw-sub {
+    margin: 0;
+    color: #7a6f5c;
+    font-size: clamp(0.95rem, 2.4vw, 1.15rem);
+  }
+
+  .nw-input-wrap {
+    margin: clamp(1.25rem, 4vw, 2rem) auto 0;
+    max-width: 420px;
+  }
+  .nw-input {
+    width: 100%;
+    box-sizing: border-box;
+    text-align: center;
+    font-family: var(--font-body);
+    font-size: clamp(1.6rem, 6vw, 2.4rem);
+    padding: 0.5rem 0.9rem;
+    border: 3px solid var(--color-secondary);
+    border-radius: 16px;
+    background: var(--color-white);
+    color: var(--color-text);
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .nw-input:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 4px rgba(74, 124, 89, 0.15);
+  }
+  .nw-input::placeholder { color: #c8bca3; }
+
+  /* The writing card holds the big name on its 4-line guide. */
+  .nw-card {
+    margin: clamp(1.25rem, 4vw, 2rem) 0 0;
+    background: var(--color-white);
+    border: 2px solid #efe7d6;
+    border-radius: 20px;
+    padding: clamp(1rem, 4vw, 2rem);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+  }
+  .nw-stage {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: clamp(110px, 26vw, 180px);
+  }
+  .nw-svg {
+    width: 100%;
+    height: auto;
+    max-height: clamp(140px, 32vw, 220px);
+    display: block;
+  }
+  .nw-placeholder {
+    margin: 0;
+    color: #c8bca3;
+    font-size: clamp(1.1rem, 3.5vw, 1.5rem);
+  }
+
+  /* Spelling option chips. */
+  .nw-options { margin: clamp(1.1rem, 3.5vw, 1.6rem) 0 0; text-align: center; }
+  .nw-options-label {
+    margin: 0 0 0.6rem;
+    color: #7a6f5c;
+    font-size: clamp(0.85rem, 2.2vw, 1rem);
+  }
+  .nw-chips {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.6rem;
+  }
+  .nw-chip {
+    font-family: var(--font-body);
+    font-size: clamp(1.05rem, 3vw, 1.4rem);
+    padding: 0.4rem 1.1rem;
+    border: 2px solid var(--color-secondary);
+    border-radius: 999px;
+    background: var(--color-white);
+    color: var(--color-text);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s, transform 0.12s;
+  }
+  .nw-chip:hover {
+    border-color: var(--color-primary);
+    transform: translateY(-1px);
+  }
+  .nw-chip.is-selected {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: var(--color-white);
+  }
+
+  /* TEMP preview styles — remove with the preview section. */
+  .nw-preview {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 2px dashed #e0d6c2;
+  }
+  .nw-preview-title {
+    font-family: var(--font-main);
+    color: var(--color-primary);
+    font-size: 1.2rem;
+    text-align: center;
+  }
+  .nw-preview-row { margin-top: 1.5rem; }
+  .nw-preview-label {
+    text-align: center;
+    color: #7a6f5c;
+    font-size: 0.95rem;
+    margin: 0 0 0.6rem;
+  }
+  .nw-preview-grid {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .nw-glyph {
+    text-align: center;
+  }
+  .nw-glyph svg {
+    width: 150px;
+    height: 150px;
+    background: var(--color-white);
+    border: 2px solid #efe7d6;
+    border-radius: 14px;
+  }
+  .nw-glyph span {
+    display: block;
+    margin-top: 0.25rem;
+    color: #b9a87f;
+    font-size: 0.85rem;
+  }
+</style>

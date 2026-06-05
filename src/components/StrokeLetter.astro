@@ -37,7 +37,7 @@ const {
   letter,
   animate = false,
   color = "#e76f51",
-  stroke = 11,
+  stroke,
   size,
   outline,
   outlineWidth = 3.5,
@@ -46,7 +46,16 @@ const {
   class: className = "",
 } = Astro.props;
 
-const strokes = letterStrokes[(letter ?? "").toUpperCase()] ?? [];
+// Prefer the exact-case glyph (lowercase a–z), falling back to the capital so
+// existing callers that pass uppercase keep working unchanged.
+const raw = letter ?? "";
+const key = letterStrokes[raw] ? raw : raw.toUpperCase();
+const strokes = letterStrokes[key] ?? [];
+
+// Lowercase letters are drawn smaller in the same box, so they need a thinner
+// pen (≈9) to match the capitals' weight (≈11). Caller can still override.
+const isLower = key >= "a" && key <= "z";
+const strokeW = stroke ?? (isLower ? 9 : 11);
 const style = [
   size ? `width:${size};height:${size};` : "",
   delay ? `--sl-delay:${delay};` : "",
@@ -69,7 +78,7 @@ const style = [
           d={d}
           fill="none"
           stroke={outline}
-          stroke-width={stroke + outlineWidth * 2}
+          stroke-width={strokeW + outlineWidth * 2}
           stroke-linecap="round"
           stroke-linejoin="round"
         />
@@ -82,7 +91,7 @@ const style = [
         pathLength="1"
         fill="none"
         stroke={color}
-        stroke-width={stroke}
+        stroke-width={strokeW}
         stroke-linecap="round"
         stroke-linejoin="round"
       />

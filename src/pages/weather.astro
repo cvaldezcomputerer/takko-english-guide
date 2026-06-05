@@ -6,16 +6,16 @@ import T from '../components/T.astro';
 // ── Speaker icon (reused on the question + every word card) ──
 const SPEAKER = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 5V4L8 9H4z" fill="currentColor"/><path d="M16.5 8.5a4.5 4.5 0 0 1 0 7" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>`;
 
-// Word art will be irasutoya images dropped into /public/images/weather/.
-// Until they're added, the card shows an empty placeholder box.
+// Word art lives in /public/images/weather/ (irasutoya .webp, one per word).
 const IMG_BASE = '/images/weather';
 
 const weatherWords = [
-    { word: 'sunny',  en: 'sunny',  ja: 'はれ' },
-    { word: 'cloudy', en: 'cloudy', ja: 'くもり' },
-    { word: 'rainy',  en: 'rainy',  ja: 'あめ' },
-    { word: 'snowy',  en: 'snowy',  ja: 'ゆき' },
-    { word: 'windy',  en: 'windy',  ja: 'かぜ' },
+    { word: 'sunny',         en: 'sunny',         ja: 'はれ' },
+    { word: 'partly_cloudy', en: 'partly cloudy', ja: 'はれときどきくもり' },
+    { word: 'cloudy',        en: 'cloudy',        ja: 'くもり' },
+    { word: 'rainy',         en: 'rainy',         ja: 'あめ' },
+    { word: 'snowy',         en: 'snowy',         ja: 'ゆき' },
+    { word: 'windy',         en: 'windy',         ja: 'かぜ' },
 ];
 
 const feelingWords = [
@@ -51,7 +51,6 @@ const GARLIC_SILO_PATH = "M199 468C136.885 532.312 124 583 143 680C191.5 772 243
                     <span class="question-speaker" set:html={SPEAKER}></span>
                 </button>
                 <p class="question-hint">
-                    <span class="question-speaker-sm" set:html={SPEAKER}></span>
                     <T>
                         <span slot="en">Click to hear</span>
                         <span slot="ja">クリックして聞いてね</span>
@@ -194,7 +193,7 @@ const GARLIC_SILO_PATH = "M199 468C136.885 532.312 124 583 143 680C191.5 772 243
     slots.forEach((s) => { slotByCategory[s.dataset.accept ?? ''] = s; });
 
     const CLICK_THRESHOLD = 6;   // px of movement below which a quick release counts as a click
-    const DRAG_HOLD_MS = 500;    // press-and-hold this long to pick a card up for dragging
+    const DRAG_HOLD_MS = 100;    // press-and-hold this long to pick a card up for dragging
     let dragEl: HTMLElement | null = null;
     let dragActive = false;
     let holdTimer: number | undefined;
@@ -478,21 +477,10 @@ const GARLIC_SILO_PATH = "M199 468C136.885 532.312 124 583 143 680C191.5 772 243
     .question-speaker :global(svg) { width: 58%; height: 58%; }
 
     .question-hint {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.35rem;
         margin: clamp(0.35rem, 1vh, 0.7rem) 0 0;
         font-size: clamp(0.8rem, 1.6vw, 1.05rem);
         color: #9a8a63;
     }
-    .question-speaker-sm {
-        width: 1em;
-        height: 1em;
-        display: inline-flex;
-        color: var(--color-secondary);
-    }
-    .question-speaker-sm :global(svg) { width: 100%; height: 100%; }
-
     /* ── Answer sentences ── */
     .answers {
         display: flex;
@@ -513,7 +501,7 @@ const GARLIC_SILO_PATH = "M199 468C136.885 532.312 124 583 143 680C191.5 772 243
         display: flex;
         align-items: center;
         gap: clamp(0.6rem, 1.5vw, 1rem);
-        max-width: 640px;
+        max-width: min(94vw, 780px);
         background: #fff;
         border: 2px solid #efe7d6;
         border-radius: 18px;
@@ -661,7 +649,7 @@ const GARLIC_SILO_PATH = "M199 468C136.885 532.312 124 583 143 680C191.5 772 243
         width: clamp(80px, 11vw, 150px);
         background: #fff;
         border: 2px solid #efe7d6;
-        border-radius: 18px;
+        border-radius: 10px;
         padding: clamp(0.55rem, 1.4vh, 1rem) clamp(0.4rem, 1vw, 0.8rem);
         box-shadow: 0 3px 8px rgba(0, 0, 0, 0.06);
         cursor: grab;
@@ -677,7 +665,7 @@ const GARLIC_SILO_PATH = "M199 468C136.885 532.312 124 583 143 680C191.5 772 243
     /* "charging up" while held — duration matches DRAG_HOLD_MS so it lands as the drag lifts */
     .word-card.arming {
         transform: scale(1.08);
-        transition: transform 0.5s ease;
+        transition: transform 0.1s ease;
         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.14);
     }
     /* faded placeholder left behind in the original spot during a drag */
@@ -703,7 +691,7 @@ const GARLIC_SILO_PATH = "M199 468C136.885 532.312 124 583 143 680C191.5 772 243
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        /* placeholder look until the irasutoya image is dropped in */
+        /* soft backdrop behind the art (also a fallback if an image is missing) */
         background: #f1ede3;
         border-radius: 12px;
         overflow: hidden;
@@ -719,6 +707,19 @@ const GARLIC_SILO_PATH = "M199 468C136.885 532.312 124 583 143 680C191.5 772 243
     .card-label {
         font-size: clamp(1rem, 2vw, 1.6rem);
         font-weight: 500;
+        line-height: 1.15;
+        text-align: center;
+        /* keep two-word / long Japanese labels balanced instead of orphaning
+           a single character on its own line */
+        text-wrap: balance;
+    }
+    /* Japanese script has no spaces, so the browser will break it between any
+       two characters — only allow that as a last resort, and never strand one. */
+    :global(body.lang-ja) .card-label .t-ja {
+        display: block;
+        text-wrap: balance;
+        word-break: keep-all;
+        overflow-wrap: anywhere;
     }
 
     .card-play {
@@ -741,20 +742,25 @@ const GARLIC_SILO_PATH = "M199 468C136.885 532.312 124 583 143 680C191.5 772 243
     .card-play:hover { background: var(--color-primary); color: #fff; transform: scale(1.1); }
     .card-play svg { width: 58%; height: 58%; }
 
-    /* A card resting inside a sentence slot → compact, horizontal */
+    /* A card resting inside a sentence slot → plain word, no card chrome */
     .drop-slot .word-card {
         flex-direction: row;
         width: auto;
-        gap: clamp(0.3rem, 0.8vw, 0.6rem);
-        padding: clamp(0.4rem, 1vh, 0.7rem) clamp(0.7rem, 1.5vw, 1.1rem);
-        padding-right: clamp(1.8rem, 3vw, 2.4rem);
-        border-color: var(--color-primary);
-        background: #f3f8f3;
-    }
-    .drop-slot .card-icon {
-        width: clamp(34px, 4vw, 52px);
-        height: clamp(34px, 4vw, 52px);
+        gap: 0;
+        padding: clamp(0.4rem, 1vh, 0.7rem) clamp(0.5rem, 1.2vw, 0.9rem);
+        border-color: transparent;
         background: transparent;
+        box-shadow: none;
+    }
+    /* inside the sentence the cards are words only — drop the picture and speaker */
+    .drop-slot .card-icon,
+    .drop-slot .card-play {
+        display: none;
+    }
+    .drop-slot .word-card:hover {
+        border-color: transparent;
+        box-shadow: none;
+        transform: none;
     }
 
     /* ── Toast ── */

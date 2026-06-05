@@ -351,6 +351,41 @@ const slots = Array.from({ length: 11 }, (_, i) => {
         </div>
 
         <div class="games-grid games-grid--tools">
+          <!-- Name Writer Tool Card -->
+          <a href="/games/name-writer" class="game-card">
+               <div class="card-image name-writer-bg">
+                  <div class="icon" aria-hidden="true">
+                    <svg viewBox="0 0 120 120" role="img" focusable="false">
+                      <line x1="20" y1="34" x2="100" y2="34" stroke="#c7b9a0" stroke-width="2.5"/>
+                      <line x1="20" y1="60" x2="100" y2="60" stroke="#c7b9a0" stroke-width="2.5" stroke-dasharray="5 6"/>
+                      <line x1="20" y1="86" x2="100" y2="86" stroke="#d94b3e" stroke-width="2.5"/>
+                      <text x="60" y="86" text-anchor="middle" font-size="46" fill="#4a7c59" font-family="'Andika', sans-serif">Aa</text>
+                    </svg>
+                  </div>
+              </div>
+              <div class="card-content">
+                  <h3>
+                    <T>
+                      <span slot="en">Write Your Name</span>
+                      <span slot="ja">なまえを英語で</span>
+                    </T>
+                  </h3>
+                  <p class="card-desc">
+                    <T>
+                      <span slot="en">Type your name in kana and see it in English letters on writing lines, ready to copy.</span>
+                      <span slot="ja">ひらがなで名前を入力すると、書き写せるように英語で大きく表示します。</span>
+                    </T>
+                  </p>
+                  <span class="play-btn">
+                    <T>
+                      <span slot="en">Open Tool</span>
+                      <span slot="ja">ツールを開く</span>
+                    </T>
+                    <i class="fas fa-arrow-right"></i>
+                  </span>
+              </div>
+          </a>
+
           <!-- Points Card Game Card -->
           <a href="/games/points-card-game" class="game-card">
                <div class="card-image points-bg">
@@ -676,6 +711,10 @@ const slots = Array.from({ length: 11 }, (_, i) => {
 
   .quizlet-bg {
     background: #dbeafe;
+  }
+
+  .name-writer-bg {
+    background: #eaf3ec;
   }
 
   .anarika-bg {

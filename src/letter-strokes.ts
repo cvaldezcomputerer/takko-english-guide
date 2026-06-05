@@ -1,9 +1,9 @@
-// Stroke-based (centerline) capital letters A–Z, designed for writing animation.
-// Each letter is an ordered array of SVG path `d` strings — one per pen stroke, in
-// D'Nealian-style print order, drawn top→bottom / left→right (O/Q circles go CCW).
-// Authored on a 0 0 100 100 viewBox; render with fill="none", stroke-width≈11,
-// round caps/joins, and pathLength="1" if you want to drive a dash-draw animation.
-// Source of truth for the <StrokeLetter> component and the ABC Order game grid.
+// Stroke-based (centerline) letters A–Z (capitals) and a–z (lowercase).
+// Designed for writing animation: each letter is an ordered array of SVG path `d` strings,
+// one per pen stroke, in natural handwriting order (top→bottom, left→right).
+// Render with fill="none", stroke-width≈11 (capitals) or 9 (lowercase),
+// round caps/joins, and pathLength="1" to drive dash-offset draw animations.
+// Use with <StrokeLetter> component for animated writing or the ABC Order game grid.
 
 export const letterStrokes: Record<string, string[]> = {
   A: ["M 50,8 L 23,91", "M 50,8 L 77,91", "M 35,62 L 65,62"],
@@ -32,4 +32,36 @@ export const letterStrokes: Record<string, string[]> = {
   X: ["M 29,8 L 71,91", "M 71,8 L 29,91"],
   Y: ["M 27,8 L 50,52", "M 73,8 L 50,52", "M 50,52 L 50,91"],
   Z: ["M 27,11 L 73,11", "M 73,11 L 27,91", "M 27,91 L 73,91"],
+
+  // ── Lowercase a–z (centerline, single-story, traced over KG Primary Penmanship) ──
+  // A separate vertical system from the capitals so descenders fit the same box:
+  //   ascender top y≈10 · x-height top y≈39 · baseline y≈76 · descender bottom y≈96.
+  // Render at stroke-width≈9 (the font's pen weight at this scale; StrokeLetter
+  // picks 9 automatically for lowercase). Same 0 0 100 100 viewBox as the capitals.
+  a: ["M 47,39 A 17.5,18.5 0 0 0 47,76 A 17.5,18.5 0 0 0 47,39", "M 64.5,39 L 64.5,76"],
+  b: ["M 35,10 L 35,76", "M 35,39 C 46,39 65,46 65,57.5", "M 65,57.5 C 65,69 46,77 35,77"],
+  c: ["M 64,46 A 17.5,18.5 0 1 0 64,70"],
+  d: ["M 67,39 C 56,39 35,46 35,57.5", "M 35,57.5 C 35,69 56,77 67,77", "M 67,10 L 67,76"],
+  e: ["M 31,58 L 65,58 C 65,46.5 57,39 47,39 C 37,39 30,47 30,57.5 C 30,68.5 38,76 49,76 C 56,76 61,72.5 64,67"],
+  f: ["M 62,19 C 61,12 54,9 49,12 C 46,14 46,18 46,23 L 46,76", "M 36,40 L 60,40"],
+  g: ["M 35,39 C 46,39 65,46 65,57.5", "M 65,57.5 C 65,69 46,77 35,77", "M 65,77 L 65,86 C 65,92 54,95 46,93 C 38,91 35,85 35,77"],
+  h: ["M 35,10 L 35,76", "M 35,46 C 38,41 49,39 57,42 C 63,45 65,51 65,59 L 65,76"],
+  i: ["M 50,39 L 50,76", "M 50,23.5 L 50,24.5"],
+  j: ["M 53,39 L 53,86 C 53,93 47,96 40,95 C 35,94 31,91 30,86", "M 53,23.5 L 53,24.5"],
+  k: ["M 35,10 L 35,76", "M 65,42 L 35,60", "M 35,60 L 64,76"],
+  l: ["M 50,10 L 50,76"],
+  m: ["M 20,39 L 20,76", "M 20,46 C 23,41 33,39 41,42 C 47,44 50,50 50,58 L 50,76", "M 50,46 C 53,41 63,39 71,42 C 77,44 80,50 80,58 L 80,76"],
+  n: ["M 33,39 L 33,76", "M 33,46 C 36,41 48,39 57,42 C 64,45 67,51 67,59 L 67,76"],
+  o: ["M 50,39 A 18.5,18.5 0 0 0 50,76 A 18.5,18.5 0 0 0 50,39"],
+  p: ["M 35,39 L 35,96", "M 35,39 C 46,39 65,46 65,57.5", "M 65,57.5 C 65,69 46,77 35,77"],
+  q: ["M 67,39 C 56,39 35,46 35,57.5", "M 35,57.5 C 35,69 56,77 67,77", "M 67,39 L 67,96"],
+  r: ["M 38,39 L 38,76", "M 38,47 C 41,42 50,39 58,40 C 62,41 65,42.5 67,45"],
+  s: ["M 63,46 C 60,40 52,38 46,40 C 38,42 36,49 42,53 C 47,57 58,58 61,64 C 64,70 59,76 51,76 C 44,76 38,73 36,67"],
+  t: ["M 46,26 L 46,70", "M 35,40 L 57,40"],
+  u: ["M 33,39 L 33,65 C 33,73 40,77 49,77 C 58,77 65,72 65,64 L 65,39", "M 65,39 L 65,76"],
+  v: ["M 32,39 L 50,76", "M 68,39 L 50,76"],
+  w: ["M 22,39 L 34,76 L 50,48 L 66,76 L 78,39"],
+  x: ["M 33,39 L 67,76", "M 67,39 L 33,76"],
+  y: ["M 33,39 L 50,73", "M 67,39 L 50,75 C 46,80 41,81 37,78"],
+  z: ["M 33,40 L 66,40", "M 66,40 L 33,76", "M 33,76 L 66,76"],
 };
