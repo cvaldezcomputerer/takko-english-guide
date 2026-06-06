@@ -1,14 +1,6 @@
 ---
 import GameLayout from '../../layouts/GameLayout.astro';
 import T from '../../components/T.astro';
-import StrokeLetter from '../../components/StrokeLetter.astro';
-import { letterOutlines } from '../../letter-outlines';
-
-// ── TEMP lowercase preview (a–z) ──────────────────────────────────────────
-// Option A = drawable centerline strokes (letterStrokes, via StrokeLetter).
-// Option B = exact font outlines (letterOutlines). Remove this block and the
-// matching markup section below once reviewed.
-const previewLetters = 'abcdefghijklmnopqrstuvwxyz'.split('');
 ---
 
 <GameLayout
@@ -68,41 +60,12 @@ const previewLetters = 'abcdefghijklmnopqrstuvwxyz'.split('');
       </p>
       <div class="nw-chips" id="nw-chips" role="group" aria-label="Spelling options"></div>
     </div>
-
-    <!-- TEMP: lowercase letter preview (a–z) — remove after review. -->
-    <section class="nw-preview">
-      <h2 class="nw-preview-title">Lowercase preview — a–z</h2>
-
-      <div class="nw-preview-row">
-        <p class="nw-preview-label">Option A — drawable strokes (StrokeLetter, auto width 9)</p>
-        <div class="nw-preview-grid">
-          {previewLetters.map((L) => (
-            <div class="nw-glyph">
-              <StrokeLetter letter={L} color="#2d3a3a" />
-              <span>{L}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div class="nw-preview-row">
-        <p class="nw-preview-label">Option B — exact font outline (static)</p>
-        <div class="nw-preview-grid">
-          {previewLetters.map((L) => (
-            <div class="nw-glyph">
-              <svg viewBox="0 0 100 100" aria-label={L}>
-                <path d={letterOutlines[L]} fill="#2d3a3a" />
-              </svg>
-              <span>{L}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
   </main>
 </GameLayout>
 
 <script>
+  import { letterStrokes } from '../../letter-strokes';
+
   // ── Kana → romaji engine ───────────────────────────────────────────────
   // A small Hepburn map. Katakana is folded to hiragana first, so one table
   // covers both. The value-add over a plain transliterator is the long-vowel
@@ -208,10 +171,49 @@ const previewLetters = 'abcdefghijklmnopqrstuvwxyz'.split('');
   }
 
   // ── Rendering ──────────────────────────────────────────────────────────
+  // The name is built from our own stroke letters (src/letter-strokes.ts), not a
+  // web font, so the shapes match what kids practise tracing. Each glyph lives in
+  // a shared 100-unit box whose lowercase metrics double as the 4-line guide:
+  //   top/ascender 10 · x-height 39 · baseline 76 (red) · descender 96.
   const SVGNS = 'http://www.w3.org/2000/svg';
-  // viewBox is 120 tall; four lines at even spacing, baseline (line 3) is red.
-  const Y_TOP = 12, Y_MID = 44, Y_BASE = 76, Y_BOTTOM = 108, VH = 120;
-  const FS = 84, PAD = 24;
+  const ASC = 10, XH = 39, BASE_Y = 76, DESC = 96;
+  const VBH = 102;          // viewBox height — a little room for descender stroke
+  const PAD_X = 24;         // left/right breathing room
+  const SPACING = 12;       // gap between letters
+  const SPACE_W = 34;       // advance for a space
+  const STROKE = 9;         // pen weight (held constant via non-scaling-stroke)
+  // Capitals are authored taller (top 8 → baseline 91). Scale + shift them so the
+  // cap-height fills the top-line→baseline band and the baseline matches lowercase.
+  const CAP_SCALE = (BASE_Y - ASC) / (91 - 8);
+  const CAP_TY = BASE_Y - 91 * CAP_SCALE;
+
+  const isCap = (ch: string) => ch >= 'A' && ch <= 'Z';
+
+  // One letter → a <g> of stroke <path>s (capitals wrapped in a scale/shift group).
+  function makeGlyph(ch: string): SVGGElement | null {
+    const strokes = letterStrokes[ch];
+    if (!strokes) return null;
+    const g = document.createElementNS(SVGNS, 'g');
+    let host: SVGGElement = g;
+    if (isCap(ch)) {
+      const inner = document.createElementNS(SVGNS, 'g');
+      inner.setAttribute('transform', `translate(0 ${CAP_TY}) scale(${CAP_SCALE})`);
+      g.appendChild(inner);
+      host = inner;
+    }
+    for (const d of strokes) {
+      const p = document.createElementNS(SVGNS, 'path');
+      p.setAttribute('d', d);
+      p.setAttribute('fill', 'none');
+      p.setAttribute('stroke', '#333');
+      p.setAttribute('stroke-width', String(STROKE));
+      p.setAttribute('stroke-linecap', 'round');
+      p.setAttribute('stroke-linejoin', 'round');
+      p.setAttribute('vector-effect', 'non-scaling-stroke');
+      host.appendChild(p);
+    }
+    return g;
+  }
 
   const input = document.getElementById('nw-input') as HTMLInputElement;
   const stage = document.getElementById('nw-stage')!;
@@ -222,24 +224,24 @@ const previewLetters = 'abcdefghijklmnopqrstuvwxyz'.split('');
   function drawName(text: string) {
     const svg = document.createElementNS(SVGNS, 'svg');
     svg.setAttribute('class', 'nw-svg');
+    svg.setAttribute('viewBox', `0 0 100 ${VBH}`);
+    stage.replaceChildren(svg); // attach first so getBBox can measure each glyph
 
-    const t = document.createElementNS(SVGNS, 'text');
-    t.setAttribute('y', String(Y_BASE));
-    t.setAttribute('font-size', String(FS));
-    t.setAttribute('font-family', 'Andika, sans-serif');
-    t.setAttribute('text-anchor', 'middle');
-    t.setAttribute('fill', '#333');
-    t.textContent = text;
-    svg.appendChild(t);
-
-    // Measure: append off-stage, read the text width, then size the viewBox.
-    svg.setAttribute('viewBox', `0 0 100 ${VH}`);
-    stage.replaceChildren(svg);
-    const w = (t as SVGTextElement).getComputedTextLength();
-    const W = Math.max(w + PAD * 2, 120);
-
-    svg.setAttribute('viewBox', `0 0 ${W} ${VH}`);
-    t.setAttribute('x', String(W / 2));
+    // Lay glyphs left→right, advancing by each one's measured ink width so the
+    // spacing reads proportionally instead of monospace.
+    let penX = PAD_X;
+    for (const ch of text) {
+      if (ch === ' ') { penX += SPACE_W; continue; }
+      const g = makeGlyph(ch);
+      if (!g) continue;
+      svg.appendChild(g);
+      const bb = g.getBBox();
+      g.setAttribute('transform', `translate(${penX - bb.x} 0)`);
+      penX += bb.width + SPACING;
+    }
+    const firstGlyph = svg.firstChild; // guide lines get inserted before this
+    const W = Math.max(penX - SPACING + PAD_X, 160);
+    svg.setAttribute('viewBox', `0 0 ${W} ${VBH}`);
 
     const line = (y: number, color: string, dashed = false) => {
       const l = document.createElementNS(SVGNS, 'line');
@@ -249,11 +251,11 @@ const previewLetters = 'abcdefghijklmnopqrstuvwxyz'.split('');
       if (dashed) l.setAttribute('stroke-dasharray', '6 7');
       return l;
     };
-    // Lines go under the text.
-    svg.insertBefore(line(Y_BOTTOM, '#333'), t);
-    svg.insertBefore(line(Y_BASE, '#d94b3e'), t);   // red baseline
-    svg.insertBefore(line(Y_MID, '#333', true), t); // dashed midline
-    svg.insertBefore(line(Y_TOP, '#333'), t);
+    // Lines go under the letters (inserted before the first glyph).
+    svg.insertBefore(line(ASC, '#333'), firstGlyph);
+    svg.insertBefore(line(XH, '#333', true), firstGlyph); // dashed midline
+    svg.insertBefore(line(BASE_Y, '#d94b3e'), firstGlyph); // red baseline
+    svg.insertBefore(line(DESC, '#333'), firstGlyph);
   }
 
   function selectChip(idx: number, options: string[]) {
@@ -397,45 +399,4 @@ const previewLetters = 'abcdefghijklmnopqrstuvwxyz'.split('');
     color: var(--color-white);
   }
 
-  /* TEMP preview styles — remove with the preview section. */
-  .nw-preview {
-    margin-top: 3rem;
-    padding-top: 1.5rem;
-    border-top: 2px dashed #e0d6c2;
-  }
-  .nw-preview-title {
-    font-family: var(--font-main);
-    color: var(--color-primary);
-    font-size: 1.2rem;
-    text-align: center;
-  }
-  .nw-preview-row { margin-top: 1.5rem; }
-  .nw-preview-label {
-    text-align: center;
-    color: #7a6f5c;
-    font-size: 0.95rem;
-    margin: 0 0 0.6rem;
-  }
-  .nw-preview-grid {
-    display: flex;
-    justify-content: center;
-    gap: 1rem;
-    flex-wrap: wrap;
-  }
-  .nw-glyph {
-    text-align: center;
-  }
-  .nw-glyph svg {
-    width: 150px;
-    height: 150px;
-    background: var(--color-white);
-    border: 2px solid #efe7d6;
-    border-radius: 14px;
-  }
-  .nw-glyph span {
-    display: block;
-    margin-top: 0.25rem;
-    color: #b9a87f;
-    font-size: 0.85rem;
-  }
 </style>

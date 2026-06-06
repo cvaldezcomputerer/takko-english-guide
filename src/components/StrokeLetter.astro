@@ -1,16 +1,23 @@
 ---
 /**
- * StrokeLetter — renders a capital letter A–Z from the stroke-based set in
- * `src/letter-strokes.ts`. Each pen stroke is a separate <path> in writing order.
+ * StrokeLetter — renders a single letter (capitals A–Z or lowercase a–z) from
+ * the stroke-based set in `src/letter-strokes.ts`. Each pen stroke is a separate
+ * <path> drawn in natural writing order, so `animate` traces the letter the way
+ * it is handwritten. This is the shared primitive for letter glyphs across the
+ * site (ABC-order game, letter pool, etc.) — reuse it rather than re-rendering
+ * paths inline.
  *
  * Usage:
  *   import StrokeLetter from "../components/StrokeLetter.astro";
- *   <StrokeLetter letter="B" />              // static
+ *   <StrokeLetter letter="B" />              // static capital
  *   <StrokeLetter letter="B" animate />      // loops a writing animation
- *   <StrokeLetter letter="g" color="#2c3e50" size="120px" stroke={9} />
+ *   <StrokeLetter letter="g" color="#2c3e50" size="120px" stroke={9} />  // lowercase
  *   <StrokeLetter letter="g" outline="#000" />   // colored letter with a black edge
  *
- * The SVG fills its container by default; pass `size` for a fixed square.
+ * Lowercase keys are preferred when present; an uppercase fallback keeps older
+ * callers working. Pen weight auto-thins for lowercase (≈9 vs ≈11) unless you
+ * pass `stroke`. The SVG fills its container by default; pass `size` for a fixed
+ * square. Animation supports up to 4 strokes per letter (all current glyphs fit).
  * Note: `outline` is meant for static letters; combining it with `animate`
  * throws off the per-stroke draw timing (extra paths shift :nth-of-type).
  */
