@@ -1,6 +1,5 @@
 ---
 import GameLayout from '../../layouts/GameLayout.astro';
-import T from '../../components/T.astro';
 ---
 
 <GameLayout
@@ -11,16 +10,11 @@ import T from '../../components/T.astro';
   <main class="nw-main">
     <header class="nw-head">
       <h1 class="nw-title">
-        <T>
-          <span slot="en">Write Your Name</span>
-          <span slot="ja">なまえを英語で書こう</span>
-        </T>
+        Write Your Name<span class="nw-title-ja">なまえをえいごでかこう</span>
       </h1>
       <p class="nw-sub">
-        <T>
-          <span slot="en">Type your name in kana.</span>
-          <span slot="ja">ひらがな・カタカナで名前を入力してね。</span>
-        </T>
+        <span class="nw-en">Type your name in kana.</span>
+        <span class="nw-ja">ひらがなやカタカナでなまえをいれてね。</span>
       </p>
     </header>
 
@@ -42,24 +36,87 @@ import T from '../../components/T.astro';
     <div class="nw-card">
       <div class="nw-stage" id="nw-stage" aria-live="polite">
         <p class="nw-placeholder" id="nw-placeholder">
-          <T>
-            <span slot="en">Your name appears here</span>
-            <span slot="ja">ここに名前が出ます</span>
-          </T>
+          <span class="nw-en">Your name appears here</span>
+          <span class="nw-ja">ここになまえがでます</span>
         </p>
+      </div>
+    </div>
+
+    <!-- "How to write": replays the name being drawn stroke by stroke. -->
+    <div class="nw-write" id="nw-write" hidden>
+      <button class="nw-draw-btn" id="nw-draw-btn" type="button">
+        <svg class="nw-pencil" viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"
+            fill="currentColor"
+          />
+        </svg>
+        <span class="nw-btn-text">
+          <span class="nw-en">How to write</span>
+          <span class="nw-ja">かきかた</span>
+        </span>
+      </button>
+
+      <div class="nw-speed" role="group" aria-label="Speed / スピード">
+        <span class="nw-speed-label">
+          <span class="nw-en">Speed</span>
+          <span class="nw-ja">スピード</span>
+        </span>
+        <button class="nw-speed-btn is-selected" type="button" data-speed="normal">
+          <svg class="nw-spd-icon" viewBox="0 0 22 16" fill="none" aria-hidden="true">
+            <path d="M3 4l4 4-4 4M9 4l4 4-4 4M15 4l4 4-4 4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span class="nw-spd-text"><span class="nw-en">Normal</span><span class="nw-ja">ふつう</span></span>
+        </button>
+        <button class="nw-speed-btn" type="button" data-speed="slow">
+          <svg class="nw-spd-icon" viewBox="0 0 22 16" fill="none" aria-hidden="true">
+            <path d="M6 4l4 4-4 4M12 4l4 4-4 4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span class="nw-spd-text"><span class="nw-en">Slow</span><span class="nw-ja">おそい</span></span>
+        </button>
+        <button class="nw-speed-btn" type="button" data-speed="vslow">
+          <svg class="nw-spd-icon" viewBox="0 0 22 16" fill="none" aria-hidden="true">
+            <path d="M9 4l4 4-4 4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span class="nw-spd-text"><span class="nw-en">Very slow</span><span class="nw-ja">とてもおそい</span></span>
+        </button>
       </div>
     </div>
 
     <!-- Spelling options, most common first. -->
     <div class="nw-options" id="nw-options" hidden>
       <p class="nw-options-label">
-        <T>
-          <span slot="en">Choose a spelling</span>
-          <span slot="ja">スペルを選んでね</span>
-        </T>
+        <span class="nw-en">Choose a spelling</span>
+        <span class="nw-ja">スペルをえらんでね</span>
       </p>
       <div class="nw-chips" id="nw-chips" role="group" aria-label="Spelling options"></div>
     </div>
+
+    <!-- Quick tips for students. -->
+    <section class="nw-tips" aria-label="Tips">
+      <h2 class="nw-tips-title">
+        <span class="nw-en">Tips</span>
+        <span class="nw-ja">ヒント</span>
+      </h2>
+      <ul class="nw-tips-list">
+        <li>
+          <span class="nw-en">Names start with a capital letter.</span>
+          <span class="nw-ja">なまえはおおもじではじめます。</span>
+        </li>
+        <li>
+          <span class="nw-en">One sound can have a few spellings — pick the one you like.</span>
+          <span class="nw-ja">よみかたはひとつでも、スペルはいくつかあります。すきなものをえらんでね。</span>
+        </li>
+        <li>
+          <span class="nw-en">Press "How to write" to watch each letter, then copy it onto paper.</span>
+          <span class="nw-ja">「かきかた」をおしてかきじゅんをみて、かみにかいてみよう。</span>
+        </li>
+        <li>
+          <span class="nw-en">Stroke order and the number of strokes can vary — this shows one common way.</span>
+          <span class="nw-ja">かきじゅんや せんのかずは、ほかの かきかたと ちがう ことが あります。これは よくある ひとつの れいだよ。</span>
+        </li>
+      </ul>
+    </section>
   </main>
 </GameLayout>
 
@@ -193,23 +250,27 @@ import T from '../../components/T.astro';
   function makeGlyph(ch: string): SVGGElement | null {
     const strokes = letterStrokes[ch];
     if (!strokes) return null;
+    const cap = isCap(ch);
     const g = document.createElementNS(SVGNS, 'g');
     let host: SVGGElement = g;
-    if (isCap(ch)) {
+    if (cap) {
       const inner = document.createElementNS(SVGNS, 'g');
       inner.setAttribute('transform', `translate(0 ${CAP_TY}) scale(${CAP_SCALE})`);
       g.appendChild(inner);
       host = inner;
     }
+    // Capitals sit in a scaled group, so bump their pen weight to land at ~STROKE
+    // after scaling. We deliberately avoid vector-effect:non-scaling-stroke here —
+    // it breaks the pathLength dash math the "how to write" draw-on relies on.
+    const strokeW = cap ? STROKE / CAP_SCALE : STROKE;
     for (const d of strokes) {
       const p = document.createElementNS(SVGNS, 'path');
       p.setAttribute('d', d);
       p.setAttribute('fill', 'none');
       p.setAttribute('stroke', '#333');
-      p.setAttribute('stroke-width', String(STROKE));
+      p.setAttribute('stroke-width', String(strokeW));
       p.setAttribute('stroke-linecap', 'round');
       p.setAttribute('stroke-linejoin', 'round');
-      p.setAttribute('vector-effect', 'non-scaling-stroke');
       host.appendChild(p);
     }
     return g;
@@ -220,6 +281,59 @@ import T from '../../components/T.astro';
   const placeholder = document.getElementById('nw-placeholder')!;
   const optionsBox = document.getElementById('nw-options') as HTMLElement;
   const chipsBox = document.getElementById('nw-chips')!;
+  const writeBox = document.getElementById('nw-write') as HTMLElement;
+  const drawBtn = document.getElementById('nw-draw-btn') as HTMLButtonElement;
+
+  // ── "How to write" animation ─────────────────────────────────────────────
+  // Each stroke <path> is revealed by animating a dash offset (same trick as
+  // StrokeLetter), one after another in DOM order = writing order. Stroke time is
+  // proportional to its length so a long stem isn't as quick as a dot. Pen speed
+  // is ms-per-unit-length; `gap` is the pen-lift pause between strokes.
+  const SPEEDS: Record<string, { ms: number; gap: number }> = {
+    normal: { ms: 7, gap: 90 },
+    slow: { ms: 14, gap: 160 },
+    vslow: { ms: 24, gap: 260 },
+  };
+  let speed = 'normal';
+  let drawAnims: Animation[] = [];
+
+  function animateDraw() {
+    drawAnims.forEach((a) => a.cancel());
+    drawAnims = [];
+    const paths = Array.from(
+      stage.querySelectorAll<SVGPathElement>('.nw-svg path')
+    );
+    if (!paths.length) return;
+
+    const { ms, gap } = SPEEDS[speed];
+    // Hide every stroke up front (offset just past 1 avoids a round-cap dot).
+    for (const p of paths) {
+      p.setAttribute('pathLength', '1');
+      p.style.strokeDasharray = '1 2';
+      p.style.strokeDashoffset = '1.05';
+    }
+    // Then reveal them one by one.
+    let delay = 0;
+    for (const p of paths) {
+      const dur = Math.max(p.getTotalLength() * ms, 90);
+      const a = p.animate(
+        [{ strokeDashoffset: '1.05' }, { strokeDashoffset: '0' }],
+        { duration: dur, delay, easing: 'ease-in-out', fill: 'forwards' }
+      );
+      drawAnims.push(a);
+      delay += dur + gap;
+    }
+  }
+
+  drawBtn.addEventListener('click', animateDraw);
+  for (const b of Array.from(writeBox.querySelectorAll<HTMLButtonElement>('.nw-speed-btn'))) {
+    b.addEventListener('click', () => {
+      speed = b.dataset.speed!;
+      writeBox.querySelectorAll('.nw-speed-btn').forEach((x) =>
+        x.classList.toggle('is-selected', x === b)
+      );
+    });
+  }
 
   function drawName(text: string) {
     const svg = document.createElementNS(SVGNS, 'svg');
@@ -270,9 +384,12 @@ import T from '../../components/T.astro';
     if (options.length === 0) {
       stage.replaceChildren(placeholder);
       optionsBox.hidden = true;
+      writeBox.hidden = true;
       chipsBox.replaceChildren();
       return;
     }
+
+    writeBox.hidden = false;
 
     chipsBox.replaceChildren();
     options.forEach((opt, i) => {
@@ -308,10 +425,27 @@ import T from '../../components/T.astro';
     font-size: clamp(1.6rem, 5vw, 2.6rem);
     margin: 0 0 0.3rem;
   }
+  .nw-title-ja {
+    display: block;
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+    font-size: clamp(1rem, 3vw, 1.4rem);
+    font-weight: 700;
+    margin-top: 0.1rem;
+  }
   .nw-sub {
     margin: 0;
     color: #7a6f5c;
     font-size: clamp(0.95rem, 2.4vw, 1.15rem);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.15rem;
+  }
+
+  /* Bilingual text: English on top, Japanese companion below/after (muted). */
+  .nw-ja {
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+    color: #9a8d76;
   }
 
   .nw-input-wrap {
@@ -363,7 +497,12 @@ import T from '../../components/T.astro';
     margin: 0;
     color: #c8bca3;
     font-size: clamp(1.1rem, 3.5vw, 1.5rem);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.1rem;
   }
+  .nw-placeholder .nw-ja { color: #cabfa6; font-size: 0.85em; }
 
   /* Spelling option chips. */
   .nw-options { margin: clamp(1.1rem, 3.5vw, 1.6rem) 0 0; text-align: center; }
@@ -371,7 +510,12 @@ import T from '../../components/T.astro';
     margin: 0 0 0.6rem;
     color: #7a6f5c;
     font-size: clamp(0.85rem, 2.2vw, 1rem);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.05rem;
   }
+  .nw-options-label .nw-ja { font-size: 0.9em; }
   .nw-chips {
     display: flex;
     flex-wrap: wrap;
@@ -399,4 +543,130 @@ import T from '../../components/T.astro';
     color: var(--color-white);
   }
 
+  /* "How to write" controls. */
+  .nw-write {
+    margin: clamp(1.1rem, 3.5vw, 1.6rem) 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem 1.2rem;
+  }
+  .nw-draw-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-family: var(--font-body);
+    font-size: clamp(1.05rem, 3vw, 1.3rem);
+    padding: 0.45rem 1.2rem;
+    border: 2px solid var(--color-primary);
+    border-radius: 12px;
+    background: var(--color-primary);
+    color: var(--color-white);
+    cursor: pointer;
+    transition: background 0.15s, transform 0.12s, box-shadow 0.15s;
+  }
+  .nw-draw-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 10px rgba(74, 124, 89, 0.25);
+  }
+  .nw-pencil {
+    width: 1.2em;
+    height: 1.2em;
+    flex: none;
+  }
+  .nw-btn-text {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: 1.1;
+  }
+  .nw-draw-btn .nw-ja { font-size: 0.72em; color: rgba(255, 255, 255, 0.88); }
+
+  /* Speed controls sit in their own little boxed section. */
+  .nw-speed {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.7rem;
+    background: #faf6ec;
+    border: 2px solid #efe7d6;
+    border-radius: 14px;
+  }
+  .nw-speed-label {
+    color: #7a6f5c;
+    font-size: clamp(0.85rem, 2.2vw, 1rem);
+    margin-right: 0.1rem;
+    display: inline-flex;
+    flex-direction: column;
+    line-height: 1.05;
+  }
+  .nw-speed-label .nw-ja { font-size: 0.82em; }
+  .nw-speed-btn {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.15rem;
+    font-family: var(--font-body);
+    font-size: clamp(0.8rem, 2.2vw, 0.98rem);
+    padding: 0.35rem 0.7rem;
+    border: 2px solid var(--color-secondary);
+    border-radius: 14px;
+    background: var(--color-white);
+    color: var(--color-text);
+    cursor: pointer;
+    line-height: 1.05;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+  }
+  .nw-speed-btn:hover { border-color: var(--color-primary); }
+  .nw-speed-btn.is-selected {
+    background: var(--color-secondary);
+    border-color: var(--color-secondary);
+    color: var(--color-text);
+  }
+  .nw-spd-icon {
+    width: 1.6rem;
+    height: 1.05rem;
+    color: var(--color-primary);
+  }
+  .nw-spd-text {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .nw-spd-text .nw-ja { font-size: 0.82em; }
+
+  /* Tips for students. */
+  .nw-tips {
+    margin: clamp(1.5rem, 5vw, 2.5rem) 0 0;
+    background: var(--color-white);
+    border: 2px solid #efe7d6;
+    border-radius: 16px;
+    padding: clamp(0.9rem, 3vw, 1.4rem) clamp(1.1rem, 4vw, 1.7rem);
+  }
+  .nw-tips-title {
+    margin: 0 0 0.6rem;
+    font-family: var(--font-main);
+    color: var(--color-primary);
+    font-size: 1.1rem;
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+  }
+  .nw-tips-title .nw-ja { font-size: 0.82em; }
+  .nw-tips-list {
+    margin: 0;
+    padding-left: 1.2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+  }
+  .nw-tips-list li {
+    color: var(--color-text);
+    font-size: clamp(0.9rem, 2.3vw, 1rem);
+    line-height: 1.35;
+  }
+  .nw-tips-list .nw-en { display: block; }
+  .nw-tips-list .nw-ja { display: block; font-size: 0.92em; margin-top: 0.05rem; }
 </style>
