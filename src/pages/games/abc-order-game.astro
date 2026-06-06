@@ -53,6 +53,15 @@ const abcColors = abcAlpha.map(
         </div>
 
         <div class="setting-row">
+          <span class="setting-label">Letters / 文字</span>
+          <span class="setting-desc">Show capital or lowercase letters / 大文字か小文字で表示します</span>
+          <div class="opt-group" id="opt-letters">
+            <button class="opt-btn active" data-value="upper">ABC</button>
+            <button class="opt-btn" data-value="lower">abc</button>
+          </div>
+        </div>
+
+        <div class="setting-row">
           <span class="setting-label">Sound / 音</span>
           <span class="setting-desc">Play a note for each correct letter / 正解するたびに音が鳴ります</span>
           <div class="opt-group" id="opt-sound">
@@ -611,7 +620,7 @@ const abcColors = abcAlpha.map(
 
   // ── Settings ───────────────────────────────────────────────────────────────
 
-  const settings = { difficulty: "easy", sound: true };
+  const settings = { difficulty: "easy", sound: true, lowercase: false };
 
   // Per-difficulty modifiers. Easy = original game.
   type Mods = {
@@ -638,18 +647,44 @@ const abcColors = abcAlpha.map(
         group.querySelectorAll(".opt-btn").forEach((b) => b.classList.remove("active"));
         btn.classList.add("active");
         const v = btn.dataset.value!;
-        if (group.id === "opt-difficulty") settings.difficulty = v;
+        if (group.id === "opt-difficulty") { settings.difficulty = v; updateInstruction(); }
         if (group.id === "opt-sound")      settings.sound = v === "on";
+        if (group.id === "opt-letters")    settings.lowercase = v === "lower";
       });
     });
   });
 
-  import { LETTER_PATHS } from "../../letter-paths";
+  // Keyboard input is an easy-mode aid; only mention it when easy is selected.
+  const instrEl = document.getElementById("instruction-text");
+  const instrJaEl = document.getElementById("instruction-ja");
+  function updateInstruction() {
+    const easy = settings.difficulty === "easy";
+    if (instrEl) instrEl.textContent = easy
+      ? "Click the letters in ABC order. You can also use the keyboard."
+      : "Click the letters in ABC order.";
+    if (instrJaEl) instrJaEl.textContent = easy
+      ? "ABC順にクリック、またはキーボードで入力しましょう。"
+      : "ABC順にクリックしましょう。";
+  }
+  updateInstruction();
+
+  import { LETTER_PATHS, LETTER_PATHS_LOWER } from "../../letter-paths";
 
   function makeSVG(letter: string): string {
-    const d = LETTER_PATHS[letter];
+    // Letters are tracked internally as A–Z; the lowercase toggle only swaps the
+    // rendered glyph (filled outlines from LETTER_PATHS_LOWER) without changing logic.
+    const lower = settings.lowercase;
+    const d = lower
+      ? LETTER_PATHS_LOWER[letter.toLowerCase()]
+      : LETTER_PATHS[letter];
     if (!d) return letter;
-    return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="${d}" fill="currentColor"/></svg>`;
+    // Lowercase glyphs share a baseline at y=76. Drawing it on the card lets kids
+    // tell p/q/b/d apart even when medium/hard rotates or flips the token: the
+    // line transforms with the letter, so descenders always hang below it.
+    const baseline = lower
+      ? `<line x1="8" y1="76" x2="92" y2="76" stroke="#c5b99a" stroke-width="3" stroke-linecap="round"/>`
+      : "";
+    return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${baseline}<path d="${d}" fill="currentColor"/></svg>`;
   }
 
   let currentIndex = 0;
@@ -1015,7 +1050,8 @@ const abcColors = abcAlpha.map(
   function init() {
     const m = mods();
     detachKeyboard();
-    attachKeyboard();
+    // Keyboard play is an easy-mode aid only; medium/hard are click-only.
+    if (settings.difficulty === "easy") attachKeyboard();
     stopTimer();
     currentIndex = 0;
     gameActive = true;
