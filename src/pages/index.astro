@@ -5,6 +5,7 @@ import Layout from '../layouts/Layout.astro';
 import Navbar from '../components/Navbar.astro';
 import AnimatedLogo from '../components/AnimatedLogo.astro';
 import ShrineIcon from '../components/ShrineIcon.astro';
+import TipIcon from '../components/TipIcon.astro';
 import T from '../components/T.astro';
 
 const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT2r7rHiUTy7tfJNkVnajXQuXoELP_27frVBYS-S0EsXzQBI71VQcWbGmb9n8-J023R_Ldso-XJg5JY/pub?output=csv';
@@ -342,88 +343,123 @@ const GARLIC_SILO_PATH = "M199 468C136.885 532.312 124 583 143 680C191.5 772 243
             </main>
 
             <aside class="page-sidebar">
-                <a class="date-card" href="/date">
-                    <div class="date-card-header">
-                        <p class="date-card-title">
-                            <T>
-                                <span slot="en">Today's Date</span>
-                                <span slot="ja">今日の日付</span>
-                            </T>
-                        </p>
-                    </div>
-                    <div class="date-card-body">
-                        <div class="cal-block">
-                            <div class="cal-weekday">
+                <div class="widget">
+                    <a class="date-card" href="/date">
+                        <div class="date-card-header">
+                            <p class="date-card-title">
                                 <T>
-                                    <span slot="en">{EN_DAYS[todayWeekday]}</span>
-                                    <span slot="ja">{JA_DAYS[todayWeekday]}</span>
+                                    <span slot="en">Today's Date</span>
+                                    <span slot="ja">今日の日付</span>
                                 </T>
-                            </div>
-                            <div class="cal-monthday">
-                                <div class="cal-month">
+                            </p>
+                        </div>
+                        <div class="date-card-body">
+                            <div class="cal-block">
+                                <div class="cal-weekday">
                                     <T>
-                                        <span slot="en">{EN_MONTHS[todayJST.getUTCMonth()]}</span>
-                                        <span slot="ja">{todayJST.getUTCMonth() + 1}月</span>
+                                        <span slot="en">{EN_DAYS[todayWeekday]}</span>
+                                        <span slot="ja">{JA_DAYS[todayWeekday]}</span>
                                     </T>
                                 </div>
-                                <div class="cal-day">{todayDate}<span class="cal-ordinal">{ordinalSuffix(todayDate)}</span></div>
+                                <div class="cal-monthday">
+                                    <div class="cal-month">
+                                        <T>
+                                            <span slot="en">{EN_MONTHS[todayJST.getUTCMonth()]}</span>
+                                            <span slot="ja">{todayJST.getUTCMonth() + 1}月</span>
+                                        </T>
+                                    </div>
+                                    <div class="cal-day">{todayDate}<span class="cal-ordinal">{ordinalSuffix(todayDate)}</span></div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </a>
-                <a class="weather-card is-loading" href="/weather">
-                    <div class="weather-card-header">
-                        <p class="weather-card-title">
+                    </a>
+                    <div class="widget-tip" aria-hidden="true">
+                        <span class="widget-tip-bubble">
                             <T>
-                                <span slot="en">Takko Weather</span>
-                                <span slot="ja">田子の天気</span>
+                                <span slot="en">Click for more!</span>
+                                <span slot="ja">もっと見る！</span>
                             </T>
-                        </p>
+                        </span>
+                        <TipIcon class="widget-tip-icon" />
                     </div>
-                    <div class="weather-zone-icon">
-                        <div class="weather-icon"></div>
-                        <div class="weather-desc">
-                            <T>
-                                <span slot="en"></span>
-                                <span slot="ja"></span>
-                            </T>
+                </div>
+
+                <div class="widget">
+                    <a class="weather-card is-loading" href="/weather">
+                        <div class="weather-card-header">
+                            <p class="weather-card-title">
+                                <T>
+                                    <span slot="en">Takko Weather</span>
+                                    <span slot="ja">田子の天気</span>
+                                </T>
+                            </p>
                         </div>
-                    </div>
-                    <div class="weather-zone-temp">
-                        <div class="weather-temp"></div>
-                        <div class="weather-feels">
-                            <T>
-                                <span slot="en"></span>
-                                <span slot="ja"></span>
-                            </T>
+                        <div class="weather-zone-icon">
+                            <div class="weather-icon"></div>
+                            <div class="weather-desc">
+                                <T>
+                                    <span slot="en"></span>
+                                    <span slot="ja"></span>
+                                </T>
+                            </div>
                         </div>
-                    </div>
-                </a>
-                <a class="wod-card" href="/takko-ben" data-words={JSON.stringify(allWords)}>
-                    <div class="wod-card-header">
-                        <p class="wod-card-title">
-                            <T>
-                                <span slot="en">Takko dialect word of the day</span>
-                                <span slot="ja">今日の田子弁</span>
-                            </T>
-                        </p>
-                    </div>
-                    <div class="wod-card-body">
-                        <div class="wod-dialect">
-                            <T>
-                                <span slot="en">{word.romaji}</span>
-                                <span slot="ja">{word.dialect}</span>
-                            </T>
+                        <div class="weather-zone-temp">
+                            <div class="weather-temp"></div>
+                            <div class="weather-feels">
+                                <T>
+                                    <span slot="en"></span>
+                                    <span slot="ja"></span>
+                                </T>
+                            </div>
                         </div>
-                        <div class="wod-sep">→</div>
-                        <div class="wod-standard">
+                    </a>
+                    <div class="widget-tip" aria-hidden="true">
+                        <span class="widget-tip-bubble">
                             <T>
-                                <span slot="en">{word.english}</span>
-                                <span slot="ja">{word.standard}</span>
+                                <span slot="en">Click for more!</span>
+                                <span slot="ja">もっと見る！</span>
                             </T>
-                        </div>
+                        </span>
+                        <TipIcon class="widget-tip-icon" />
                     </div>
-                </a>
+                </div>
+
+                <div class="widget">
+                    <a class="wod-card" href="/takko-ben" data-words={JSON.stringify(allWords)}>
+                        <div class="wod-card-header">
+                            <p class="wod-card-title">
+                                <T>
+                                    <span slot="en">Takko dialect word of the day</span>
+                                    <span slot="ja">今日の田子弁</span>
+                                </T>
+                            </p>
+                        </div>
+                        <div class="wod-card-body">
+                            <div class="wod-dialect">
+                                <T>
+                                    <span slot="en">{word.romaji}</span>
+                                    <span slot="ja">{word.dialect}</span>
+                                </T>
+                            </div>
+                            <div class="wod-sep">→</div>
+                            <div class="wod-standard">
+                                <T>
+                                    <span slot="en">{word.english}</span>
+                                    <span slot="ja">{word.standard}</span>
+                                </T>
+                            </div>
+                        </div>
+                    </a>
+                    <div class="widget-tip" aria-hidden="true">
+                        <span class="widget-tip-bubble">
+                            <T>
+                                <span slot="en">Click for more!</span>
+                                <span slot="ja">もっと見る！</span>
+                            </T>
+                        </span>
+                        <TipIcon class="widget-tip-icon" />
+                    </div>
+                </div>
             </aside>
         </div>
 
@@ -794,6 +830,77 @@ const GARLIC_SILO_PATH = "M199 468C136.885 532.312 124 583 143 680C191.5 772 243
 
     :global(body.lang-ja) .wod-card-body {
         align-items: center;
+    }
+
+    /* ── Sidebar widget tips ──────────────────────────────────────────────
+       A "Clippy"-style assistant floats to the RIGHT of each widget: the mascot
+       with a little speech bubble above it. The mascot idle-bobs to draw the eye.
+       The card is the link — the tip is a non-interactive affordance. The mascot
+       is a placeholder (TipIcon) until the real pixel logo is ready. */
+    .widget { position: relative; }
+
+    .widget-tip {
+        position: absolute;
+        left: 100%;             /* sit just outside the card's right edge */
+        top: 50%;
+        transform: translateY(-50%);
+        margin-left: 0.85rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.45rem;           /* room for the bubble's downward tail */
+        pointer-events: none;   /* purely decorative — click the card */
+    }
+
+    /* Little speech bubble floating above the mascot (Clippy-style). */
+    .widget-tip-bubble {
+        position: relative;
+        max-width: 6rem;
+        background: #fff;
+        border: 2px solid var(--color-secondary);
+        border-radius: 10px;
+        padding: 0.32rem 0.5rem;
+        font-size: 0.7rem;
+        font-weight: 700;
+        line-height: 1.2;
+        color: var(--color-primary);
+        text-align: center;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+    }
+    /* Tail: a small square rotated 45° carrying two of the bubble's borders.
+       It overlaps the bubble's bottom edge, so the white face hides the border
+       behind it and only the outer two sides show — a clean pointed tail. */
+    .widget-tip-bubble::after {
+        content: "";
+        position: absolute;
+        left: 50%;
+        bottom: -6px;
+        width: 11px;
+        height: 11px;
+        background: #fff;
+        border-right: 2px solid var(--color-secondary);
+        border-bottom: 2px solid var(--color-secondary);
+        transform: translateX(-50%) rotate(45deg);
+    }
+
+    /* The mascot "assistant" idles with a gentle bob. */
+    .widget-tip-icon {
+        width: 34px;
+        height: 34px;
+        animation: tip-bob 1.8s ease-in-out infinite;
+    }
+    @keyframes tip-bob {
+        0%, 100% { transform: translateY(0); }
+        50%      { transform: translateY(-3px); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .widget-tip-icon { animation: none; }
+    }
+
+    /* The tip pokes out the right edge of the sidebar, so only show it once the
+       viewport is wide enough to fit it without clipping. */
+    @media (max-width: 1320px) {
+        .widget-tip { display: none; }
     }
 
     @media (max-width: 900px) {

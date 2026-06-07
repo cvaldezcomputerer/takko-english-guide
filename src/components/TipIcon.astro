@@ -1,0 +1,34 @@
+---
+// Placeholder pixel-style mascot for the homepage tip widgets ("tutorial guy").
+// All three sidebar widgets render this, so when the real pixel logo is ready,
+// swap the SVG below and every widget updates at once.
+const { class: className } = Astro.props;
+---
+
+<svg
+  class:list={["tip-icon", className]}
+  viewBox="0 0 16 16"
+  shape-rendering="crispEdges"
+  xmlns="http://www.w3.org/2000/svg"
+  role="img"
+  aria-hidden="true"
+>
+  <rect x="1" y="1" width="14" height="14" fill="#fff3da" />
+  <rect x="1" y="1" width="14" height="14" fill="none" stroke="#caa46a" stroke-width="1" />
+  <!-- eyes -->
+  <rect x="4" y="5" width="2" height="2" fill="#4a7c59" />
+  <rect x="10" y="5" width="2" height="2" fill="#4a7c59" />
+  <!-- smile -->
+  <rect x="4" y="8" width="1" height="1" fill="#4a7c59" />
+  <rect x="11" y="8" width="1" height="1" fill="#4a7c59" />
+  <rect x="5" y="9" width="6" height="1" fill="#4a7c59" />
+</svg>
+
+<style>
+  .tip-icon {
+    display: block;
+    width: 28px;
+    height: 28px;
+    image-rendering: pixelated;
+  }
+</style>
