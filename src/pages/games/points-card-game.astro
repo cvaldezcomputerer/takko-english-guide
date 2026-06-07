@@ -8,13 +8,18 @@ import GameLayout from "../../layouts/GameLayout.astro";
 
       <div class="play-layout">
         <aside class="side-panel event-list-wrap">
-          <h2>
-            Event Cards <span class="jp">イベントカード</span>
-            <span id="eventCount" class="event-count">0/10</span>
-          </h2>
-          <ul id="eventList" class="event-list"></ul>
+          <details class="event-menu">
+            <summary class="event-summary">
+              <span class="event-summary-title">Event Cards <span class="jp">イベントカード</span></span>
+              <span id="eventCount" class="event-count">0/10</span>
+              <svg class="event-chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M4 6l4 4 4-4"/>
+              </svg>
+            </summary>
+            <div class="event-menu-body">
+              <ul id="eventList" class="event-list"></ul>
 
-          <form id="addEventForm" class="add-event">
+              <form id="addEventForm" class="add-event">
             <input
               id="newEventText"
               class="event-input"
@@ -23,19 +28,31 @@ import GameLayout from "../../layouts/GameLayout.astro";
               autocomplete="off"
               placeholder="New card text / 新しいカード"
             />
-            <div class="add-row">
-              <select id="newEventTone" class="event-tone" aria-label="Card type">
-                <option value="positive">Good / よい</option>
-                <option value="neutral">Neutral / ふつう</option>
-                <option value="negative">Bad / わるい</option>
-              </select>
-              <button id="addEventBtn" class="add-btn" type="submit">Add <span class="jp">追加</span></button>
+            <select id="newEventTone" class="event-tone" aria-label="Card type">
+              <option value="positive">Good / よい</option>
+              <option value="neutral">Neutral / ふつう</option>
+              <option value="negative">Bad / わるい</option>
+            </select>
+                <button id="addEventBtn" class="add-btn" type="submit">Add <span class="jp">追加</span></button>
+                <p id="eventHint" class="event-hint" hidden>Up to 10 cards. <span class="jp">カードは10まい まで。</span></p>
+              </form>
             </div>
-            <p id="eventHint" class="event-hint" hidden>Up to 10 cards. <span class="jp">カードは10まい まで。</span></p>
-          </form>
+          </details>
         </aside>
 
         <section class="center-stage" aria-live="polite">
+          <button id="muteBtn" class="mute-btn" type="button" aria-pressed="false" aria-label="Mute sounds">
+            <svg class="icon-sound" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M11 5L6 9H2v6h4l5 4V5z"/>
+              <path d="M15.5 8.5a5 5 0 0 1 0 7"/>
+              <path d="M19 5a9 9 0 0 1 0 14"/>
+            </svg>
+            <svg class="icon-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M11 5L6 9H2v6h4l5 4V5z"/>
+              <path d="M22 9l-6 6"/>
+              <path d="M16 9l6 6"/>
+            </svg>
+          </button>
           <div class="result-box">
             <div class="result-label">Result <span class="jp">けっか</span></div>
             <div id="resultText" class="result-text">PRESS ME</div>
@@ -65,6 +82,7 @@ import GameLayout from "../../layouts/GameLayout.astro";
 
 <script>
   const rollBtn      = document.getElementById("rollBtn") as HTMLButtonElement;
+  const muteBtn      = document.getElementById("muteBtn") as HTMLButtonElement;
   const resultText   = document.getElementById("resultText")!;
   const minInput     = document.getElementById("minPoints") as HTMLInputElement;
   const maxInput     = document.getElementById("maxPoints") as HTMLInputElement;
@@ -99,7 +117,16 @@ import GameLayout from "../../layouts/GameLayout.astro";
   const TEXT_LIMIT = 40;
   const EVENTS_KEY = "points-tool:events";
   const RANGE_KEY = "points-tool:range";
+  const MUTED_KEY = "points-tool:muted";
   const TONES: Tone[] = ["positive", "negative", "neutral"];
+
+  // Feather-style trash icon (static markup, no user data — safe as innerHTML).
+  const TRASH_SVG =
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+    '<path d="M3 6h18"/>' +
+    '<path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/>' +
+    '<path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>' +
+    '<path d="M10 11v6"/><path d="M14 11v6"/></svg>';
 
   const DEFAULT_EVENTS: EventCard[] = [
     { text: "Point Swap", tone: "negative" },
@@ -156,7 +183,7 @@ import GameLayout from "../../layouts/GameLayout.astro";
       const del = document.createElement("button");
       del.type = "button";
       del.className = "event-del";
-      del.textContent = "×";
+      del.innerHTML = TRASH_SVG;
       del.setAttribute("aria-label", `Delete ${ev.text}`);
       del.addEventListener("click", () => {
         events.splice(i, 1);
@@ -230,7 +257,23 @@ import GameLayout from "../../layouts/GameLayout.astro";
   let rolling = false;
   let drumrollInterval: number | null = null;
 
+  // ── Mute: gates all sound, toggled from the center stage, persisted ──────
+  let muted = false;
+  try { muted = localStorage.getItem(MUTED_KEY) === "1"; } catch {}
+
+  function applyMuted(): void {
+    muteBtn.setAttribute("aria-pressed", String(muted));
+    muteBtn.setAttribute("aria-label", muted ? "Unmute sounds" : "Mute sounds");
+  }
+
+  muteBtn.addEventListener("click", () => {
+    muted = !muted;
+    try { localStorage.setItem(MUTED_KEY, muted ? "1" : "0"); } catch {}
+    applyMuted();
+  });
+
   const playFeedbackSound = async (tone: string): Promise<void> => {
+    if (muted) return;
     const pool = tone === "negative" ? negativeSounds : positiveSounds;
     const src = pool[randInt(0, pool.length - 1)];
     const sfx = new Audio(src);
@@ -244,10 +287,12 @@ import GameLayout from "../../layouts/GameLayout.astro";
     let step = 0;
     const maxSteps = 10;
     const timer = window.setInterval(() => {
-      const tick = new Audio(countdownTickSrc);
-      tick.volume = 0.38;
-      tick.playbackRate = 1 + step * 0.05;
-      tick.play().catch(() => {});
+      if (!muted) {
+        const tick = new Audio(countdownTickSrc);
+        tick.volume = 0.38;
+        tick.playbackRate = 1 + step * 0.05;
+        tick.play().catch(() => {});
+      }
       step += 1;
       if (step >= maxSteps) {
         window.clearInterval(timer);
@@ -317,6 +362,7 @@ import GameLayout from "../../layouts/GameLayout.astro";
 
   loadRange();
   renderEvents();
+  applyMuted();
 </script>
 
 <style>
@@ -329,20 +375,33 @@ import GameLayout from "../../layouts/GameLayout.astro";
   }
 
   .game-shell {
-    width: min(940px, 100%);
+    width: 75%;
+    max-width: 1500px;
     background: var(--color-white);
     border: 2px solid var(--color-secondary);
     border-radius: 8px;
     box-shadow: 0 4px 14px rgba(85, 113, 83, 0.12);
-    padding: 1.1rem;
+    padding: 1.5rem;
+  }
+
+  /* On smaller screens 75% leaves the content too cramped — fill the width. */
+  @media (max-width: 1100px) {
+    .game-shell { width: 100%; }
   }
 
   .play-layout {
     display: grid;
-    grid-template-columns: minmax(200px, 1fr) minmax(360px, 1.8fr) minmax(200px, 1fr);
+    grid-template-columns: minmax(360px, 1.7fr) minmax(220px, 1fr);
+    grid-template-areas:
+      "stage stats"
+      "events events";
     gap: 0.9rem;
     align-items: stretch;
   }
+
+  .center-stage   { grid-area: stage; }
+  .stats-wrap     { grid-area: stats; }
+  .event-list-wrap { grid-area: events; }
 
 .side-panel {
     border: 2px solid var(--color-secondary);
@@ -352,32 +411,69 @@ import GameLayout from "../../layouts/GameLayout.astro";
   }
 
   .center-stage {
-    min-height: 340px;
+    position: relative;
+    min-height: 420px;
     border: 2px solid var(--color-secondary);
     border-radius: 5px;
     background: var(--color-beige);
     display: grid;
     place-content: center;
-    gap: 1rem;
+    gap: 1.5rem;
     text-align: center;
-    padding: 1.1rem;
+    padding: 1.5rem;
   }
+
+  .mute-btn {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    display: grid;
+    place-items: center;
+    width: 3.8rem;
+    height: 3.8rem;
+    border: 3px solid var(--color-secondary);
+    border-radius: 50%;
+    background: var(--color-white);
+    color: var(--color-primary);
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    transition: background 0.15s, color 0.15s, border-color 0.15s, transform 0.15s;
+  }
+
+  .mute-btn svg {
+    width: 30px;
+    height: 30px;
+    display: block;
+  }
+
+  .mute-btn:hover { transform: scale(1.06); }
+
+  .mute-btn .icon-muted { display: none; }
+
+  /* Muted: solid red fill + white icon, readable from across a classroom. */
+  .mute-btn[aria-pressed="true"] {
+    background: #c0392b;
+    border-color: #99281c;
+    color: #fff;
+  }
+  .mute-btn[aria-pressed="true"] .icon-sound { display: none; }
+  .mute-btn[aria-pressed="true"] .icon-muted { display: block; }
 
   .result-box {
     border: 2px solid var(--color-primary);
     background: #fffdf8;
     border-radius: 4px;
-    padding: 1rem 1.2rem;
+    padding: 1.4rem 1.6rem;
     width: 100%;
-    max-width: 520px;
+    max-width: 760px;
   }
 
   .result-label {
-    font-size: 0.9rem;
+    font-size: 1rem;
     letter-spacing: 0.08em;
     color: var(--color-primary);
     font-weight: 700;
-    margin-bottom: 0.45rem;
+    margin-bottom: 0.5rem;
   }
 
   /* Japanese sub-text shown alongside English (no lang toggle on tool pages). */
@@ -395,11 +491,11 @@ import GameLayout from "../../layouts/GameLayout.astro";
   }
 
   .result-text {
-    font-size: clamp(1.6rem, 5.5vw, 3.2rem);
+    font-size: clamp(2rem, 5vw, 4.2rem);
     font-weight: 900;
     letter-spacing: 0.02em;
     color: var(--color-dark-teal);
-    min-height: 3.2rem;
+    min-height: 4.2rem;
     display: grid;
     place-items: center;
   }
@@ -427,22 +523,22 @@ import GameLayout from "../../layouts/GameLayout.astro";
     color: #ffffff;
     font-weight: 900;
     letter-spacing: 0.06em;
-    padding: 0.9rem 3.4rem;
+    padding: 1.2rem 4.4rem;
     cursor: pointer;
     box-shadow: 0 8px 0 #8f0000;
     transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
     display: grid;
-    gap: 0.1rem;
+    gap: 0.15rem;
     line-height: 1.1;
   }
 
   .roll-en {
-    font-size: clamp(1.2rem, 3.4vw, 2rem);
+    font-size: clamp(1.4rem, 3.4vw, 2.6rem);
   }
 
   .roll-jp {
     font-family: 'M PLUS Rounded 1c', sans-serif;
-    font-size: clamp(0.78rem, 2vw, 1rem);
+    font-size: clamp(0.85rem, 2vw, 1.15rem);
     font-weight: 700;
     opacity: 0.92;
   }
@@ -480,88 +576,71 @@ import GameLayout from "../../layouts/GameLayout.astro";
   }
 
   .event-list {
-    margin: 0 0 0.7rem;
+    margin: 0 0 0.85rem;
     padding: 0;
     list-style: none;
     display: grid;
-    gap: 0.4rem;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 0.5rem;
   }
 
-  .event-item {
+  /* Collapsible menu (template elements — scoped styles apply normally). */
+  .event-menu { width: 100%; }
+
+  .event-summary {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    border: 1px solid var(--color-secondary);
-    border-radius: 4px;
-    background: var(--color-white);
-    padding: 0.4rem 0.45rem 0.4rem 0.55rem;
-  }
-
-  .event-dot {
-    flex-shrink: 0;
-    width: 9px;
-    height: 9px;
-    border-radius: 50%;
-    background: var(--color-secondary);
-  }
-
-  .event-item[data-tone="positive"] .event-dot { background: #4a7c59; }
-  .event-item[data-tone="negative"] .event-dot { background: #d94b3e; }
-  .event-item[data-tone="neutral"]  .event-dot { background: #c8a24a; }
-
-  .event-text {
-    flex: 1;
-    min-width: 0;
-    color: var(--color-dark-teal);
-    line-height: 1.3;
-    overflow-wrap: anywhere;
-  }
-
-  .event-del {
-    flex-shrink: 0;
-    border: 0;
-    background: transparent;
-    color: #b0563f;
-    font-size: 1.15rem;
-    line-height: 1;
-    width: 1.5rem;
-    height: 1.5rem;
-    border-radius: 4px;
+    gap: 0.6rem;
     cursor: pointer;
+    list-style: none;
+    color: var(--color-primary);
+    font-weight: 700;
+    padding: 0.2rem 0;
+  }
+  .event-summary::-webkit-details-marker { display: none; }
+
+  .event-summary-title {
+    margin-right: auto;
+    font-size: 1.2rem;
   }
 
-  .event-del:hover {
-    background: #f7e3dd;
-    color: #8f3a28;
+  .event-chevron {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    transition: transform 0.2s ease;
   }
+  .event-menu[open] .event-chevron { transform: rotate(180deg); }
 
+  .event-menu-body { margin-top: 1rem; }
+
+  /* Add form: one row on wide layouts, wraps cleanly when space is tight so
+     the controls never spill past the panel. */
   .add-event {
-    display: grid;
-    gap: 0.45rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
   }
 
   .event-input {
-    width: 100%;
+    flex: 1 1 240px;
+    min-width: 0;
     box-sizing: border-box;
     border: 2px solid var(--color-secondary);
     border-radius: 4px;
-    padding: 0.5rem 0.55rem;
+    padding: 0.5rem 0.6rem;
     font: inherit;
     color: var(--color-dark-teal);
     background: var(--color-white);
   }
 
-  .add-row {
-    display: flex;
-    gap: 0.45rem;
-  }
-
   .event-tone {
-    flex: 1;
+    flex: 0 1 auto;
     min-width: 0;
     border: 2px solid var(--color-secondary);
     border-radius: 4px;
-    padding: 0.45rem 0.5rem;
+    padding: 0.5rem 0.5rem;
     font: inherit;
     color: var(--color-dark-teal);
     background: var(--color-white);
@@ -569,12 +648,12 @@ import GameLayout from "../../layouts/GameLayout.astro";
   }
 
   .add-btn {
-    flex-shrink: 0;
+    flex: 0 0 auto;
     border: 2px solid var(--color-primary);
     background: var(--color-primary);
     color: #fff;
     border-radius: 4px;
-    padding: 0.45rem 0.9rem;
+    padding: 0.5rem 1.1rem;
     font-weight: 700;
     cursor: pointer;
   }
@@ -593,6 +672,7 @@ import GameLayout from "../../layouts/GameLayout.astro";
   }
 
   .event-hint {
+    flex-basis: 100%;
     margin: 0;
     color: #b0563f;
     font-size: 0.82rem;
@@ -662,18 +742,69 @@ import GameLayout from "../../layouts/GameLayout.astro";
   @media (max-width: 1024px) {
     .play-layout {
       grid-template-columns: 1fr;
+      grid-template-areas:
+        "stage"
+        "stats"
+        "events";
     }
+  }
+</style>
 
-    .center-stage {
-      order: 1;
-    }
+<!-- Event cards are built in JS at runtime, so Astro's scoped styles can't
+     reach them. These rules are global but stay confined under .event-list. -->
+<style is:global>
+  .event-list .event-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    border: 1px solid var(--color-secondary);
+    border-radius: 4px;
+    background: var(--color-white);
+    padding: 0.55rem 0.5rem 0.55rem 0.7rem;
+  }
 
-    .event-list-wrap {
-      order: 2;
-    }
+  .event-list .event-dot {
+    flex-shrink: 0;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--color-secondary);
+  }
 
-    .stats-wrap {
-      order: 3;
-    }
+  .event-list .event-item[data-tone="positive"] .event-dot { background: #4a7c59; }
+  .event-list .event-item[data-tone="negative"] .event-dot { background: #d94b3e; }
+  .event-list .event-item[data-tone="neutral"]  .event-dot { background: #c8a24a; }
+
+  .event-list .event-text {
+    flex: 1;
+    min-width: 0;
+    color: var(--color-dark-teal);
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+  }
+
+  .event-list .event-del {
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    border: 0;
+    background: transparent;
+    color: #a98a6a;
+    width: 2.1rem;
+    height: 2.1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+
+  .event-list .event-del svg {
+    width: 18px;
+    height: 18px;
+    display: block;
+  }
+
+  .event-list .event-del:hover {
+    background: #f7e3dd;
+    color: #c0392b;
   }
 </style>

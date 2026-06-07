@@ -32,14 +32,15 @@ const {
   </head>
   <body class="game-layout-body">
     {showBackBar && (
-      <a href="/game" class="tool-back-bar">
-        <svg viewBox="0 0 16 16" fill="none" width="14" height="14" aria-hidden="true">
-          <path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <span class="back-en">Games &amp; Tools</span>
-        <span class="back-sep">/</span>
-        <span class="back-ja">ゲーム・ツール一覧</span>
-      </a>
+      <div class="tool-back-wrap">
+        <a href="/game" class="tool-back-btn">
+          <svg viewBox="0 0 16 16" fill="none" width="16" height="16" aria-hidden="true">
+            <path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span class="back-en">Go back</span>
+          <span class="back-ja">もどる</span>
+        </a>
+      </div>
     )}
     <slot />
   </body>
@@ -51,40 +52,49 @@ const {
     min-height: 100vh;
   }
 
-  .tool-back-bar {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    padding: 0.45rem 1rem;
-    background: #f5f5f5;
-    border-bottom: 1px solid #e4e4e4;
-    text-decoration: none;
-    color: #555;
-    font-family: 'Andika', sans-serif;
-    font-size: 0.82rem;
-    transition: background 0.15s, color 0.15s;
+  .tool-back-wrap {
     position: sticky;
     top: 0;
     z-index: 100;
+    padding: 0.6rem 0.9rem;
+    background: var(--color-bg);
+    border-bottom: 1px solid #ece3d0;
   }
 
-  .tool-back-bar:hover {
-    background: #eaeaea;
-    color: #1a1a1a;
+  .tool-back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1.1rem;
+    background: var(--color-white);
+    border: 2px solid var(--color-secondary);
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--color-primary);
+    font-family: 'Andika', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.06);
+    transition: background 0.15s, color 0.15s, transform 0.15s;
   }
 
-  .back-sep {
-    color: #ccc;
-    font-size: 0.75rem;
+  .tool-back-btn:hover {
+    background: var(--color-primary);
+    color: #fff;
+    transform: translateX(-2px);
+  }
+
+  .tool-back-btn svg {
+    flex-shrink: 0;
   }
 
   .back-ja {
     font-family: 'M PLUS Rounded 1c', sans-serif;
-    font-size: 0.78rem;
-    color: #888;
+    font-size: 0.82em;
+    opacity: 0.75;
   }
 
-  .tool-back-bar:hover .back-ja {
-    color: #444;
+  .tool-back-btn:hover .back-ja {
+    opacity: 0.9;
   }
 </style>
