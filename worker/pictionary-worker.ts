@@ -1,5 +1,3 @@
-/// <reference types="@cloudflare/workers-types" />
-
 const themes: Record<string, readonly string[]> = {
   Animals: ['cat','dog','bird','fish','rabbit','elephant','monkey','snake','lion','tiger','bear','duck','frog','butterfly','turtle','horse','cow','pig','chicken','penguin','giraffe','zebra','whale','crab'],
   Food: ['apple','banana','pizza','bread','cake','rice','soup','egg','milk','cheese','carrot','tomato','sandwich','ice cream','cookie','noodles','watermelon','grapes','strawberry','popcorn','sushi','ramen'],

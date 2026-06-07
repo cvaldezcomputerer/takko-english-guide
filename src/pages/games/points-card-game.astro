@@ -8,37 +8,55 @@ import GameLayout from "../../layouts/GameLayout.astro";
 
       <div class="play-layout">
         <aside class="side-panel event-list-wrap">
-          <h2>Event Card Pool (7)</h2>
-          <ul class="event-list">
-            <li>Point Swap: Flip your result sign (positive becomes negative).</li>
-            <li>Double Points: Boost result to +400.</li>
-            <li>Half Points: Drop result to -100.</li>
-            <li>Swap with random team: Trade this result with a random team.</li>
-            <li>Steal 300: Grab +300 points.</li>
-            <li>Oops -1000: Lose 1000 points.</li>
-            <li>Jackpot +1000: Hit the top reward.</li>
-          </ul>
+          <h2>
+            Event Cards <span class="jp">イベントカード</span>
+            <span id="eventCount" class="event-count">0/10</span>
+          </h2>
+          <ul id="eventList" class="event-list"></ul>
+
+          <form id="addEventForm" class="add-event">
+            <input
+              id="newEventText"
+              class="event-input"
+              type="text"
+              maxlength="40"
+              autocomplete="off"
+              placeholder="New card text / 新しいカード"
+            />
+            <div class="add-row">
+              <select id="newEventTone" class="event-tone" aria-label="Card type">
+                <option value="positive">Good / よい</option>
+                <option value="neutral">Neutral / ふつう</option>
+                <option value="negative">Bad / わるい</option>
+              </select>
+              <button id="addEventBtn" class="add-btn" type="submit">Add <span class="jp">追加</span></button>
+            </div>
+            <p id="eventHint" class="event-hint" hidden>Up to 10 cards. <span class="jp">カードは10まい まで。</span></p>
+          </form>
         </aside>
 
         <section class="center-stage" aria-live="polite">
           <div class="result-box">
-            <div class="result-label">Result</div>
+            <div class="result-label">Result <span class="jp">けっか</span></div>
             <div id="resultText" class="result-text">PRESS ME</div>
           </div>
-          <button id="rollBtn" class="roll-btn" type="button">PRESS ME</button>
+          <button id="rollBtn" class="roll-btn" type="button">
+            <span class="roll-en">PRESS ME</span>
+            <span class="roll-jp">おして！</span>
+          </button>
         </section>
 
         <aside class="side-panel stats-wrap">
-          <h2>Point Range</h2>
+          <h2>Point Range <span class="jp">ポイントのはんい</span></h2>
           <div class="stats-row">
-            <span class="stat-key">Min</span>
-            <span id="minPoints" class="stat-value">--</span>
+            <label class="stat-key" for="minPoints">Min <span class="jp">さいしょう</span></label>
+            <input id="minPoints" class="stat-input" type="number" min="-10000" max="10000" step="50" value="-500" />
           </div>
           <div class="stats-row">
-            <span class="stat-key">Max</span>
-            <span id="maxPoints" class="stat-value">--</span>
+            <label class="stat-key" for="maxPoints">Max <span class="jp">さいだい</span></label>
+            <input id="maxPoints" class="stat-input" type="number" min="-10000" max="10000" step="50" value="1000" />
           </div>
-          <p class="stats-note">Range shown is for point rolls (not event cards).</p>
+          <p class="stats-note">Point rolls land on a multiple of 50 in this range. Cards are not affected.<span class="jp jp-block">ポイントは50ごとの数になります（イベントカードは別）。</span></p>
         </aside>
       </div>
     </main>
@@ -46,10 +64,17 @@ import GameLayout from "../../layouts/GameLayout.astro";
 </GameLayout>
 
 <script>
-  const rollBtn       = document.getElementById("rollBtn") as HTMLButtonElement;
-  const resultText    = document.getElementById("resultText")!;
-  const minPointsText = document.getElementById("minPoints")!;
-  const maxPointsText = document.getElementById("maxPoints")!;
+  const rollBtn      = document.getElementById("rollBtn") as HTMLButtonElement;
+  const resultText   = document.getElementById("resultText")!;
+  const minInput     = document.getElementById("minPoints") as HTMLInputElement;
+  const maxInput     = document.getElementById("maxPoints") as HTMLInputElement;
+  const eventList    = document.getElementById("eventList")!;
+  const eventCount   = document.getElementById("eventCount")!;
+  const addForm      = document.getElementById("addEventForm") as HTMLFormElement;
+  const newEventText = document.getElementById("newEventText") as HTMLInputElement;
+  const newEventTone = document.getElementById("newEventTone") as HTMLSelectElement;
+  const addBtn       = document.getElementById("addEventBtn") as HTMLButtonElement;
+  const eventHint    = document.getElementById("eventHint")!;
 
   const countdownTickSrc = "/audio/directions-reaction-game/countdown-tick.ogg";
   const positiveSounds = [
@@ -65,20 +90,142 @@ import GameLayout from "../../layouts/GameLayout.astro";
     "/audio/directions-reaction-game/feedback/bad-woops-3.mp3",
   ];
 
-  const points = [-200, -100, 0, 100, 200, 300, 400, 500, 600, 700];
-  const events = [
-    { text: "EVENT CARD: Point Swap", tone: "negative" },
-    { text: "EVENT CARD: Double Points (+400)", tone: "positive" },
-    { text: "EVENT CARD: Half Points (-100)", tone: "negative" },
-    { text: "EVENT CARD: Swap with random team", tone: "neutral" },
-    { text: "EVENT CARD: Steal 300", tone: "positive" },
-    { text: "EVENT CARD: Oops -1000", tone: "negative" },
-    { text: "EVENT CARD: Jackpot +1000", tone: "positive" },
+  type Tone = "positive" | "negative" | "neutral";
+  interface EventCard { text: string; tone: Tone; }
+
+  const RANGE_LIMIT = 10000; // hard cap on min/max so input can't break the roll
+  const ROLL_STEP = 50;      // point rolls land on a multiple of this
+  const MAX_EVENTS = 10;
+  const TEXT_LIMIT = 40;
+  const EVENTS_KEY = "points-tool:events";
+  const RANGE_KEY = "points-tool:range";
+  const TONES: Tone[] = ["positive", "negative", "neutral"];
+
+  const DEFAULT_EVENTS: EventCard[] = [
+    { text: "Point Swap", tone: "negative" },
+    { text: "Double Points (+400)", tone: "positive" },
+    { text: "Half Points (-100)", tone: "negative" },
+    { text: "Swap with a random team", tone: "neutral" },
+    { text: "Steal +300", tone: "positive" },
+    { text: "Oops -1000", tone: "negative" },
+    { text: "Jackpot +1000", tone: "positive" },
   ];
 
   const randInt = (min: number, max: number): number => Math.floor(Math.random() * (max - min + 1)) + min;
-  const minPoints = Math.min(...points);
-  const maxPoints = Math.max(...points);
+  const clampRange = (n: number): number =>
+    Number.isFinite(n) ? Math.max(-RANGE_LIMIT, Math.min(RANGE_LIMIT, Math.round(n))) : 0;
+  const asTone = (v: unknown): Tone => (TONES.includes(v as Tone) ? (v as Tone) : "neutral");
+
+  // ── Event cards: load (or seed defaults on first visit), render, persist ──
+  let events: EventCard[] = loadEvents();
+
+  function loadEvents(): EventCard[] {
+    try {
+      const raw = localStorage.getItem(EVENTS_KEY);
+      if (raw === null) return [...DEFAULT_EVENTS]; // first visit only
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) return [...DEFAULT_EVENTS];
+      return parsed // a saved empty list is respected (user deleted them all)
+        .filter((e) => e && typeof e.text === "string" && e.text.trim() !== "")
+        .map((e) => ({ text: String(e.text).slice(0, TEXT_LIMIT), tone: asTone(e.tone) }))
+        .slice(0, MAX_EVENTS);
+    } catch {
+      return [...DEFAULT_EVENTS];
+    }
+  }
+
+  function saveEvents(): void {
+    try { localStorage.setItem(EVENTS_KEY, JSON.stringify(events)); } catch {}
+  }
+
+  function renderEvents(): void {
+    eventList.replaceChildren();
+    events.forEach((ev, i) => {
+      const li = document.createElement("li");
+      li.className = "event-item";
+      li.dataset.tone = ev.tone;
+
+      const dot = document.createElement("span");
+      dot.className = "event-dot";
+      dot.setAttribute("aria-hidden", "true");
+
+      const text = document.createElement("span");
+      text.className = "event-text";
+      text.textContent = ev.text; // textContent, never innerHTML — user input
+
+      const del = document.createElement("button");
+      del.type = "button";
+      del.className = "event-del";
+      del.textContent = "×";
+      del.setAttribute("aria-label", `Delete ${ev.text}`);
+      del.addEventListener("click", () => {
+        events.splice(i, 1);
+        saveEvents();
+        renderEvents();
+      });
+
+      li.append(dot, text, del);
+      eventList.appendChild(li);
+    });
+
+    eventCount.textContent = `${events.length}/${MAX_EVENTS}`;
+    const full = events.length >= MAX_EVENTS;
+    newEventText.disabled = full;
+    newEventTone.disabled = full;
+    addBtn.disabled = full;
+    eventHint.hidden = !full;
+  }
+
+  addForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const text = newEventText.value.trim();
+    if (text === "" || events.length >= MAX_EVENTS) return;
+    events.push({ text: text.slice(0, TEXT_LIMIT), tone: asTone(newEventTone.value) });
+    saveEvents();
+    newEventText.value = "";
+    renderEvents();
+    newEventText.focus();
+  });
+
+  // ── Point range: editable, clamped, ordered, persisted ──────────────────
+  function saveRange(min: number, max: number): void {
+    try { localStorage.setItem(RANGE_KEY, JSON.stringify({ min, max })); } catch {}
+  }
+
+  function normalizeRange(): { min: number; max: number } {
+    let min = clampRange(Number(minInput.value));
+    let max = clampRange(Number(maxInput.value));
+    if (min > max) max = min; // keep ordered so the roll always has a range
+    minInput.value = String(min);
+    maxInput.value = String(max);
+    saveRange(min, max);
+    return { min, max };
+  }
+
+  function loadRange(): void {
+    try {
+      const raw = localStorage.getItem(RANGE_KEY);
+      if (raw !== null) {
+        const r = JSON.parse(raw);
+        if (r && Number.isFinite(r.min) && Number.isFinite(r.max)) {
+          minInput.value = String(clampRange(r.min));
+          maxInput.value = String(clampRange(r.max));
+        }
+      }
+    } catch {}
+    normalizeRange();
+  }
+
+  function rollPoints(): number {
+    const { min, max } = normalizeRange();
+    const lo = Math.ceil(min / ROLL_STEP) * ROLL_STEP;
+    const hi = Math.floor(max / ROLL_STEP) * ROLL_STEP;
+    if (hi < lo) return randInt(min, max); // range too narrow for a step of 50
+    return lo + ROLL_STEP * randInt(0, (hi - lo) / ROLL_STEP);
+  }
+
+  minInput.addEventListener("change", () => { normalizeRange(); });
+  maxInput.addEventListener("change", () => { normalizeRange(); });
 
   let rolling = false;
   let drumrollInterval: number | null = null;
@@ -130,17 +277,17 @@ import GameLayout from "../../layouts/GameLayout.astro";
     resultText.classList.remove("rolling");
   };
 
-  const reveal = () => {
-    const isEvent = Math.random() < 0.33;
-    if (isEvent) {
-      const eventResult = events[randInt(0, events.length - 1)];
-      resultText.textContent = eventResult.text;
+  const reveal = (): Tone => {
+    const useEvent = events.length > 0 && Math.random() < 0.33;
+    if (useEvent) {
+      const ev = events[randInt(0, events.length - 1)];
+      resultText.textContent = ev.text;
       resultText.classList.add("event");
       resultText.classList.remove("points");
-      return eventResult.tone;
+      return ev.tone;
     }
 
-    const value = points[randInt(0, points.length - 1)];
+    const value = rollPoints();
     resultText.textContent = value >= 0 ? `+${value} POINTS` : `${value} POINTS`;
     resultText.classList.add("points");
     resultText.classList.remove("event");
@@ -168,8 +315,8 @@ import GameLayout from "../../layouts/GameLayout.astro";
     }, 1400);
   });
 
-  minPointsText.textContent = String(minPoints);
-  maxPointsText.textContent = String(maxPoints);
+  loadRange();
+  renderEvents();
 </script>
 
 <style>
@@ -185,8 +332,8 @@ import GameLayout from "../../layouts/GameLayout.astro";
     width: min(940px, 100%);
     background: var(--color-white);
     border: 2px solid var(--color-secondary);
-    border-radius: 16px;
-    box-shadow: 0 10px 22px rgba(85, 113, 83, 0.14);
+    border-radius: 8px;
+    box-shadow: 0 4px 14px rgba(85, 113, 83, 0.12);
     padding: 1.1rem;
   }
 
@@ -199,7 +346,7 @@ import GameLayout from "../../layouts/GameLayout.astro";
 
 .side-panel {
     border: 2px solid var(--color-secondary);
-    border-radius: 12px;
+    border-radius: 5px;
     background: #fffdf8;
     padding: 0.9rem;
   }
@@ -207,7 +354,7 @@ import GameLayout from "../../layouts/GameLayout.astro";
   .center-stage {
     min-height: 340px;
     border: 2px solid var(--color-secondary);
-    border-radius: 12px;
+    border-radius: 5px;
     background: var(--color-beige);
     display: grid;
     place-content: center;
@@ -219,7 +366,7 @@ import GameLayout from "../../layouts/GameLayout.astro";
   .result-box {
     border: 2px solid var(--color-primary);
     background: #fffdf8;
-    border-radius: 10px;
+    border-radius: 4px;
     padding: 1rem 1.2rem;
     width: 100%;
     max-width: 520px;
@@ -231,6 +378,20 @@ import GameLayout from "../../layouts/GameLayout.astro";
     color: var(--color-primary);
     font-weight: 700;
     margin-bottom: 0.45rem;
+  }
+
+  /* Japanese sub-text shown alongside English (no lang toggle on tool pages). */
+  .jp {
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+    font-weight: 500;
+    font-size: 0.82em;
+    color: var(--color-dark-teal);
+    opacity: 0.72;
+  }
+
+  .jp-block {
+    display: block;
+    margin-top: 0.1rem;
   }
 
   .result-text {
@@ -261,16 +422,29 @@ import GameLayout from "../../layouts/GameLayout.astro";
   .roll-btn {
     justify-self: center;
     border: 0;
-    border-radius: 999px;
+    border-radius: 12px;
     background: #d90000;
     color: #ffffff;
-    font-size: clamp(1.2rem, 3.4vw, 2rem);
     font-weight: 900;
     letter-spacing: 0.06em;
-    padding: 1rem 3.4rem;
+    padding: 0.9rem 3.4rem;
     cursor: pointer;
     box-shadow: 0 8px 0 #8f0000;
     transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+    display: grid;
+    gap: 0.1rem;
+    line-height: 1.1;
+  }
+
+  .roll-en {
+    font-size: clamp(1.2rem, 3.4vw, 2rem);
+  }
+
+  .roll-jp {
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+    font-size: clamp(0.78rem, 2vw, 1rem);
+    font-weight: 700;
+    opacity: 0.92;
   }
 
   .roll-btn:hover {
@@ -297,15 +471,132 @@ import GameLayout from "../../layouts/GameLayout.astro";
     color: var(--color-primary);
   }
 
-  .event-list {
-    margin: 0;
-    padding-left: 1.15rem;
+  .event-count {
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+    font-weight: 700;
+    font-size: 0.78rem;
     color: var(--color-dark-teal);
-    line-height: 1.35;
+    opacity: 0.7;
   }
 
-  .event-list li {
-    margin-bottom: 0.38rem;
+  .event-list {
+    margin: 0 0 0.7rem;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 0.4rem;
+  }
+
+  .event-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: 1px solid var(--color-secondary);
+    border-radius: 4px;
+    background: var(--color-white);
+    padding: 0.4rem 0.45rem 0.4rem 0.55rem;
+  }
+
+  .event-dot {
+    flex-shrink: 0;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--color-secondary);
+  }
+
+  .event-item[data-tone="positive"] .event-dot { background: #4a7c59; }
+  .event-item[data-tone="negative"] .event-dot { background: #d94b3e; }
+  .event-item[data-tone="neutral"]  .event-dot { background: #c8a24a; }
+
+  .event-text {
+    flex: 1;
+    min-width: 0;
+    color: var(--color-dark-teal);
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+  }
+
+  .event-del {
+    flex-shrink: 0;
+    border: 0;
+    background: transparent;
+    color: #b0563f;
+    font-size: 1.15rem;
+    line-height: 1;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .event-del:hover {
+    background: #f7e3dd;
+    color: #8f3a28;
+  }
+
+  .add-event {
+    display: grid;
+    gap: 0.45rem;
+  }
+
+  .event-input {
+    width: 100%;
+    box-sizing: border-box;
+    border: 2px solid var(--color-secondary);
+    border-radius: 4px;
+    padding: 0.5rem 0.55rem;
+    font: inherit;
+    color: var(--color-dark-teal);
+    background: var(--color-white);
+  }
+
+  .add-row {
+    display: flex;
+    gap: 0.45rem;
+  }
+
+  .event-tone {
+    flex: 1;
+    min-width: 0;
+    border: 2px solid var(--color-secondary);
+    border-radius: 4px;
+    padding: 0.45rem 0.5rem;
+    font: inherit;
+    color: var(--color-dark-teal);
+    background: var(--color-white);
+    cursor: pointer;
+  }
+
+  .add-btn {
+    flex-shrink: 0;
+    border: 2px solid var(--color-primary);
+    background: var(--color-primary);
+    color: #fff;
+    border-radius: 4px;
+    padding: 0.45rem 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .add-btn .jp {
+    color: #fff;
+    opacity: 0.85;
+    margin-left: 0.25rem;
+  }
+
+  .event-input:disabled,
+  .event-tone:disabled,
+  .add-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .event-hint {
+    margin: 0;
+    color: #b0563f;
+    font-size: 0.82rem;
+    line-height: 1.3;
   }
 
   .stats-wrap {
@@ -319,7 +610,7 @@ import GameLayout from "../../layouts/GameLayout.astro";
     justify-content: space-between;
     align-items: center;
     border: 1px solid var(--color-secondary);
-    border-radius: 8px;
+    border-radius: 4px;
     background: var(--color-beige);
     padding: 0.5rem 0.65rem;
   }
@@ -329,10 +620,17 @@ import GameLayout from "../../layouts/GameLayout.astro";
     font-weight: 700;
   }
 
-  .stat-value {
+  .stat-input {
+    width: 6.5rem;
+    border: 2px solid var(--color-secondary);
+    border-radius: 4px;
+    background: var(--color-white);
     color: var(--color-dark-teal);
+    font: inherit;
     font-weight: 900;
-    font-size: 1.2rem;
+    font-size: 1.1rem;
+    text-align: right;
+    padding: 0.3rem 0.45rem;
   }
 
   .stats-note {

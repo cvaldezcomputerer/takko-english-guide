@@ -1,6 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import Navbar from '../../components/Navbar.astro';
+import ShrineIcon from '../../components/ShrineIcon.astro';
 import T from '../../components/T.astro';
 import { shrines } from '../../data/shrines';
 ---
@@ -17,14 +18,7 @@ import { shrines } from '../../data/shrines';
         <header class="page-header">
             <div class="page-header-inner">
                 <div class="torii-icon" aria-hidden="true">
-                    <svg viewBox="0 0 120 100" xmlns="http://www.w3.org/2000/svg">
-                        <rect x="22" y="28" width="10" height="72" rx="2" fill="currentColor"/>
-                        <rect x="88" y="28" width="10" height="72" rx="2" fill="currentColor"/>
-                        <rect x="18" y="47" width="84" height="8" rx="2" fill="currentColor"/>
-                        <path d="M4,25 L4,17 Q14,3 24,11 L96,11 Q106,3 116,17 L116,25 Z" fill="currentColor"/>
-                        <rect x="18" y="25" width="16" height="5" rx="1" fill="currentColor"/>
-                        <rect x="86" y="25" width="16" height="5" rx="1" fill="currentColor"/>
-                    </svg>
+                    <ShrineIcon />
                 </div>
                 <h1>
                     <T>
@@ -47,14 +41,7 @@ import { shrines } from '../../data/shrines';
                 {shrines.map(shrine => (
                     <a href={`/shrines/${shrine.slug}`} class="shrine-card">
                         <div class="card-torii" aria-hidden="true">
-                            <svg viewBox="0 0 120 100" xmlns="http://www.w3.org/2000/svg">
-                                <rect x="22" y="28" width="10" height="72" rx="2" fill="currentColor"/>
-                                <rect x="88" y="28" width="10" height="72" rx="2" fill="currentColor"/>
-                                <rect x="18" y="47" width="84" height="8" rx="2" fill="currentColor"/>
-                                <path d="M4,25 L4,17 Q14,3 24,11 L96,11 Q106,3 116,17 L116,25 Z" fill="currentColor"/>
-                                <rect x="18" y="25" width="16" height="5" rx="1" fill="currentColor"/>
-                                <rect x="86" y="25" width="16" height="5" rx="1" fill="currentColor"/>
-                            </svg>
+                            <ShrineIcon />
                         </div>
                         <div class="card-text">
                             <h2>
@@ -181,8 +168,8 @@ import { shrines } from '../../data/shrines';
 
     .torii-icon {
         color: var(--color-torii);
-        width: 72px;
-        height: 60px;
+        width: 68px;
+        height: 68px;
         margin: 0 auto 1.25rem;
     }
 
@@ -238,8 +225,8 @@ import { shrines } from '../../data/shrines';
     .card-torii {
         color: var(--color-torii);
         flex-shrink: 0;
-        width: 52px;
-        height: 44px;
+        width: 48px;
+        height: 48px;
     }
 
     .card-torii svg { width: 100%; height: 100%; }

@@ -1,0 +1,11 @@
+{
+  "extends": "astro/tsconfigs/base",
+  "include": ["**/*.ts"],
+  "compilerOptions": {
+    // Cloudflare Worker code: use the Workers runtime globals, not the browser
+    // DOM. Kept in its own program (root tsconfig excludes "worker") so these
+    // types can't leak into and clash with the site's DOM types.
+    "lib": ["ESNext"],
+    "types": ["@cloudflare/workers-types"]
+  }
+}
