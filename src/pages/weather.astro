@@ -5,6 +5,7 @@ import T from '../components/T.astro';
 
 // ── Speaker icon (reused on the question + every word card) ──
 const SPEAKER = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 5V4L8 9H4z" fill="currentColor"/><path d="M16.5 8.5a4.5 4.5 0 0 1 0 7" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>`;
+const MAGNIFY = `<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" fill="currentColor"/><line x1="10.5" y1="7.5" x2="10.5" y2="13.5" stroke="#fff" stroke-width="2" stroke-linecap="round"/><line x1="7.5" y1="10.5" x2="13.5" y2="10.5" stroke="#fff" stroke-width="2" stroke-linecap="round"/><line x1="15.5" y1="15.5" x2="21" y2="21" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>`;
 
 // Word art lives in /public/images/weather/ (irasutoya .webp, one per word).
 const IMG_BASE = '/images/weather';
@@ -50,12 +51,6 @@ const GARLIC_SILO_PATH = "M199 468C136.885 532.312 124 583 143 680C191.5 772 243
                     </span>
                     <span class="question-speaker" set:html={SPEAKER}></span>
                 </button>
-                <p class="question-hint">
-                    <T>
-                        <span slot="en">Click to hear</span>
-                        <span slot="ja">クリックして聞いてね</span>
-                    </T>
-                </p>
             </header>
 
             <!-- Answer sentence with drop slots -->
@@ -78,10 +73,16 @@ const GARLIC_SILO_PATH = "M199 468C136.885 532.312 124 583 143 680C191.5 772 243
                         <span class="sentence-end">.</span>
                     </p>
                 </div>
-                <button class="sentence-play" id="sentence-play" disabled aria-label="Read the sentence">
-                    <span class="sp-icon" set:html={SPEAKER}></span>
-                    <T><span slot="en">Read it</span><span slot="ja">読んでみよう</span></T>
-                </button>
+                <div class="sentence-actions">
+                    <button class="sentence-play" id="sentence-play" disabled aria-label="Read the sentence">
+                        <span class="sp-icon" set:html={SPEAKER}></span>
+                        <T><span slot="en">Read it</span><span slot="ja">読んでみよう</span></T>
+                    </button>
+                    <button class="sentence-big" id="sentence-big" disabled aria-label="Write it big">
+                        <span class="sb-icon" set:html={MAGNIFY}></span>
+                        <T><span slot="en">Big</span><span slot="ja">おおきく</span></T>
+                    </button>
+                </div>
                 </div>
             </div>
 
@@ -129,6 +130,19 @@ const GARLIC_SILO_PATH = "M199 468C136.885 532.312 124 583 143 680C191.5 772 243
             </div>
         </main>
 
+        <!-- Writing modal (centered card with backdrop) -->
+        <div class="big-modal" id="big-modal" hidden aria-modal="true" role="dialog">
+            <div class="big-card">
+                <button class="big-close" id="big-close" aria-label="Close">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                        <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                    </svg>
+                </button>
+                <div class="big-stage" id="big-stage"></div>
+            </div>
+        </div>
+
         <!-- Audio-not-ready note -->
         <div class="toast" id="audio-toast" role="status" aria-live="polite">
             <T>
@@ -140,6 +154,8 @@ const GARLIC_SILO_PATH = "M199 468C136.885 532.312 124 583 143 680C191.5 772 243
 </Layout>
 
 <script>
+    import { LETTER_PATHS, LETTER_PATHS_LOWER } from '../letter-paths';
+
     // ── Audio (files are added later — fail softly until then) ──
     const toast = document.getElementById('audio-toast');
     let toastTimer: number | undefined;
@@ -391,26 +407,175 @@ const GARLIC_SILO_PATH = "M199 468C136.885 532.312 124 583 143 680C191.5 772 243
         card.addEventListener('pointerdown', onPointerDown);
     });
 
-    // ── "Read it" button: speaks the whole sentence once both slots are filled ──
+    // ── "Read it" + "Big" buttons: active once both slots are filled ──
     const sentenceBtn = document.getElementById('sentence-play') as HTMLButtonElement | null;
+    const bigBtn = document.getElementById('sentence-big') as HTMLButtonElement | null;
 
     function placedWord(category: string): string {
         const card = slotByCategory[category]?.querySelector<HTMLElement>('.word-card:not(.card-ghost)');
         return card?.querySelector<HTMLElement>('.card-play')?.dataset.say ?? '';
     }
 
-    function updateSentenceButton() {
-        if (!sentenceBtn) return;
-        sentenceBtn.disabled = !(placedWord('weather') && placedWord('feeling'));
+    function placedAudio(category: string): string {
+        const card = slotByCategory[category]?.querySelector<HTMLElement>('.word-card:not(.card-ghost)');
+        return card?.querySelector<HTMLElement>('.card-play')?.dataset.audio ?? '';
     }
 
-    sentenceBtn?.addEventListener('click', () => {
-        const w = placedWord('weather');
-        const f = placedWord('feeling');
-        if (w && f) speak(`It's ${w} and ${f}.`);
+    function playClip(src: string): Promise<void> {
+        return new Promise((resolve) => {
+            const a = new Audio(src);
+            a.addEventListener('ended', () => resolve(), { once: true });
+            a.addEventListener('error', () => resolve(), { once: true });
+            a.play().catch(() => resolve());
+        });
+    }
+
+    function updateSentenceButton() {
+        if (!sentenceBtn) return;
+        const ready = !!(placedWord('weather') && placedWord('feeling'));
+        sentenceBtn.disabled = !ready;
+        if (bigBtn) bigBtn.disabled = !ready;
+    }
+
+    sentenceBtn?.addEventListener('click', async () => {
+        const wAudio = placedAudio('weather');
+        const fAudio = placedAudio('feeling');
+        if (wAudio && fAudio) {
+            await playClip('/audio/weather/its.mp3');
+            await playClip(wAudio);
+            await playClip('/audio/weather/and.mp3');
+            await playClip(fAudio);
+        } else {
+            speak(`It's ${placedWord('weather')} and ${placedWord('feeling')}.`);
+        }
     });
 
     updateSentenceButton();
+
+    // ── "Big" writing modal (same SVG system as name-writer) ──────────────────
+    const bigModal = document.getElementById('big-modal') as HTMLElement | null;
+    const bigClose = document.getElementById('big-close') as HTMLButtonElement | null;
+    const bigStage = document.getElementById('big-stage') as HTMLElement | null;
+
+    const BSVG = 'http://www.w3.org/2000/svg';
+    const B_PAD = 24, B_GAP = 12, B_SPW = 34, B_STROKE = 9;
+    // Writing-guide lines (same metrics as the lowercase letters / name-writer):
+    // ascender top, x-height top, baseline, descender bottom.
+    const B_ASC = 10, B_XH = 39, B_BASE = 76, B_DESC = 96;
+
+    function bGlyph(ch: string): SVGGElement | null {
+        // Prefer the exact-case glyph: lowercase from LETTER_PATHS_LOWER, capitals
+        // from LETTER_PATHS. Fall back to the capital so unknown cases still draw.
+        const d = LETTER_PATHS_LOWER[ch] ?? LETTER_PATHS[ch] ?? LETTER_PATHS[ch.toUpperCase()];
+        if (!d) return null;
+        const g = document.createElementNS(BSVG, 'g');
+        const p = document.createElementNS(BSVG, 'path');
+        p.setAttribute('d', d);
+        p.setAttribute('fill', '#333');
+        g.appendChild(p);
+        return g;
+    }
+
+    function bPunct(d: string, advanceX: number): (svg: SVGSVGElement, x: number) => number {
+        return (svg, x) => {
+            const g = document.createElementNS(BSVG, 'g');
+            const p = document.createElementNS(BSVG, 'path');
+            p.setAttribute('d', d);
+            p.setAttribute('fill', 'none');
+            p.setAttribute('stroke', '#333');
+            p.setAttribute('stroke-width', String(B_STROKE));
+            p.setAttribute('stroke-linecap', 'round');
+            p.setAttribute('stroke-linejoin', 'round');
+            g.appendChild(p);
+            svg.appendChild(g);
+            // Place by known center x=50 in path coords; advance by explicit width
+            g.setAttribute('transform', `translate(${x - 50} 0)`);
+            return x + advanceX + B_GAP;
+        };
+    }
+    // Period: zero-length path with round cap = perfect circle dot at the baseline
+    const placePeriod = bPunct('M 50,71.5 L 50,71.5', B_STROKE);
+    // Apostrophe: short diagonal comma-like stroke above the x-height
+    // advanceX is negative to cancel most of B_GAP — apostrophes hug the next letter
+    const placeApostrophe = bPunct('M 52,10 L 49,22', -5);
+
+    const isCap = (ch: string) => ch >= 'A' && ch <= 'Z';
+
+    function bRow(svg: SVGSVGElement, text: string): number {
+        let x = B_PAD;
+        for (const ch of text) {
+            if (ch === ' ') { x += B_SPW; continue; }
+            if (ch === '.') { x = placePeriod(svg, x); continue; }
+            if (ch === "'") { x = placeApostrophe(svg, x); continue; }
+            const g = bGlyph(ch);
+            if (!g) continue;
+            svg.appendChild(g);
+            const bb = g.getBBox();
+            if (isCap(ch)) {
+                // Capitals are authored full-box (top ≈ascender, bottom below the
+                // baseline). Scale them into the ascender→baseline band and sit them
+                // on the red baseline so they line up with the lowercase glyphs.
+                const s = (B_BASE - B_ASC) / bb.height;
+                const tx = x - bb.x * s;
+                const ty = B_BASE - (bb.y + bb.height) * s;
+                g.setAttribute('transform', `translate(${tx} ${ty}) scale(${s})`);
+                x += bb.width * s + B_GAP;
+            } else {
+                g.setAttribute('transform', `translate(${x - bb.x} 0)`);
+                x += bb.width + B_GAP;
+            }
+        }
+        return Math.max(x - B_GAP + B_PAD, 160);
+    }
+
+    // Build the 4 writing-guide lines as one <g>, sized to the row width.
+    function bGuides(w: number): SVGGElement {
+        const g = document.createElementNS(BSVG, 'g');
+        const add = (y: number, dashed: boolean) => {
+            const line = document.createElementNS(BSVG, 'line');
+            line.setAttribute('x1', '0');
+            line.setAttribute('x2', String(w));
+            line.setAttribute('y1', String(y));
+            line.setAttribute('y2', String(y));
+            line.setAttribute('stroke', dashed ? '#c9b6a0' : '#b34a3a');
+            line.setAttribute('stroke-width', dashed ? '1' : '1.4');
+            if (dashed) line.setAttribute('stroke-dasharray', '4 5');
+            g.appendChild(line);
+        };
+        add(B_ASC, true);   // ascender (top, dashed)
+        add(B_XH, true);    // x-height (dashed)
+        add(B_BASE, false); // baseline (solid red)
+        add(B_DESC, true);  // descender (bottom, dashed)
+        return g;
+    }
+
+    function drawBig() {
+        if (!bigStage) return;
+        const text = `It's ${placedWord('weather')} and ${placedWord('feeling')}.`;
+        const svg = document.createElementNS(BSVG, 'svg');
+        svg.setAttribute('class', 'big-svg');
+        svg.setAttribute('viewBox', '0 0 100 100');
+        bigStage.replaceChildren(svg);
+        const W = bRow(svg, text);
+        // Insert guides as the first child so they render behind the letters.
+        svg.insertBefore(bGuides(W), svg.firstChild);
+        svg.setAttribute('viewBox', `0 0 ${W} 100`);
+    }
+
+    bigBtn?.addEventListener('click', () => {
+        bigModal?.removeAttribute('hidden');  // must be visible before drawBig so getBBox works
+        drawBig();
+        bigClose?.focus();
+    });
+
+    const closeBigModal = () => {
+        bigModal?.setAttribute('hidden', '');
+        bigBtn?.focus();
+    };
+    bigClose?.addEventListener('click', closeBigModal);
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && bigModal && !bigModal.hasAttribute('hidden')) closeBigModal();
+    });
 </script>
 
 <style>
@@ -470,17 +635,12 @@ const GARLIC_SILO_PATH = "M199 468C136.885 532.312 124 583 143 680C191.5 772 243
         display: inline-flex;
         align-items: center;
         justify-content: center;
+        border: 2.5px solid var(--color-secondary);
         border-radius: 50%;
         background: var(--color-primary);
         color: #fff;
     }
     .question-speaker :global(svg) { width: 58%; height: 58%; }
-
-    .question-hint {
-        margin: clamp(0.35rem, 1vh, 0.7rem) 0 0;
-        font-size: clamp(0.8rem, 1.6vw, 1.05rem);
-        color: #9a8a63;
-    }
     /* ── Answer sentences ── */
     .answers {
         display: flex;
@@ -551,31 +711,43 @@ const GARLIC_SILO_PATH = "M199 468C136.885 532.312 124 583 143 680C191.5 772 243
     }
     .drop-slot.filled .slot-hint { display: none; }
 
-    /* ── "Read it" sentence button ── */
-    .sentence-play {
+    /* ── "Read it" + "Big" button group ── */
+    .sentence-actions {
+        flex: 0 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+    }
+
+    .sentence-play,
+    .sentence-big {
         flex: 0 0 auto;
         display: inline-flex;
         align-items: center;
         gap: 0.5rem;
-        border: none;
-        border-radius: 999px;
+        border: 2px solid var(--color-primary);
+        border-radius: 10px;
+        background: #fff;
+        color: var(--color-primary);
+        font-family: var(--font-main);
+        font-weight: 600;
+        font-size: clamp(0.85rem, 1.6vw, 1.05rem);
+        padding: 0.45rem 1.2rem 0.45rem 0.9rem;
+        cursor: pointer;
+        transition: background 0.15s, color 0.15s, transform 0.12s;
+    }
+    .sentence-play:hover:not(:disabled),
+    .sentence-big:hover:not(:disabled) {
         background: var(--color-primary);
         color: #fff;
-        font-family: var(--font-main);
-        font-weight: 500;
-        font-size: clamp(0.85rem, 1.6vw, 1.05rem);
-        padding: 0.5rem 1.3rem 0.5rem 1rem;
-        cursor: pointer;
-        transition: background 0.15s, opacity 0.15s, transform 0.12s;
-    }
-    .sentence-play:hover:not(:disabled) {
-        background: #3c6749;
         transform: scale(1.03);
     }
-    .sentence-play:disabled {
-        background: #d9d4c7;
+    .sentence-play:disabled,
+    .sentence-big:disabled {
+        border-color: #c0bbb0;
+        color: #b0a898;
+        background: #fff;
         cursor: not-allowed;
-        opacity: 0.65;
     }
     .sp-icon {
         width: 1.2em;
@@ -784,6 +956,65 @@ const GARLIC_SILO_PATH = "M199 468C136.885 532.312 124 583 143 680C191.5 772 243
         opacity: 1;
         transform: translate(-50%, 0);
     }
+
+    .sb-icon {
+        width: 1.2em;
+        height: 1.2em;
+        display: inline-flex;
+    }
+    .sb-icon :global(svg) { width: 100%; height: 100%; }
+
+    /* ── Writing modal (backdrop + centered card) ── */
+    .big-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 3000;
+        background: rgba(0, 0, 0, 0.45);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+    }
+    .big-modal[hidden] { display: none; }
+
+    .big-card {
+        position: relative;
+        overflow: visible;
+        background: #fdfaf5;
+        border: 2px solid #efe7d6;
+        border-radius: 18px;
+        padding: 2rem;
+        width: min(92vw, 860px);
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .big-stage {
+        width: 100%;
+    }
+    .big-svg {
+        width: 100%;
+        height: auto;
+        display: block;
+    }
+
+    .big-close {
+        position: absolute;
+        top: -1rem;
+        right: -1rem;
+        width: 2.25rem;
+        height: 2.25rem;
+        border-radius: 50%;
+        background: #d94b3e;
+        border: 2.5px solid #fff;
+        color: #fff;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.15s, transform 0.12s;
+    }
+    .big-close:hover { background: #b83a2f; transform: scale(1.08); }
+    .big-close svg { width: 58%; height: 58%; }
 
     @media (max-width: 600px) {
         .answer-row {

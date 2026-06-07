@@ -1,9 +1,12 @@
-// Stroke-based (centerline) letters A–Z (capitals) and a–z (lowercase).
-// Designed for writing animation: each letter is an ordered array of SVG path `d` strings,
-// one per pen stroke, in natural handwriting order (top→bottom, left→right).
+// CENTERLINE (single-line) letters A–Z (capitals) and a–z (lowercase).
+// These are for *drawing* a letter: writing animations, tracing, "how to write"
+// demos. Each letter is an ordered array of SVG path `d` strings, one per pen
+// stroke, in natural handwriting order (top→bottom, left→right).
 // Render with fill="none", stroke-width≈11 (capitals) or 9 (lowercase),
 // round caps/joins, and pathLength="1" to drive dash-offset draw animations.
-// Use with <StrokeLetter> component for animated writing or the ABC Order game grid.
+// Use with <StrokeLetter> for animated writing or the ABC Order game grid.
+// For letters shown as finished solid shapes, use the OUTLINE set in
+// src/letter-paths.ts instead.
 
 export const letterStrokes: Record<string, string[]> = {
   A: ["M 50,8 L 23,91", "M 50,8 L 77,91", "M 35,62 L 65,62"],
@@ -33,7 +36,7 @@ export const letterStrokes: Record<string, string[]> = {
   Y: ["M 27,8 L 50,52", "M 73,8 L 50,52", "M 50,52 L 50,91"],
   Z: ["M 27,11 L 73,11", "M 73,11 L 27,91", "M 27,91 L 73,91"],
 
-  // ── Lowercase a–z (centerline, single-story, traced over KG Primary Penmanship) ──
+  // ── Lowercase a–z (centerline, single-story) ──
   // A separate vertical system from the capitals so descenders fit the same box:
   //   ascender top y≈10 · x-height top y≈39 · baseline y≈76 · descender bottom y≈96.
   // Render at stroke-width≈9 (the font's pen weight at this scale; StrokeLetter
