@@ -52,7 +52,33 @@ const CLIPS = [
   { text: "warm.",          out: "weather/warm.mp3" },
   { text: "cool.",          out: "weather/cool.mp3" },
   { text: "cold.",          out: "weather/cold.mp3" },
+
+  // ── Date page ──
+  { text: "What's the date today?", out: "date/what-is-the-date.mp3" },
+  { text: "Today is",               out: "date/today-is.mp3" },
 ];
+
+// Months + days are generated programmatically. Each gets a trailing period so
+// ElevenLabs gives the word a full, clear pronunciation (not a clipped one).
+const MONTHS = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
+];
+for (const name of MONTHS) {
+  CLIPS.push({ text: `${name}.`, out: `date/months/${name.toLowerCase()}.mp3` });
+}
+
+const ONES = ["", "first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eighth", "ninth",
+  "tenth", "eleventh", "twelfth", "thirteenth", "fourteenth", "fifteenth", "sixteenth",
+  "seventeenth", "eighteenth", "nineteenth", "twentieth"];
+const ordinalWord = (d) => {
+  if (d <= 20) return ONES[d];
+  if (d === 30) return "thirtieth";
+  return `${d < 30 ? "twenty" : "thirty"}-${ONES[d % 10]}`;
+};
+for (let d = 1; d <= 31; d++) {
+  CLIPS.push({ text: `${ordinalWord(d)}.`, out: `date/days/${d}.mp3` });
+}
 
 async function generateClip(text, outRelative) {
   const outPath = join(ROOT, "public", "audio", outRelative);

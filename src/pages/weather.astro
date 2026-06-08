@@ -155,8 +155,9 @@ const GARLIC_SILO_PATH = "M199 468C136.885 532.312 124 583 143 680C191.5 772 243
 
 <script>
     import { LETTER_PATHS, LETTER_PATHS_LOWER } from '../letter-paths';
+    import { speakMii, speakPlain, isMiiVoiceOn, playClip, playFromEl } from '../scripts/speak';
 
-    // ── Audio (files are added later — fail softly until then) ──
+    // ── Audio ──
     const toast = document.getElementById('audio-toast');
     let toastTimer: number | undefined;
     function showToast() {
@@ -165,27 +166,7 @@ const GARLIC_SILO_PATH = "M199 468C136.885 532.312 124 583 143 680C191.5 772 243
         clearTimeout(toastTimer);
         toastTimer = window.setTimeout(() => toast.classList.remove('show'), 2200);
     }
-    // Speak with the browser's built-in voice (placeholder until real recordings exist).
-    function speak(text: string | undefined) {
-        if (!text || !('speechSynthesis' in window)) { showToast(); return; }
-        window.speechSynthesis.cancel();
-        const u = new SpeechSynthesisUtterance(text);
-        u.lang = 'en-US';
-        u.rate = 0.9;
-        window.speechSynthesis.speak(u);
-    }
-
-    // Try the recorded clip first; if it isn't there yet, fall back to the browser voice.
-    function play(el: HTMLElement) {
-        const src = el.dataset.audio;
-        const say = el.dataset.say;
-        if (!src) { speak(say); return; }
-        const a = new Audio(src);
-        let handled = false;
-        const fallback = () => { if (!handled) { handled = true; speak(say); } };
-        a.addEventListener('error', fallback, { once: true });
-        a.play().catch(fallback);
-    }
+    const play = (el: HTMLElement) => playFromEl(el, showToast);
 
     // Question + every word's speaker button
     document.getElementById('question-btn')?.addEventListener('click', (e) => {
@@ -421,15 +402,6 @@ const GARLIC_SILO_PATH = "M199 468C136.885 532.312 124 583 143 680C191.5 772 243
         return card?.querySelector<HTMLElement>('.card-play')?.dataset.audio ?? '';
     }
 
-    function playClip(src: string): Promise<void> {
-        return new Promise((resolve) => {
-            const a = new Audio(src);
-            a.addEventListener('ended', () => resolve(), { once: true });
-            a.addEventListener('error', () => resolve(), { once: true });
-            a.play().catch(() => resolve());
-        });
-    }
-
     function updateSentenceButton() {
         if (!sentenceBtn) return;
         const ready = !!(placedWord('weather') && placedWord('feeling'));
@@ -438,6 +410,8 @@ const GARLIC_SILO_PATH = "M199 468C136.885 532.312 124 583 143 680C191.5 772 243
     }
 
     sentenceBtn?.addEventListener('click', async () => {
+        const sentence = `It's ${placedWord('weather')} and ${placedWord('feeling')}.`;
+        if (isMiiVoiceOn()) { if (!speakMii(sentence)) showToast(); return; }
         const wAudio = placedAudio('weather');
         const fAudio = placedAudio('feeling');
         if (wAudio && fAudio) {
@@ -445,8 +419,8 @@ const GARLIC_SILO_PATH = "M199 468C136.885 532.312 124 583 143 680C191.5 772 243
             await playClip(wAudio);
             await playClip('/audio/weather/and.mp3');
             await playClip(fAudio);
-        } else {
-            speak(`It's ${placedWord('weather')} and ${placedWord('feeling')}.`);
+        } else if (!speakPlain(sentence)) {
+            showToast();
         }
     });
 

@@ -2,75 +2,1021 @@
 import Layout from '../layouts/Layout.astro';
 import Navbar from '../components/Navbar.astro';
 import T from '../components/T.astro';
+
+// ── Speaker + magnify icons (same set as the weather widget) ──
+const SPEAKER = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 5V4L8 9H4z" fill="currentColor"/><path d="M16.5 8.5a4.5 4.5 0 0 1 0 7" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>`;
+const MAGNIFY = `<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" fill="currentColor"/><line x1="10.5" y1="7.5" x2="10.5" y2="13.5" stroke="#fff" stroke-width="2" stroke-linecap="round"/><line x1="7.5" y1="10.5" x2="13.5" y2="10.5" stroke="#fff" stroke-width="2" stroke-linecap="round"/><line x1="15.5" y1="15.5" x2="21" y2="21" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>`;
+
+// ── Months: English name + Japanese (number + 月) ──
+const MONTHS = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December',
+];
+const months = MONTHS.map((en, i) => ({
+    key: en.toLowerCase(),
+    en,
+    ja: `${i + 1}月`,
+}));
+
+// ── Days 1–31: ordinal suffix + spoken word (for the browser-voice fallback) ──
+const ordinalSuffix = (d: number) => {
+    const t = d % 100;
+    if (t >= 11 && t <= 13) return 'th';
+    return ['th', 'st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th', 'th'][d % 10];
+};
+const ONES = ['', 'first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh', 'eighth', 'ninth',
+    'tenth', 'eleventh', 'twelfth', 'thirteenth', 'fourteenth', 'fifteenth', 'sixteenth',
+    'seventeenth', 'eighteenth', 'nineteenth', 'twentieth'];
+const ordinalWord = (d: number) => {
+    if (d <= 20) return ONES[d];
+    if (d === 30) return 'thirtieth';
+    const tens = d < 30 ? 'twenty' : 'thirty';
+    return `${tens}-${ONES[d % 10]}`;
+};
+const days = Array.from({ length: 31 }, (_, i) => {
+    const n = i + 1;
+    return { n, label: `${n}${ordinalSuffix(n)}`, say: ordinalWord(n), ja: `${n}日` };
+});
+
 ---
 
 <Layout
-    title="Today's Date — TakkoTaco"
-    description="The date in Takko Machi."
+    title="What's the Date? — TakkoTaco"
+    description="A daily warm-up for English class: pick the month and the day, then read the date out loud."
 >
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Patrick+Hand&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600&display=swap" rel="stylesheet">
 
-    <div class="info-body">
+    <div class="date-body">
         <Navbar />
 
-        <main class="info-main">
-            <div class="info-card">
-                <h1>
-                    <T>
-                        <span slot="en">Today's Date</span>
-                        <span slot="ja">今日の日付</span>
-                    </T>
-                </h1>
-                <p class="info-intro">
-                    <T>
-                        <span slot="en">The date and calendar in Takko. More coming soon.</span>
-                        <span slot="ja">田子の日付とカレンダーのページです。準備中です。</span>
-                    </T>
-                </p>
+        <main class="date-main">
+            <!-- Clickable question (plays the teacher's voice) -->
+            <header class="date-head">
+                <button class="question" id="question-btn" data-audio="/audio/date/what-is-the-date.mp3" data-say="What's the date today?">
+                    <span class="question-text">
+                        <T>
+                            <span slot="en">What's the date today?</span>
+                            <span slot="ja">今日は何月何日ですか？</span>
+                        </T>
+                    </span>
+                    <span class="question-speaker" set:html={SPEAKER}></span>
+                </button>
+            </header>
+
+            <!-- Answer sentence with drop slots -->
+            <div class="answers">
+                <div class="answer-line">
+                <div class="answer-row">
+                    <p class="sentence">
+                        <span class="sentence-start">Today is</span>
+                        <span class="drop-slot" data-accept="month">
+                            <span class="slot-hint">
+                                <T><span slot="en">month</span><span slot="ja">何月</span></T>
+                            </span>
+                        </span>
+                        <span class="drop-slot" data-accept="day">
+                            <span class="slot-hint">
+                                <T><span slot="en">day</span><span slot="ja">何日</span></T>
+                            </span>
+                        </span>
+                        <span class="sentence-end">.</span>
+                    </p>
+                </div>
+                <div class="sentence-actions">
+                    <button class="sentence-play" id="sentence-play" disabled aria-label="Read the sentence">
+                        <span class="sp-icon" set:html={SPEAKER}></span>
+                        <T><span slot="en">Read it</span><span slot="ja">読んでみよう</span></T>
+                    </button>
+                    <button class="sentence-big" id="sentence-big" disabled aria-label="Write it big">
+                        <span class="sb-icon" set:html={MAGNIFY}></span>
+                        <T><span slot="en">Big</span><span slot="ja">おおきく</span></T>
+                    </button>
+                </div>
+                </div>
+            </div>
+
+            <!-- Word banks: 6 months down each side, the day numbers in the middle -->
+            <div class="banks">
+                <div class="word-bank months months-left" data-category="month">
+                    {months.slice(0, 6).map((m, i) => (
+                        <div class="word-card month-card" data-category="month" data-order={i} data-text={m.en}>
+                            <span class="card-label">
+                                <T><span slot="en">{m.en}</span><span slot="ja">{m.ja}</span></T>
+                            </span>
+                            <button class="play-btn card-play" data-audio={`/audio/date/months/${m.key}.mp3`} data-say={m.en} aria-label={`Play ${m.en}`} set:html={SPEAKER}></button>
+                        </div>
+                    ))}
+                </div>
+
+                <div class="word-bank days" data-category="day">
+                    {days.map((d, i) => (
+                        <div class="word-card day-card" data-category="day" data-order={i} data-text={d.label}>
+                            <span class="card-label">{d.label}</span>
+                            <button class="play-btn card-play" data-audio={`/audio/date/days/${d.n}.mp3`} data-say={d.say} aria-label={`Play ${d.label}`} set:html={SPEAKER}></button>
+                        </div>
+                    ))}
+                </div>
+
+                <div class="word-bank months months-right" data-category="month">
+                    {months.slice(6).map((m, i) => (
+                        <div class="word-card month-card" data-category="month" data-order={i + 6} data-text={m.en}>
+                            <span class="card-label">
+                                <T><span slot="en">{m.en}</span><span slot="ja">{m.ja}</span></T>
+                            </span>
+                            <button class="play-btn card-play" data-audio={`/audio/date/months/${m.key}.mp3`} data-say={m.en} aria-label={`Play ${m.en}`} set:html={SPEAKER}></button>
+                        </div>
+                    ))}
+                </div>
             </div>
         </main>
+
+        <!-- Writing modal (centered card with backdrop) -->
+        <div class="big-modal" id="big-modal" hidden aria-modal="true" role="dialog">
+            <div class="big-card">
+                <button class="big-close" id="big-close" aria-label="Close">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                        <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                    </svg>
+                </button>
+                <div class="big-stage" id="big-stage"></div>
+            </div>
+        </div>
+
+        <!-- Audio-not-ready note -->
+        <div class="toast" id="audio-toast" role="status" aria-live="polite">
+            <T>
+                <span slot="en">Voice not available</span>
+                <span slot="ja">音声を再生できません</span>
+            </T>
+        </div>
     </div>
 </Layout>
 
+<script>
+    import { LETTER_PATHS, LETTER_PATHS_LOWER } from '../letter-paths';
+    import { speakMii, speakPlain, isMiiVoiceOn, playClip, playFromEl } from '../scripts/speak';
+
+    // ── Audio ──
+    const toast = document.getElementById('audio-toast');
+    let toastTimer: number | undefined;
+    function showToast() {
+        if (!toast) return;
+        toast.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = window.setTimeout(() => toast.classList.remove('show'), 2200);
+    }
+    const play = (el: HTMLElement) => playFromEl(el, showToast);
+
+    // Question + every word's speaker button
+    document.getElementById('question-btn')?.addEventListener('click', (e) => {
+        play(e.currentTarget as HTMLElement);
+    });
+    document.querySelectorAll<HTMLButtonElement>('.play-btn').forEach((btn) => {
+        btn.addEventListener('pointerdown', (e) => e.stopPropagation());
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            play(btn);
+        });
+    });
+
+    // ── Drag & drop (pointer events → works with mouse and touch) ──
+    // Each card remembers its own home bank — months live in two separate banks
+    // (left + right) that share the "month" category, so we can't look a card's
+    // bank up by category; cards must return to the exact bank they came from.
+    const homeBankOf = new Map<HTMLElement, HTMLElement>();
+    document.querySelectorAll<HTMLElement>('.word-bank').forEach((bank) => {
+        bank.querySelectorAll<HTMLElement>('.word-card').forEach((card) => {
+            homeBankOf.set(card, bank);
+        });
+    });
+    const slots = Array.from(document.querySelectorAll<HTMLElement>('.drop-slot'));
+    const slotByCategory: Record<string, HTMLElement> = {};
+    slots.forEach((s) => { slotByCategory[s.dataset.accept ?? ''] = s; });
+
+    const CLICK_THRESHOLD = 6;   // px of movement below which a quick release counts as a click
+    const DRAG_HOLD_MS = 100;    // press-and-hold this long to pick a card up for dragging
+    let dragEl: HTMLElement | null = null;
+    let dragActive = false;
+    let holdTimer: number | undefined;
+    let originSlot: HTMLElement | null = null;
+    let offsetX = 0;
+    let offsetY = 0;
+    let startX = 0;
+    let startY = 0;
+    let lastX = 0;
+    let lastY = 0;
+    let ghostEl: HTMLElement | null = null;
+
+    function removeGhost() {
+        ghostEl?.remove();
+        ghostEl = null;
+    }
+
+    function insertSorted(bank: HTMLElement, card: HTMLElement) {
+        const order = Number(card.dataset.order ?? 0);
+        const after = Array.from(bank.querySelectorAll<HTMLElement>('.word-card'))
+            .find((c) => Number(c.dataset.order ?? 0) > order);
+        bank.insertBefore(card, after ?? null);
+    }
+
+    // While a card lives in a slot, a faded clone holds its place in the bank
+    // so the bank never reshuffles (whether the card was clicked or dragged there).
+    const homeGhosts = new Map<HTMLElement, HTMLElement>();
+
+    function makeHomeGhost(card: HTMLElement) {
+        if (homeGhosts.has(card)) return;
+        const bank = homeBankOf.get(card);
+        if (!bank) return;
+        const ghost = card.cloneNode(true) as HTMLElement;
+        ghost.classList.add('card-ghost');
+        ghost.classList.remove('arming', 'dragging');
+        ghost.dataset.order = card.dataset.order;
+        insertSorted(bank, ghost);
+        homeGhosts.set(card, ghost);
+    }
+
+    function removeHomeGhost(card: HTMLElement) {
+        homeGhosts.get(card)?.remove();
+        homeGhosts.delete(card);
+    }
+
+    function returnCard(card: HTMLElement) {
+        removeHomeGhost(card);
+        const bank = homeBankOf.get(card);
+        if (bank) insertSorted(bank, card);
+    }
+
+    function clearSlot(slot: HTMLElement) {
+        const existing = slot.querySelector<HTMLElement>('.word-card:not(.card-ghost)');
+        if (existing) returnCard(existing);
+        slot.classList.remove('filled');
+    }
+
+    function placeInSlot(card: HTMLElement, slot: HTMLElement) {
+        clearSlot(slot);
+        makeHomeGhost(card);
+        slot.appendChild(card);
+        slot.classList.add('filled');
+    }
+
+    function slotUnderPoint(x: number, y: number): HTMLElement | null {
+        for (const slot of slots) {
+            const r = slot.getBoundingClientRect();
+            if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) return slot;
+        }
+        return null;
+    }
+
+    function highlight(active: HTMLElement | null, category: string) {
+        slots.forEach((s) => {
+            const ok = s === active && s.dataset.accept === category;
+            s.classList.toggle('drop-hover', ok);
+        });
+    }
+
+    // Promote a held card into an actual drag: lift it out of flow under the pointer.
+    function activateDrag() {
+        if (!dragEl || dragActive) return;
+        const card = dragEl;
+        dragActive = true;
+        card.classList.remove('arming');
+
+        const r = card.getBoundingClientRect();
+        offsetX = lastX - r.left;
+        offsetY = lastY - r.top;
+
+        // Keep the original spot occupied by a faded clone while dragging.
+        if (originSlot) {
+            // dragging out of a slot: hold the slot with a temporary ghost
+            const ghost = card.cloneNode(true) as HTMLElement;
+            ghost.classList.add('card-ghost');
+            ghost.classList.remove('arming', 'dragging');
+            originSlot.insertBefore(ghost, card);
+            ghostEl = ghost;
+        } else {
+            // dragging out of the bank: its persistent home ghost holds the spot
+            makeHomeGhost(card);
+        }
+
+        card.style.width = `${r.width}px`;
+        card.style.left = `${r.left}px`;
+        card.style.top = `${r.top}px`;
+        card.classList.add('dragging');
+        document.body.appendChild(card);
+
+        // show where this word goes back to
+        homeBankOf.get(card)?.classList.add('bank-return');
+    }
+
+    function endInteraction() {
+        removeGhost();
+        clearTimeout(holdTimer);
+        holdTimer = undefined;
+        window.removeEventListener('pointermove', onPointerMove);
+        window.removeEventListener('pointerup', onPointerUp);
+        dragEl = null;
+        dragActive = false;
+        originSlot = null;
+        updateSentenceButton();
+    }
+
+    function onPointerMove(e: PointerEvent) {
+        if (!dragEl) return;
+        lastX = e.clientX;
+        lastY = e.clientY;
+        if (dragActive) {
+            dragEl.style.left = `${e.clientX - offsetX}px`;
+            dragEl.style.top = `${e.clientY - offsetY}px`;
+            highlight(slotUnderPoint(e.clientX, e.clientY), dragEl.dataset.category ?? '');
+        }
+    }
+
+    function onPointerUp(e: PointerEvent) {
+        if (!dragEl) return;
+        const card = dragEl;
+        const category = card.dataset.category ?? '';
+
+        if (dragActive) {
+            // released after a real drag → drop on a matching slot, else send home
+            removeGhost();
+            if (originSlot) originSlot.classList.remove('filled');
+            card.classList.remove('dragging');
+            card.style.left = card.style.top = card.style.width = '';
+            const target = slotUnderPoint(e.clientX, e.clientY);
+            if (target && target.dataset.accept === category) placeInSlot(card, target);
+            else returnCard(card);
+            highlight(null, category);
+            homeBankOf.get(card)?.classList.remove('bank-return');
+        } else {
+            // released before the hold armed → treat a still press as a click toggle
+            card.classList.remove('arming');
+            const isClick = Math.hypot(e.clientX - startX, e.clientY - startY) < CLICK_THRESHOLD;
+            if (isClick) {
+                if (originSlot) {
+                    originSlot.classList.remove('filled');
+                    returnCard(card);               // in a slot → snap down to the bank
+                } else {
+                    const slot = slotByCategory[category];
+                    if (slot) placeInSlot(card, slot); // in the bank → snap up into its slot
+                }
+            }
+        }
+
+        endInteraction();
+    }
+
+    function onPointerDown(e: PointerEvent) {
+        const card = (e.target as HTMLElement).closest<HTMLElement>('.word-card');
+        if (!card || (e.button !== undefined && e.button !== 0)) return;
+        e.preventDefault();
+
+        originSlot = card.parentElement?.classList.contains('drop-slot')
+            ? card.parentElement
+            : null;
+
+        startX = lastX = e.clientX;
+        startY = lastY = e.clientY;
+        dragEl = card;
+        dragActive = false;
+
+        // arm: hold long enough and it lifts into a drag (a quick release = click)
+        card.classList.add('arming');
+        clearTimeout(holdTimer);
+        holdTimer = window.setTimeout(activateDrag, DRAG_HOLD_MS);
+
+        window.addEventListener('pointermove', onPointerMove);
+        window.addEventListener('pointerup', onPointerUp);
+    }
+
+    document.querySelectorAll<HTMLElement>('.word-card').forEach((card) => {
+        card.addEventListener('pointerdown', onPointerDown);
+    });
+
+    // ── "Read it" + "Big" buttons: active once both slots are filled ──
+    const sentenceBtn = document.getElementById('sentence-play') as HTMLButtonElement | null;
+    const bigBtn = document.getElementById('sentence-big') as HTMLButtonElement | null;
+
+    function placedCard(category: string): HTMLElement | null {
+        return slotByCategory[category]?.querySelector<HTMLElement>('.word-card:not(.card-ghost)') ?? null;
+    }
+    function placedText(category: string): string {
+        return placedCard(category)?.dataset.text ?? '';
+    }
+    function placedSay(category: string): string {
+        return placedCard(category)?.querySelector<HTMLElement>('.card-play')?.dataset.say ?? '';
+    }
+    function placedAudio(category: string): string {
+        return placedCard(category)?.querySelector<HTMLElement>('.card-play')?.dataset.audio ?? '';
+    }
+
+    function updateSentenceButton() {
+        if (!sentenceBtn) return;
+        const ready = !!(placedText('month') && placedText('day'));
+        sentenceBtn.disabled = !ready;
+        if (bigBtn) bigBtn.disabled = !ready;
+    }
+
+    // Read it: Mii voice speaks the whole sentence; otherwise play the recorded
+    // clips in sequence (today is → month → day), falling back to a spoken
+    // sentence if any clip is missing.
+    sentenceBtn?.addEventListener('click', async () => {
+        const sentence = `Today is ${placedText('month')} the ${placedSay('day')}.`;
+        if (isMiiVoiceOn()) { if (!speakMii(sentence)) showToast(); return; }
+        const mAudio = placedAudio('month');
+        const dAudio = placedAudio('day');
+        let ok = await playClip('/audio/date/today-is.mp3');
+        if (ok && mAudio) ok = await playClip(mAudio);
+        if (ok && dAudio) ok = await playClip(dAudio);
+        if (!ok && !speakPlain(sentence)) showToast();
+    });
+
+    updateSentenceButton();
+
+    // ── "Big" writing modal (same SVG writing-guide system as the weather widget) ──
+    // Letters are drawn from the stroke-path glyphs so they show how to write each
+    // one; bare digits fall back to a school-handwriting font (no number paths yet).
+    const bigModal = document.getElementById('big-modal') as HTMLElement | null;
+    const bigClose = document.getElementById('big-close') as HTMLButtonElement | null;
+    const bigStage = document.getElementById('big-stage') as HTMLElement | null;
+
+    const BSVG = 'http://www.w3.org/2000/svg';
+    // Andika is an upright literacy font (already loaded site-wide) — plain,
+    // non-slanted numerals with an open "4", the way they're taught by hand.
+    const DIGIT_FONT = "'Andika'";
+    const B_PAD = 24, B_GAP = 12, B_SPW = 34, B_STROKE = 9;
+    // Capitals carry more built-in side-bearing than the lowercase glyphs, so the
+    // word looks gappy after them — close that up with a smaller gap after a cap.
+    const B_CAP_GAP = 3;
+    // Writing-guide lines: ascender top, x-height top, baseline, descender bottom.
+    const B_ASC = 10, B_XH = 39, B_BASE = 76, B_DESC = 96;
+    const isCap = (ch: string) => ch >= 'A' && ch <= 'Z';
+    const isDigit = (ch: string) => ch >= '0' && ch <= '9';
+
+    function bGlyph(ch: string): SVGGElement | null {
+        const d = LETTER_PATHS_LOWER[ch] ?? LETTER_PATHS[ch] ?? LETTER_PATHS[ch.toUpperCase()];
+        if (!d) return null;
+        const g = document.createElementNS(BSVG, 'g');
+        const p = document.createElementNS(BSVG, 'path');
+        p.setAttribute('d', d);
+        p.setAttribute('fill', '#333');
+        g.appendChild(p);
+        return g;
+    }
+
+    // Digit drawn as SVG text in the handwriting font. SVG getBBox() on <text>
+    // returns the font line-box (not the glyph ink), so we measure the true ink
+    // height/width with a canvas, then scale the digit into the ascender→baseline
+    // band and seat it on the baseline — matching the capital letters' height.
+    let digitCtx: CanvasRenderingContext2D | null = null;
+    function measureDigit(ch: string) {
+        if (!digitCtx) digitCtx = document.createElement('canvas').getContext('2d');
+        digitCtx!.font = `100px ${DIGIT_FONT}`;
+        const m = digitCtx!.measureText(ch);
+        return { asc: m.actualBoundingBoxAscent, w: m.width };
+    }
+    function bDigit(svg: SVGSVGElement, ch: string, x: number): number {
+        const { asc, w } = measureDigit(ch);
+        const s = (B_BASE - B_ASC) / asc;
+        const t = document.createElementNS(BSVG, 'text');
+        t.setAttribute('font-family', DIGIT_FONT);
+        t.setAttribute('font-weight', '700');
+        t.setAttribute('font-size', '100');
+        t.setAttribute('fill', '#333');
+        t.setAttribute('x', '0');
+        t.setAttribute('y', '0');
+        t.textContent = ch;
+        t.setAttribute('transform', `translate(${x} ${B_BASE}) scale(${s})`);
+        svg.appendChild(t);
+        return x + w * s + B_GAP;
+    }
+
+    // Period: zero-length path with a round cap = a perfect dot on the baseline.
+    function placePeriod(svg: SVGSVGElement, x: number): number {
+        const g = document.createElementNS(BSVG, 'g');
+        const p = document.createElementNS(BSVG, 'path');
+        p.setAttribute('d', 'M 50,71.5 L 50,71.5');
+        p.setAttribute('fill', 'none');
+        p.setAttribute('stroke', '#333');
+        p.setAttribute('stroke-width', String(B_STROKE));
+        p.setAttribute('stroke-linecap', 'round');
+        g.appendChild(p);
+        svg.appendChild(g);
+        g.setAttribute('transform', `translate(${x - 50} 0)`);
+        return x + B_STROKE + B_GAP;
+    }
+
+    function bRow(svg: SVGSVGElement, text: string, startX: number): number {
+        let x = startX;
+        for (const ch of text) {
+            if (ch === ' ') { x += B_SPW; continue; }
+            if (ch === '.') { x = placePeriod(svg, x); continue; }
+            if (isDigit(ch)) { x = bDigit(svg, ch, x); continue; }
+            const g = bGlyph(ch);
+            if (!g) continue;
+            svg.appendChild(g);
+            const bb = g.getBBox();
+            if (isCap(ch)) {
+                // Capitals are authored full-box: scale them into the
+                // ascender→baseline band and sit them on the red baseline.
+                const s = (B_BASE - B_ASC) / bb.height;
+                const tx = x - bb.x * s;
+                const ty = B_BASE - (bb.y + bb.height) * s;
+                g.setAttribute('transform', `translate(${tx} ${ty}) scale(${s})`);
+                x += bb.width * s + B_CAP_GAP;
+            } else {
+                g.setAttribute('transform', `translate(${x - bb.x} 0)`);
+                x += bb.width + B_GAP;
+            }
+        }
+        return x;
+    }
+
+    // The 4 writing-guide lines as one <g>, sized to the row width.
+    function bGuides(w: number): SVGGElement {
+        const g = document.createElementNS(BSVG, 'g');
+        const add = (y: number, dashed: boolean) => {
+            const line = document.createElementNS(BSVG, 'line');
+            line.setAttribute('x1', '0');
+            line.setAttribute('x2', String(w));
+            line.setAttribute('y1', String(y));
+            line.setAttribute('y2', String(y));
+            line.setAttribute('stroke', dashed ? '#c9b6a0' : '#b34a3a');
+            line.setAttribute('stroke-width', dashed ? '1' : '1.4');
+            if (dashed) line.setAttribute('stroke-dasharray', '4 5');
+            g.appendChild(line);
+        };
+        add(B_ASC, true);   // ascender (top, dashed)
+        add(B_XH, true);    // x-height (dashed)
+        add(B_BASE, false); // baseline (solid red)
+        add(B_DESC, true);  // descender (bottom, dashed)
+        return g;
+    }
+
+    function drawBig() {
+        if (!bigStage) return;
+        const text = `Today is ${placedText('month')} ${placedText('day')}.`;
+        const svg = document.createElementNS(BSVG, 'svg');
+        svg.setAttribute('class', 'big-svg');
+        svg.setAttribute('viewBox', '0 0 100 100');
+        bigStage.replaceChildren(svg);
+        const W = Math.max(bRow(svg, text, B_PAD) - B_GAP + B_PAD, 160);
+        // Insert guides first so they render behind the letters.
+        svg.insertBefore(bGuides(W), svg.firstChild);
+        svg.setAttribute('viewBox', `0 0 ${W} 100`);
+    }
+
+    bigBtn?.addEventListener('click', async () => {
+        // The font must be ready before getBBox, or digit widths come out wrong.
+        try { await (document as any).fonts?.load(`100px ${DIGIT_FONT}`); } catch {}
+        bigModal?.removeAttribute('hidden');  // must be visible before drawBig so getBBox works
+        drawBig();
+        bigClose?.focus();
+    });
+
+    const closeBigModal = () => {
+        bigModal?.setAttribute('hidden', '');
+        bigBtn?.focus();
+    };
+    bigClose?.addEventListener('click', closeBigModal);
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && bigModal && !bigModal.hasAttribute('hidden')) closeBigModal();
+    });
+</script>
+
 <style>
-    .info-body {
-        background: #fff;
+    /* The whole tool is sized to fit one screen — no scrolling in class. */
+    .date-body {
+        background: var(--color-bg);
         font-family: var(--font-main);
-        color: #333;
+        color: var(--color-text);
         min-height: 100vh;
+        display: flex;
+        flex-direction: column;
         border-bottom: 8px solid var(--color-primary);
     }
 
-    .info-main {
-        max-width: 640px;
-        margin: 3rem auto;
-        padding: 0 1.5rem;
+    .date-main {
+        flex: 1;
+        width: 100%;
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: clamp(1rem, 2.5vh, 2.25rem) clamp(1rem, 3vw, 2.5rem);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: clamp(1rem, 3vh, 2.5rem);
     }
 
-    .info-card {
-        background: var(--color-bg);
-        border-radius: 24px;
-        padding: 3rem 2.5rem;
-        box-shadow: 0 4px 24px rgba(0,0,0,0.06);
-    }
+    /* ── Clickable question ── */
+    .date-head { text-align: center; }
 
-    h1 {
+    .question {
+        display: inline-flex;
+        align-items: center;
+        gap: clamp(0.5rem, 1.2vw, 1rem);
+        margin: 0 auto;
+        border: none;
+        background: none;
+        cursor: pointer;
         font-family: var(--font-main);
-        font-size: 2.4rem;
+        font-weight: 600;
         color: var(--color-primary);
-        margin: 0 0 0.5rem;
+        line-height: 1.15;
+        padding: 0.2rem 0.4rem;
+        transition: transform 0.12s, color 0.15s;
+    }
+    .question-text {
+        font-size: clamp(1.7rem, 5vw, 3.4rem);
+        border-bottom: 3px dashed transparent;
+    }
+    .question:hover { transform: scale(1.02); }
+    .question:hover .question-text { border-bottom-color: var(--color-secondary); }
+    .question:active { transform: scale(0.99); }
+
+    .question-speaker {
+        flex: 0 0 auto;
+        width: clamp(2rem, 4.5vw, 3rem);
+        height: clamp(2rem, 4.5vw, 3rem);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 2.5px solid var(--color-secondary);
+        border-radius: 50%;
+        background: var(--color-primary);
+        color: #fff;
+    }
+    .question-speaker :global(svg) { width: 58%; height: 58%; }
+
+    /* ── Answer sentence ── */
+    .answers {
+        display: flex;
+        flex-direction: column;
+        gap: clamp(0.6rem, 1.6vh, 1.1rem);
+        align-items: center;
     }
 
-    .info-intro {
-        color: #666;
-        font-size: 1rem;
+    .answer-line {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: clamp(0.6rem, 1.5vw, 1rem);
+        width: 100%;
+    }
+
+    .answer-row {
+        display: flex;
+        align-items: center;
+        gap: clamp(0.6rem, 1.5vw, 1rem);
+        max-width: min(94vw, 780px);
+        background: #fff;
+        border: 2px solid #efe7d6;
+        border-radius: 18px;
+        padding: clamp(0.6rem, 1.6vh, 1.1rem) clamp(0.9rem, 2vw, 1.4rem);
+    }
+
+    .sentence {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.5rem;
         margin: 0;
+        font-size: clamp(1.3rem, 3.2vw, 2.2rem);
+        font-weight: 500;
+    }
+    .sentence-end { margin-left: -0.25rem; }
+
+    .drop-slot {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: clamp(120px, 16vw, 200px);
+        min-height: clamp(56px, 9vh, 90px);
+        padding: 0.2rem 0.5rem;
+        border: 3px dashed var(--color-secondary);
+        border-radius: 16px;
+        background: #fdfaf2;
+        transition: background 0.15s, border-color 0.15s, transform 0.1s;
+    }
+    .drop-slot.filled {
+        border-color: transparent;
+        background: transparent;
+        min-width: 0;
+        min-height: 0;
+        padding: 0;
+    }
+    .drop-slot.drop-hover {
+        border-color: var(--color-accent);
+        background: #fdeee8;
+        transform: scale(1.03);
+    }
+    .slot-hint {
+        font-size: clamp(0.8rem, 1.5vw, 1rem);
+        font-weight: 400;
+        color: #b9a87f;
+        pointer-events: none;
+    }
+    .drop-slot.filled .slot-hint { display: none; }
+
+    /* ── "Read it" + "Big" button group ── */
+    .sentence-actions {
+        flex: 0 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+    }
+
+    .sentence-play,
+    .sentence-big {
+        flex: 0 0 auto;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        border: 2px solid var(--color-primary);
+        border-radius: 10px;
+        background: #fff;
+        color: var(--color-primary);
+        font-family: var(--font-main);
+        font-weight: 600;
+        font-size: clamp(0.85rem, 1.6vw, 1.05rem);
+        padding: 0.45rem 1.2rem 0.45rem 0.9rem;
+        cursor: pointer;
+        transition: background 0.15s, color 0.15s, transform 0.12s;
+    }
+    .sentence-play:hover:not(:disabled),
+    .sentence-big:hover:not(:disabled) {
+        background: var(--color-primary);
+        color: #fff;
+        transform: scale(1.03);
+    }
+    .sentence-play:disabled,
+    .sentence-big:disabled {
+        border-color: #c0bbb0;
+        color: #b0a898;
+        background: #fff;
+        cursor: not-allowed;
+    }
+    .sp-icon, .sb-icon {
+        width: 1.2em;
+        height: 1.2em;
+        display: inline-flex;
+    }
+    .sp-icon :global(svg), .sb-icon :global(svg) { width: 100%; height: 100%; }
+
+    /* ── Word banks: 6 months down each side, the day numbers in the middle ── */
+    .banks {
+        display: flex;
+        flex-direction: row;
+        align-items: flex-start;
+        justify-content: center;
+        gap: clamp(0.6rem, 1.6vw, 1.5rem);
+        width: 100%;
+    }
+
+    .word-bank {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: clamp(0.4rem, 1vw, 0.7rem);
+        padding: clamp(0.4rem, 1vh, 0.7rem);
+        border: 2px dashed transparent;
+        border-radius: 18px;
+        transition: background 0.15s, border-color 0.15s;
+    }
+    /* the home bank lights up while you drag its word, showing where it returns
+       (keep each zone's own tint — only the dashed ring appears) */
+    .word-bank.bank-return {
+        border-color: var(--color-secondary);
+    }
+
+    /* months: a soft green panel, a vertical stack of 6 down each side */
+    .word-bank.months {
+        flex: 0 0 auto;
+        flex-direction: column;
+        flex-wrap: nowrap;
+        align-self: center;
+        gap: clamp(0.45rem, 1vh, 0.8rem);
+        padding: clamp(0.6rem, 1.4vh, 1rem);
+        background: #e3efe7;
+        box-shadow: 0 4px 16px rgba(74, 124, 89, 0.12);
+    }
+    /* days: a soft tan panel filling the middle — no scrollbar needed */
+    .word-bank.days {
+        flex: 1 1 auto;
+        max-width: min(70vw, 660px);
+        align-content: flex-start;
+        padding: clamp(0.6rem, 1.4vh, 1rem);
+        background: #f7ecda;
+        box-shadow: 0 4px 16px rgba(212, 163, 115, 0.16);
+    }
+
+    /* ── Word cards (a horizontal pill: label + speaker side by side) ── */
+    .word-card {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: clamp(0.4rem, 0.9vw, 0.65rem);
+        background: #fff;
+        border: 2px solid #efe7d6;
+        border-radius: 10px;
+        padding: clamp(0.5rem, 1.3vh, 0.85rem) clamp(0.7rem, 1.4vw, 1rem);
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.06);
+        cursor: grab;
+        touch-action: none;
+        user-select: none;
+        transition: box-shadow 0.15s, border-color 0.15s, transform 0.12s;
+    }
+    .word-card:hover {
+        border-color: var(--color-secondary);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+        transform: translateY(-2px);
+    }
+    /* "charging up" while held — duration matches DRAG_HOLD_MS so it lands as the drag lifts */
+    .word-card.arming {
+        transform: scale(1.08);
+        transition: transform 0.1s ease;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.14);
+    }
+    /* faded placeholder left behind in the original spot during a drag */
+    .word-card.card-ghost {
+        opacity: 0.4;
+        pointer-events: none;
+        box-shadow: none;
+        cursor: default;
+        transform: none;
+    }
+    .word-card.dragging {
+        position: fixed;
+        z-index: 1000;
+        cursor: grabbing;
+        box-shadow: 0 14px 30px rgba(0, 0, 0, 0.22);
+        transform: rotate(-2deg) scale(1.05);
+        pointer-events: none;
+    }
+
+    /* month cards: green family — a little taller than a plain pill */
+    .months .word-card {
+        padding-block: clamp(0.7rem, 1.8vh, 1.15rem);
+        background: #f4faf6;
+        border-color: #c4ddcc;
+    }
+    .months .word-card:hover { border-color: var(--color-primary); }
+    .months .card-label { color: var(--color-primary); }
+    .months .card-play { background: #e5efe8; }
+
+    /* day cards: tan family — compact square tiles, number over speaker */
+    .day-card {
+        flex-direction: column;
+        gap: clamp(0.1rem, 0.5vh, 0.3rem);
+        aspect-ratio: 1 / 1;
+        min-width: clamp(56px, 6vw, 72px);
+        padding: clamp(0.35rem, 1vh, 0.6rem);
+        background: #fdf5ea;
+        border-color: #ecd7b6;
+    }
+    .day-card:hover { border-color: var(--color-secondary); }
+    .day-card .card-label { color: #b06a2c; }
+    .day-card .card-play { background: #f4e7d2; color: #b06a2c; }
+
+    .card-label {
+        font-size: clamp(1rem, 2vw, 1.5rem);
+        font-weight: 500;
+        line-height: 1.15;
+        text-align: center;
+        white-space: nowrap;
+        text-wrap: balance;
+    }
+    .day-card .card-label { font-size: clamp(0.95rem, 1.7vw, 1.3rem); }
+    /* Japanese script has no spaces — only break as a last resort, never strand one. */
+    :global(body.lang-ja) .card-label .t-ja {
+        display: block;
+        text-wrap: balance;
+        word-break: keep-all;
+        overflow-wrap: anywhere;
+    }
+
+    .card-play {
+        flex: 0 0 auto;
+        width: clamp(22px, 2.4vw, 30px);
+        height: clamp(22px, 2.4vw, 30px);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        border-radius: 50%;
+        background: #eef3ee;
+        color: var(--color-primary);
+        cursor: pointer;
+        padding: 0;
+        transition: transform 0.12s, background 0.15s;
+    }
+    .card-play:hover { background: var(--color-primary); color: #fff; transform: scale(1.1); }
+    .card-play svg { width: 58%; height: 58%; }
+
+    /* A card resting inside a sentence slot → plain word, no card chrome or speaker */
+    .drop-slot .word-card {
+        flex-direction: row;
+        aspect-ratio: auto;
+        min-width: 0;
+        width: auto;
+        padding: clamp(0.4rem, 1vh, 0.7rem) clamp(0.5rem, 1.2vw, 0.9rem);
+        border-color: transparent;
+        background: transparent;
+        box-shadow: none;
+    }
+    .drop-slot .card-play { display: none; }
+    .drop-slot .word-card:hover {
+        border-color: transparent;
+        box-shadow: none;
+        transform: none;
+    }
+    /* in the sentence the words read plain dark, not their zone colour */
+    .drop-slot .card-label { font-size: clamp(1.3rem, 3.2vw, 2.2rem); color: var(--color-text); }
+
+    /* ── Toast ── */
+    .toast {
+        position: fixed;
+        left: 50%;
+        bottom: 1.5rem;
+        transform: translate(-50%, 1.5rem);
+        background: var(--color-text);
+        color: #fff;
+        font-family: var(--font-main);
+        font-size: 0.95rem;
+        padding: 0.7rem 1.3rem;
+        border-radius: 999px;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s, transform 0.2s;
+        z-index: 2000;
+    }
+    .toast.show {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+
+    /* ── Writing modal (backdrop + centered card) ── */
+    .big-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 3000;
+        background: rgba(0, 0, 0, 0.45);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+    }
+    .big-modal[hidden] { display: none; }
+
+    .big-card {
+        position: relative;
+        overflow: visible;
+        background: #fdfaf5;
+        border: 2px solid #efe7d6;
+        border-radius: 18px;
+        padding: clamp(1.5rem, 4vw, 3rem);
+        width: min(92vw, 860px);
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .big-stage { width: 100%; }
+    .big-svg {
+        width: 100%;
+        height: auto;
+        display: block;
+    }
+
+    .big-close {
+        position: absolute;
+        top: -1rem;
+        right: -1rem;
+        width: 2.25rem;
+        height: 2.25rem;
+        border-radius: 50%;
+        background: #d94b3e;
+        border: 2.5px solid #fff;
+        color: #fff;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.15s, transform 0.12s;
+    }
+    .big-close:hover { background: #b83a2f; transform: scale(1.08); }
+    .big-close svg { width: 58%; height: 58%; }
+
+    /* Narrow screens: stack the three columns — months go back to rows. */
+    @media (max-width: 820px) {
+        .banks { flex-direction: column; align-items: center; }
+        .word-bank.months { flex-direction: row; flex-wrap: wrap; }
+        .word-bank.days { max-width: 96vw; }
     }
 
     @media (max-width: 600px) {
-        .info-card {
-            padding: 2rem 1.25rem;
+        .answer-row {
+            align-items: center;
+            gap: 0.5rem;
         }
-        h1 { font-size: 2rem; }
     }
 </style>

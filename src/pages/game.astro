@@ -787,17 +787,21 @@ const slots = Array.from({ length: 11 }, (_, i) => {
 
   .play-btn {
     display: inline-block;
-    padding: 0.8rem 1.5rem;
+    padding: 0.7rem 1.5rem;
     background: var(--color-primary);
     color: white;
-    border-radius: 50px;
+    border-radius: 8px;
+    border: 2px solid var(--color-dark-teal);
+    box-shadow: 3px 3px 0 var(--color-dark-teal);
     font-weight: bold;
-    transition: background 0.2s;
+    transition: background 0.2s, transform 0.1s, box-shadow 0.1s;
     align-self: center;
   }
 
   .game-card:hover .play-btn {
     background: var(--color-secondary);
+    transform: translate(-1px, -1px);
+    box-shadow: 4px 4px 0 var(--color-dark-teal);
   }
 
   @media (min-width: 1024px) {

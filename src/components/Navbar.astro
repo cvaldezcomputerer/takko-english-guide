@@ -23,6 +23,21 @@ import T from './T.astro';
         <i class="fas fa-language"></i>
         <span class="lang-text" id="lang-text">日本語</span>
       </button>
+
+      <button class="mii-switch" id="mii-toggle" role="switch" aria-checked="false" aria-label="Mii voice">
+        <span class="mii-track">
+          <span class="mii-knob">
+            <i class="fas fa-robot mii-knob-ai"></i>
+            <span class="mii-knob-mii">mii</span>
+          </span>
+        </span>
+        <span class="mii-tip" role="tooltip">
+          <T>
+            <span slot="en">Robot = clear English. Mii = funny voice. (for tools &amp; games with audio)</span>
+            <span slot="ja">ロボット：はっきり えいご。Mii：おもしろい こえ。（おとが でる ツールや ゲームで）</span>
+          </T>
+        </span>
+      </button>
     </div>
   </div>
 </nav>
@@ -57,6 +72,21 @@ import T from './T.astro';
             const newIsJa = !currentIsJa;
             localStorage.setItem('site-lang', newIsJa ? 'ja' : 'en');
             updateLangUI(newIsJa);
+          });
+      }
+
+      // Mii-voice toggle — off by default. Read by src/scripts/speak.ts via the
+      // same 'mii-voice' localStorage key (keep them in sync).
+      const miiToggle = document.getElementById('mii-toggle');
+      if (miiToggle) {
+          const updateMiiUI = (on) => miiToggle.setAttribute('aria-checked', on ? 'true' : 'false');
+          let miiOn = false;
+          try { miiOn = localStorage.getItem('mii-voice') === 'on'; } catch (e) {}
+          updateMiiUI(miiOn);
+          miiToggle.addEventListener('click', () => {
+            miiOn = miiToggle.getAttribute('aria-checked') !== 'true';
+            try { localStorage.setItem('mii-voice', miiOn ? 'on' : 'off'); } catch (e) {}
+            updateMiiUI(miiOn);
           });
       }
     
@@ -219,6 +249,89 @@ import T from './T.astro';
     color: white;
   }
 
+  /* ── Mii-voice switch (a silly classic on/off slider) ── */
+  .mii-switch {
+    position: relative;
+    background: none;
+    border: none;
+    padding: 0.25rem;
+    margin: 0;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .mii-track {
+    position: relative;
+    display: inline-block;
+    width: 64px;
+    height: 30px;
+    border-radius: 999px;
+    background: #aebac4;            /* off: muted "tech" grey-blue */
+    border: 2px solid #8a99a4;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .mii-knob {
+    position: absolute;
+    top: 50%;
+    left: 3px;
+    transform: translateY(-50%);
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    display: grid;
+    place-items: center;
+    color: #6b7a85;
+    /* springy slide = a bit of silliness */
+    transition: left 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.2s;
+  }
+  .mii-knob-ai { font-size: 0.7rem; line-height: 1; }
+  .mii-knob-mii { font-size: 0.6rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1; display: none; }
+
+  /* on (Mii) state — that Nintendo red, knob springs right and shows "mii" */
+  .mii-switch[aria-checked="true"] .mii-track {
+    background: #e60012;
+    border-color: #b3000e;
+  }
+  .mii-switch[aria-checked="true"] .mii-knob {
+    left: 39px;
+    color: #e60012;
+  }
+  .mii-switch[aria-checked="true"] .mii-knob-ai { display: none; }
+  .mii-switch[aria-checked="true"] .mii-knob-mii { display: block; }
+
+  /* Tooltip — explains the switch on hover/focus (desktop). */
+  .mii-tip {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    right: 0;
+    width: max-content;
+    max-width: 220px;
+    background: var(--color-dark-teal);
+    color: #fff;
+    font-weight: 500;
+    font-size: 0.8rem;
+    line-height: 1.3;
+    text-align: left;
+    padding: 0.5rem 0.7rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-4px);
+    transition: opacity 0.15s, transform 0.15s, visibility 0.15s;
+    pointer-events: none;
+    z-index: 60;
+  }
+  .mii-switch:hover .mii-tip,
+  .mii-switch:focus-visible .mii-tip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
   /* Mobile Styles */
   @media (max-width: 768px) {
     .nav-content {
@@ -260,6 +373,21 @@ import T from './T.astro';
     .lang-toggle {
       width: 100%;
       justify-content: center;
+    }
+    /* keep the little switch centered in the stacked mobile menu */
+    .mii-switch {
+      align-self: center;
+    }
+    /* tooltip: centered under the switch on mobile */
+    .mii-tip {
+      right: auto;
+      left: 50%;
+      transform: translate(-50%, -4px);
+      max-width: 80vw;
+    }
+    .mii-switch:hover .mii-tip,
+    .mii-switch:focus-visible .mii-tip {
+      transform: translate(-50%, 0);
     }
   }
 
