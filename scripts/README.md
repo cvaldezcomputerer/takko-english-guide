@@ -36,6 +36,22 @@ node scripts/download-images.mjs
 the search, e.g. "a bento, not a lunchbox") · `n` no image (final) · `→` skip for now · `←` back.
 Reroll is live — it hits the photo APIs on demand.
 
+## Hand-grabbed illustrations (emotions, tastes, abstract words)
+
+Stock photos don't work for words like "angry", "bitter", or "embarrassed". For those,
+download an illustration yourself (e.g. from [Irasutoya](https://www.irasutoya.com/)) and add it:
+
+```bash
+node scripts/add-local-image.mjs "<word>" <path-to-image> [--page <url>] [--source <name>]
+# e.g. node scripts/add-local-image.mjs "angry" ~/Downloads/okoru.png --page https://www.irasutoya.com/...
+```
+
+It mats the image onto a white 400x400 webp (`fit: contain`, so nothing is cropped),
+writes `public/images/vocab/<slug>.webp`, registers it in `image-selections.json`, and
+regenerates the manifest + CREDITS.json. Defaults `--source` to `irasutoya` and credits
+Takashi Mifune. **Irasutoya licensing:** free + unlimited for non-commercial use (this site
+earns no money); a 20-illustration cap applies only if it's ever monetized.
+
 ## Vocab audio — one voice clip per word
 
 ```bash
