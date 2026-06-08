@@ -82,9 +82,9 @@ import WordSelectorModal from '../../components/WordSelectorModal.astro';
 </GameLayout>
 
 <script>
-  import type { QuizWord } from '../../data/anarika/words';
-  import { categories } from '../../data/anarika/words';
-  import { categoryGroups } from '../../data/anarika/groups';
+  import type { VocabWord } from '../../data/vocab/words';
+  import { categories } from '../../data/vocab/words';
+  import { categoryGroups } from '../../data/vocab/groups';
   import { buildCategoryGrid, openModal, closeModal, initModalListeners, getSelectedWords, formatJapanese } from '../../scripts/wordSelector';
 
   const screenSelect = document.getElementById('screen-select')!;
@@ -96,7 +96,7 @@ import WordSelectorModal from '../../components/WordSelectorModal.astro';
   const copyBtn      = document.getElementById('copy-btn') as HTMLButtonElement;
   const capsBtn      = document.getElementById('caps-btn') as HTMLButtonElement;
 
-  let currentWords: QuizWord[] = [];
+  let currentWords: VocabWord[] = [];
   let capsOn = false;
 
   function showScreen(id: string): void {
@@ -121,7 +121,7 @@ import WordSelectorModal from '../../components/WordSelectorModal.astro';
     showSet(merged);
   });
 
-  function showSet(words: QuizWord[]): void {
+  function showSet(words: VocabWord[]): void {
     currentWords = words;
     capsOn = false;
     capsBtn.textContent = 'Capitalize ／ 大文字';

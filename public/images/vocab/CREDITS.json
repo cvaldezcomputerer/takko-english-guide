@@ -1,0 +1,317 @@
+{
+  "coffee": {
+    "source": "pexels",
+    "author": "Alina Skazka",
+    "page": "https://www.pexels.com/photo/white-cup-of-black-coffee-26985929/"
+  },
+  "tea": {
+    "source": "pixabay",
+    "author": "Pexels",
+    "page": "https://pixabay.com/photos/tea-cup-pot-tea-leaves-pour-1869716/"
+  },
+  "green tea": {
+    "source": "pexels",
+    "author": "Anh Nguyen",
+    "page": "https://www.pexels.com/photo/traditional-japanese-green-tea-setup-with-teapot-31251487/"
+  },
+  "juice": {
+    "source": "pexels",
+    "author": "Kindel Media",
+    "page": "https://www.pexels.com/photo/clear-glass-mug-of-orange-juice-8215136/"
+  },
+  "milk": {
+    "source": "pixabay",
+    "author": "Bru-nO",
+    "page": "https://pixabay.com/photos/milk-food-nourishment-drink-glass-2777165/"
+  },
+  "mineral water": {
+    "source": "pixabay",
+    "author": "jarmoluk",
+    "page": "https://pixabay.com/photos/water-bottle-desire-mineral-water-2105211/"
+  },
+  "cake": {
+    "source": "pixabay",
+    "author": "Couleur",
+    "page": "https://pixabay.com/photos/cake-cakes-cream-cake-cream-yummy-1227842/"
+  },
+  "donut": {
+    "source": "pexels",
+    "author": "Ray Suarez",
+    "page": "https://www.pexels.com/photo/colorful-sprinkled-donuts-on-white-background-34565248/"
+  },
+  "soda": {
+    "source": "pexels",
+    "author": "alleksana",
+    "page": "https://www.pexels.com/photo/photo-of-person-holding-bottled-soft-drinks-4113686/"
+  },
+  "parfait": {
+    "source": "pixabay",
+    "author": "kinoppy",
+    "page": "https://pixabay.com/photos/parfait-chocolate-fresh-cream-2404581/"
+  },
+  "pudding": {
+    "source": "pixabay",
+    "author": "congerdesign",
+    "page": "https://pixabay.com/photos/pudding-dessert-vanilla-pudding-701286/"
+  },
+  "ice cream": {
+    "source": "pexels",
+    "author": "Nick Mayer",
+    "page": "https://www.pexels.com/photo/close-up-photo-of-a-person-s-hand-holding-a-delicious-ice-cream-7761650/"
+  },
+  "shaved ice": {
+    "source": "pexels",
+    "author": "Saya Kimura",
+    "page": "https://www.pexels.com/photo/flavored-ice-on-white-styrofoam-disposable-cup-123016/"
+  },
+  "chocolate": {
+    "source": "pexels",
+    "author": "Vie Studio",
+    "page": "https://www.pexels.com/photo/chocolate-bar-on-white-paper-6167328/"
+  },
+  "cream puff": {
+    "source": "pixabay",
+    "author": "ThomasWolter",
+    "page": "https://pixabay.com/photos/transparent-transparent-background-1075409/"
+  },
+  "popcorn": {
+    "source": "pexels",
+    "author": "Pavel Danilyuk",
+    "page": "https://www.pexels.com/photo/a-yellow-bucket-and-a-tumbler-of-popcorns-7234390/"
+  },
+  "potato chips": {
+    "source": "pexels",
+    "author": "Natan Machado Fotografia  Gastronômica",
+    "page": "https://www.pexels.com/photo/delicious-crunchy-potato-chips-15010284/"
+  },
+  "rice ball": {
+    "source": "pexels",
+    "author": "Airam Dato-on",
+    "page": "https://www.pexels.com/photo/fresh-onigiri-rice-balls-on-wooden-board-30874703/"
+  },
+  "curry and rice": {
+    "source": "pexels",
+    "author": "Cats Coming",
+    "page": "https://www.pexels.com/photo/cooked-rice-and-curry-food-served-on-white-plate-674574/"
+  },
+  "grilled eel": {
+    "source": "pexels",
+    "author": "Cheng",
+    "page": "https://www.pexels.com/photo/meal-with-fish-in-box-18149489/"
+  },
+  "grilled fish": {
+    "source": "pexels",
+    "author": "Vladimir Srajber",
+    "page": "https://www.pexels.com/photo/grilled-fish-on-barbecue-grill-outdoor-cooking-34206378/"
+  },
+  "bread": {
+    "source": "pexels",
+    "author": "Karolina Grabowska www.kaboompics.com",
+    "page": "https://www.pexels.com/photo/bagels-and-bread-6195/"
+  },
+  "sandwich": {
+    "source": "pexels",
+    "author": "SERHAT  TUĞ",
+    "page": "https://www.pexels.com/photo/delicious-sub-sandwich-with-vegetables-on-plate-28396784/"
+  },
+  "pancake": {
+    "source": "pexels",
+    "author": "Tochukwu  Ekeh",
+    "page": "https://www.pexels.com/photo/stack-of-pancakes-with-strawberries-and-syrup-37648012/"
+  },
+  "pizza": {
+    "source": "pexels",
+    "author": "Dario Garcia",
+    "page": "https://www.pexels.com/photo/close-up-shot-of-pizzas-6068717/"
+  },
+  "hot dog": {
+    "source": "pixabay",
+    "author": "HannahChen",
+    "page": "https://pixabay.com/photos/hot-dog-gourmet-ketchup-657039/"
+  },
+  "French fries": {
+    "source": "pexels",
+    "author": "Ali Dashti",
+    "page": "https://www.pexels.com/photo/french-fries-in-a-box-on-a-pink-background-27758755/"
+  },
+  "fried chicken": {
+    "source": "pexels",
+    "author": "Terrance Barksdale",
+    "page": "https://www.pexels.com/photo/fried-chicken-on-paper-towel-9872916/"
+  },
+  "sausage": {
+    "source": "pixabay",
+    "author": "planet_fox",
+    "page": "https://pixabay.com/photos/white-sausage-bavaria-sausage-4733722/"
+  },
+  "steak": {
+    "source": "pexels",
+    "author": "Mohamed  Olwy",
+    "page": "https://www.pexels.com/photo/juicy-grilled-steaks-sizzling-with-flames-36543125/"
+  },
+  "omelet": {
+    "source": "pixabay",
+    "author": "nemoelguedes",
+    "page": "https://pixabay.com/photos/kitchen-omelet-eggs-food-healthy-775746/"
+  },
+  "spaghetti": {
+    "source": "pexels",
+    "author": "Klaus Nielsen",
+    "page": "https://www.pexels.com/photo/crop-faceless-chef-adding-fresh-bolognese-sauce-to-spaghetti-6287497/"
+  },
+  "salad": {
+    "source": "pexels",
+    "author": "Filipp Romanovski",
+    "page": "https://www.pexels.com/photo/salads-served-on-a-banquet-20085552/"
+  },
+  "soup": {
+    "source": "pixabay",
+    "author": "arinaja",
+    "page": "https://pixabay.com/photos/fish-soup-soup-with-pumpkin-2878191/"
+  },
+  "fried noodles": {
+    "source": "pexels",
+    "author": "cottonbro studio",
+    "page": "https://www.pexels.com/photo/thai-noodles-on-a-frying-pan-5602458/"
+  },
+  "ramen": {
+    "source": "pixabay",
+    "author": "dangvan",
+    "page": "https://pixabay.com/photos/bars-ramen-in-saigon-ramen-in-q1-3227779/"
+  },
+  "soba": {
+    "source": "pixabay",
+    "author": "K2-Kaji",
+    "page": "https://pixabay.com/photos/soba-buckwheat-japanese-meal-zaru-801660/"
+  },
+  "beef bowl": {
+    "source": "pixabay",
+    "author": "takedahrs",
+    "page": "https://pixabay.com/photos/beef-food-meal-restaurant-4162800/"
+  },
+  "tempura": {
+    "source": "pexels",
+    "author": "makafood",
+    "page": "https://www.pexels.com/photo/tempura-on-a-basket-8953714/"
+  },
+  "apple": {
+    "source": "pixabay",
+    "author": "NoName_13",
+    "page": "https://pixabay.com/photos/apple-red-fruit-red-chief-1702316/"
+  },
+  "banana": {
+    "source": "pexels",
+    "author": "İbrahim Erkan Bayram | iebarts",
+    "page": "https://www.pexels.com/photo/fresh-yellow-bananas-on-a-table-in-bursa-37182860/"
+  },
+  "bean": {
+    "source": "pexels",
+    "author": "Betül  Taşdemir",
+    "page": "https://www.pexels.com/photo/a-person-holding-a-handful-of-beans-and-seeds-28086783/"
+  },
+  "broccoli": {
+    "source": "pixabay",
+    "author": "Schwarzenarzisse",
+    "page": "https://pixabay.com/photos/broccoli-vegetable-food-1450274/"
+  },
+  "cabbage": {
+    "source": "pixabay",
+    "author": "ulleo",
+    "page": "https://pixabay.com/photos/cabbage-herb-white-cabbage-3722517/"
+  },
+  "carrot": {
+    "source": "pexels",
+    "author": "Suzy Hazelwood",
+    "page": "https://www.pexels.com/photo/close-up-photography-of-orange-carrots-1306559/"
+  },
+  "cherry": {
+    "source": "pexels",
+    "author": "Julia Filirovska",
+    "page": "https://www.pexels.com/photo/red-cherries-hanging-on-tree-branch-8243948/"
+  },
+  "corn": {
+    "source": "pexels",
+    "author": "Engin Akyurt",
+    "page": "https://www.pexels.com/photo/fresh-corns-at-the-market-16732706/"
+  },
+  "cucumber": {
+    "source": "pixabay",
+    "author": "monika1607",
+    "page": "https://pixabay.com/photos/cucumber-vegetables-salad-meal-4314342/"
+  },
+  "eggplant": {
+    "source": "pixabay",
+    "author": "polatdover",
+    "page": "https://pixabay.com/photos/fruit-eggplant-organic-aubergine-6720613/"
+  },
+  "grapes": {
+    "source": "pixabay",
+    "author": "NickyPe",
+    "page": "https://pixabay.com/photos/grapes-fruit-cluster-grape-5889697/"
+  },
+  "kiwi fruit": {
+    "source": "pexels",
+    "author": "Pranjall Kumar",
+    "page": "https://www.pexels.com/photo/close-up-shot-of-kiwis-on-a-wooden-tray-7255620/"
+  },
+  "lemon": {
+    "source": "pexels",
+    "author": "L. Lum",
+    "page": "https://www.pexels.com/photo/fresh-lemons-with-vibrant-green-leaf-35926707/"
+  },
+  "lettuce": {
+    "source": "pexels",
+    "author": "neilstha firman",
+    "page": "https://www.pexels.com/photo/close-up-of-fresh-crisp-green-lettuce-leaves-36165494/"
+  },
+  "melon": {
+    "source": "pixabay",
+    "author": "congerdesign",
+    "page": "https://pixabay.com/photos/melon-honeydew-melon-galia-6191133/"
+  },
+  "onion": {
+    "source": "pexels",
+    "author": "Magda Ehlers",
+    "page": "https://www.pexels.com/photo/close-up-shot-of-white-onions-4163410/"
+  },
+  "orange": {
+    "source": "pexels",
+    "author": "Márcio  Carvalho",
+    "page": "https://www.pexels.com/photo/fresh-oranges-on-wooden-surface-with-bright-background-30925639/"
+  },
+  "peach": {
+    "source": "pixabay",
+    "author": "kiyu_01",
+    "page": "https://pixabay.com/photos/peach-fruit-food-fresh-healthy-2721852/"
+  },
+  "pineapple": {
+    "source": "pexels",
+    "author": "Matheus Bertelli",
+    "page": "https://www.pexels.com/photo/fresh-pineapples-at-outdoor-market-display-30893237/"
+  },
+  "potato": {
+    "source": "pexels",
+    "author": "Pixabay",
+    "page": "https://www.pexels.com/photo/potatoes-144248/"
+  },
+  "spinach": {
+    "source": "pixabay",
+    "author": "maxmann",
+    "page": "https://pixabay.com/photos/spinach-japanese-spinach-komatsuna-2310134/"
+  },
+  "strawberry": {
+    "source": "pixabay",
+    "author": "Der_Mentor",
+    "page": "https://pixabay.com/photos/strawberry-fruit-food-vitamins-7224875/"
+  },
+  "beef": {
+    "source": "pixabay",
+    "author": "tomwieden",
+    "page": "https://pixabay.com/photos/flesh-food-beef-steak-enjoy-3139641/"
+  },
+  "pork": {
+    "source": "pexels",
+    "author": "Rickie-Tom Schünemann",
+    "page": "https://www.pexels.com/photo/displayed-raw-meat-10647859/"
+  }
+}

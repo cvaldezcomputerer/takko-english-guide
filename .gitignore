@@ -25,3 +25,6 @@ pnpm-debug.log*
 
 # partykit local dev state
 .partykit/
+
+# find-image tool: ad-hoc scratch queue (candidates + picks are throwaway)
+scripts/.find-image/

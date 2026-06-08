@@ -97,15 +97,15 @@ import WordSelectorModal from '../../components/WordSelectorModal.astro';
 </div>
 </GameLayout>
 <script>
-  import type { QuizWord } from '../../data/anarika/words';
-  import { categories } from '../../data/anarika/words';
-  import { categoryGroups } from '../../data/anarika/groups';
+  import type { VocabWord } from '../../data/vocab/words';
+  import { categories } from '../../data/vocab/words';
+  import { categoryGroups } from '../../data/vocab/groups';
   import { buildCategoryGrid, openModal, closeModal, initModalListeners, getSelectedWords } from '../../scripts/wordSelector';
 
   interface MissedEntry { en: string; yourAnswer: string; correct: string; }
 
-  let words: QuizWord[] = [];
-  let lastWordsForReplay: QuizWord[] = [];
+  let words: VocabWord[] = [];
+  let lastWordsForReplay: VocabWord[] = [];
   let wordIndex = 0;
   let score = 0;
   let missed: MissedEntry[] = [];
@@ -172,7 +172,7 @@ import WordSelectorModal from '../../components/WordSelectorModal.astro';
     return accepted.some(a => normalize(a) === norm);
   }
 
-  function startQuiz(wordsArray: QuizWord[], mode: string): void {
+  function startQuiz(wordsArray: VocabWord[], mode: string): void {
     words = [...wordsArray];
     lastWordsForReplay = [...wordsArray];
     lastMode = mode;
@@ -183,7 +183,7 @@ import WordSelectorModal from '../../components/WordSelectorModal.astro';
     showQuestion();
   }
 
-  function getChoices(correctWord: QuizWord): QuizWord[] {
+  function getChoices(correctWord: VocabWord): VocabWord[] {
     const pool = words.filter(w => w.en !== correctWord.en);
     const shuffled = pool.sort(() => Math.random() - 0.5).slice(0, 3);
     return [correctWord, ...shuffled].sort(() => Math.random() - 0.5);
@@ -236,7 +236,7 @@ import WordSelectorModal from '../../components/WordSelectorModal.astro';
     }
   }
 
-  function submitChoiceAnswer(chosenText: string, correctText: string, word: QuizWord): void {
+  function submitChoiceAnswer(chosenText: string, correctText: string, word: VocabWord): void {
     choicesGrid.querySelectorAll<HTMLButtonElement>('.choice-btn').forEach(btn => {
       btn.disabled = true;
       if (btn.textContent === correctText) btn.classList.add('choice-correct');

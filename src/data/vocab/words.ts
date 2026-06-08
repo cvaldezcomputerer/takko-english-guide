@@ -1,14 +1,35 @@
-export interface QuizWord {
+import { vocabImages } from "./images";
+import { vocabAudio } from "./audio";
+
+export interface VocabWord {
   en: string;
   ja: string[]; // all accepted hiragana answers
+  img?: string; // optional photo path; usually resolved via imageFor(), not stored here
+  audio?: string; // optional voice clip path; usually resolved via audioFor(), not stored here
 }
 
-export interface QuizCategory {
+export interface VocabCategory {
   name: string;
-  words: QuizWord[];
+  words: VocabWord[];
 }
 
-export const categories: QuizCategory[] = [
+/**
+ * Public image path for a vocab word, or undefined if none has been picked yet.
+ * Backed by the generated src/data/vocab/images.ts manifest (see scripts/).
+ */
+export function imageFor(word: VocabWord): string | undefined {
+  return word.img ?? vocabImages[word.en];
+}
+
+/**
+ * Public audio (voice clip) path for a vocab word, or undefined if none exists
+ * yet. Backed by the generated src/data/vocab/audio.ts manifest (see scripts/).
+ */
+export function audioFor(word: VocabWord): string | undefined {
+  return word.audio ?? vocabAudio[word.en];
+}
+
+export const categories: VocabCategory[] = [
   // Food, Drink & Taste
   {
     name: "Drinks",

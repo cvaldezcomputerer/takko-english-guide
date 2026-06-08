@@ -1,9 +1,9 @@
-import type { QuizWord, QuizCategory } from '../data/anarika/words';
-import type { CategoryGroup } from '../data/anarika/groups';
+import type { VocabWord, VocabCategory } from '../data/vocab/words';
+import type { CategoryGroup } from '../data/vocab/groups';
 
 export type { CategoryGroup };
 
-export function formatJapanese(word: QuizWord): string {
+export function formatJapanese(word: VocabWord): string {
   const primary = word.ja[0];
   const hasKanji = /[一-鿿㐀-䶿]/.test(primary);
   if (!hasKanji) return primary;
@@ -31,7 +31,7 @@ export function buildCategoryGrid(
   });
 }
 
-export function openModal(group: CategoryGroup, allCategories: QuizCategory[]): void {
+export function openModal(group: CategoryGroup, allCategories: VocabCategory[]): void {
   const modal          = document.getElementById('category-modal')!;
   const modalGroupName = document.getElementById('modal-group-name')!;
   const modalGroupJa   = document.getElementById('modal-group-ja')!;
@@ -172,7 +172,7 @@ export function getSelectedNames(): string[] {
     .map(c => c.value);
 }
 
-export function getSelectedWords(allCategories: QuizCategory[]): QuizWord[] {
+export function getSelectedWords(allCategories: VocabCategory[]): VocabWord[] {
   return getSelectedNames().flatMap(name =>
     allCategories.find(c => c.name === name)?.words ?? []
   );

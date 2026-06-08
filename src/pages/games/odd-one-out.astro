@@ -76,9 +76,9 @@ import WordSelectorModal from '../../components/WordSelectorModal.astro';
 </GameLayout>
 
 <script>
-  import type { QuizWord } from '../../data/anarika/words';
-  import { categories } from '../../data/anarika/words';
-  import { categoryGroups } from '../../data/anarika/groups';
+  import type { VocabWord } from '../../data/vocab/words';
+  import { categories } from '../../data/vocab/words';
+  import { categoryGroups } from '../../data/vocab/groups';
   import { buildCategoryGrid, openModal, closeModal, initModalListeners, getSelectedNames } from '../../scripts/wordSelector';
 
   const screenSelect      = document.getElementById('screen-select')!;
@@ -131,7 +131,7 @@ import WordSelectorModal from '../../components/WordSelectorModal.astro';
     return a;
   }
 
-  function pickImpostor(): QuizWord | null {
+  function pickImpostor(): VocabWord | null {
     const otherGroups = categoryGroups.filter((_, i) => i !== activeGroupIdx);
     for (let attempt = 0; attempt < 20; attempt++) {
       const rGroup  = otherGroups[Math.floor(Math.random() * otherGroups.length)];
@@ -144,8 +144,8 @@ import WordSelectorModal from '../../components/WordSelectorModal.astro';
     return null;
   }
 
-  function pickNoiseWords(count: number): QuizWord[] {
-    const pool: QuizWord[] = [];
+  function pickNoiseWords(count: number): VocabWord[] {
+    const pool: VocabWord[] = [];
     categoryGroups.forEach((group, i) => {
       if (i === activeGroupIdx) return;
       group.categories.forEach(groupCat => {
@@ -157,7 +157,7 @@ import WordSelectorModal from '../../components/WordSelectorModal.astro';
   }
 
   function startGame(): void {
-    const pool: QuizWord[] = [];
+    const pool: VocabWord[] = [];
     selectedCatNames.forEach(name => {
       const cat = categories.find(c => c.name === name);
       if (cat) pool.push(...cat.words);
