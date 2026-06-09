@@ -33,3 +33,4 @@ tools/data/.find-image/
 # result — approved clips, manifest, picks — is committed elsewhere.
 tools/data/sfx-candidates/
 tools/data/sfx-candidates.json
+CLAUDE.md
