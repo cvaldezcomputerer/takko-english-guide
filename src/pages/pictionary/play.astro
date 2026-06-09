@@ -62,8 +62,8 @@ import Layout from '../../layouts/Layout.astro';
       <div class="tool-row">
         <div class="color-swatches">
           <button class="swatch swatch--active" data-color="#000000" style="background:#000000" title="Black"></button>
-          <button class="swatch" data-color="#e03d2f" style="background:#e03d2f" title="Red"></button>
-          <button class="swatch" data-color="#2563eb" style="background:#2563eb" title="Blue"></button>
+          <button class="swatch" data-color="#e03d2f" style="background:var(--color-danger)" title="Red"></button>
+          <button class="swatch" data-color="#2563eb" style="background:var(--color-blue)" title="Blue"></button>
           <button class="swatch" data-color="#16a34a" style="background:#16a34a" title="Green"></button>
           <button class="swatch" data-color="#f59e0b" style="background:#f59e0b" title="Yellow"></button>
           <button class="swatch" data-color="#a855f7" style="background:#a855f7" title="Purple"></button>
@@ -603,7 +603,7 @@ import Layout from '../../layouts/Layout.astro';
   .ja {
     font-size: 1rem;
     font-weight: 400;
-    color: #aaa;
+    color: var(--color-border-strong);
   }
 
   .center-panel h2 {
@@ -629,7 +629,7 @@ import Layout from '../../layouts/Layout.astro';
   input[type="text"] {
     width: 100%;
     padding: 0.75rem 1rem;
-    border: 2px solid #ddd;
+    border: 2px solid var(--color-border);
     border-radius: 10px;
     font-size: 1.4rem;
     font-weight: 700;
@@ -643,7 +643,7 @@ import Layout from '../../layouts/Layout.astro';
   #name-input { letter-spacing: 0; font-size: 1.1rem; text-align: left; }
   input:focus { outline: none; border-color: var(--color-secondary); }
 
-  .error-msg { color: #e03d2f; font-size: 0.9rem; margin-top: 0.5rem; }
+  .error-msg { color: var(--color-danger); font-size: 0.9rem; margin-top: 0.5rem; }
 
   /* ── Lobby ───────────────────────────────────────────── */
   #screen-lobby {
@@ -666,7 +666,7 @@ import Layout from '../../layouts/Layout.astro';
 
   .center-panel h2 { color: var(--color-primary); font-size: 1.6rem; margin-bottom: 0.5rem; }
 
-  .lobby-count { color: #888; margin-bottom: 1rem; }
+  .lobby-count { color: var(--color-text-faint); margin-bottom: 1rem; }
   .lobby-list { list-style: none; padding: 0; margin: 0; }
   .lobby-item {
     padding: 0.4rem 0.75rem;
@@ -723,7 +723,7 @@ import Layout from '../../layouts/Layout.astro';
     text-align: center;
   }
 
-  .timer-display--urgent { color: #e03d2f; animation: pulse 0.5s infinite alternate; }
+  .timer-display--urgent { color: var(--color-danger); animation: pulse 0.5s infinite alternate; }
   @keyframes pulse { from { opacity: 1; } to { opacity: 0.5; } }
 
   /* Tool row */
@@ -753,7 +753,7 @@ import Layout from '../../layouts/Layout.astro';
     justify-content: center;
   }
 
-  .swatch--eraser { border: 2px solid #ccc; background: white !important; }
+  .swatch--eraser { border: 2px solid var(--color-border); background: white !important; }
   .swatch--active { border-color: var(--color-text); transform: scale(1.2); }
 
   .brush-sizes { display: flex; gap: 0.3rem; }
@@ -761,7 +761,7 @@ import Layout from '../../layouts/Layout.astro';
   .brush-btn {
     width: 36px;
     height: 36px;
-    border: 2px solid #ddd;
+    border: 2px solid var(--color-border);
     border-radius: var(--radius-sm);
     background: white;
     cursor: pointer;
@@ -791,7 +791,7 @@ import Layout from '../../layouts/Layout.astro';
     margin-left: auto;
     width: 36px;
     height: 36px;
-    border: 2px solid #e03d2f;
+    border: 2px solid var(--color-danger);
     border-radius: var(--radius-sm);
     background: white;
     font-size: 1.1rem;
@@ -806,7 +806,7 @@ import Layout from '../../layouts/Layout.astro';
 
   .input-hint {
     font-size: 0.8rem;
-    color: #888;
+    color: var(--color-text-faint);
     margin-top: 0.35rem;
     margin-bottom: 0;
   }
@@ -874,7 +874,7 @@ import Layout from '../../layouts/Layout.astro';
 
   .guess-row input {
     flex: 1;
-    border: 2px solid #ddd;
+    border: 2px solid var(--color-border);
     border-radius: var(--radius-sm);
     padding: 0.4rem 0.75rem;
     font-size: 1rem;
@@ -944,9 +944,9 @@ import Layout from '../../layouts/Layout.astro';
     flex: 1;
   }
 
-  .reveal-label { color: #666; margin-bottom: 0.25rem; }
+  .reveal-label { color: var(--color-text-muted); margin-bottom: 0.25rem; }
   .reveal-word { font-size: 2.5rem; font-weight: 900; color: var(--color-primary); margin-bottom: 0.75rem; }
-  .waiting-next { font-size: 0.9rem; color: #aaa; margin-bottom: 1rem; }
+  .waiting-next { font-size: 0.9rem; color: var(--color-border-strong); margin-bottom: 1rem; }
 
   .end-guess-row {
     display: flex;
@@ -959,7 +959,7 @@ import Layout from '../../layouts/Layout.astro';
   .end-guess-row input {
     flex: 1;
     min-width: 120px;
-    border: 2px solid #ddd;
+    border: 2px solid var(--color-border);
     border-radius: var(--radius-sm);
     padding: 0.4rem 0.75rem;
     font-size: 0.95rem;
@@ -998,7 +998,7 @@ import Layout from '../../layouts/Layout.astro';
 
   .guess-name { font-weight: 700; color: var(--color-primary); white-space: nowrap; }
   .guess-text { color: var(--color-text); }
-  .no-guesses { color: #aaa; font-size: 0.9rem; font-style: italic; }
+  .no-guesses { color: var(--color-border-strong); font-size: 0.9rem; font-style: italic; }
 
   /* ── Shared button ───────────────────────────────────── */
   .primary-btn {

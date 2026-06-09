@@ -537,7 +537,7 @@ Astro.response.headers.set('Cache-Control', `public, s-maxage=${ttl}, stale-whil
         text-decoration: none;
         font-weight: bold;
         transition: transform 0.2s;
-        box-shadow: 0 3px 0px #c05035;
+        box-shadow: 0 3px 0px var(--color-accent-dark);
     }
 
     .cta-button.cta-secondary {
@@ -640,7 +640,7 @@ Astro.response.headers.set('Cache-Control', `public, s-maxage=${ttl}, stale-whil
 
     .section-header p {
         font-size: 1rem;
-        color: #666;
+        color: var(--color-text-muted);
     }
 
     /* ── Cards ── */
@@ -689,13 +689,13 @@ Astro.response.headers.set('Cache-Control', `public, s-maxage=${ttl}, stale-whil
 
     .site-card p {
         font-size: 1rem;
-        color: #666;
+        color: var(--color-text-muted);
         margin: 0;
     }
 
     .soon-label {
         font-family: var(--font-hand);
-        color: #999 !important;
+        color: var(--color-text-faint) !important;
         font-size: 1rem;
     }
 
@@ -775,7 +775,7 @@ Astro.response.headers.set('Cache-Control', `public, s-maxage=${ttl}, stale-whil
 
     .wod-sep {
         font-size: 1.1rem;
-        color: #bbb;
+        color: var(--color-border);
         text-align: center;
     }
 
@@ -911,7 +911,7 @@ Astro.response.headers.set('Cache-Control', `public, s-maxage=${ttl}, stale-whil
     .weather-feels {
         font-size: 0.9rem;
         font-family: 'Crete Round', serif;
-        color: #888;
+        color: var(--color-text-faint);
     }
 
     /* ── Weather loading skeleton (pulse, no gradient) ── */
@@ -942,7 +942,7 @@ Astro.response.headers.set('Cache-Control', `public, s-maxage=${ttl}, stale-whil
     .weather-card.is-error .weather-desc {
         font-size: 0.9rem;
         font-weight: 400;
-        color: #888;
+        color: var(--color-text-faint);
     }
 
     .weather-card.is-error .weather-temp {

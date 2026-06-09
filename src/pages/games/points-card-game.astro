@@ -452,7 +452,7 @@ import GameLayout from "../../layouts/GameLayout.astro";
 
   /* Muted: solid red fill + white icon, readable from across a classroom. */
   .mute-btn[aria-pressed="true"] {
-    background: #c0392b;
+    background: var(--color-danger);
     border-color: #99281c;
     color: var(--color-white);
   }
@@ -805,6 +805,6 @@ import GameLayout from "../../layouts/GameLayout.astro";
 
   .event-list .event-del:hover {
     background: #f7e3dd;
-    color: #c0392b;
+    color: var(--color-danger);
   }
 </style>

@@ -300,7 +300,7 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
       justify-content: space-between;
       align-items: center;
       margin-bottom: 1.5rem;
-      border-bottom: 1px solid #eee;
+      border-bottom: 1px solid var(--color-border);
       padding-bottom: 0.5rem;
   }
 
@@ -315,7 +315,7 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
       font-size: 2rem;
       line-height: 1;
       cursor: pointer;
-      color: #666;
+      color: var(--color-text-muted);
   }
 
   .settings-group {
@@ -326,7 +326,7 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
       margin-top: 0;
       margin-bottom: 1rem;
       font-size: 1.1rem;
-      color: #555;
+      color: var(--color-text-muted);
   }
 
   /* Mode Switcher */
@@ -356,7 +356,7 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
       border-radius: 0.25rem;
       font-weight: 600;
       transition: all 0.2s ease;
-      color: #666;
+      color: var(--color-text-muted);
   }
 
   .mode-option input:checked + .mode-label {
@@ -391,7 +391,7 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
       background: #f0f0f0;
       border-radius: 0.5rem;
       font-weight: bold;
-      color: #666;
+      color: var(--color-text-muted);
       transition: all 0.2s;
       border: 2px solid transparent;
       text-transform: capitalize;
@@ -479,7 +479,7 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
       display: block;
       font-weight: 400;
       font-size: 0.8rem;
-      color: #888;
+      color: var(--color-text-faint);
       margin-top: 0.1rem;
   }
 
@@ -503,7 +503,7 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: #ccc;
+    background-color: var(--color-border);
     transition: .4s;
     border-radius: 34px;
   }
@@ -730,7 +730,7 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
       background: #f0f0f0;
       border-radius: 0.5rem;
       font-weight: 600;
-      color: #444;
+      color: var(--color-text);
       font-size: 0.9rem;
       border: 2px solid transparent;
       transition: all 0.2s;

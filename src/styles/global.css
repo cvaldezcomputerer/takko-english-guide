@@ -110,6 +110,19 @@ select {
   --color-beige: #f8f3e6;     /* games section background */
   --color-nav-bg: rgba(255, 255, 255, 0.9);
 
+  /* Grey ramp — text & borders. Neighbors snapped to these (see token backlog). */
+  --color-text-muted: #666;    /* secondary text (also #555) */
+  --color-text-faint: #999;    /* tertiary / hint text (also #888, #777) */
+  --color-border: #ddd;        /* default hairline border (also #ccc, #bbb, #eee) */
+  --color-border-strong: #aaa; /* stronger border / divider */
+
+  /* Status / utility colors */
+  --color-danger: #c0392b;     /* error red — .status-err (also #c0394b, #e03d2f) */
+  --color-blue: #2563eb;       /* tool blue (quizlet / pictionary) */
+  --color-blue-dark: #1d4ed8;  /* tool blue hover */
+  --color-blue-darker: #1e3a8a;/* tool blue darkest */
+  --color-accent-dark: #c05035;/* hard CTA "sticker" shadow — twin of --color-accent */
+
   /* Legacy aliases — keep nav/footer greens in sync with the brand */
   --color-dark-green: var(--color-primary);
   --color-light-green: #94b49f; /* nav link hover */

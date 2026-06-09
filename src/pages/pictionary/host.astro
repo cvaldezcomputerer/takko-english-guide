@@ -451,7 +451,7 @@ import Layout from '../../layouts/Layout.astro';
   select {
     width: 100%;
     padding: 0.7rem 1rem;
-    border: 2px solid #ddd;
+    border: 2px solid var(--color-border);
     border-radius: 10px;
     font-size: 1rem;
     font-family: inherit;
@@ -470,7 +470,7 @@ import Layout from '../../layouts/Layout.astro';
 
   .timer-btn {
     padding: 0.5rem 1rem;
-    border: 2px solid #ddd;
+    border: 2px solid var(--color-border);
     border-radius: var(--radius-pill);
     background: white;
     font-size: 0.95rem;
@@ -557,7 +557,7 @@ import Layout from '../../layouts/Layout.astro';
   .room-select {
     width: 100%;
     padding: 0.4rem 0.5rem;
-    border: 2px solid #ddd;
+    border: 2px solid var(--color-border);
     border-radius: var(--radius-sm);
     font-size: 0.85rem;
     font-family: inherit;
@@ -572,7 +572,7 @@ import Layout from '../../layouts/Layout.astro';
 
   .room-timer-btn {
     padding: 0.25rem 0.5rem;
-    border: 2px solid #ddd;
+    border: 2px solid var(--color-border);
     border-radius: var(--radius-pill);
     background: white;
     font-size: 0.75rem;
@@ -597,8 +597,8 @@ import Layout from '../../layouts/Layout.astro';
   .state-panel--hidden { display: none !important; }
 
   /* Lobby */
-  .waiting-msg { font-size: 1.2rem; color: #777; margin-bottom: 1.5rem; text-align: center; margin-top: 3rem; }
-  .start-hint { font-size: 0.85rem; color: #aaa; text-align: center; margin-top: 0.5rem; }
+  .waiting-msg { font-size: 1.2rem; color: var(--color-text-faint); margin-bottom: 1.5rem; text-align: center; margin-top: 3rem; }
+  .start-hint { font-size: 0.85rem; color: var(--color-border-strong); text-align: center; margin-top: 0.5rem; }
 
   /* Drawing */
   .round-header {
@@ -608,7 +608,7 @@ import Layout from '../../layouts/Layout.astro';
     margin-bottom: 0.75rem;
   }
 
-  .drawer-info { font-size: 1.1rem; color: #444; }
+  .drawer-info { font-size: 1.1rem; color: var(--color-text); }
 
   .timer-display {
     font-size: 2.2rem;
@@ -618,7 +618,7 @@ import Layout from '../../layouts/Layout.astro';
     text-align: center;
   }
 
-  .timer-display--urgent { color: #e03d2f; animation: pulse 0.5s infinite alternate; }
+  .timer-display--urgent { color: var(--color-danger); animation: pulse 0.5s infinite alternate; }
   @keyframes pulse { from { opacity: 1; } to { opacity: 0.5; } }
 
   .word-row {
@@ -675,7 +675,7 @@ import Layout from '../../layouts/Layout.astro';
   }
 
   .round-end-left h2 { font-size: 2rem; color: var(--color-primary); }
-  .reveal-label { color: #666; }
+  .reveal-label { color: var(--color-text-muted); }
   .reveal-word { font-size: 3rem; font-weight: 900; color: var(--color-primary); }
 
   .round-end-right {
@@ -702,7 +702,7 @@ import Layout from '../../layouts/Layout.astro';
 
   .guess-name { font-weight: 700; color: var(--color-primary); white-space: nowrap; }
   .guess-text { color: var(--color-text); }
-  .no-guesses { color: #aaa; font-size: 0.85rem; font-style: italic; }
+  .no-guesses { color: var(--color-border-strong); font-size: 0.85rem; font-style: italic; }
 
   /* Buttons */
   .primary-btn {
@@ -730,7 +730,7 @@ import Layout from '../../layouts/Layout.astro';
     gap: 1rem;
   }
 
-  .countdown-label { font-size: 1.2rem; color: #555; }
+  .countdown-label { font-size: 1.2rem; color: var(--color-text-muted); }
   .countdown-number {
     font-size: 7rem;
     font-weight: 900;
@@ -741,8 +741,8 @@ import Layout from '../../layouts/Layout.astro';
   .danger-btn {
     padding: 0.75rem 1.5rem;
     background: white;
-    color: #e03d2f;
-    border: 2px solid #e03d2f;
+    color: var(--color-danger);
+    border: 2px solid var(--color-danger);
     border-radius: var(--radius-pill);
     font-size: 1rem;
     font-weight: 700;

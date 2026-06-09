@@ -455,14 +455,14 @@ const splitAffricates: SoundCell[] = [
 
   .header-sub {
     font-size: 1.1rem;
-    color: #999;
+    color: var(--color-text-faint);
     font-family: var(--font-hand);
     margin-bottom: 1.25rem;
   }
 
   .header-intro {
     font-size: 1rem;
-    color: #555;
+    color: var(--color-text-muted);
     line-height: 1.65;
   }
 
@@ -485,7 +485,7 @@ const splitAffricates: SoundCell[] = [
   .info-box-title {
     font-size: 1rem;
     font-weight: 600;
-    color: #888;
+    color: var(--color-text-faint);
     text-transform: uppercase;
     letter-spacing: 0.07em;
     margin-bottom: 0.5rem;
@@ -494,7 +494,7 @@ const splitAffricates: SoundCell[] = [
   .info-box-sub {
     font-family: var(--font-hand);
     font-size: 0.9rem;
-    color: #777;
+    color: var(--color-text-faint);
     margin-bottom: 1rem;
     line-height: 1.5;
   }
@@ -510,16 +510,16 @@ const splitAffricates: SoundCell[] = [
     align-items: center;
     gap: 0.25rem;
     background: white;
-    border: 1.5px solid #ddd;
+    border: 1.5px solid var(--color-border);
     border-radius: 6px;
     padding: 0.25rem 0.6rem;
     font-size: 0.9rem;
   }
 
   .nt-phonetic { font-weight: 700; color: var(--color-text); }
-  .nt-eq { color: #bbb; font-size: 0.8rem; }
+  .nt-eq { color: var(--color-border); font-size: 0.8rem; }
   .nt-hepburn { color: var(--color-primary); }
-  .nt-kana { color: #888; font-size: 0.85rem; }
+  .nt-kana { color: var(--color-text-faint); font-size: 0.85rem; }
 
   /* Symbol list */
   .symbol-list {
@@ -553,21 +553,21 @@ const splitAffricates: SoundCell[] = [
   .sym-name {
     font-size: 0.8rem;
     font-weight: 600;
-    color: #999;
+    color: var(--color-text-faint);
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
 
   .sym-sound {
     font-size: 0.9rem;
-    color: #555;
+    color: var(--color-text-muted);
     line-height: 1.4;
   }
 
   /* ── Standard grid (collapsed) ── */
   .standard-wrapper {
     background: #f7f7f4;
-    border-bottom: 2px solid #ddd;
+    border-bottom: 2px solid var(--color-border);
   }
 
   .standard-details { width: 100%; }
@@ -580,7 +580,7 @@ const splitAffricates: SoundCell[] = [
     cursor: pointer;
     list-style: none;
     user-select: none;
-    color: #999;
+    color: var(--color-text-faint);
     font-size: 0.9rem;
     font-family: var(--font-hand);
     gap: 0.75rem;
@@ -596,7 +596,7 @@ const splitAffricates: SoundCell[] = [
     height: 0;
     border-left: 5px solid transparent;
     border-right: 5px solid transparent;
-    border-top: 6px solid #bbb;
+    border-top: 6px solid var(--color-border);
     flex-shrink: 0;
     transition: transform 0.2s;
   }
@@ -606,7 +606,7 @@ const splitAffricates: SoundCell[] = [
   }
 
   .standard-details[open] .standard-summary {
-    color: #777;
+    color: var(--color-text-faint);
   }
 
   .standard-grid-wrap {
@@ -616,7 +616,7 @@ const splitAffricates: SoundCell[] = [
   .standard-note {
     font-family: var(--font-hand);
     font-size: 0.85rem;
-    color: #999;
+    color: var(--color-text-faint);
     margin-bottom: 1rem;
   }
 
@@ -636,8 +636,8 @@ const splitAffricates: SoundCell[] = [
     padding: 0.4rem 0.5rem;
     font-size: 0.85rem;
     font-weight: 600;
-    color: #999;
-    border-bottom: 2px solid #ccc;
+    color: var(--color-text-faint);
+    border-bottom: 2px solid var(--color-border);
     text-align: center;
     background: transparent;
   }
@@ -648,7 +648,7 @@ const splitAffricates: SoundCell[] = [
     padding: 0.3rem 0.75rem 0.3rem 0;
     font-size: 0.8rem;
     font-weight: 600;
-    color: #aaa;
+    color: var(--color-border-strong);
     white-space: nowrap;
     text-align: right;
     vertical-align: middle;
@@ -665,9 +665,9 @@ const splitAffricates: SoundCell[] = [
   .sc.empty { background: #f2f2ef; }
   .sc.merged { background: #fef4ee; }
 
-  .ck { display: block; font-size: 1.3rem; line-height: 1.1; color: #555; }
-  .cp { display: block; font-size: 0.7rem; color: #aaa; font-weight: 600; margin-top: 0.1rem; }
-  .ch { display: block; font-size: 0.65rem; color: #ccc; }
+  .ck { display: block; font-size: 1.3rem; line-height: 1.1; color: var(--color-text-muted); }
+  .cp { display: block; font-size: 0.7rem; color: var(--color-border-strong); font-weight: 600; margin-top: 0.1rem; }
+  .ch { display: block; font-size: 0.65rem; color: var(--color-border); }
 
   /* ── Main divider ── */
   .main-divider {
@@ -706,7 +706,7 @@ const splitAffricates: SoundCell[] = [
 
   .feature-section {
     padding: 2.5rem 0;
-    border-bottom: 2px solid #eee;
+    border-bottom: 2px solid var(--color-border);
   }
 
   .feature-section:last-child { border-bottom: none; }
@@ -737,13 +737,13 @@ const splitAffricates: SoundCell[] = [
   .feature-desc {
     font-family: var(--font-hand);
     font-size: 0.95rem;
-    color: #666;
+    color: var(--color-text-muted);
     line-height: 1.6;
     margin: 0;
     max-width: 620px;
   }
 
-  .feature-desc em { font-style: normal; font-weight: 600; color: #444; }
+  .feature-desc em { font-style: normal; font-weight: 600; color: var(--color-text); }
 
   /* Sound chips */
   .sound-chips {
@@ -772,7 +772,7 @@ const splitAffricates: SoundCell[] = [
 
   .chip-kana-plain {
     font-size: 1.1rem;
-    color: #bbb;
+    color: var(--color-border);
   }
 
   .chip-phonetic {
@@ -784,7 +784,7 @@ const splitAffricates: SoundCell[] = [
 
   .chip-hepburn {
     font-size: 0.68rem;
-    color: #aaa;
+    color: var(--color-border-strong);
   }
 
   /* ── Responsive ── */
