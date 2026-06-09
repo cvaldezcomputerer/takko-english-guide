@@ -37,21 +37,6 @@ const slots = Array.from({ length: 11 }, (_, i) => {
 
   <div class="container">
     <main class="content">
-      <div class="intro">
-        <h2>
-          <T>
-            <span slot="en">Choose an Activity</span>
-            <span slot="ja">アクティビティを選ぶ</span>
-          </T>
-        </h2>
-        <p>
-          <T>
-            <span slot="en">Pick a game or classroom tool below.</span>
-            <span slot="ja">下からゲームまたはクラス用ツールを選びましょう。</span>
-          </T>
-        </p>
-      </div>
-
       <section class="activity-section">
         <div class="section-heading">
           <h3>
@@ -66,6 +51,13 @@ const slots = Array.from({ length: 11 }, (_, i) => {
               <span slot="ja">授業で遊べるインタラクティブなアクティビティです。</span>
             </T>
           </p>
+          <a class="tools-jump" href="#tools">
+            <T>
+              <span slot="en">Scroll down for tools</span>
+              <span slot="ja">ツールは下にあります</span>
+            </T>
+            <i class="fas fa-arrow-down" aria-hidden="true"></i>
+          </a>
         </div>
 
         <div class="games-grid games-grid--games">
@@ -334,7 +326,7 @@ const slots = Array.from({ length: 11 }, (_, i) => {
         </div>
       </section>
 
-      <section class="activity-section activity-section--tools">
+      <section id="tools" class="activity-section activity-section--tools">
         <div class="section-heading">
           <h3>
             <T>
@@ -601,20 +593,27 @@ const slots = Array.from({ length: 11 }, (_, i) => {
     margin-top: 2rem;
   }
 
-  .intro {
-    text-align: center;
-    margin-bottom: 3rem;
+  .tools-jump {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 0.6rem;
+    color: var(--color-accent);
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-decoration: none;
   }
 
-  .intro h2 {
-    color: var(--color-primary);
-    font-size: 2.5rem;
-    margin-bottom: 0.5rem;
+  .tools-jump:hover {
+    text-decoration: underline;
   }
 
-  .intro p {
-    color: var(--color-text-muted);
-    font-size: 1.1rem;
+  .tools-jump i {
+    transition: transform var(--transition-fast) ease;
+  }
+
+  .tools-jump:hover i {
+    transform: translateY(2px);
   }
 
   .activity-section + .activity-section {
@@ -813,19 +812,6 @@ const slots = Array.from({ length: 11 }, (_, i) => {
     .content {
       padding: 1.5rem;
       margin-top: 1rem;
-    }
-
-    .intro {
-      margin-bottom: 1.25rem;
-    }
-
-    .intro h2 {
-      font-size: 2rem;
-      margin-bottom: 0.35rem;
-    }
-
-    .intro p {
-      font-size: 1rem;
     }
 
     .section-heading {
