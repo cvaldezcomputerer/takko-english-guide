@@ -1,5 +1,5 @@
 ---
-// MapGame.astro - School Map Navigation Game
+// SchoolMapGame.astro - School Map Navigation Game
 import lilMeow from '../../assets/map-game/game/lilMeow.png';
 import boomGif from '../../assets/map-game/game/boom.gif';
 
@@ -187,7 +187,7 @@ for (const path in roomImagesGlob) {
     width: 72px;
     height: 72px;
     padding: 0;
-    border-radius: 12px;
+    border-radius: var(--radius-md);
     border: 3px solid #0f172a;
     background: white;
     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
@@ -415,7 +415,7 @@ for (const path in roomImagesGlob) {
 
   .grid :global(.cell.location) {
     z-index: 5;
-    border-radius: 8px;
+    border-radius: var(--radius-sm);
     border: 2px solid rgba(255, 255, 255, 0.6) !important;
     box-shadow: var(--wall-top-shadow), var(--wall-bottom-shadow), var(--wall-left-shadow), var(--wall-right-shadow), 0 2px 4px rgba(0,0,0,0.2);
     overflow: visible;
@@ -459,7 +459,7 @@ for (const path in roomImagesGlob) {
     position: absolute;
     width: 86%;
     height: 86%;
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     background: #ffffff;
     border: 2px solid rgba(15, 23, 42, 0.24);
     box-shadow: 0 1px 6px rgba(0, 0, 0, 0.18);
@@ -472,7 +472,7 @@ for (const path in roomImagesGlob) {
     position: absolute;
     width: 82%;
     height: 82%;
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     border: 3px solid #24b74b;
     box-shadow: 0 0 0 3px rgba(36, 183, 75, 0.35), 0 0 18px rgba(36, 183, 75, 0.6);
     animation: first-visit-pulse 1.2s ease-in-out infinite;
@@ -505,7 +505,7 @@ for (const path in roomImagesGlob) {
     color: #000;
     background: #ffd93d; /* Yellow from palette */
     padding: 2px 4px;
-    border-radius: 4px;
+    border-radius: var(--radius-xs);
     pointer-events: none;
     z-index: 10;
     position: absolute;
@@ -546,7 +546,7 @@ for (const path in roomImagesGlob) {
     width: 56px;
     height: 56px;
     padding: 0;
-    border-radius: 12px;
+    border-radius: var(--radius-md);
     border: 3px solid #0f172a;
     background: #fff2cc;
     color: #0f172a;
@@ -585,7 +585,7 @@ for (const path in roomImagesGlob) {
 
   .avatar-modal__card {
     width: min(430px, 96vw);
-    border-radius: 16px;
+    border-radius: var(--radius-lg);
     border: 3px solid #1e3a8a;
     background: #f8fbff;
     box-shadow: 0 12px 36px rgba(0, 0, 0, 0.35);
@@ -604,7 +604,7 @@ for (const path in roomImagesGlob) {
   }
 
   .avatar-modal__canvas-wrap {
-    border-radius: 12px;
+    border-radius: var(--radius-md);
     border: 3px solid #1e3a8a;
     background: #ffffff;
     overflow: hidden;

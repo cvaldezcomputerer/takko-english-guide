@@ -121,7 +121,7 @@ import GameLayout from '../../layouts/GameLayout.astro';
 </GameLayout>
 
 <script>
-  import { letterStrokes } from '../../letter-strokes';
+  import { letterStrokes } from '../../data/letter-strokes';
 
   // ── Kana → romaji engine ───────────────────────────────────────────────
   // A small Hepburn map. Katakana is folded to hiragana first, so one table
@@ -460,7 +460,7 @@ import GameLayout from '../../layouts/GameLayout.astro';
     font-size: clamp(1.6rem, 6vw, 2.4rem);
     padding: 0.5rem 0.9rem;
     border: 3px solid var(--color-secondary);
-    border-radius: 16px;
+    border-radius: var(--radius-lg);
     background: var(--color-white);
     color: var(--color-text);
     outline: none;
@@ -527,7 +527,7 @@ import GameLayout from '../../layouts/GameLayout.astro';
     font-size: clamp(1.05rem, 3vw, 1.4rem);
     padding: 0.4rem 1.1rem;
     border: 2px solid var(--color-secondary);
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     background: var(--color-white);
     color: var(--color-text);
     cursor: pointer;
@@ -560,7 +560,7 @@ import GameLayout from '../../layouts/GameLayout.astro';
     font-size: clamp(1.05rem, 3vw, 1.3rem);
     padding: 0.45rem 1.2rem;
     border: 2px solid var(--color-primary);
-    border-radius: 12px;
+    border-radius: var(--radius-md);
     background: var(--color-primary);
     color: var(--color-white);
     cursor: pointer;
@@ -642,7 +642,7 @@ import GameLayout from '../../layouts/GameLayout.astro';
     margin: clamp(1.5rem, 5vw, 2.5rem) 0 0;
     background: var(--color-white);
     border: 2px solid #efe7d6;
-    border-radius: 16px;
+    border-radius: var(--radius-lg);
     padding: clamp(0.9rem, 3vw, 1.4rem) clamp(1.1rem, 4vw, 1.7rem);
   }
   .nw-tips-title {

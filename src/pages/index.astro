@@ -6,6 +6,7 @@ import Navbar from '../components/Navbar.astro';
 import AnimatedLogo from '../components/AnimatedLogo.astro';
 import ShrineIcon from '../components/ShrineIcon.astro';
 import T from '../components/T.astro';
+import { GARLIC_SILO_PATH } from '../data/garlic';
 
 const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT2r7rHiUTy7tfJNkVnajXQuXoELP_27frVBYS-S0EsXzQBI71VQcWbGmb9n8-J023R_Ldso-XJg5JY/pub?output=csv';
 
@@ -134,10 +135,6 @@ const jstMidnight = new Date(nowMs + 9 * 3_600_000);
 jstMidnight.setUTCHours(24, 0, 0, 0);
 const ttl = Math.floor((jstMidnight.getTime() - 9 * 3_600_000 - nowMs) / 1000);
 Astro.response.headers.set('Cache-Control', `public, s-maxage=${ttl}, stale-while-revalidate=60`);
-
-// Closed outer silhouette: body-bottom → reversed right-ear → reversed center/sprout → reversed left-ear → Z
-// Each cubic bezier reversed by swapping its two control points.
-const GARLIC_SILO_PATH = "M199 468C136.885 532.312 124 583 143 680C191.5 772 243 783 346 792C399.466 819.505 433 839 502 839C579 836 598.935 822.763 652.5 792C784.385 779.941 838 749 863 648.5C866 571.5 847.902 515.187 795.5 461.5C824.561 374.668 826 252.5 814 236.5C788 231 706.5 271.5 620 348C597.464 341.182 586.176 332.053 567 312C543.23 277.333 522.5 204.5 531 147L465.5 191C465.5 227.5 455.5 265.5 439.5 301C421.494 325.085 408.38 336.495 378 352C320.888 290.902 206 224.5 187 231C171 252.5 174.118 374.842 199 468Z";
 ---
 
 <Layout
@@ -442,8 +439,8 @@ const GARLIC_SILO_PATH = "M199 468C136.885 532.312 124 583 143 680C191.5 772 243
     .town-guide-body {
         background-color: #fffbf0;
         /* 4×4 composite tile: 15 earless garlics + 1 with-ears at slot (2,1).
-           Symbol 'e' = earless-with-stem, 'w' = with-ears (original outline). */
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 184'%3E%3Cdefs%3E%3Csymbol id='e' viewBox='120 140 780 750'%3E%3Cpath fill='none' stroke='%234a7c59' stroke-opacity='0.2' stroke-width='17' stroke-linejoin='round' stroke-linecap='round' d='M199 468C136.885 532.312 124 583 143 680C191.5 772 243 783 346 792C399.466 819.505 433 839 502 839C579 836 598.935 822.763 652.5 792C784.385 779.941 838 749 863 648.5C866 571.5 847.902 515.187 795.5 461.5C731.75 408.424 693.486 383.276 620 348C597.464 341.182 586.176 332.053 567 312C543.23 277.333 522.5 204.5 531 147L465.5 191C465.5 227.5 455.5 265.5 439.5 301C421.494 325.085 408.38 336.495 378 352C296.829 383.891 257.592 409.289 199 468Z'/%3E%3C/symbol%3E%3Csymbol id='w' viewBox='120 140 780 750'%3E%3Cpath fill='none' stroke='%234a7c59' stroke-opacity='0.2' stroke-width='17' stroke-linejoin='round' stroke-linecap='round' d='M199 468C257.592 409.289 296.829 383.891 378 352M199 468C174.118 374.842 171 252.5 187 231C206 224.5 320.888 290.902 378 352M199 468C136.885 532.312 124 583 143 680C191.5 772 243 783 346 792C399.466 819.505 433 839 502 839C579 836 598.935 822.763 652.5 792C784.385 779.941 838 749 863 648.5C866 571.5 847.902 515.187 795.5 461.5M378 352C408.38 336.495 421.494 325.085 439.5 301C455.5 265.5 465.5 227.5 465.5 191L531 147C522.5 204.5 543.23 277.333 567 312C586.176 332.053 597.464 341.182 620 348M620 348C706.5 271.5 788 231 814 236.5C826 252.5 824.561 374.668 795.5 461.5M620 348C693.486 383.276 731.75 408.424 795.5 461.5'/%3E%3C/symbol%3E%3C/defs%3E%3Cuse href='%23e' x='0' y='0' width='48' height='46'/%3E%3Cuse href='%23e' x='48' y='0' width='48' height='46'/%3E%3Cuse href='%23e' x='96' y='0' width='48' height='46'/%3E%3Cuse href='%23e' x='144' y='0' width='48' height='46'/%3E%3Cuse href='%23e' x='0' y='46' width='48' height='46'/%3E%3Cuse href='%23e' x='48' y='46' width='48' height='46'/%3E%3Cuse href='%23w' x='96' y='46' width='48' height='46'/%3E%3Cuse href='%23e' x='144' y='46' width='48' height='46'/%3E%3Cuse href='%23e' x='0' y='92' width='48' height='46'/%3E%3Cuse href='%23e' x='48' y='92' width='48' height='46'/%3E%3Cuse href='%23e' x='96' y='92' width='48' height='46'/%3E%3Cuse href='%23e' x='144' y='92' width='48' height='46'/%3E%3Cuse href='%23e' x='0' y='138' width='48' height='46'/%3E%3Cuse href='%23e' x='48' y='138' width='48' height='46'/%3E%3Cuse href='%23e' x='96' y='138' width='48' height='46'/%3E%3Cuse href='%23e' x='144' y='138' width='48' height='46'/%3E%3C/svg%3E");
+           Lives in /public/images/garlic-tile.svg (shared with contact.astro). */
+        background-image: url("/images/garlic-tile.svg");
         background-size: 192px 184px;
         background-repeat: repeat;
         animation: garlic-drift 180s linear infinite;
@@ -536,7 +533,7 @@ const GARLIC_SILO_PATH = "M199 468C136.885 532.312 124 583 143 680C191.5 772 243
         background: var(--color-accent);
         color: white;
         padding: 0.75rem 1.75rem;
-        border-radius: 50px;
+        border-radius: var(--radius-button);
         text-decoration: none;
         font-weight: bold;
         transition: transform 0.2s;
@@ -577,7 +574,7 @@ const GARLIC_SILO_PATH = "M199 468C136.885 532.312 124 583 143 680C191.5 772 243
 
     .page-main {
         background: var(--color-bg);
-        border-radius: 24px;
+        border-radius: var(--radius-xl);
         padding: 3rem 3rem 4rem 2rem;
         box-shadow: 0 4px 24px rgba(0,0,0,0.06);
     }
@@ -587,7 +584,7 @@ const GARLIC_SILO_PATH = "M199 468C136.885 532.312 124 583 143 680C191.5 772 243
         flex-direction: column;
         gap: 1.5rem;
         background: #edf2ee;
-        border-radius: 24px;
+        border-radius: var(--radius-xl);
         padding: 2rem 1.25rem;
         box-shadow: 0 4px 24px rgba(0,0,0,0.06);
     }
@@ -656,7 +653,7 @@ const GARLIC_SILO_PATH = "M199 468C136.885 532.312 124 583 143 680C191.5 772 243
     .site-card {
         background: white;
         border: 3px solid var(--color-primary);
-        border-radius: 12px;
+        border-radius: var(--radius-md);
         padding: 2rem;
         text-decoration: none;
         color: inherit;
@@ -718,7 +715,7 @@ const GARLIC_SILO_PATH = "M199 468C136.885 532.312 124 583 143 680C191.5 772 243
     .wod-card {
         display: block;
         width: 100%;
-        border-radius: 8px;
+        border-radius: var(--radius-sm);
         overflow: hidden;
         border: 3px solid var(--color-secondary);
         box-shadow: 0 4px 20px rgba(0,0,0,0.1);
@@ -771,7 +768,7 @@ const GARLIC_SILO_PATH = "M199 468C136.885 532.312 124 583 143 680C191.5 772 243
         background: #fde8e2;
         border: 1px solid #f0b8a8;
         padding: 0.2rem 0.75rem;
-        border-radius: 4px;
+        border-radius: var(--radius-xs);
         text-align: center;
         overflow-wrap: break-word;
     }
@@ -790,7 +787,7 @@ const GARLIC_SILO_PATH = "M199 468C136.885 532.312 124 583 143 680C191.5 772 243
         background: #e4f0e8;
         border: 1px solid #a8cdb5;
         padding: 0.2rem 0.75rem;
-        border-radius: 4px;
+        border-radius: var(--radius-xs);
         text-align: center;
         overflow-wrap: break-word;
     }
@@ -844,7 +841,7 @@ const GARLIC_SILO_PATH = "M199 468C136.885 532.312 124 583 143 680C191.5 772 243
     .weather-card {
         display: block;
         width: 100%;
-        border-radius: 8px;
+        border-radius: var(--radius-sm);
         overflow: hidden;
         border: 3px solid var(--color-secondary);
         box-shadow: 0 4px 20px rgba(0,0,0,0.1);
@@ -937,7 +934,7 @@ const GARLIC_SILO_PATH = "M199 468C136.885 532.312 124 583 143 680C191.5 772 243
         animation: wx-pulse 1.2s ease-in-out infinite;
     }
 
-    .weather-card.is-loading .weather-icon  { width: 52px; border-radius: 50%; }
+    .weather-card.is-loading .weather-icon  { width: 52px; border-radius: var(--radius-round); }
     .weather-card.is-loading .weather-desc  { width: 70%;  height: 1.1rem; }
     .weather-card.is-loading .weather-temp  { width: 90px; height: 2.2rem; }
     .weather-card.is-loading .weather-feels { width: 60%;  height: 0.9rem; }
@@ -956,7 +953,7 @@ const GARLIC_SILO_PATH = "M199 468C136.885 532.312 124 583 143 680C191.5 772 243
     .date-card {
         display: block;
         width: 100%;
-        border-radius: 8px;
+        border-radius: var(--radius-sm);
         overflow: hidden;
         border: 3px solid var(--color-secondary);
         box-shadow: 0 4px 20px rgba(0,0,0,0.1);

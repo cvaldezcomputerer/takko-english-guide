@@ -100,7 +100,7 @@ import WordSelectorModal from '../../components/WordSelectorModal.astro';
   import type { VocabWord } from '../../data/vocab/words';
   import { categories } from '../../data/vocab/words';
   import { categoryGroups } from '../../data/vocab/groups';
-  import { buildCategoryGrid, openModal, closeModal, initModalListeners, getSelectedWords } from '../../scripts/wordSelector';
+  import { buildCategoryGrid, openModal, closeModal, initModalListeners, getSelectedWords } from '../../lib/wordSelector';
 
   interface MissedEntry { en: string; yourAnswer: string; correct: string; }
 
@@ -369,7 +369,7 @@ import WordSelectorModal from '../../components/WordSelectorModal.astro';
     width: 140px;
     height: 140px;
     margin: 0 auto 1rem;
-    border-radius: 50%;
+    border-radius: var(--radius-round);
     overflow: hidden;
     border: 4px solid #f4a0aa;
     box-shadow: 0 4px 16px rgba(192, 57, 75, 0.15);
@@ -432,7 +432,7 @@ import WordSelectorModal from '../../components/WordSelectorModal.astro';
     flex: 1;
     background: white;
     border: 2px solid #ddd;
-    border-radius: 50px;
+    border-radius: var(--radius-pill);
     padding: 0.55rem 0.5rem;
     font-size: 0.85rem;
     font-family: inherit;
@@ -482,7 +482,7 @@ import WordSelectorModal from '../../components/WordSelectorModal.astro';
   .back-btn {
     background: none;
     border: 2px solid #ddd;
-    border-radius: 8px;
+    border-radius: var(--radius-sm);
     padding: 0.4rem 0.8rem;
     cursor: pointer;
     font-family: inherit;
@@ -503,14 +503,14 @@ import WordSelectorModal from '../../components/WordSelectorModal.astro';
   .progress-bar {
     height: 8px;
     background: #f0d0d4;
-    border-radius: 4px;
+    border-radius: var(--radius-xs);
     overflow: hidden;
   }
 
   .progress-fill {
     height: 100%;
     background: #c0394b;
-    border-radius: 4px;
+    border-radius: var(--radius-xs);
     transition: width 0.3s;
   }
 
@@ -533,7 +533,7 @@ import WordSelectorModal from '../../components/WordSelectorModal.astro';
   .question-card {
     background: white;
     border: 2px solid #f4a0aa;
-    border-radius: 16px;
+    border-radius: var(--radius-lg);
     padding: 2.5rem 2rem;
     text-align: center;
   }
@@ -575,7 +575,7 @@ import WordSelectorModal from '../../components/WordSelectorModal.astro';
     background: #c0394b;
     color: white;
     border: none;
-    border-radius: 50px;
+    border-radius: var(--radius-pill);
     padding: 0.8rem 0;
     width: 220px;
     font-size: 1rem;
@@ -597,7 +597,7 @@ import WordSelectorModal from '../../components/WordSelectorModal.astro';
   .choice-btn {
     background: white;
     border: 2px solid #ddd;
-    border-radius: 12px;
+    border-radius: var(--radius-md);
     padding: 0.9rem 0.75rem;
     font-size: 1rem;
     font-family: inherit;
@@ -616,7 +616,7 @@ import WordSelectorModal from '../../components/WordSelectorModal.astro';
   .feedback-card {
     background: white;
     border: 2px solid #eee;
-    border-radius: 16px;
+    border-radius: var(--radius-lg);
     padding: 2rem;
     text-align: center;
     margin-top: 1.5rem;
@@ -656,7 +656,7 @@ import WordSelectorModal from '../../components/WordSelectorModal.astro';
     background: #333;
     color: white;
     border: none;
-    border-radius: 50px;
+    border-radius: var(--radius-pill);
     padding: 0.8rem 0;
     width: 220px;
     font-size: 1rem;
@@ -683,7 +683,7 @@ import WordSelectorModal from '../../components/WordSelectorModal.astro';
   .missed-section {
     background: white;
     border: 2px solid #f4a0aa;
-    border-radius: 16px;
+    border-radius: var(--radius-lg);
     padding: 1.5rem;
     margin-top: 2rem;
   }
@@ -729,7 +729,7 @@ import WordSelectorModal from '../../components/WordSelectorModal.astro';
     background: #c0394b;
     color: white;
     border: none;
-    border-radius: 50px;
+    border-radius: var(--radius-pill);
     padding: 0.8rem 0;
     width: 220px;
     font-size: 1rem;
@@ -744,7 +744,7 @@ import WordSelectorModal from '../../components/WordSelectorModal.astro';
     background: white;
     color: #c0394b;
     border: 2px solid #c0394b;
-    border-radius: 50px;
+    border-radius: var(--radius-pill);
     padding: 0.8rem 0;
     width: 220px;
     font-size: 1rem;

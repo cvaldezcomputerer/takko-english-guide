@@ -1,15 +1,15 @@
 ---
-import badcat1  from "../assets/DirectionsReactionGame/bad-cat-1.png";
-import badcat10 from "../assets/DirectionsReactionGame/bad-cat-10.png";
-import badcat11 from "../assets/DirectionsReactionGame/bad-cat-11.png";
-import badcat2  from "../assets/DirectionsReactionGame/bad-cat-2.jpg";
-import badcat3  from "../assets/DirectionsReactionGame/bad-cat-3.jpg";
-import goodCat1  from "../assets/DirectionsReactionGame/good-cat-1.png";
-import goodCat10 from "../assets/DirectionsReactionGame/good-cat-10.png";
-import goodCat12 from "../assets/DirectionsReactionGame/good-cat-12.png";
-import goodCat2  from "../assets/DirectionsReactionGame/good-cat-2.png";
-import goodCat3  from "../assets/DirectionsReactionGame/good-cat-3.png";
-import goodCat4  from "../assets/DirectionsReactionGame/good-cat-4.png";
+import badcat1  from "../../assets/DirectionsReactionGame/bad-cat-1.png";
+import badcat10 from "../../assets/DirectionsReactionGame/bad-cat-10.png";
+import badcat11 from "../../assets/DirectionsReactionGame/bad-cat-11.png";
+import badcat2  from "../../assets/DirectionsReactionGame/bad-cat-2.jpg";
+import badcat3  from "../../assets/DirectionsReactionGame/bad-cat-3.jpg";
+import goodCat1  from "../../assets/DirectionsReactionGame/good-cat-1.png";
+import goodCat10 from "../../assets/DirectionsReactionGame/good-cat-10.png";
+import goodCat12 from "../../assets/DirectionsReactionGame/good-cat-12.png";
+import goodCat2  from "../../assets/DirectionsReactionGame/good-cat-2.png";
+import goodCat3  from "../../assets/DirectionsReactionGame/good-cat-3.png";
+import goodCat4  from "../../assets/DirectionsReactionGame/good-cat-4.png";
 
 const GOOD_IMGS = [goodCat1.src, goodCat2.src, goodCat3.src, goodCat4.src, goodCat10.src, goodCat12.src];
 const BAD_IMGS  = [badcat1.src,  badcat2.src,  badcat3.src,  badcat10.src, badcat11.src];
@@ -119,7 +119,7 @@ const BAD_IMGS  = [badcat1.src,  badcat2.src,  badcat3.src,  badcat10.src, badca
     width: min(1032px, 96vw);
     margin: 2rem auto;
     padding: 1rem;
-    border-radius: 24px;
+    border-radius: var(--radius-xl);
     background: var(--bg-1);
     box-shadow: 0 18px 40px rgba(0, 0, 0, 0.5);
     font-family: "Trebuchet MS", "Segoe UI", sans-serif;
@@ -267,7 +267,7 @@ const BAD_IMGS  = [badcat1.src,  badcat2.src,  badcat3.src,  badcat10.src, badca
 
   .theme-btn {
     border: 2px solid rgba(255,255,255,0.18);
-    border-radius: 8px;
+    border-radius: var(--radius-sm);
     background: transparent;
     color: var(--muted);
     font-size: 0.85rem;
@@ -297,7 +297,7 @@ const BAD_IMGS  = [badcat1.src,  badcat2.src,  badcat3.src,  badcat10.src, badca
 
   .primary-btn {
     border: none;
-    border-radius: 12px;
+    border-radius: var(--radius-md);
     background: #2979ff;
     color: #fff;
     font-size: 1.05rem;
@@ -340,7 +340,7 @@ const BAD_IMGS  = [badcat1.src,  badcat2.src,  badcat3.src,  badcat10.src, badca
     height: 44px;
     border: 4px solid rgba(255, 255, 255, 0.15);
     border-top-color: #2979ff;
-    border-radius: 50%;
+    border-radius: var(--radius-round);
     animation: spin 0.8s linear infinite;
   }
 

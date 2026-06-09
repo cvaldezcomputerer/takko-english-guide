@@ -85,7 +85,7 @@ import WordSelectorModal from '../../components/WordSelectorModal.astro';
   import type { VocabWord } from '../../data/vocab/words';
   import { categories } from '../../data/vocab/words';
   import { categoryGroups } from '../../data/vocab/groups';
-  import { buildCategoryGrid, openModal, closeModal, initModalListeners, getSelectedWords, formatJapanese } from '../../scripts/wordSelector';
+  import { buildCategoryGrid, openModal, closeModal, initModalListeners, getSelectedWords, formatJapanese } from '../../lib/wordSelector';
 
   const screenSelect = document.getElementById('screen-select')!;
   const screenOutput = document.getElementById('screen-output')!;
@@ -230,7 +230,7 @@ import WordSelectorModal from '../../components/WordSelectorModal.astro';
   .back-btn {
     background: none;
     border: 2px solid #ddd;
-    border-radius: 8px;
+    border-radius: var(--radius-sm);
     padding: 0.4rem 0.8rem;
     cursor: pointer;
     font-family: inherit;
@@ -247,7 +247,7 @@ import WordSelectorModal from '../../components/WordSelectorModal.astro';
   .output-card {
     background: white;
     border: 2px solid #bfdbfe;
-    border-radius: 16px;
+    border-radius: var(--radius-lg);
     padding: 1.5rem;
     margin-bottom: 1.5rem;
   }
@@ -277,7 +277,7 @@ import WordSelectorModal from '../../components/WordSelectorModal.astro';
     background: white;
     border: 2px solid #2563eb;
     color: #2563eb;
-    border-radius: 50px;
+    border-radius: var(--radius-pill);
     padding: 0.45rem 1rem;
     font-size: 0.9rem;
     font-family: inherit;
@@ -296,7 +296,7 @@ import WordSelectorModal from '../../components/WordSelectorModal.astro';
     background: #2563eb;
     color: white;
     border: none;
-    border-radius: 50px;
+    border-radius: var(--radius-pill);
     padding: 0.45rem 1.2rem;
     font-size: 0.9rem;
     font-family: inherit;

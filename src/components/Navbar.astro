@@ -75,7 +75,7 @@ import T from './T.astro';
           });
       }
 
-      // Mii-voice toggle — off by default. Read by src/scripts/speak.ts via the
+      // Mii-voice toggle — off by default. Read by src/lib/speak.ts via the
       // same 'mii-voice' localStorage key (keep them in sync).
       const miiToggle = document.getElementById('mii-toggle');
       if (miiToggle) {
@@ -234,7 +234,7 @@ import T from './T.astro';
     border: 2px solid var(--color-dark-green);
     color: var(--color-dark-green);
     padding: 0.5rem 1rem;
-    border-radius: 20px;
+    border-radius: var(--radius-button);
     cursor: pointer;
     font-family: inherit;
     font-weight: bold;
@@ -266,7 +266,7 @@ import T from './T.astro';
     display: inline-block;
     width: 64px;
     height: 30px;
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     background: #aebac4;            /* off: muted "tech" grey-blue */
     border: 2px solid #8a99a4;
     transition: background 0.2s, border-color 0.2s;
@@ -278,7 +278,7 @@ import T from './T.astro';
     transform: translateY(-50%);
     width: 22px;
     height: 22px;
-    border-radius: 50%;
+    border-radius: var(--radius-round);
     background: #fff;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
     display: grid;

@@ -1,5 +1,5 @@
 ---
-const { class: className, ...props } = Astro.props;
+const { class: className, mouthOpen = false, ...props } = Astro.props;
 ---
 
 <svg class:list={["takko-logo", className]} viewBox="120 140 780 750" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
@@ -21,7 +21,14 @@ const { class: className, ...props } = Astro.props;
     </g>
     <g id="mouth-nose">
       <path id="nose" d="M510 626H485.5L488 645L498.5 654.5L508.5 645L510 626Z" fill="currentColor"/>
-      <path id="mouth" d="M451 714.5C470.702 710.853 481.081 703.062 498.5 690M498.5 690C515.387 703.979 525.654 711.774 545.5 714.5M498.5 690V654.5M498.5 654.5L488 645L485.5 626H510L508.5 645L498.5 654.5Z" stroke="currentColor" stroke-width="13" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      {mouthOpen ? (
+        <g id="mouth">
+          <path d="M498.5 654.5V676" stroke="currentColor" stroke-width="13" stroke-linecap="round" fill="none"/>
+          <ellipse cx="498.5" cy="703" rx="29" ry="27" stroke="currentColor" stroke-width="13" fill="none"/>
+        </g>
+      ) : (
+        <path id="mouth" d="M451 714.5C470.702 710.853 481.081 703.062 498.5 690M498.5 690C515.387 703.979 525.654 711.774 545.5 714.5M498.5 690V654.5M498.5 654.5L488 645L485.5 626H510L508.5 645L498.5 654.5Z" stroke="currentColor" stroke-width="13" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      )}
     </g>
   </g>
 </svg>

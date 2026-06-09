@@ -1,4 +1,4 @@
-# dog_SITE
+# TakkoTaco
 
 TakkoTaco is an unofficial English website for Takko Machi, a small garlic farming town in Aomori, Japan.
 

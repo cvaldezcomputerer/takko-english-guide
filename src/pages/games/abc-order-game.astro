@@ -173,7 +173,7 @@ const abcColors = abcAlpha.map(
     top: 1rem;
     left: 1rem;
     padding: 0.35rem 0.85rem;
-    border-radius: 8px;
+    border-radius: var(--radius-sm);
     background: white;
     border: 2px solid #c5b99a;
     color: #555;
@@ -192,7 +192,7 @@ const abcColors = abcAlpha.map(
   .start-card {
     background: white;
     border: 3px solid #c5b99a;
-    border-radius: 16px;
+    border-radius: var(--radius-lg);
     padding: 3rem 4rem;
     text-align: center;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
@@ -275,7 +275,7 @@ const abcColors = abcAlpha.map(
   .opt-btn {
     padding: 0.32rem 0.85rem;
     border: 2px solid #ccc5b8;
-    border-radius: 50px;
+    border-radius: var(--radius-pill);
     background: #f5f2eb;
     color: #555;
     font-family: inherit;
@@ -303,7 +303,7 @@ const abcColors = abcAlpha.map(
     background: #e76f51;
     color: white;
     border: none;
-    border-radius: 50px;
+    border-radius: var(--radius-pill);
     font-family: "Crete Round", serif;
     font-size: 1.2rem;
     font-weight: 700;
@@ -327,7 +327,7 @@ const abcColors = abcAlpha.map(
   .win-card {
     background: white;
     border: 3px solid #c5b99a;
-    border-radius: 16px;
+    border-radius: var(--radius-lg);
     padding: 3rem 4rem;
     text-align: center;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
@@ -668,7 +668,7 @@ const abcColors = abcAlpha.map(
   }
   updateInstruction();
 
-  import { LETTER_PATHS, LETTER_PATHS_LOWER } from "../../letter-paths";
+  import { LETTER_PATHS, LETTER_PATHS_LOWER } from "../../data/letter-paths";
 
   function makeSVG(letter: string): string {
     // Letters are tracked internally as A–Z; the lowercase toggle only swaps the

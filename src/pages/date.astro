@@ -154,8 +154,8 @@ const days = Array.from({ length: 31 }, (_, i) => {
 </Layout>
 
 <script>
-    import { LETTER_PATHS, LETTER_PATHS_LOWER } from '../letter-paths';
-    import { speakMii, speakPlain, isMiiVoiceOn, playClip, playFromEl } from '../scripts/speak';
+    import { LETTER_PATHS, LETTER_PATHS_LOWER } from '../data/letter-paths';
+    import { speakMii, speakPlain, isMiiVoiceOn, playClip, playFromEl } from '../lib/speak';
 
     // ── Audio ──
     const toast = document.getElementById('audio-toast');
@@ -642,7 +642,7 @@ const days = Array.from({ length: 31 }, (_, i) => {
         align-items: center;
         justify-content: center;
         border: 2.5px solid var(--color-secondary);
-        border-radius: 50%;
+        border-radius: var(--radius-round);
         background: var(--color-primary);
         color: #fff;
     }
@@ -694,7 +694,7 @@ const days = Array.from({ length: 31 }, (_, i) => {
         min-height: clamp(56px, 9vh, 90px);
         padding: 0.2rem 0.5rem;
         border: 3px dashed var(--color-secondary);
-        border-radius: 16px;
+        border-radius: var(--radius-lg);
         background: #fdfaf2;
         transition: background 0.15s, border-color 0.15s, transform 0.1s;
     }
@@ -904,7 +904,7 @@ const days = Array.from({ length: 31 }, (_, i) => {
         align-items: center;
         justify-content: center;
         border: none;
-        border-radius: 50%;
+        border-radius: var(--radius-round);
         background: #eef3ee;
         color: var(--color-primary);
         cursor: pointer;
@@ -945,7 +945,7 @@ const days = Array.from({ length: 31 }, (_, i) => {
         font-family: var(--font-main);
         font-size: 0.95rem;
         padding: 0.7rem 1.3rem;
-        border-radius: 999px;
+        border-radius: var(--radius-pill);
         opacity: 0;
         pointer-events: none;
         transition: opacity 0.2s, transform 0.2s;
@@ -993,7 +993,7 @@ const days = Array.from({ length: 31 }, (_, i) => {
         right: -1rem;
         width: 2.25rem;
         height: 2.25rem;
-        border-radius: 50%;
+        border-radius: var(--radius-round);
         background: #d94b3e;
         border: 2.5px solid #fff;
         color: #fff;

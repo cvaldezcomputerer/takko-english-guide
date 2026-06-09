@@ -79,7 +79,7 @@ import WordSelectorModal from '../../components/WordSelectorModal.astro';
   import type { VocabWord } from '../../data/vocab/words';
   import { categories } from '../../data/vocab/words';
   import { categoryGroups } from '../../data/vocab/groups';
-  import { buildCategoryGrid, openModal, closeModal, initModalListeners, getSelectedNames } from '../../scripts/wordSelector';
+  import { buildCategoryGrid, openModal, closeModal, initModalListeners, getSelectedNames } from '../../lib/wordSelector';
 
   const screenSelect      = document.getElementById('screen-select')!;
   const screenGame        = document.getElementById('screen-game')!;
@@ -406,7 +406,7 @@ import WordSelectorModal from '../../components/WordSelectorModal.astro';
   :global(.word-card) {
     background: white;
     border: 3px solid #c5d9c5;
-    border-radius: 16px;
+    border-radius: var(--radius-lg);
     padding: 1.5rem 1rem;
     font-size: 1.4rem;
     font-weight: 700;
@@ -506,7 +506,7 @@ import WordSelectorModal from '../../components/WordSelectorModal.astro';
     width: 18px;
     height: 18px;
     background: white;
-    border-radius: 50%;
+    border-radius: var(--radius-round);
     top: 2px;
     left: 2px;
     transition: transform 0.2s;
@@ -568,7 +568,7 @@ import WordSelectorModal from '../../components/WordSelectorModal.astro';
   .reveal-btn {
     background: white;
     border: 2px solid #c5d9c5;
-    border-radius: 50px;
+    border-radius: var(--radius-pill);
     padding: 0.9rem 2.2rem;
     font-size: 1.15rem;
     font-weight: 700;
@@ -583,7 +583,7 @@ import WordSelectorModal from '../../components/WordSelectorModal.astro';
   .next-btn {
     background: var(--color-primary);
     border: none;
-    border-radius: 50px;
+    border-radius: var(--radius-pill);
     padding: 0.9rem 2.2rem;
     font-size: 1.15rem;
     font-weight: 700;

@@ -299,7 +299,7 @@ const { shrine } = Astro.props;
     }
 
     .g-main {
-        border-radius: 12px;
+        border-radius: var(--radius-md);
         overflow: hidden;
         border: 2px solid #ddd6c4;
     }
@@ -331,7 +331,7 @@ const { shrine } = Astro.props;
         flex-shrink: 0;
         width: 180px;
         height: 135px;
-        border-radius: 8px;
+        border-radius: var(--radius-sm);
         overflow: hidden;
         border: 2px solid #ddd6c4;
     }
@@ -357,7 +357,7 @@ const { shrine } = Astro.props;
 
     .grid-thumb {
         aspect-ratio: 4/3;
-        border-radius: 8px;
+        border-radius: var(--radius-sm);
         overflow: hidden;
         border: 2px solid #ddd6c4;
     }
@@ -389,7 +389,7 @@ const { shrine } = Astro.props;
 
     .mosaic-thumb {
         aspect-ratio: 1;
-        border-radius: 8px;
+        border-radius: var(--radius-sm);
         overflow: hidden;
         border: 2px solid #ddd6c4;
     }
@@ -458,7 +458,7 @@ const { shrine } = Astro.props;
         top: 0.55em;
         width: 8px;
         height: 8px;
-        border-radius: 50%;
+        border-radius: var(--radius-round);
         background: var(--color-torii);
         opacity: 0.6;
     }
@@ -533,7 +533,7 @@ const { shrine } = Astro.props;
     .subshrine-card {
         background: white;
         border: 2px solid #ddd6c4;
-        border-radius: 12px;
+        border-radius: var(--radius-md);
         overflow: hidden;
     }
 

@@ -2,6 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import Navbar from '../components/Navbar.astro';
 import T from '../components/T.astro';
+import { GARLIC_SILO_PATH } from '../data/garlic';
 
 // ── Speaker icon (reused on the question + every word card) ──
 const SPEAKER = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 5V4L8 9H4z" fill="currentColor"/><path d="M16.5 8.5a4.5 4.5 0 0 1 0 7" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>`;
@@ -25,9 +26,6 @@ const feelingWords = [
     { word: 'cool', en: 'cool', ja: 'すずしい' },
     { word: 'cold', en: 'cold', ja: 'さむい' },
 ];
-
-// Garlic-silo divider mark (same one used between sections on the home page)
-const GARLIC_SILO_PATH = "M199 468C136.885 532.312 124 583 143 680C191.5 772 243 783 346 792C399.466 819.505 433 839 502 839C579 836 598.935 822.763 652.5 792C784.385 779.941 838 749 863 648.5C866 571.5 847.902 515.187 795.5 461.5C824.561 374.668 826 252.5 814 236.5C788 231 706.5 271.5 620 348C597.464 341.182 586.176 332.053 567 312C543.23 277.333 522.5 204.5 531 147L465.5 191C465.5 227.5 455.5 265.5 439.5 301C421.494 325.085 408.38 336.495 378 352C320.888 290.902 206 224.5 187 231C171 252.5 174.118 374.842 199 468Z";
 ---
 
 <Layout
@@ -154,8 +152,8 @@ const GARLIC_SILO_PATH = "M199 468C136.885 532.312 124 583 143 680C191.5 772 243
 </Layout>
 
 <script>
-    import { LETTER_PATHS, LETTER_PATHS_LOWER } from '../letter-paths';
-    import { speakMii, speakPlain, isMiiVoiceOn, playClip, playFromEl } from '../scripts/speak';
+    import { LETTER_PATHS, LETTER_PATHS_LOWER } from '../data/letter-paths';
+    import { speakMii, speakPlain, isMiiVoiceOn, playClip, playFromEl } from '../lib/speak';
 
     // ── Audio ──
     const toast = document.getElementById('audio-toast');
@@ -610,7 +608,7 @@ const GARLIC_SILO_PATH = "M199 468C136.885 532.312 124 583 143 680C191.5 772 243
         align-items: center;
         justify-content: center;
         border: 2.5px solid var(--color-secondary);
-        border-radius: 50%;
+        border-radius: var(--radius-round);
         background: var(--color-primary);
         color: #fff;
     }
@@ -661,7 +659,7 @@ const GARLIC_SILO_PATH = "M199 468C136.885 532.312 124 583 143 680C191.5 772 243
         min-height: clamp(56px, 9vh, 90px);
         padding: 0.2rem 0.5rem;
         border: 3px dashed var(--color-secondary);
-        border-radius: 16px;
+        border-radius: var(--radius-lg);
         background: #fdfaf2;
         transition: background 0.15s, border-color 0.15s, transform 0.1s;
     }
@@ -839,7 +837,7 @@ const GARLIC_SILO_PATH = "M199 468C136.885 532.312 124 583 143 680C191.5 772 243
         justify-content: center;
         /* soft backdrop behind the art (also a fallback if an image is missing) */
         background: #f1ede3;
-        border-radius: 12px;
+        border-radius: var(--radius-md);
         overflow: hidden;
     }
     .card-icon img {
@@ -878,7 +876,7 @@ const GARLIC_SILO_PATH = "M199 468C136.885 532.312 124 583 143 680C191.5 772 243
         align-items: center;
         justify-content: center;
         border: none;
-        border-radius: 50%;
+        border-radius: var(--radius-round);
         background: #eef3ee;
         color: var(--color-primary);
         cursor: pointer;
@@ -920,7 +918,7 @@ const GARLIC_SILO_PATH = "M199 468C136.885 532.312 124 583 143 680C191.5 772 243
         font-family: var(--font-main);
         font-size: 0.95rem;
         padding: 0.7rem 1.3rem;
-        border-radius: 999px;
+        border-radius: var(--radius-pill);
         opacity: 0;
         pointer-events: none;
         transition: opacity 0.2s, transform 0.2s;
@@ -977,7 +975,7 @@ const GARLIC_SILO_PATH = "M199 468C136.885 532.312 124 583 143 680C191.5 772 243
         right: -1rem;
         width: 2.25rem;
         height: 2.25rem;
-        border-radius: 50%;
+        border-radius: var(--radius-round);
         background: #d94b3e;
         border: 2.5px solid #fff;
         color: #fff;

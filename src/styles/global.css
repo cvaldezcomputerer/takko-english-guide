@@ -119,6 +119,17 @@ select {
   --font-heading: var(--font-body);
   --font-main: 'Fredoka', sans-serif;       /* town-guide / page headings */
   --font-hand: 'Patrick Hand', cursive;     /* handwritten accents */
+
+  /* Corner rounding — use these instead of hard-coded px.
+     Scale chosen to match the values already common across the site. */
+  --radius-xs: 4px;     /* tags, chips, tight insets */
+  --radius-sm: 8px;     /* small controls, inputs */
+  --radius-md: 12px;    /* list rows, medium panels */
+  --radius-lg: 16px;    /* cards */
+  --radius-xl: 24px;    /* large hero / feature cards */
+  --radius-pill: 999px; /* fully-rounded pills & toggles */
+  --radius-round: 50%;  /* circles / avatars */
+  --radius-button: 20px;/* soft-rounded buttons — the standard CTA look (matches the language toggle) */
 }
 
 .site-footer {

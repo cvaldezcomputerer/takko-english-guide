@@ -1,16 +1,16 @@
 ---
-import Loader from "./Loader.astro";
-import badcat1 from "../assets/DirectionsReactionGame/bad-cat-1.png";
-import badcat10 from "../assets/DirectionsReactionGame/bad-cat-10.png";
-import badcat11 from "../assets/DirectionsReactionGame/bad-cat-11.png";
-import badcat2 from "../assets/DirectionsReactionGame/bad-cat-2.jpg";
-import badcat3 from "../assets/DirectionsReactionGame/bad-cat-3.jpg";
-import goodCat1 from "../assets/DirectionsReactionGame/good-cat-1.png";
-import goodCat10 from "../assets/DirectionsReactionGame/good-cat-10.png";
-import goodCat12 from "../assets/DirectionsReactionGame/good-cat-12.png";
-import goodCat2 from "../assets/DirectionsReactionGame/good-cat-2.png";
-import goodCat3 from "../assets/DirectionsReactionGame/good-cat-3.png";
-import goodCat4 from "../assets/DirectionsReactionGame/good-cat-4.png";
+import Loader from "../Loader.astro";
+import badcat1 from "../../assets/DirectionsReactionGame/bad-cat-1.png";
+import badcat10 from "../../assets/DirectionsReactionGame/bad-cat-10.png";
+import badcat11 from "../../assets/DirectionsReactionGame/bad-cat-11.png";
+import badcat2 from "../../assets/DirectionsReactionGame/bad-cat-2.jpg";
+import badcat3 from "../../assets/DirectionsReactionGame/bad-cat-3.jpg";
+import goodCat1 from "../../assets/DirectionsReactionGame/good-cat-1.png";
+import goodCat10 from "../../assets/DirectionsReactionGame/good-cat-10.png";
+import goodCat12 from "../../assets/DirectionsReactionGame/good-cat-12.png";
+import goodCat2 from "../../assets/DirectionsReactionGame/good-cat-2.png";
+import goodCat3 from "../../assets/DirectionsReactionGame/good-cat-3.png";
+import goodCat4 from "../../assets/DirectionsReactionGame/good-cat-4.png";
 
 const GOOD_FEEDBACK_IMAGES = [goodCat1.src, goodCat2.src, goodCat3.src, goodCat4.src, goodCat10.src, goodCat12.src];
 const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src, badcat10.src, badcat11.src];
@@ -88,7 +88,7 @@ const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src, badcat10.src
     display: inline-block;
     margin-bottom: 0.75rem;
     padding: 0.35rem 0.85rem;
-    border-radius: 8px;
+    border-radius: var(--radius-sm);
     background: var(--panel, #fffdf7);
     border: 2px solid rgba(212, 163, 115, 0.45);
     color: var(--ink, #2f2a24);
@@ -118,7 +118,7 @@ const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src, badcat10.src
     width: min(860px, 94vw);
     margin: 2rem auto;
     padding: 1rem;
-    border-radius: 24px;
+    border-radius: var(--radius-xl);
     background: var(--bg-1);
     box-shadow: 0 12px 0 rgba(74, 124, 89, 0.18), 0 18px 34px rgba(0, 0, 0, 0.1);
     border: 2px solid rgba(212, 163, 115, 0.45);
@@ -171,7 +171,7 @@ const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src, badcat10.src
 
   .audio-loading {
     margin-top: 0.85rem;
-    border-radius: 12px;
+    border-radius: var(--radius-md);
     background: rgba(255, 255, 255, 0.88);
     border: 1px solid rgba(74, 124, 89, 0.28);
     padding: 0.55rem 0.8rem;
@@ -347,7 +347,7 @@ const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src, badcat10.src
 
   .start-btn {
     border: none;
-    border-radius: 12px;
+    border-radius: var(--radius-md);
     background: #7a4a2a;
     color: #fffdf7;
     border: 2px solid #5a351d;
@@ -371,7 +371,7 @@ const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src, badcat10.src
   .mode-btn {
     margin-left: auto;
     border: 2px solid #5a351d;
-    border-radius: 12px;
+    border-radius: var(--radius-md);
     background: #f0decf;
     color: #4a2b17;
     font-size: 1rem;
@@ -398,7 +398,7 @@ const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src, badcat10.src
     z-index: 30;
     display: grid;
     place-items: center;
-    border-radius: 24px;
+    border-radius: var(--radius-xl);
     background: rgba(12, 20, 38, 0.56);
     backdrop-filter: blur(3px);
     padding: 1rem;
@@ -427,7 +427,7 @@ const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src, badcat10.src
     width: 2.75rem;
     height: 2.75rem;
     border: none;
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     background: #dc2626;
     color: #ffffff;
     font-size: 1.1rem;

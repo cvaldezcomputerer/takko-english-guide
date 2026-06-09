@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 184">
+  <!-- 4x4 composite tile: 15 earless garlics ('e') + 1 with-ears ('w') at slot (2,1).
+       Paths mirror src/data/garlic.ts (GARLIC_BARE_PATH and GARLIC_HEAD_OUTLINE). -->
+  <defs>
+    <symbol id="e" viewBox="120 140 780 750">
+      <path fill="none" stroke="#4a7c59" stroke-opacity="0.2" stroke-width="17" stroke-linejoin="round" stroke-linecap="round" d="M199 468C136.885 532.312 124 583 143 680C191.5 772 243 783 346 792C399.466 819.505 433 839 502 839C579 836 598.935 822.763 652.5 792C784.385 779.941 838 749 863 648.5C866 571.5 847.902 515.187 795.5 461.5C731.75 408.424 693.486 383.276 620 348C597.464 341.182 586.176 332.053 567 312C543.23 277.333 522.5 204.5 531 147L465.5 191C465.5 227.5 455.5 265.5 439.5 301C421.494 325.085 408.38 336.495 378 352C296.829 383.891 257.592 409.289 199 468Z"/>
+    </symbol>
+    <symbol id="w" viewBox="120 140 780 750">
+      <path fill="none" stroke="#4a7c59" stroke-opacity="0.2" stroke-width="17" stroke-linejoin="round" stroke-linecap="round" d="M199 468C257.592 409.289 296.829 383.891 378 352M199 468C174.118 374.842 171 252.5 187 231C206 224.5 320.888 290.902 378 352M199 468C136.885 532.312 124 583 143 680C191.5 772 243 783 346 792C399.466 819.505 433 839 502 839C579 836 598.935 822.763 652.5 792C784.385 779.941 838 749 863 648.5C866 571.5 847.902 515.187 795.5 461.5M378 352C408.38 336.495 421.494 325.085 439.5 301C455.5 265.5 465.5 227.5 465.5 191L531 147C522.5 204.5 543.23 277.333 567 312C586.176 332.053 597.464 341.182 620 348M620 348C706.5 271.5 788 231 814 236.5C826 252.5 824.561 374.668 795.5 461.5M620 348C693.486 383.276 731.75 408.424 795.5 461.5"/>
+    </symbol>
+  </defs>
+  <use href="#e" x="0"   y="0"   width="48" height="46"/>
+  <use href="#e" x="48"  y="0"   width="48" height="46"/>
+  <use href="#e" x="96"  y="0"   width="48" height="46"/>
+  <use href="#e" x="144" y="0"   width="48" height="46"/>
+  <use href="#e" x="0"   y="46"  width="48" height="46"/>
+  <use href="#e" x="48"  y="46"  width="48" height="46"/>
+  <use href="#w" x="96"  y="46"  width="48" height="46"/>
+  <use href="#e" x="144" y="46"  width="48" height="46"/>
+  <use href="#e" x="0"   y="92"  width="48" height="46"/>
+  <use href="#e" x="48"  y="92"  width="48" height="46"/>
+  <use href="#e" x="96"  y="92"  width="48" height="46"/>
+  <use href="#e" x="144" y="92"  width="48" height="46"/>
+  <use href="#e" x="0"   y="138" width="48" height="46"/>
+  <use href="#e" x="48"  y="138" width="48" height="46"/>
+  <use href="#e" x="96"  y="138" width="48" height="46"/>
+  <use href="#e" x="144" y="138" width="48" height="46"/>
+</svg>
