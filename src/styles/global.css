@@ -148,6 +148,13 @@ select {
      visual change). Micro-durations (0.1s/0.12s) stay literal by design. */
   --transition-fast: 0.15s;
   --transition: 0.2s;
+
+  /* Neutral shadow elevation scale. Near-duplicate soft black shadows snap
+     to these 3 tiers (subtle shifts). Colored, hard-offset (0 Npx 0 …) and
+     strong overlay shadows (>=0.14 alpha) are NOT part of this scale. */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.08);
 }
 
 .site-footer {
