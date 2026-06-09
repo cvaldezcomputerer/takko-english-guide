@@ -1,0 +1,83 @@
+---
+/**
+ * Local dev dashboard — a convenience hub linking to the site's internal
+ * preview/review pages. Not linked from the nav; meant for development only.
+ * Flesh out with more dev links over time.
+ */
+import Layout from '../layouts/Layout.astro';
+import Navbar from '../components/Navbar.astro';
+
+const links: { href: string; name: string; desc: string }[] = [
+    { href: '/sound-preview', name: 'Sound preview', desc: 'Play every game sound effect; volume + mute; clip vs procedural.' },
+    { href: '/vocab-preview', name: 'Vocab preview', desc: 'Vocab images + voice clips and the drawable-letter audit.' },
+];
+---
+
+<Layout title="Dev Dashboard — TakkoTaco" description="Internal dev page index.">
+    <Navbar />
+    <main class="dev">
+        <h1>Dev dashboard</h1>
+        <p class="sub">Internal preview &amp; review pages. Not shipped in the nav.</p>
+        <ul class="grid">
+            {links.map((l) => (
+                <li>
+                    <a href={l.href}>
+                        <span class="name">{l.name}</span>
+                        <span class="path">{l.href}</span>
+                        <span class="desc">{l.desc}</span>
+                    </a>
+                </li>
+            ))}
+        </ul>
+    </main>
+</Layout>
+
+<style>
+    .dev {
+        max-width: 720px;
+        margin: 0 auto;
+        padding: 2rem 1.25rem 4rem;
+    }
+    h1 {
+        margin: 0 0 0.25rem;
+    }
+    .sub {
+        color: #5b626d;
+        font-size: 0.9rem;
+        margin: 0 0 1.5rem;
+    }
+    .grid {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 0.75rem;
+    }
+    .grid a {
+        display: grid;
+        gap: 0.2rem;
+        padding: 1rem;
+        border: 1px solid #e1e4ea;
+        border-radius: var(--radius-button, 8px);
+        background: #fff;
+        text-decoration: none;
+        color: inherit;
+        transition: background var(--dur-fast, 0.12s) ease;
+    }
+    .grid a:hover {
+        background: #f6f7f9;
+    }
+    .name {
+        font-weight: 700;
+    }
+    .path {
+        font-size: 0.8rem;
+        color: #8b97a5;
+        font-family: ui-monospace, monospace;
+    }
+    .desc {
+        font-size: 0.85rem;
+        color: #5b626d;
+    }
+</style>

@@ -27,4 +27,9 @@ pnpm-debug.log*
 .partykit/
 
 # find-image tool: ad-hoc scratch queue (candidates + picks are throwaway)
-scripts/.find-image/
+tools/data/.find-image/
+
+# SFX pipeline: candidate clips are large + regenerable (scratch). The durable
+# result — approved clips, manifest, picks — is committed elsewhere.
+tools/data/sfx-candidates/
+tools/data/sfx-candidates.json

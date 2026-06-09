@@ -520,9 +520,12 @@ export const categories: VocabCategory[] = [
       { en: "windy", ja: ["かぜがつよい", "かぜがふいている"] },
       { en: "rainy", ja: ["あめ", "あめがふっている"] },
       { en: "snowy", ja: ["ゆき", "ゆきがふっている"] },
-      { en: "cold", ja: ["さむい"] },
+      // cold/hot also exist in Taste (つめたい/あつい) and share the manifest key
+      // by `en`; img override gives the weather sense its own illustration.
+      // (Irasutoya illustration, © Takashi Mifune.)
+      { en: "cold", ja: ["さむい"], img: "/images/vocab/weather-cold.webp" },
       { en: "warm", ja: ["あたたかい"] },
-      { en: "hot", ja: ["あつい"] },
+      { en: "hot", ja: ["あつい"], img: "/images/vocab/weather-hot.webp" },
       { en: "humid", ja: ["むしあつい", "しめっている"] },
     ],
   },

@@ -1,0 +1,199 @@
+---
+/**
+ * Internal preview of the game sound effects (src/lib/sounds.ts).
+ * Lists every sound key with a play button, a master-volume slider, and a mute
+ * toggle, and shows which keys are backed by an approved ElevenLabs clip vs. the
+ * procedural Web Audio fallback. Not linked from the nav — it's a dev/review page.
+ */
+import Layout from '../layouts/Layout.astro';
+import Navbar from '../components/Navbar.astro';
+
+// Short human labels mirror the descriptions in the sound brief.
+const LABELS: Record<string, string> = {
+    correct: 'Bright ascending ding',
+    wrong: 'Low descending buzz',
+    streak: 'Ascending arpeggio',
+    timerTick: 'Quiet tick',
+    timeUp: 'Sad descending sweep',
+    levelClear: 'Triumphant fanfare',
+    gameOver: 'Slow minor phrase',
+    buttonClick: 'Soft UI tap',
+    menuOpen: 'Upward whoosh',
+    menuClose: 'Downward whoosh',
+    itemSelect: 'Subtle select tick',
+    notification: 'Two-tone chime',
+    countdown: 'Sharp mid beep',
+    applause: 'Crowd cheer',
+    reveal: 'Rising sweep + tail',
+    error: 'Harsh buzz',
+};
+---
+
+<Layout title="Sound Preview — TakkoTaco" description="Internal preview of game sound effects.">
+    <Navbar />
+    <main class="sfx">
+        <h1>Sound preview</h1>
+        <p class="sub">
+            Click to play. <span class="dot clip"></span> approved ElevenLabs clip ·
+            <span class="dot proc"></span> procedural fallback. Audio starts on first click.
+        </p>
+
+        <div class="controls">
+            <label>
+                Volume
+                <input id="vol" type="range" min="0" max="1" step="0.01" value="0.3" />
+                <span id="volVal">0.30</span>
+            </label>
+            <button id="mute" type="button">Mute</button>
+        </div>
+
+        <ul id="grid" class="grid"></ul>
+    </main>
+</Layout>
+
+<script>
+    import { sounds, SOUND_KEYS } from '../lib/sounds';
+
+    const LABELS: Record<string, string> = JSON.parse(
+        document.getElementById('labels')?.textContent || '{}',
+    );
+
+    const grid = document.getElementById('grid') as HTMLUListElement;
+    for (const key of SOUND_KEYS) {
+        const li = document.createElement('li');
+        const backed = sounds.hasClip(key);
+        li.innerHTML = `
+            <button type="button" data-key="${key}" class="play">
+                <span class="dot ${backed ? 'clip' : 'proc'}"></span>
+                <span class="name">${key}</span>
+                <span class="desc">${LABELS[key] ?? ''}</span>
+            </button>`;
+        grid.appendChild(li);
+    }
+
+    grid.addEventListener('click', (e) => {
+        const btn = (e.target as HTMLElement).closest('button.play') as HTMLElement | null;
+        if (!btn) return;
+        sounds.preview(btn.dataset.key as Parameters<typeof sounds.preview>[0]);
+    });
+
+    const vol = document.getElementById('vol') as HTMLInputElement;
+    const volVal = document.getElementById('volVal') as HTMLSpanElement;
+    vol.addEventListener('input', () => {
+        const v = Number(vol.value);
+        sounds.setVolume(v);
+        volVal.textContent = v.toFixed(2);
+    });
+
+    const muteBtn = document.getElementById('mute') as HTMLButtonElement;
+    muteBtn.addEventListener('click', () => {
+        if (sounds.isMuted()) {
+            sounds.unmute();
+            muteBtn.textContent = 'Mute';
+            muteBtn.classList.remove('on');
+        } else {
+            sounds.mute();
+            muteBtn.textContent = 'Muted';
+            muteBtn.classList.add('on');
+        }
+    });
+</script>
+
+<script id="labels" type="application/json" set:html={JSON.stringify(LABELS)} is:inline></script>
+
+<style>
+    .sfx {
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 2rem 1.25rem 4rem;
+    }
+    h1 {
+        margin: 0 0 0.25rem;
+    }
+    .sub {
+        color: #5b626d;
+        font-size: 0.9rem;
+        margin: 0 0 1.5rem;
+    }
+    .dot {
+        display: inline-block;
+        width: 0.6rem;
+        height: 0.6rem;
+        border-radius: 50%;
+        vertical-align: middle;
+    }
+    .dot.clip {
+        background: #2e7d46;
+    }
+    .dot.proc {
+        background: #b7bcc4;
+    }
+    .controls {
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+    }
+    .controls label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+    }
+    .controls #volVal {
+        font-variant-numeric: tabular-nums;
+        color: #5b626d;
+        min-width: 2.6em;
+    }
+    #mute {
+        font: inherit;
+        padding: 0.4rem 0.9rem;
+        border-radius: var(--radius-button, 8px);
+        border: 1px solid #d2d6dd;
+        background: #fff;
+        cursor: pointer;
+    }
+    #mute.on {
+        background: #f3d3d3;
+        border-color: #d99;
+    }
+    .grid {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 0.6rem;
+    }
+    .play {
+        width: 100%;
+        text-align: left;
+        font: inherit;
+        display: grid;
+        grid-template-columns: auto 1fr;
+        grid-template-rows: auto auto;
+        column-gap: 0.5rem;
+        padding: 0.7rem 0.9rem;
+        border: 1px solid #e1e4ea;
+        border-radius: var(--radius-button, 8px);
+        background: #fff;
+        cursor: pointer;
+        transition: background var(--dur-fast, 0.12s) ease;
+    }
+    .play:hover {
+        background: #f6f7f9;
+    }
+    .play .dot {
+        grid-row: 1 / span 2;
+        align-self: center;
+    }
+    .play .name {
+        font-weight: 600;
+    }
+    .play .desc {
+        grid-column: 2;
+        color: #5b626d;
+        font-size: 0.8rem;
+    }
+</style>
