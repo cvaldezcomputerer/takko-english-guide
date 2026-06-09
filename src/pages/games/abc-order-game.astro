@@ -285,22 +285,22 @@ const abcColors = abcAlpha.map(
   }
 
   .opt-btn.active {
-    background: #e76f51;
-    border-color: #e76f51;
+    background: var(--color-accent);
+    border-color: var(--color-accent);
     color: white;
     font-weight: 600;
   }
 
   .opt-btn:hover:not(.active) {
     border-color: #a89880;
-    color: #333;
+    color: var(--color-text);
     background: #ede8de;
   }
 
   .btn {
     margin-top: 0.5rem;
     padding: 0.85rem 2.5rem;
-    background: #e76f51;
+    background: var(--color-accent);
     color: white;
     border: none;
     border-radius: var(--radius-pill);
@@ -359,7 +359,7 @@ const abcColors = abcAlpha.map(
     font-family: "Crete Round", serif;
     font-size: 1.2rem;
     font-weight: 700;
-    color: #4a7c59;
+    color: var(--color-primary);
     font-variant-numeric: tabular-nums;
   }
 
@@ -419,7 +419,7 @@ const abcColors = abcAlpha.map(
     font-family: "Crete Round", serif;
     font-size: 1.1rem;
     font-weight: 700;
-    color: #4a7c59;
+    color: var(--color-primary);
     font-variant-numeric: tabular-nums;
     letter-spacing: 0.05em;
   }
@@ -447,7 +447,7 @@ const abcColors = abcAlpha.map(
 
   /* ─── Lose Screen ─── */
   .lose-card {
-    border-color: #e76f51;
+    border-color: var(--color-accent);
   }
 
   .lose-sub {
@@ -495,7 +495,7 @@ const abcColors = abcAlpha.map(
 
   :global(.shelf-slot.next) {
     border-style: solid;
-    border-color: #e76f51;
+    border-color: var(--color-accent);
     box-shadow: 0 0 0 2px rgba(231, 111, 81, 0.25);
   }
 

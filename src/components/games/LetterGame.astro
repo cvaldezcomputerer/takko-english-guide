@@ -279,7 +279,7 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
   .settings-modal {
       background: white;
-      color: #333;
+      color: var(--color-text);
       padding: 2rem;
       border-radius: 1rem;
       width: 100%;
@@ -361,7 +361,7 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
   .mode-option input:checked + .mode-label {
       background: white;
-      color: #333;
+      color: var(--color-text);
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   }
 
@@ -445,7 +445,7 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
       text-transform: capitalize;
       transition: all 0.2s;
       background: var(--swatch-color, #f0f0f0);
-      color: var(--swatch-text-color, #fff);
+      color: var(--swatch-text-color, var(--color-white));
   }
 
   :global(#lg-color-grid .item-toggle input:checked + span) {

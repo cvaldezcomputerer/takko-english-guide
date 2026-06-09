@@ -644,7 +644,7 @@ const days = Array.from({ length: 31 }, (_, i) => {
         border: 2.5px solid var(--color-secondary);
         border-radius: var(--radius-round);
         background: var(--color-primary);
-        color: #fff;
+        color: var(--color-white);
     }
     .question-speaker :global(svg) { width: 58%; height: 58%; }
 
@@ -669,7 +669,7 @@ const days = Array.from({ length: 31 }, (_, i) => {
         align-items: center;
         gap: clamp(0.6rem, 1.5vw, 1rem);
         max-width: min(94vw, 780px);
-        background: #fff;
+        background: var(--color-white);
         border: 2px solid #efe7d6;
         border-radius: 18px;
         padding: clamp(0.6rem, 1.6vh, 1.1rem) clamp(0.9rem, 2vw, 1.4rem);
@@ -734,7 +734,7 @@ const days = Array.from({ length: 31 }, (_, i) => {
         gap: 0.5rem;
         border: 2px solid var(--color-primary);
         border-radius: 10px;
-        background: #fff;
+        background: var(--color-white);
         color: var(--color-primary);
         font-family: var(--font-main);
         font-weight: 600;
@@ -746,14 +746,14 @@ const days = Array.from({ length: 31 }, (_, i) => {
     .sentence-play:hover:not(:disabled),
     .sentence-big:hover:not(:disabled) {
         background: var(--color-primary);
-        color: #fff;
+        color: var(--color-white);
         transform: scale(1.03);
     }
     .sentence-play:disabled,
     .sentence-big:disabled {
         border-color: #c0bbb0;
         color: #b0a898;
-        background: #fff;
+        background: var(--color-white);
         cursor: not-allowed;
     }
     .sp-icon, .sb-icon {
@@ -817,7 +817,7 @@ const days = Array.from({ length: 31 }, (_, i) => {
         align-items: center;
         justify-content: center;
         gap: clamp(0.4rem, 0.9vw, 0.65rem);
-        background: #fff;
+        background: var(--color-white);
         border: 2px solid #efe7d6;
         border-radius: 10px;
         padding: clamp(0.5rem, 1.3vh, 0.85rem) clamp(0.7rem, 1.4vw, 1rem);
@@ -911,7 +911,7 @@ const days = Array.from({ length: 31 }, (_, i) => {
         padding: 0;
         transition: transform 0.12s, background 0.15s;
     }
-    .card-play:hover { background: var(--color-primary); color: #fff; transform: scale(1.1); }
+    .card-play:hover { background: var(--color-primary); color: var(--color-white); transform: scale(1.1); }
     .card-play svg { width: 58%; height: 58%; }
 
     /* A card resting inside a sentence slot → plain word, no card chrome or speaker */
@@ -941,7 +941,7 @@ const days = Array.from({ length: 31 }, (_, i) => {
         bottom: 1.5rem;
         transform: translate(-50%, 1.5rem);
         background: var(--color-text);
-        color: #fff;
+        color: var(--color-white);
         font-family: var(--font-main);
         font-size: 0.95rem;
         padding: 0.7rem 1.3rem;
@@ -995,8 +995,8 @@ const days = Array.from({ length: 31 }, (_, i) => {
         height: 2.25rem;
         border-radius: var(--radius-round);
         background: #d94b3e;
-        border: 2.5px solid #fff;
-        color: #fff;
+        border: 2.5px solid var(--color-white);
+        color: var(--color-white);
         cursor: pointer;
         display: flex;
         align-items: center;

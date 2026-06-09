@@ -734,7 +734,7 @@ const slots = Array.from({ length: 11 }, (_, i) => {
     height: clamp(88px, 24vw, 116px);
     display: grid;
     place-items: center;
-    background: #ffffff;
+    background: var(--color-white);
     border: 3px solid rgba(0, 0, 0, 0.16);
     border-radius: 22px;
     filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));
@@ -769,7 +769,7 @@ const slots = Array.from({ length: 11 }, (_, i) => {
   .card-topics {
     font-size: 0.72rem;
     font-weight: 700;
-    color: #e76f51;
+    color: var(--color-accent);
     letter-spacing: 0.04em;
     text-transform: uppercase;
     padding-bottom: 0.6rem;
@@ -924,8 +924,8 @@ const slots = Array.from({ length: 11 }, (_, i) => {
     height: 124px;
     opacity: 0.5;
     box-sizing: border-box;
-    border-top: 1.5px solid #333;    /* line 1 (top) */
-    border-bottom: 1.5px solid #333; /* line 4 (bottom) */
+    border-top: 1.5px solid var(--color-text);    /* line 1 (top) */
+    border-bottom: 1.5px solid var(--color-text); /* line 4 (bottom) */
   }
   .abc-side-deco .guide-row::before,
   .abc-side-deco .guide-row::after {
@@ -933,7 +933,7 @@ const slots = Array.from({ length: 11 }, (_, i) => {
     position: absolute;
     left: 0;
     right: 0;
-    border-top: 1.5px solid #333;
+    border-top: 1.5px solid var(--color-text);
   }
   .abc-side-deco .guide-row::before {
     top: 33.33%;                 /* line 2 (midline) */

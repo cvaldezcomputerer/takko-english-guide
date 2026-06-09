@@ -674,7 +674,7 @@ import Layout from '../../layouts/Layout.astro';
     border-radius: var(--radius-sm);
     margin-bottom: 0.3rem;
     font-size: 0.95rem;
-    color: #333;
+    color: var(--color-text);
   }
 
   /* ── Drawing screen ──────────────────────────────────── */
@@ -754,7 +754,7 @@ import Layout from '../../layouts/Layout.astro';
   }
 
   .swatch--eraser { border: 2px solid #ccc; background: white !important; }
-  .swatch--active { border-color: #333; transform: scale(1.2); }
+  .swatch--active { border-color: var(--color-text); transform: scale(1.2); }
 
   .brush-sizes { display: flex; gap: 0.3rem; }
 
@@ -851,7 +851,7 @@ import Layout from '../../layouts/Layout.astro';
     box-shadow: 0 2px 8px rgba(0,0,0,0.06);
   }
 
-  .viewer-label { font-size: 1.1rem; color: #333; font-weight: 600; }
+  .viewer-label { font-size: 1.1rem; color: var(--color-text); font-weight: 600; }
 
   .view-canvas {
     width: 100%;
@@ -997,7 +997,7 @@ import Layout from '../../layouts/Layout.astro';
   }
 
   .guess-name { font-weight: 700; color: var(--color-primary); white-space: nowrap; }
-  .guess-text { color: #333; }
+  .guess-text { color: var(--color-text); }
   .no-guesses { color: #aaa; font-size: 0.9rem; font-style: italic; }
 
   /* ── Shared button ───────────────────────────────────── */

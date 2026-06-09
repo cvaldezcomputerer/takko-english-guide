@@ -437,7 +437,7 @@ Astro.response.headers.set('Cache-Control', `public, s-maxage=${ttl}, stale-whil
 
 <style>
     .town-guide-body {
-        background-color: #fffbf0;
+        background-color: var(--color-bg);
         /* 4×4 composite tile: 15 earless garlics + 1 with-ears at slot (2,1).
            Lives in /public/images/garlic-tile.svg (shared with contact.astro). */
         background-image: url("/images/garlic-tile.svg");
@@ -445,7 +445,7 @@ Astro.response.headers.set('Cache-Control', `public, s-maxage=${ttl}, stale-whil
         background-repeat: repeat;
         animation: garlic-drift 180s linear infinite;
         font-family: var(--font-main);
-        color: #333;
+        color: var(--color-text);
         border-bottom: 8px solid var(--color-primary);
     }
 
@@ -700,7 +700,7 @@ Astro.response.headers.set('Cache-Control', `public, s-maxage=${ttl}, stale-whil
     }
 
     .shrine-card-home .card-home-torii {
-        color: #b5291c;
+        color: var(--color-torii);
         width: 44px;
         height: 44px;
         margin-bottom: 0.75rem;
@@ -752,7 +752,7 @@ Astro.response.headers.set('Cache-Control', `public, s-maxage=${ttl}, stale-whil
     }
 
     .wod-card-body {
-        background: #fffbf0;
+        background: var(--color-bg);
         padding: 1rem 1rem 1.25rem;
         display: flex;
         flex-direction: column;

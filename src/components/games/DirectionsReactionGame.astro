@@ -103,14 +103,14 @@ const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src, badcat10.src
   }
 
   .reaction-game {
-    --bg-1: #fffbf0;
+    --bg-1: var(--color-bg);
     --bg-2: #f6eddc;
     --panel: #fffdf7;
     --ink: #2f2a24;
     --muted: #6b6257;
-    --primary: #4a7c59;
-    --secondary: #d4a373;
-    --accent: #e76f51;
+    --primary: var(--color-primary);
+    --secondary: var(--color-secondary);
+    --accent: var(--color-accent);
     --ok: #13955a;
     --bad: #c9382d;
 
@@ -414,8 +414,8 @@ const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src, badcat10.src
     border-radius: 20px;
     padding: 1.2rem 1rem;
     text-align: center;
-    color: #ffffff;
-    background: #4a7c59;
+    color: var(--color-white);
+    background: var(--color-primary);
     box-shadow: 0 18px 46px rgba(0, 0, 0, 0.36);
     animation: finish-pop 240ms ease-out;
   }
@@ -429,7 +429,7 @@ const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src, badcat10.src
     border: none;
     border-radius: var(--radius-pill);
     background: #dc2626;
-    color: #ffffff;
+    color: var(--color-white);
     font-size: 1.1rem;
     font-weight: 800;
     line-height: 1;
@@ -441,7 +441,7 @@ const BAD_FEEDBACK_IMAGES = [badcat1.src, badcat2.src, badcat3.src, badcat10.src
   }
 
   .finish-close:focus-visible {
-    outline: 3px solid #ffffff;
+    outline: 3px solid var(--color-white);
     outline-offset: 2px;
   }
 

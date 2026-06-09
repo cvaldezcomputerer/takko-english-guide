@@ -454,7 +454,7 @@ import GameLayout from "../../layouts/GameLayout.astro";
   .mute-btn[aria-pressed="true"] {
     background: #c0392b;
     border-color: #99281c;
-    color: #fff;
+    color: var(--color-white);
   }
   .mute-btn[aria-pressed="true"] .icon-sound { display: none; }
   .mute-btn[aria-pressed="true"] .icon-muted { display: block; }
@@ -520,7 +520,7 @@ import GameLayout from "../../layouts/GameLayout.astro";
     border: 0;
     border-radius: var(--radius-md);
     background: #d90000;
-    color: #ffffff;
+    color: var(--color-white);
     font-weight: 900;
     letter-spacing: 0.06em;
     padding: 1.2rem 4.4rem;
@@ -651,7 +651,7 @@ import GameLayout from "../../layouts/GameLayout.astro";
     flex: 0 0 auto;
     border: 2px solid var(--color-primary);
     background: var(--color-primary);
-    color: #fff;
+    color: var(--color-white);
     border-radius: var(--radius-xs);
     padding: 0.5rem 1.1rem;
     font-weight: 700;
@@ -659,7 +659,7 @@ import GameLayout from "../../layouts/GameLayout.astro";
   }
 
   .add-btn .jp {
-    color: #fff;
+    color: var(--color-white);
     opacity: 0.85;
     margin-left: 0.25rem;
   }
@@ -771,7 +771,7 @@ import GameLayout from "../../layouts/GameLayout.astro";
     background: var(--color-secondary);
   }
 
-  .event-list .event-item[data-tone="positive"] .event-dot { background: #4a7c59; }
+  .event-list .event-item[data-tone="positive"] .event-dot { background: var(--color-primary); }
   .event-list .event-item[data-tone="negative"] .event-dot { background: #d94b3e; }
   .event-list .event-item[data-tone="neutral"]  .event-dot { background: #c8a24a; }
 

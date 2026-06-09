@@ -117,14 +117,14 @@ import T from '../components/T.astro';
 
 <style>
     .contact-body {
-        background-color: #fffbf0;
+        background-color: var(--color-bg);
         /* Shared garlic tile — see /public/images/garlic-tile.svg (same as index.astro). */
         background-image: url("/images/garlic-tile.svg");
         background-size: 192px 184px;
         background-repeat: repeat;
         animation: garlic-drift 180s linear infinite;
         font-family: var(--font-main);
-        color: #333;
+        color: var(--color-text);
         min-height: 100vh;
         border-bottom: 8px solid var(--color-primary);
     }
@@ -141,7 +141,7 @@ import T from '../components/T.astro';
     }
 
     .contact-card {
-        background: #fffbf0;
+        background: var(--color-bg);
         border-radius: var(--radius-xl);
         padding: 3rem 2.5rem;
         box-shadow: 0 4px 24px rgba(0,0,0,0.06);
@@ -181,8 +181,8 @@ import T from '../components/T.astro';
         border: 2px solid var(--color-secondary);
         border-radius: 10px;
         padding: 0.65rem 0.9rem;
-        background: #fff;
-        color: #333;
+        background: var(--color-white);
+        color: var(--color-text);
         outline: none;
         transition: border-color 0.15s;
         resize: vertical;
