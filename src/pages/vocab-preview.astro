@@ -1,0 +1,309 @@
+---
+/**
+ * Internal preview of the vocab image+audio assets (scripts/ pipeline output).
+ * Shows every word that currently has a picked image, grouped by category, so
+ * you can eyeball how the processed photos/illustrations look. Click a card to
+ * hear its voice clip. Not linked from the nav — it's a dev/review page.
+ */
+import Layout from '../layouts/Layout.astro';
+import Navbar from '../components/Navbar.astro';
+import T from '../components/T.astro';
+import StrokeLetter from '../components/StrokeLetter.astro';
+import { categories, imageFor, audioFor } from '../data/vocab/words';
+
+// Drawable-letter audit preview: full caps + lowercase sets, static and animated,
+// with guide lines, plus mixed-case sample words on a shared baseline.
+const caps = [..."ABCDEFGHIJKLMNOPQRSTUVWXYZ"];
+const lows = [..."abcdefghijklmnopqrstuvwxyz"];
+const sampleWords = ["Dog", "Apple", "jump", "Takko", "Quiz", "gym"];
+const isLow = (ch: string) => ch >= "a" && ch <= "z";
+
+const SPEAKER = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 5V4L8 9H4z" fill="currentColor"/><path d="M16.5 8.5a4.5 4.5 0 0 1 0 7" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>`;
+
+// Only categories that have at least one image, and only the worded cards within.
+const sections = categories
+    .map((c) => ({
+        name: c.name,
+        words: c.words
+            .map((w) => ({ en: w.en, ja: w.ja[0], img: imageFor(w), audio: audioFor(w) }))
+            .filter((w) => w.img),
+    }))
+    .filter((c) => c.words.length > 0);
+
+const total = sections.reduce((n, s) => n + s.words.length, 0);
+---
+
+<Layout
+    title="Vocab Image Preview — TakkoTaco"
+    description="Internal preview of vocab images and audio."
+>
+    <div class="preview-body">
+        <Navbar />
+
+        <main class="preview-main">
+            <header class="preview-head">
+                <h1>
+                    <T>
+                        <span slot="en">Vocab Image Preview</span>
+                        <span slot="ja">たんごの がぞう プレビュー</span>
+                    </T>
+                </h1>
+                <p class="count">{total} words with an image</p>
+            </header>
+
+            <section class="cat alpha">
+                <h2>Drawable letters — stroke audit</h2>
+
+                <h3>Capitals</h3>
+                <div class="alpha-row caps">
+                    {caps.map((l) => (
+                        <span class="cell cap"><StrokeLetter letter={l} /></span>
+                    ))}
+                </div>
+                <div class="alpha-row caps">
+                    {caps.map((l, i) => (
+                        <span class="cell cap"><StrokeLetter letter={l} animate delay={`-${(i * 0.15).toFixed(2)}s`} /></span>
+                    ))}
+                </div>
+
+                <h3>Lowercase</h3>
+                <div class="alpha-row lower">
+                    {lows.map((l) => (
+                        <span class="cell low"><StrokeLetter letter={l} /></span>
+                    ))}
+                </div>
+                <div class="alpha-row lower">
+                    {lows.map((l, i) => (
+                        <span class="cell low"><StrokeLetter letter={l} animate delay={`-${(i * 0.15).toFixed(2)}s`} /></span>
+                    ))}
+                </div>
+
+                <h3>Sample words <span class="cat-count">shared baseline</span></h3>
+                <div class="words">
+                    {sampleWords.map((w) => (
+                        <span class="word">
+                            {[...w].map((ch) => (
+                                <span class:list={["g", { low: isLow(ch) }]}><StrokeLetter letter={ch} /></span>
+                            ))}
+                        </span>
+                    ))}
+                </div>
+            </section>
+
+            {sections.map((section) => (
+                <section class="cat">
+                    <h2>{section.name} <span class="cat-count">{section.words.length}</span></h2>
+                    <div class="grid">
+                        {section.words.map((w) => (
+                            <button
+                                class="card"
+                                data-audio={w.audio}
+                                data-say={w.en}
+                                aria-label={`Play ${w.en}`}
+                            >
+                                <span class="thumb">
+                                    <img src={w.img} alt={w.en} loading="lazy" width="160" height="160" />
+                                    <span class="speaker" set:html={SPEAKER}></span>
+                                </span>
+                                <span class="label">
+                                    <span class="en">{w.en}</span>
+                                    <span class="ja">{w.ja}</span>
+                                </span>
+                            </button>
+                        ))}
+                    </div>
+                </section>
+            ))}
+        </main>
+    </div>
+</Layout>
+
+<script>
+    import { playFromEl } from '../scripts/speak';
+    document.querySelectorAll<HTMLButtonElement>('.card').forEach((card) => {
+        card.addEventListener('click', () => playFromEl(card));
+    });
+</script>
+
+<style>
+    .preview-body {
+        min-height: 100vh;
+        background: #f6f4ef;
+    }
+    .preview-main {
+        width: 75%;
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 2rem 0 4rem;
+    }
+    .preview-head {
+        display: flex;
+        align-items: baseline;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    .preview-head h1 {
+        font-size: 1.6rem;
+        margin: 0;
+        color: #2b2b2b;
+    }
+    .count {
+        color: #8a8478;
+        font-size: 0.95rem;
+        margin: 0;
+    }
+    .cat {
+        margin-bottom: 2.5rem;
+    }
+    .alpha h3 {
+        font-size: 0.85rem;
+        color: #6a6555;
+        margin: 1.2rem 0 0.5rem;
+        font-weight: 600;
+    }
+    .alpha-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        margin-bottom: 0.5rem;
+    }
+    .cell {
+        position: relative;
+        width: 54px;
+        height: 54px;
+        background: #fff;
+        border: 1px solid #ece7db;
+        border-radius: 6px;
+    }
+    .cell :global(svg) {
+        position: relative;
+        z-index: 1;
+    }
+    /* guide lines: solid = baseline, faint = cap-top / x-height */
+    .cell::before,
+    .cell::after {
+        content: "";
+        position: absolute;
+        left: 4px;
+        right: 4px;
+        border-top: 1px dashed #ddd4c0;
+    }
+    .cell.cap::before { top: 91%; border-top-color: #d8b24a; }
+    .cell.cap::after { top: 8%; }
+    .cell.low::before { top: 76%; border-top-color: #d8b24a; }
+    .cell.low::after { top: 42.7%; }
+    .words {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.2rem;
+        align-items: flex-end;
+        padding-bottom: 0.5rem;
+    }
+    .word {
+        display: inline-flex;
+        align-items: flex-start;
+        overflow: visible;
+    }
+    .word .g {
+        width: 64px;
+        height: 64px;
+    }
+    /* drop lowercase so its baseline (y76) meets the caps baseline (y91): 15% */
+    .word .g.low :global(svg) {
+        transform: translateY(15%);
+    }
+    .cat h2 {
+        font-size: 1.05rem;
+        color: #4a4639;
+        border-bottom: 2px solid #e6e1d6;
+        padding-bottom: 0.4rem;
+        margin: 0 0 1rem;
+    }
+    .cat-count {
+        color: #b3ac9c;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        gap: 0.9rem;
+    }
+    .card {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0;
+        padding: 0;
+        background: #fff;
+        border: 1px solid #e4dfd3;
+        border-radius: 10px;
+        overflow: hidden;
+        cursor: pointer;
+        font: inherit;
+        text-align: left;
+        transition: border-color 0.12s, transform 0.12s;
+    }
+    .card:hover {
+        border-color: #c9a24a;
+        transform: translateY(-2px);
+    }
+    .card:active {
+        transform: translateY(0);
+    }
+    .thumb {
+        position: relative;
+        display: block;
+        aspect-ratio: 1 / 1;
+        background: #faf8f3;
+    }
+    .thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+    .speaker {
+        position: absolute;
+        right: 6px;
+        bottom: 6px;
+        width: 22px;
+        height: 22px;
+        padding: 3px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.9);
+        color: #5a5343;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+    }
+    .speaker :global(svg) {
+        width: 100%;
+        height: 100%;
+        display: block;
+    }
+    .label {
+        display: flex;
+        flex-direction: column;
+        padding: 0.5rem 0.6rem 0.6rem;
+    }
+    .label .en {
+        font-weight: 600;
+        color: #2b2b2b;
+        font-size: 0.95rem;
+    }
+    .label .ja {
+        color: #8a8478;
+        font-size: 0.8rem;
+    }
+    body.lang-ja .label .en {
+        color: #6a6555;
+        font-weight: 500;
+        font-size: 0.8rem;
+        order: 2;
+    }
+    body.lang-ja .label .ja {
+        color: #2b2b2b;
+        font-weight: 600;
+        font-size: 0.95rem;
+        order: 1;
+    }
+</style>

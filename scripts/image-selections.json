@@ -534,5 +534,265 @@
     "full": "https://images.pexels.com/photos/10647859/pexels-photo-10647859.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
     "page": "https://www.pexels.com/photo/displayed-raw-meat-10647859/",
     "author": "Rickie-Tom Schünemann"
+  },
+  "hamburger": {
+    "id": "pexels-15344191",
+    "source": "pexels",
+    "thumb": "https://images.pexels.com/photos/15344191/pexels-photo-15344191.jpeg?auto=compress&cs=tinysrgb&h=350",
+    "full": "https://images.pexels.com/photos/15344191/pexels-photo-15344191.jpeg",
+    "page": "https://www.pexels.com/photo/hamburgers-and-beverages-15344191/",
+    "author": "Thiago Diniz"
+  },
+  "pie": {
+    "id": "pexels-4340676",
+    "source": "pexels",
+    "thumb": "https://images.pexels.com/photos/4340676/pexels-photo-4340676.jpeg?auto=compress&cs=tinysrgb&h=350",
+    "full": "https://images.pexels.com/photos/4340676/pexels-photo-4340676.jpeg",
+    "page": "https://www.pexels.com/photo/delicious-ice-cream-on-plate-with-apple-pie-4340676/",
+    "author": "Spencer Davis"
+  },
+  "green pepper": {
+    "id": "pexels-29560970",
+    "source": "pexels",
+    "thumb": "https://images.pexels.com/photos/29560970/pexels-photo-29560970.jpeg?auto=compress&cs=tinysrgb&h=350",
+    "full": "https://images.pexels.com/photos/29560970/pexels-photo-29560970.jpeg",
+    "page": "https://www.pexels.com/photo/fresh-green-bell-peppers-from-brasil-29560970/",
+    "author": "Mateus Belarmino"
+  },
+  "breakfast": {
+    "id": "pexels-4109374",
+    "source": "pexels",
+    "thumb": "https://images.pexels.com/photos/4109374/pexels-photo-4109374.jpeg?auto=compress&cs=tinysrgb&h=350",
+    "full": "https://images.pexels.com/photos/4109374/pexels-photo-4109374.jpeg",
+    "page": "https://www.pexels.com/photo/food-on-plates-4109374/",
+    "author": "Polina Tankilevitch"
+  },
+  "meat": {
+    "id": "pixabay-5878787",
+    "source": "pixabay",
+    "thumb": "https://pixabay.com/get/g92f9dd4eaabd56bf88318db595ec69b1bb4cf12e9b48dbee3fee2bba74fd7e0722cf9b2c9071d13ef6c50b27666168d6e21c0787981da6720dcfc31b7569dfb1_640.jpg",
+    "full": "https://pixabay.com/get/gc70f6a1c1d0cc1395ff9ce644fcd03a9ceabd0df7b80999db4a0ccf364ceacd551518982c478dd1dc64743b6b0703b5d33ba63454dcbcabd9b55ffce427dbba8_1280.jpg",
+    "page": "https://pixabay.com/photos/meat-cut-food-cutting-grilled-5878787/",
+    "author": "planet_fox"
+  },
+  "bacon": {
+    "id": "pixabay-5909430",
+    "source": "pixabay",
+    "thumb": "https://pixabay.com/get/g616a5efffa502544362605d40859ea893d005613b52aa831c6396716074f68dd2102367493d984d4fd90319044c05d2207173032cba2a216e70ed93d460e03b7_640.jpg",
+    "full": "https://pixabay.com/get/gb427894689dfbd889d566a392e84fa35b206829154e3cf62d6eaf3000a303c6c1867d6944a9082a34d37114ba912da8b9ecabd28cf4637ff6be8598e172456a2_1280.jpg",
+    "page": "https://pixabay.com/photos/breakfast-bacon-cast-iron-skillet-5909430/",
+    "author": "joshuavanhierden"
+  },
+  "ham": {
+    "id": "pixabay-2278383",
+    "source": "pixabay",
+    "thumb": "https://pixabay.com/get/ga7604bd203ca7e3003d967ada3050a260bfa891e064095712173a6f2c0a639948d12fa91e6ebb4c0e26a42676261f65350d2687586ed0b5db314af9b73da37a4_640.jpg",
+    "full": "https://pixabay.com/get/g23adce9c2ac0eb351e112b3832f0c08cff362ecb726d388892041264315bbd3d91219b81b6164be5142d852251c9fcb4067a774e383de0253f3fa4f3f84cdc3a_1280.jpg",
+    "page": "https://pixabay.com/photos/black-forest-ham-ham-cold-buffet-2278383/",
+    "author": "HNBS"
+  },
+  "cheese": {
+    "id": "pexels-28575893",
+    "source": "pexels",
+    "thumb": "https://images.pexels.com/photos/28575893/pexels-photo-28575893.jpeg?auto=compress&cs=tinysrgb&h=350",
+    "full": "https://images.pexels.com/photos/28575893/pexels-photo-28575893.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+    "page": "https://www.pexels.com/photo/artisanal-cheese-and-bread-on-wooden-board-28575893/",
+    "author": "Marcelo Verfe"
+  },
+  "egg": {
+    "id": "pexels-32149473",
+    "source": "pexels",
+    "thumb": "https://images.pexels.com/photos/32149473/pexels-photo-32149473.jpeg?auto=compress&cs=tinysrgb&h=350",
+    "full": "https://images.pexels.com/photos/32149473/pexels-photo-32149473.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+    "page": "https://www.pexels.com/photo/single-brown-chicken-egg-on-dark-surface-32149473/",
+    "author": "Christopher Welsch Leveroni"
+  },
+  "fish": {
+    "id": "pexels-37534681",
+    "source": "pexels",
+    "thumb": "https://images.pexels.com/photos/37534681/pexels-photo-37534681.jpeg?auto=compress&cs=tinysrgb&h=350",
+    "full": "https://images.pexels.com/photos/37534681/pexels-photo-37534681.jpeg",
+    "page": "https://www.pexels.com/photo/grilled-whole-fish-with-herbs-and-lime-37534681/",
+    "author": "Masuma Rahaman"
+  },
+  "salmon": {
+    "id": "pixabay-2326479",
+    "source": "pixabay",
+    "thumb": "https://pixabay.com/get/gfa63dc9156b117bcbbb19ac1f499056f3b86423563e68bf915d32fefb86db215c684a5e667d1b9a6f1ab6f13366618db10adfd58d2592b85acfa49f43222ebcb_640.jpg",
+    "full": "https://pixabay.com/get/gfa63dc9156b117bcbbb19ac1f499056f3b86423563e68bf915d32fefb86db215c684a5e667d1b9a6f1ab6f13366618db10adfd58d2592b85acfa49f43222ebcb_640.jpg",
+    "page": "https://pixabay.com/photos/salmon-salmon-fillet-fish-2326479/",
+    "author": "Sabrinakoeln"
+  },
+  "octopus": {
+    "id": "pexels-10432458",
+    "source": "pexels",
+    "thumb": "https://images.pexels.com/photos/10432458/pexels-photo-10432458.jpeg?auto=compress&cs=tinysrgb&h=350",
+    "full": "https://images.pexels.com/photos/10432458/pexels-photo-10432458.jpeg",
+    "page": "https://www.pexels.com/photo/salmon-and-octopus-and-tentacles-on-plates-10432458/",
+    "author": "RDNE Stock project"
+  },
+  "bitter": {
+    "id": "pexels-37125860",
+    "source": "pexels",
+    "thumb": "https://images.pexels.com/photos/37125860/pexels-photo-37125860.jpeg?auto=compress&cs=tinysrgb&h=350",
+    "full": "https://images.pexels.com/photos/37125860/pexels-photo-37125860.jpeg",
+    "page": "https://www.pexels.com/photo/three-stages-of-coffee-beans-grind-brew-37125860/",
+    "author": "Christopher Welsch Leveroni"
+  },
+  "sweet": {
+    "id": "pexels-6942042",
+    "source": "pexels",
+    "thumb": "https://images.pexels.com/photos/6942042/pexels-photo-6942042.jpeg?auto=compress&cs=tinysrgb&h=350",
+    "full": "https://images.pexels.com/photos/6942042/pexels-photo-6942042.jpeg",
+    "page": "https://www.pexels.com/photo/colorful-candies-and-sweet-foods-on-a-blue-surface-6942042/",
+    "author": "Nataliya Vaitkevich"
+  },
+  "salty": {
+    "id": "pexels-6696932",
+    "source": "pexels",
+    "thumb": "https://images.pexels.com/photos/6696932/pexels-photo-6696932.jpeg?auto=compress&cs=tinysrgb&h=350",
+    "full": "https://images.pexels.com/photos/6696932/pexels-photo-6696932.jpeg",
+    "page": "https://www.pexels.com/photo/female-holding-tasty-snacks-in-hands-6696932/",
+    "author": "Tim  Samuel"
+  },
+  "sour": {
+    "id": "pexels-30256656",
+    "source": "pexels",
+    "thumb": "https://images.pexels.com/photos/30256656/pexels-photo-30256656.jpeg?auto=compress&cs=tinysrgb&h=350",
+    "full": "https://images.pexels.com/photos/30256656/pexels-photo-30256656.jpeg",
+    "page": "https://www.pexels.com/photo/woman-licking-lemon-slice-against-blue-background-30256656/",
+    "author": "Visual Tag Mx"
+  },
+  "spicy": {
+    "id": "pixabay-98945",
+    "source": "pixabay",
+    "thumb": "https://pixabay.com/get/g3724bccde90bf4f23c67096e0c460bd1ec7dbede59138713587a67ba90616f4890627d4c000139ed3d3c109e1462ec25_640.jpg",
+    "full": "https://pixabay.com/get/g4f7171e98328105a7ee22a91ddedf3d13995d571a4df06c41697e14b089468bb4857b3a44b0e3e9e96115e64c1c62db8_1280.jpg",
+    "page": "https://pixabay.com/photos/hot-pepper-pepper-fire-food-green-98945/",
+    "author": "holdosi"
+  },
+  "delicious": {
+    "id": "pexels-3811663",
+    "source": "pexels",
+    "thumb": "https://images.pexels.com/photos/3811663/pexels-photo-3811663.jpeg?auto=compress&cs=tinysrgb&h=350",
+    "full": "https://images.pexels.com/photos/3811663/pexels-photo-3811663.jpeg",
+    "page": "https://www.pexels.com/photo/woman-in-purple-eating-3811663/",
+    "author": "Andrea Piacquadio"
+  },
+  "soft": {
+    "id": "pexels-30363058",
+    "source": "pexels",
+    "thumb": "https://images.pexels.com/photos/30363058/pexels-photo-30363058.jpeg?auto=compress&cs=tinysrgb&h=350",
+    "full": "https://images.pexels.com/photos/30363058/pexels-photo-30363058.jpeg",
+    "page": "https://www.pexels.com/photo/soft-sherpa-sofa-cover-with-hand-touch-30363058/",
+    "author": "SlipcoverKAS .COM"
+  },
+  "hard": {
+    "id": "pexels-5348821",
+    "source": "pexels",
+    "thumb": "https://images.pexels.com/photos/5348821/pexels-photo-5348821.png?auto=compress&cs=tinysrgb&h=350",
+    "full": "https://images.pexels.com/photos/5348821/pexels-photo-5348821.png",
+    "page": "https://www.pexels.com/photo/male-hand-on-grey-stone-5348821/",
+    "author": "Eman Genatilan"
+  },
+  "cold": {
+    "id": "pexels-10773592",
+    "source": "pexels",
+    "thumb": "https://images.pexels.com/photos/10773592/pexels-photo-10773592.jpeg?auto=compress&cs=tinysrgb&h=350",
+    "full": "https://images.pexels.com/photos/10773592/pexels-photo-10773592.jpeg",
+    "page": "https://www.pexels.com/photo/man-in-beanie-hat-covered-with-cloth-10773592/",
+    "author": "Abrar Hashim"
+  },
+  "hot": {
+    "id": "pexels-12413177",
+    "source": "pexels",
+    "thumb": "https://images.pexels.com/photos/12413177/pexels-photo-12413177.jpeg?auto=compress&cs=tinysrgb&h=350",
+    "full": "https://images.pexels.com/photos/12413177/pexels-photo-12413177.jpeg",
+    "page": "https://www.pexels.com/photo/a-city-during-sunset-12413177/",
+    "author": "Fatih Turan"
+  },
+  "fine": {
+    "id": "irasutoya-local",
+    "source": "irasutoya",
+    "manual": true,
+    "page": null,
+    "author": "Takashi Mifune (Irasutoya)"
+  },
+  "good": {
+    "id": "irasutoya-local",
+    "source": "irasutoya",
+    "manual": true,
+    "page": null,
+    "author": "Takashi Mifune (Irasutoya)"
+  },
+  "great": {
+    "id": "irasutoya-local",
+    "source": "irasutoya",
+    "manual": true,
+    "page": null,
+    "author": "Takashi Mifune (Irasutoya)"
+  },
+  "happy": {
+    "id": "irasutoya-local",
+    "source": "irasutoya",
+    "manual": true,
+    "page": null,
+    "author": "Takashi Mifune (Irasutoya)"
+  },
+  "sad": {
+    "id": "irasutoya-local",
+    "source": "irasutoya",
+    "manual": true,
+    "page": null,
+    "author": "Takashi Mifune (Irasutoya)"
+  },
+  "nervous": {
+    "id": "irasutoya-local",
+    "source": "irasutoya",
+    "manual": true,
+    "page": null,
+    "author": "Takashi Mifune (Irasutoya)"
+  },
+  "tired": {
+    "id": "irasutoya-local",
+    "source": "irasutoya",
+    "manual": true,
+    "page": null,
+    "author": "Takashi Mifune (Irasutoya)"
+  },
+  "sleepy": {
+    "id": "irasutoya-local",
+    "source": "irasutoya",
+    "manual": true,
+    "page": null,
+    "author": "Takashi Mifune (Irasutoya)"
+  },
+  "busy": {
+    "id": "irasutoya-local",
+    "source": "irasutoya",
+    "manual": true,
+    "page": null,
+    "author": "Takashi Mifune (Irasutoya)"
+  },
+  "hungry": {
+    "id": "irasutoya-local",
+    "source": "irasutoya",
+    "manual": true,
+    "page": null,
+    "author": "Takashi Mifune (Irasutoya)"
+  },
+  "thirsty": {
+    "id": "irasutoya-local",
+    "source": "irasutoya",
+    "manual": true,
+    "page": null,
+    "author": "Takashi Mifune (Irasutoya)"
+  },
+  "comfortable": {
+    "id": "irasutoya-local",
+    "source": "irasutoya",
+    "manual": true,
+    "page": null,
+    "author": "Takashi Mifune (Irasutoya)"
   }
 }

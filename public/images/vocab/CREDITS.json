@@ -313,5 +313,175 @@
     "source": "pexels",
     "author": "Rickie-Tom Schünemann",
     "page": "https://www.pexels.com/photo/displayed-raw-meat-10647859/"
+  },
+  "hamburger": {
+    "source": "pexels",
+    "author": "Thiago Diniz",
+    "page": "https://www.pexels.com/photo/hamburgers-and-beverages-15344191/"
+  },
+  "pie": {
+    "source": "pexels",
+    "author": "Spencer Davis",
+    "page": "https://www.pexels.com/photo/delicious-ice-cream-on-plate-with-apple-pie-4340676/"
+  },
+  "green pepper": {
+    "source": "pexels",
+    "author": "Mateus Belarmino",
+    "page": "https://www.pexels.com/photo/fresh-green-bell-peppers-from-brasil-29560970/"
+  },
+  "breakfast": {
+    "source": "pexels",
+    "author": "Polina Tankilevitch",
+    "page": "https://www.pexels.com/photo/food-on-plates-4109374/"
+  },
+  "meat": {
+    "source": "pixabay",
+    "author": "planet_fox",
+    "page": "https://pixabay.com/photos/meat-cut-food-cutting-grilled-5878787/"
+  },
+  "bacon": {
+    "source": "pixabay",
+    "author": "joshuavanhierden",
+    "page": "https://pixabay.com/photos/breakfast-bacon-cast-iron-skillet-5909430/"
+  },
+  "ham": {
+    "source": "pixabay",
+    "author": "HNBS",
+    "page": "https://pixabay.com/photos/black-forest-ham-ham-cold-buffet-2278383/"
+  },
+  "cheese": {
+    "source": "pexels",
+    "author": "Marcelo Verfe",
+    "page": "https://www.pexels.com/photo/artisanal-cheese-and-bread-on-wooden-board-28575893/"
+  },
+  "egg": {
+    "source": "pexels",
+    "author": "Christopher Welsch Leveroni",
+    "page": "https://www.pexels.com/photo/single-brown-chicken-egg-on-dark-surface-32149473/"
+  },
+  "fish": {
+    "source": "pexels",
+    "author": "Masuma Rahaman",
+    "page": "https://www.pexels.com/photo/grilled-whole-fish-with-herbs-and-lime-37534681/"
+  },
+  "salmon": {
+    "source": "pixabay",
+    "author": "Sabrinakoeln",
+    "page": "https://pixabay.com/photos/salmon-salmon-fillet-fish-2326479/"
+  },
+  "octopus": {
+    "source": "pexels",
+    "author": "RDNE Stock project",
+    "page": "https://www.pexels.com/photo/salmon-and-octopus-and-tentacles-on-plates-10432458/"
+  },
+  "bitter": {
+    "source": "pexels",
+    "author": "Christopher Welsch Leveroni",
+    "page": "https://www.pexels.com/photo/three-stages-of-coffee-beans-grind-brew-37125860/"
+  },
+  "sweet": {
+    "source": "pexels",
+    "author": "Nataliya Vaitkevich",
+    "page": "https://www.pexels.com/photo/colorful-candies-and-sweet-foods-on-a-blue-surface-6942042/"
+  },
+  "salty": {
+    "source": "pexels",
+    "author": "Tim  Samuel",
+    "page": "https://www.pexels.com/photo/female-holding-tasty-snacks-in-hands-6696932/"
+  },
+  "sour": {
+    "source": "pexels",
+    "author": "Visual Tag Mx",
+    "page": "https://www.pexels.com/photo/woman-licking-lemon-slice-against-blue-background-30256656/"
+  },
+  "spicy": {
+    "source": "pixabay",
+    "author": "holdosi",
+    "page": "https://pixabay.com/photos/hot-pepper-pepper-fire-food-green-98945/"
+  },
+  "delicious": {
+    "source": "pexels",
+    "author": "Andrea Piacquadio",
+    "page": "https://www.pexels.com/photo/woman-in-purple-eating-3811663/"
+  },
+  "soft": {
+    "source": "pexels",
+    "author": "SlipcoverKAS .COM",
+    "page": "https://www.pexels.com/photo/soft-sherpa-sofa-cover-with-hand-touch-30363058/"
+  },
+  "hard": {
+    "source": "pexels",
+    "author": "Eman Genatilan",
+    "page": "https://www.pexels.com/photo/male-hand-on-grey-stone-5348821/"
+  },
+  "cold": {
+    "source": "pexels",
+    "author": "Abrar Hashim",
+    "page": "https://www.pexels.com/photo/man-in-beanie-hat-covered-with-cloth-10773592/"
+  },
+  "hot": {
+    "source": "pexels",
+    "author": "Fatih Turan",
+    "page": "https://www.pexels.com/photo/a-city-during-sunset-12413177/"
+  },
+  "fine": {
+    "source": "irasutoya",
+    "author": "Takashi Mifune (Irasutoya)",
+    "page": null
+  },
+  "good": {
+    "source": "irasutoya",
+    "author": "Takashi Mifune (Irasutoya)",
+    "page": null
+  },
+  "great": {
+    "source": "irasutoya",
+    "author": "Takashi Mifune (Irasutoya)",
+    "page": null
+  },
+  "happy": {
+    "source": "irasutoya",
+    "author": "Takashi Mifune (Irasutoya)",
+    "page": null
+  },
+  "sad": {
+    "source": "irasutoya",
+    "author": "Takashi Mifune (Irasutoya)",
+    "page": null
+  },
+  "nervous": {
+    "source": "irasutoya",
+    "author": "Takashi Mifune (Irasutoya)",
+    "page": null
+  },
+  "tired": {
+    "source": "irasutoya",
+    "author": "Takashi Mifune (Irasutoya)",
+    "page": null
+  },
+  "sleepy": {
+    "source": "irasutoya",
+    "author": "Takashi Mifune (Irasutoya)",
+    "page": null
+  },
+  "busy": {
+    "source": "irasutoya",
+    "author": "Takashi Mifune (Irasutoya)",
+    "page": null
+  },
+  "hungry": {
+    "source": "irasutoya",
+    "author": "Takashi Mifune (Irasutoya)",
+    "page": null
+  },
+  "thirsty": {
+    "source": "irasutoya",
+    "author": "Takashi Mifune (Irasutoya)",
+    "page": null
+  },
+  "comfortable": {
+    "source": "irasutoya",
+    "author": "Takashi Mifune (Irasutoya)",
+    "page": null
   }
 }
