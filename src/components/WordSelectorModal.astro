@@ -127,7 +127,7 @@
     font-family: inherit;
     font-weight: 700;
     cursor: pointer;
-    transition: opacity 0.2s;
+    transition: opacity var(--transition);
   }
   .modal-go-btn:hover    { opacity: 0.88; }
   .modal-go-btn:disabled { opacity: 0.4; cursor: default; }
@@ -178,7 +178,7 @@
     align-items: center;
     flex-shrink: 0;
     margin-left: auto;
-    transition: border-color 0.15s, color 0.15s, background 0.15s;
+    transition: border-color var(--transition-fast), color var(--transition-fast), background var(--transition-fast);
   }
   :global(.preview-btn:hover) {
     border-color: var(--modal-color, #557153);
@@ -232,7 +232,7 @@
     cursor: pointer;
     font-family: inherit;
     text-align: left;
-    transition: background 0.15s;
+    transition: background var(--transition-fast);
     box-sizing: border-box;
     color: inherit;
   }

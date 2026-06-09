@@ -221,7 +221,7 @@ import T from './T.astro';
     color: var(--color-dark-green);
     text-decoration: none;
     font-weight: 500;
-    transition: color 0.2s;
+    transition: color var(--transition);
     font-size: 1.1rem;
   }
 
@@ -241,7 +241,7 @@ import T from './T.astro';
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    transition: all 0.2s;
+    transition: all var(--transition);
   }
 
   .lang-toggle:hover {
@@ -269,7 +269,7 @@ import T from './T.astro';
     border-radius: var(--radius-pill);
     background: #aebac4;            /* off: muted "tech" grey-blue */
     border: 2px solid #8a99a4;
-    transition: background 0.2s, border-color 0.2s;
+    transition: background var(--transition), border-color var(--transition);
   }
   .mii-knob {
     position: absolute;
@@ -285,7 +285,7 @@ import T from './T.astro';
     place-items: center;
     color: #6b7a85;
     /* springy slide = a bit of silliness */
-    transition: left 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.2s;
+    transition: left 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), color var(--transition);
   }
   .mii-knob-ai { font-size: 0.7rem; line-height: 1; }
   .mii-knob-mii { font-size: 0.6rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1; display: none; }
@@ -321,7 +321,7 @@ import T from './T.astro';
     opacity: 0;
     visibility: hidden;
     transform: translateY(-4px);
-    transition: opacity 0.15s, transform 0.15s, visibility 0.15s;
+    transition: opacity var(--transition-fast), transform var(--transition-fast), visibility var(--transition-fast);
     pointer-events: none;
     z-index: 60;
   }

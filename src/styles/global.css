@@ -143,6 +143,11 @@ select {
   --radius-pill: 999px; /* fully-rounded pills & toggles */
   --radius-round: 50%;  /* circles / avatars */
   --radius-button: 20px;/* soft-rounded buttons — the standard CTA look (matches the language toggle) */
+
+  /* Transition durations — the two most common values. Exact aliases (no
+     visual change). Micro-durations (0.1s/0.12s) stay literal by design. */
+  --transition-fast: 0.15s;
+  --transition: 0.2s;
 }
 
 .site-footer {

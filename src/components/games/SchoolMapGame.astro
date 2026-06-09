@@ -161,7 +161,7 @@ for (const path in roomImagesGlob) {
     background: rgba(255, 255, 255, 0.5);
     backdrop-filter: blur(4px);
     box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    transition: all 0.2s ease;
+    transition: all var(--transition) ease;
   }
 
   .movement-controls {
@@ -494,7 +494,7 @@ for (const path in roomImagesGlob) {
     width: 80%;
     height: 80%;
     object-fit: contain;
-    transition: transform 0.2s ease;
+    transition: transform var(--transition) ease;
     position: relative;
     z-index: 1;
   }

@@ -71,7 +71,7 @@ import GameLayout from "../../layouts/GameLayout.astro";
     min-height: 100vh;
     background: var(--color-beige);
     padding: 1.25rem;
-    transition: background-color 0.2s ease;
+    transition: background-color var(--transition) ease;
   }
 
   .color-vote-page[data-screen="red"] {
@@ -120,7 +120,7 @@ import GameLayout from "../../layouts/GameLayout.astro";
     gap: 0.2rem;
     font-weight: 800;
     cursor: pointer;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    transition: transform var(--transition-fast) ease, box-shadow var(--transition-fast) ease;
     color: var(--color-white);
   }
 

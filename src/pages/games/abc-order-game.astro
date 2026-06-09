@@ -181,7 +181,7 @@ const abcColors = abcAlpha.map(
     font-size: 0.9rem;
     font-weight: 700;
     z-index: 10;
-    transition: background 0.15s;
+    transition: background var(--transition-fast);
   }
 
   .back-link:hover {
@@ -437,7 +437,7 @@ const abcColors = abcAlpha.map(
     width: auto;
     object-fit: contain;
     filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.35));
-    transition: filter 0.2s, opacity 0.2s;
+    transition: filter var(--transition), opacity var(--transition);
   }
 
   .hud-lives :global(.life.lost) {
@@ -487,9 +487,9 @@ const abcColors = abcAlpha.map(
     font-size: clamp(11px, 2.6vw, 28px);
     color: #2c3e50;
     transition:
-      background 0.15s,
-      border-color 0.15s,
-      box-shadow 0.15s;
+      background var(--transition-fast),
+      border-color var(--transition-fast),
+      box-shadow var(--transition-fast);
     overflow: hidden;
   }
 

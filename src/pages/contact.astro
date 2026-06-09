@@ -184,7 +184,7 @@ import T from '../components/T.astro';
         background: var(--color-white);
         color: var(--color-text);
         outline: none;
-        transition: border-color 0.15s;
+        transition: border-color var(--transition-fast);
         resize: vertical;
     }
 
@@ -204,7 +204,7 @@ import T from '../components/T.astro';
         padding: 0.75rem 2.5rem;
         cursor: pointer;
         box-shadow: 0 3px 0 var(--color-accent-dark);
-        transition: transform 0.15s, box-shadow 0.15s;
+        transition: transform var(--transition-fast), box-shadow var(--transition-fast);
     }
 
     button[type="submit"]:hover:not(:disabled) {

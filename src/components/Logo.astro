@@ -41,7 +41,7 @@ const { class: className, mouthOpen = false, ...props } = Astro.props;
   }
 
   .eye-pupil, .eye-lid {
-    transition: transform 0.2s ease-in-out;
+    transition: transform var(--transition) ease-in-out;
   }
   .eye-pupil {
     transform-box: fill-box;

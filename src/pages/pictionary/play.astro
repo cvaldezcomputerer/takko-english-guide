@@ -637,7 +637,7 @@ import Layout from '../../layouts/Layout.astro';
     letter-spacing: 4px;
     font-family: inherit;
     box-sizing: border-box;
-    transition: border-color 0.15s;
+    transition: border-color var(--transition-fast);
   }
 
   #name-input { letter-spacing: 0; font-size: 1.1rem; text-align: left; }
@@ -768,7 +768,7 @@ import Layout from '../../layouts/Layout.astro';
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.15s;
+    transition: all var(--transition-fast);
     padding: 0;
   }
 
@@ -800,7 +800,7 @@ import Layout from '../../layouts/Layout.astro';
     align-items: center;
     justify-content: center;
     padding: 0;
-    transition: all 0.15s;
+    transition: all var(--transition-fast);
   }
   .clear-btn:hover { background: #fee2e2; }
 
@@ -895,7 +895,7 @@ import Layout from '../../layouts/Layout.astro';
     cursor: pointer;
     font-family: inherit;
     white-space: nowrap;
-    transition: background 0.2s;
+    transition: background var(--transition);
   }
   .guess-submit-btn:hover { background: var(--color-secondary); }
 
@@ -1012,7 +1012,7 @@ import Layout from '../../layouts/Layout.astro';
     font-weight: 700;
     cursor: pointer;
     font-family: inherit;
-    transition: background 0.2s;
+    transition: background var(--transition);
     margin-top: 0.5rem;
   }
   .primary-btn:hover { background: var(--color-secondary); }

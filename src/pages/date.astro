@@ -624,7 +624,7 @@ const days = Array.from({ length: 31 }, (_, i) => {
         color: var(--color-primary);
         line-height: 1.15;
         padding: 0.2rem 0.4rem;
-        transition: transform 0.12s, color 0.15s;
+        transition: transform 0.12s, color var(--transition-fast);
     }
     .question-text {
         font-size: clamp(1.7rem, 5vw, 3.4rem);
@@ -696,7 +696,7 @@ const days = Array.from({ length: 31 }, (_, i) => {
         border: 3px dashed var(--color-secondary);
         border-radius: var(--radius-lg);
         background: #fdfaf2;
-        transition: background 0.15s, border-color 0.15s, transform 0.1s;
+        transition: background var(--transition-fast), border-color var(--transition-fast), transform 0.1s;
     }
     .drop-slot.filled {
         border-color: transparent;
@@ -741,7 +741,7 @@ const days = Array.from({ length: 31 }, (_, i) => {
         font-size: clamp(0.85rem, 1.6vw, 1.05rem);
         padding: 0.45rem 1.2rem 0.45rem 0.9rem;
         cursor: pointer;
-        transition: background 0.15s, color 0.15s, transform 0.12s;
+        transition: background var(--transition-fast), color var(--transition-fast), transform 0.12s;
     }
     .sentence-play:hover:not(:disabled),
     .sentence-big:hover:not(:disabled) {
@@ -781,7 +781,7 @@ const days = Array.from({ length: 31 }, (_, i) => {
         padding: clamp(0.4rem, 1vh, 0.7rem);
         border: 2px dashed transparent;
         border-radius: 18px;
-        transition: background 0.15s, border-color 0.15s;
+        transition: background var(--transition-fast), border-color var(--transition-fast);
     }
     /* the home bank lights up while you drag its word, showing where it returns
        (keep each zone's own tint — only the dashed ring appears) */
@@ -825,7 +825,7 @@ const days = Array.from({ length: 31 }, (_, i) => {
         cursor: grab;
         touch-action: none;
         user-select: none;
-        transition: box-shadow 0.15s, border-color 0.15s, transform 0.12s;
+        transition: box-shadow var(--transition-fast), border-color var(--transition-fast), transform 0.12s;
     }
     .word-card:hover {
         border-color: var(--color-secondary);
@@ -909,7 +909,7 @@ const days = Array.from({ length: 31 }, (_, i) => {
         color: var(--color-primary);
         cursor: pointer;
         padding: 0;
-        transition: transform 0.12s, background 0.15s;
+        transition: transform 0.12s, background var(--transition-fast);
     }
     .card-play:hover { background: var(--color-primary); color: var(--color-white); transform: scale(1.1); }
     .card-play svg { width: 58%; height: 58%; }
@@ -948,7 +948,7 @@ const days = Array.from({ length: 31 }, (_, i) => {
         border-radius: var(--radius-pill);
         opacity: 0;
         pointer-events: none;
-        transition: opacity 0.2s, transform 0.2s;
+        transition: opacity var(--transition), transform var(--transition);
         z-index: 2000;
     }
     .toast.show {
@@ -1001,7 +1001,7 @@ const days = Array.from({ length: 31 }, (_, i) => {
         display: flex;
         align-items: center;
         justify-content: center;
-        transition: background 0.15s, transform 0.12s;
+        transition: background var(--transition-fast), transform 0.12s;
     }
     .big-close:hover { background: #b83a2f; transform: scale(1.08); }
     .big-close svg { width: 58%; height: 58%; }

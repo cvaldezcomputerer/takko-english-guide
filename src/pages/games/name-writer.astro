@@ -464,7 +464,7 @@ import GameLayout from '../../layouts/GameLayout.astro';
     background: var(--color-white);
     color: var(--color-text);
     outline: none;
-    transition: border-color 0.15s, box-shadow 0.15s;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
   }
   .nw-input:focus {
     border-color: var(--color-primary);
@@ -531,7 +531,7 @@ import GameLayout from '../../layouts/GameLayout.astro';
     background: var(--color-white);
     color: var(--color-text);
     cursor: pointer;
-    transition: background 0.15s, color 0.15s, border-color 0.15s, transform 0.12s;
+    transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast), transform 0.12s;
   }
   .nw-chip:hover {
     border-color: var(--color-primary);
@@ -564,7 +564,7 @@ import GameLayout from '../../layouts/GameLayout.astro';
     background: var(--color-primary);
     color: var(--color-white);
     cursor: pointer;
-    transition: background 0.15s, transform 0.12s, box-shadow 0.15s;
+    transition: background var(--transition-fast), transform 0.12s, box-shadow var(--transition-fast);
   }
   .nw-draw-btn:hover {
     transform: translateY(-1px);
@@ -617,7 +617,7 @@ import GameLayout from '../../layouts/GameLayout.astro';
     color: var(--color-text);
     cursor: pointer;
     line-height: 1.05;
-    transition: background 0.15s, color 0.15s, border-color 0.15s;
+    transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
   }
   .nw-speed-btn:hover { border-color: var(--color-primary); }
   .nw-speed-btn.is-selected {

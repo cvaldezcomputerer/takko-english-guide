@@ -476,7 +476,7 @@ import Layout from '../../layouts/Layout.astro';
     font-size: 0.95rem;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.15s;
+    transition: all var(--transition-fast);
     font-family: inherit;
   }
 
@@ -579,7 +579,7 @@ import Layout from '../../layouts/Layout.astro';
     font-weight: 600;
     cursor: pointer;
     font-family: inherit;
-    transition: all 0.15s;
+    transition: all var(--transition-fast);
   }
   .room-timer-btn:hover:not(:disabled) { border-color: var(--color-secondary); }
   .room-timer-btn--active { background: var(--color-primary); color: white; border-color: var(--color-primary); }
@@ -715,7 +715,7 @@ import Layout from '../../layouts/Layout.astro';
     font-weight: 700;
     cursor: pointer;
     font-family: inherit;
-    transition: background 0.2s, opacity 0.2s;
+    transition: background var(--transition), opacity var(--transition);
   }
   .primary-btn:hover:not(:disabled) { background: var(--color-secondary); }
   .primary-btn:disabled { opacity: 0.45; cursor: not-allowed; }
@@ -748,7 +748,7 @@ import Layout from '../../layouts/Layout.astro';
     font-weight: 700;
     cursor: pointer;
     font-family: inherit;
-    transition: all 0.2s;
+    transition: all var(--transition);
   }
   .danger-btn:hover { background: #fee2e2; }
 
@@ -762,7 +762,7 @@ import Layout from '../../layouts/Layout.astro';
     font-weight: 700;
     cursor: pointer;
     font-family: inherit;
-    transition: all 0.2s;
+    transition: all var(--transition);
   }
   .secondary-btn:hover { background: #f0eeea; }
 </style>
