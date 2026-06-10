@@ -33,4 +33,7 @@ tools/data/.find-image/
 # result — approved clips, manifest, picks — is committed elsewhere.
 tools/data/sfx-candidates/
 tools/data/sfx-candidates.json
-CLAUDE.md
+
+# Claude Code: track .claude/ across machines, but keep the machine-specific
+# local settings (absolute paths, per-machine approvals) out of git.
+.claude/settings.local.json
