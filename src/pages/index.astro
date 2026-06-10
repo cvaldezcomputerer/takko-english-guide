@@ -6,7 +6,7 @@ import Navbar from '../components/Navbar.astro';
 import AnimatedLogo from '../components/AnimatedLogo.astro';
 import ShrineIcon from '../components/ShrineIcon.astro';
 import T from '../components/T.astro';
-import { GARLIC_SILO_PATH } from '../data/garlic';
+import TrainDivider from '../components/TrainDivider.astro';
 
 const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT2r7rHiUTy7tfJNkVnajXQuXoELP_27frVBYS-S0EsXzQBI71VQcWbGmb9n8-J023R_Ldso-XJg5JY/pub?output=csv';
 
@@ -235,13 +235,7 @@ Astro.response.headers.set('Cache-Control', `public, s-maxage=${ttl}, stale-whil
                     </div>
                 </section>
 
-                <div class="garlic-divider" aria-hidden="true">
-                    <span class="garlic-div-line"></span>
-                    <svg viewBox="120 140 780 750" class="garlic-div-icon" xmlns="http://www.w3.org/2000/svg"><path d={GARLIC_SILO_PATH} fill="currentColor"/></svg>
-                    <svg viewBox="120 140 780 750" class="garlic-div-icon" xmlns="http://www.w3.org/2000/svg"><path d={GARLIC_SILO_PATH} fill="currentColor"/></svg>
-                    <svg viewBox="120 140 780 750" class="garlic-div-icon" xmlns="http://www.w3.org/2000/svg"><path d={GARLIC_SILO_PATH} fill="currentColor"/></svg>
-                    <span class="garlic-div-line"></span>
-                </div>
+                <TrainDivider variant="filled" class="train-section-divider" />
 
                 <!-- Town Guide -->
                 <section class="site-section" id="town-guide">
@@ -594,34 +588,17 @@ Astro.response.headers.set('Cache-Control', `public, s-maxage=${ttl}, stale-whil
         padding-bottom: 3rem;
     }
 
-    .site-section + .garlic-divider + .site-section {
-        padding-top: 0.5rem;
-    }
-
-    .garlic-divider {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 1.25rem 0 1.5rem;
+    /* Filled Hayabusa silhouette replacing the garlic divider.
+       :global needed because the SVG is rendered by TrainDivider.astro
+       and carries that component's scope id, not this page's. */
+    :global(.train-section-divider) {
+        display: block;
+        width: 100%;
+        margin: 1.25rem 0 1.5rem;
         color: var(--color-secondary);
     }
 
-    .garlic-div-line {
-        flex: 1;
-        height: 2px;
-        background: currentColor;
-        opacity: 0.5;
-        border-radius: 1px;
-    }
-
-    .garlic-div-icon {
-        width: 34px;
-        height: 34px;
-        flex-shrink: 0;
-    }
-
     .section-alt {
-        /* border replaced by .garlic-divider above */
     }
 
     .section-header {

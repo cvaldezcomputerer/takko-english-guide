@@ -9,6 +9,7 @@ import Layout from '../layouts/Layout.astro';
 import Navbar from '../components/Navbar.astro';
 import T from '../components/T.astro';
 import StrokeLetter from '../components/StrokeLetter.astro';
+import OutlineLetter from '../components/OutlineLetter.astro';
 import { categories, imageFor, audioFor } from '../data/vocab/words';
 
 // Drawable-letter audit preview: full caps + lowercase sets, static and animated,
@@ -84,6 +85,35 @@ const total = sections.reduce((n, s) => n + s.words.length, 0);
                         <span class="word">
                             {[...w].map((ch) => (
                                 <span class:list={["g", { low: isLow(ch) }]}><StrokeLetter letter={ch} /></span>
+                            ))}
+                        </span>
+                    ))}
+                </div>
+            </section>
+
+            <section class="cat alpha">
+                <h2>Outline letters — font audit</h2>
+
+                <h3>Capitals</h3>
+                <div class="alpha-row caps">
+                    {caps.map((l) => (
+                        <span class="cell cap"><OutlineLetter letter={l} /></span>
+                    ))}
+                </div>
+
+                <h3>Lowercase</h3>
+                <div class="alpha-row lower">
+                    {lows.map((l) => (
+                        <span class="cell low"><OutlineLetter letter={l} /></span>
+                    ))}
+                </div>
+
+                <h3>Sample words <span class="cat-count">shared baseline</span></h3>
+                <div class="words">
+                    {sampleWords.map((w) => (
+                        <span class="word">
+                            {[...w].map((ch) => (
+                                <span class:list={["g", { low: isLow(ch) }]}><OutlineLetter letter={ch} /></span>
                             ))}
                         </span>
                     ))}

@@ -1,0 +1,63 @@
+---
+import frontUrl from '../assets/trains/hayabusa-front.svg?url';
+import carUrl from '../assets/trains/hayabusa-car.svg?url';
+---
+<div class="train-track" aria-hidden="true">
+  <div class="train-consist" id="train-consist">
+    <img src={frontUrl} class="t-front" alt="" width="249" height="55" />
+    <img src={carUrl}   class="t-car"   alt="" width="245" height="55" />
+    <img src={carUrl}   class="t-car"   alt="" width="245" height="55" />
+    <img src={carUrl}   class="t-car"   alt="" width="245" height="55" />
+    <img src={carUrl}   class="t-car"   alt="" width="245" height="55" />
+    <img src={carUrl}   class="t-car"   alt="" width="245" height="55" />
+    <img src={carUrl}   class="t-car"   alt="" width="245" height="55" />
+    <img src={frontUrl} class="t-rear"  alt="" width="249" height="55" />
+  </div>
+</div>
+
+<style>
+  .train-track {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 55px;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 51;
+  }
+
+  .train-consist {
+    display: flex;
+    align-items: flex-end;
+    /* right edge sits one full viewport past the left edge of the track */
+    transform: translateX(calc(-100% - 100vw));
+  }
+
+  .train-consist.running {
+    animation: train-run 5.5s linear forwards;
+  }
+
+  .t-front,
+  .t-car,
+  .t-rear {
+    display: block;
+    flex-shrink: 0;
+    /* collapse any inline whitespace gap */
+    margin-right: -1px;
+  }
+
+  /* flip the rear car to face backwards */
+  .t-rear {
+    transform: scaleX(-1);
+  }
+
+  @media (max-width: 768px) {
+    .train-track { display: none; }
+  }
+
+  @keyframes train-run {
+    from { transform: translateX(calc(-100% - 100vw)); }
+    to   { transform: translateX(100vw); }
+  }
+</style>

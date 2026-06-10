@@ -1,0 +1,113 @@
+---
+import Layout from '../layouts/Layout.astro';
+import frontUrl from '../assets/trains/hayabusa-front.svg?url';
+import carUrl   from '../assets/trains/hayabusa-car.svg?url';
+---
+<Layout title="Train preview" description="Train SVG alignment check">
+  <main class="wrap">
+    <h1>Train alignment preview</h1>
+
+    <section>
+      <h2>Natural size (no scaling)</h2>
+      <p class="note">Front: 475×105 &nbsp;|&nbsp; Car: 467×105 &nbsp;— align-items: flex-end</p>
+      <div class="consist natural">
+        <img src={frontUrl} alt="front" />
+        <img src={carUrl}   alt="car" />
+        <img src={carUrl}   alt="car" />
+        <img src={carUrl}   alt="car" />
+        <img src={frontUrl} class="rear" alt="rear" />
+      </div>
+    </section>
+
+    <section>
+      <h2>Scaled to 60px tall</h2>
+      <p class="note">As used in the navbar animation (height=55px)</p>
+      <div class="consist scaled">
+        <img src={frontUrl} alt="front" height="60" />
+        <img src={carUrl}   alt="car"   height="60" />
+        <img src={carUrl}   alt="car"   height="60" />
+        <img src={carUrl}   alt="car"   height="60" />
+        <img src={frontUrl} class="rear" alt="rear" height="60" />
+      </div>
+    </section>
+
+    <section>
+      <h2>Single car — close-up</h2>
+      <div class="consist natural">
+        <img src={frontUrl} alt="front" />
+        <img src={carUrl}   alt="car" />
+      </div>
+    </section>
+
+    <section>
+      <h2>Individual SVGs</h2>
+      <div class="individuals">
+        <div>
+          <p>Front (hayabusa-front.svg)</p>
+          <img src={frontUrl} alt="front" />
+        </div>
+        <div>
+          <p>Car (hayabusa-car.svg)</p>
+          <img src={carUrl} alt="car" />
+        </div>
+      </div>
+    </section>
+  </main>
+</Layout>
+
+<style>
+  .wrap {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+  }
+
+  h1 { margin-bottom: 2rem; }
+  h2 { margin: 0 0 0.4rem; font-size: 1rem; }
+
+  section {
+    margin-bottom: 3rem;
+  }
+
+  .note {
+    font-size: 0.85rem;
+    color: #666;
+    margin: 0 0 0.75rem;
+  }
+
+  .consist {
+    display: flex;
+    align-items: flex-end;
+    background: #e8e8e8;
+    padding: 0.5rem;
+    width: fit-content;
+    gap: 0;
+  }
+
+  .consist img {
+    display: block;
+    flex-shrink: 0;
+  }
+
+  .rear {
+    transform: scaleX(-1);
+  }
+
+  .individuals {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .individuals p {
+    font-size: 0.85rem;
+    margin: 0 0 0.4rem;
+    color: #444;
+  }
+
+  .individuals img {
+    display: block;
+    background: #e8e8e8;
+    padding: 0.25rem;
+  }
+</style>

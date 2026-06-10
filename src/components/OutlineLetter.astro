@@ -1,0 +1,55 @@
+---
+/**
+ * OutlineLetter — renders a single letter (A–Z or a–z) from the filled outline
+ * set in `src/data/letter-paths.ts`. Unlike StrokeLetter (which animates pen
+ * strokes), this component renders each glyph as a solid filled shape — the
+ * source of truth for eventual font export.
+ *
+ * Usage:
+ *   import OutlineLetter from "../components/OutlineLetter.astro";
+ *   <OutlineLetter letter="A" />
+ *   <OutlineLetter letter="g" color="#2c3e50" size="80px" />
+ */
+import { LETTER_PATHS, LETTER_PATHS_LOWER } from "../data/letter-paths";
+
+interface Props {
+  letter: string;
+  color?: string;
+  size?: string;
+  class?: string;
+}
+
+const {
+  letter,
+  color = "#2b2b2b",
+  size,
+  class: className = "",
+} = Astro.props;
+
+const raw = letter ?? "";
+const isLower = raw >= "a" && raw <= "z";
+const d = isLower ? LETTER_PATHS_LOWER[raw] : LETTER_PATHS[raw.toUpperCase()];
+const style = size ? `width:${size};height:${size};` : "";
+---
+
+<svg
+  class:list={["outline-letter", className]}
+  viewBox="0 0 100 100"
+  xmlns="http://www.w3.org/2000/svg"
+  style={style}
+  aria-label={letter}
+  role="img"
+>
+  {d
+    ? <path d={d} fill={color} fill-rule="evenodd" stroke="none" />
+    : <text x="50" y="78" text-anchor="middle" font-size="72" fill={color}>{raw}</text>
+  }
+</svg>
+
+<style>
+  .outline-letter {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1;
+  }
+</style>
