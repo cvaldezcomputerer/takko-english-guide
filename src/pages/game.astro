@@ -415,29 +415,22 @@ const slots = Array.from({ length: 11 }, (_, i) => {
               </div>
           </a>
 
-          <!-- Timer Game Card -->
+          <!-- Train Timer Card -->
           <a href="/games/timer-game" class="game-card">
-               <div class="card-image timer-bg">
-                  <div class="icon" aria-hidden="true">
-                    <svg viewBox="0 0 120 120" role="img" focusable="false">
-                      <circle cx="60" cy="66" r="34" fill="#fff7ed" stroke="#7c2d12" stroke-width="4"/>
-                      <rect x="48" y="18" width="24" height="12" rx="4" fill="#f97316" stroke="#7c2d12" stroke-width="4"/>
-                      <path d="M60 66V48m0 18 12 8" stroke="#7c2d12" stroke-width="4" stroke-linecap="round"/>
-                      <path d="M34 34 28 27m58 7 6-7" stroke="#7c2d12" stroke-width="4" stroke-linecap="round"/>
-                    </svg>
-                  </div>
+               <div class="card-image card-image--screenshot">
+                  <img src="/images/game-screenshots/train-timer.png" alt="Train Timer screenshot" loading="lazy" />
               </div>
               <div class="card-content">
                   <h3>
                     <T>
-                      <span slot="en">Countdown Timer</span>
-                      <span slot="ja">カウントダウンタイマー</span>
+                      <span slot="en">Train Timer</span>
+                      <span slot="ja">電車タイマー</span>
                     </T>
                   </h3>
                   <p class="card-desc">
                     <T>
-                      <span slot="en">Set your time and run a simple countdown with a final 5-second alert.</span>
-                      <span slot="ja">時間を設定して、最後5秒のアラート付きカウントダウン。</span>
+                      <span slot="en">Train themed countdown timer for the classroom.</span>
+                      <span slot="ja">教室向けの電車テーマのカウントダウンタイマー。</span>
                     </T>
                   </p>
                   <span class="play-btn">
@@ -698,10 +691,6 @@ const slots = Array.from({ length: 11 }, (_, i) => {
 
   .points-bg {
     background: #ffe8cf;
-  }
-
-  .timer-bg {
-    background: #ffe2da;
   }
 
   .color-vote-bg {
