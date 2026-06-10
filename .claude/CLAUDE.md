@@ -36,6 +36,14 @@ This bites us most often when a component accepts a `class` prop for layout plac
 
 **The tell:** if a margin, padding, color, or display rule on a component class simply has no effect, check for the scoping mismatch before anything else. It is almost always this.
 
+## Global CSS Reset Gotchas
+
+`src/styles/global.css` applies a global reset including `img, picture { max-width: 100%; display: block; }`. This silently bites absolutely-positioned, no-explicit-width elements: such a box shrinks-to-fit **clamped to its containing block's width**, so its measured `offsetWidth` (and `translateX(-100%)`) reflect the container, not the real content. An off-screen slide-in animation then starts mid-container instead of fully off-screen — looks like the element "pops in."
+
+**Fix:** give the element `width: max-content` so it sizes to its true content width.
+
+**The tell:** an element that should start fully off-screen (transform/animation) instead appears partway on-screen, and tweaking the transform values does nothing — because the box width itself is wrong.
+
 ## Workflow Rules
 
 - **Never commit for the user.** They write their own commit messages and run git themselves. At natural stopping points, a brief note that it's a good time to commit is fine — nothing more.
