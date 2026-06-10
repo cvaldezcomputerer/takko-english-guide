@@ -405,7 +405,13 @@ import GameLayout from '../../layouts/GameLayout.astro';
     selectChip(0, options);
   }
 
-  input.addEventListener('input', render);
+  // On mobile, Japanese IME fires compositionstart/compositionend around the
+  // character commitment phase. Avoid rendering mid-composition (the value is
+  // partial/romaji at that point), and render once the user commits kana.
+  let composing = false;
+  input.addEventListener('compositionstart', () => { composing = true; });
+  input.addEventListener('compositionend', () => { composing = false; render(); });
+  input.addEventListener('input', () => { if (!composing) render(); });
   render();
 </script>
 

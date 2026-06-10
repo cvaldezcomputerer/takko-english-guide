@@ -43,6 +43,17 @@ import T from './T.astro';
 </nav>
 
 <script is:inline>
+  // Set mii toggle state immediately (before first paint) to avoid the knob
+  // animating from off→on on every page load when the user has it turned on.
+  // The <script> comes after the nav HTML so getElementById works here.
+  (function() {
+    const btn = document.getElementById('mii-toggle');
+    if (!btn) return;
+    let on = false;
+    try { on = localStorage.getItem('mii-voice') === 'on'; } catch(e) {}
+    btn.setAttribute('aria-checked', on ? 'true' : 'false');
+  })();
+
   document.addEventListener('DOMContentLoaded', () => {
       // Language Logic
       function updateLangUI(isJa) {
@@ -56,7 +67,7 @@ import T from './T.astro';
           document.body.classList.remove('lang-ja');
         }
       }
-    
+
       try {
           const savedLang = localStorage.getItem('site-lang');
           const isJa = savedLang === 'ja';
@@ -64,7 +75,7 @@ import T from './T.astro';
       } catch (e) {
           console.error("Language init error:", e);
       }
-    
+
       const langToggle = document.getElementById('lang-toggle');
       if (langToggle) {
           langToggle.addEventListener('click', () => {
@@ -75,18 +86,13 @@ import T from './T.astro';
           });
       }
 
-      // Mii-voice toggle — off by default. Read by src/lib/speak.ts via the
-      // same 'mii-voice' localStorage key (keep them in sync).
+      // Mii-voice click handler (state is already set synchronously above).
       const miiToggle = document.getElementById('mii-toggle');
       if (miiToggle) {
-          const updateMiiUI = (on) => miiToggle.setAttribute('aria-checked', on ? 'true' : 'false');
-          let miiOn = false;
-          try { miiOn = localStorage.getItem('mii-voice') === 'on'; } catch (e) {}
-          updateMiiUI(miiOn);
           miiToggle.addEventListener('click', () => {
-            miiOn = miiToggle.getAttribute('aria-checked') !== 'true';
-            try { localStorage.setItem('mii-voice', miiOn ? 'on' : 'off'); } catch (e) {}
-            updateMiiUI(miiOn);
+            const on = miiToggle.getAttribute('aria-checked') !== 'true';
+            try { localStorage.setItem('mii-voice', on ? 'on' : 'off'); } catch (e) {}
+            miiToggle.setAttribute('aria-checked', on ? 'true' : 'false');
           });
       }
     
@@ -296,7 +302,7 @@ import T from './T.astro';
     border-color: #b3000e;
   }
   .mii-switch[aria-checked="true"] .mii-knob {
-    left: 39px;
+    left: 35px;
     color: #e60012;
   }
   .mii-switch[aria-checked="true"] .mii-knob-ai { display: none; }
