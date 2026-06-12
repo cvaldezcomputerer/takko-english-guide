@@ -515,16 +515,18 @@ export const categories: VocabCategory[] = [
   {
     name: "Weather",
     words: [
-      { en: "sunny", ja: ["はれ", "はれている"] },
-      { en: "cloudy", ja: ["くもり", "くもっている"] },
-      { en: "windy", ja: ["かぜがつよい", "かぜがふいている"] },
-      { en: "rainy", ja: ["あめ", "あめがふっている"] },
-      { en: "snowy", ja: ["ゆき", "ゆきがふっている"] },
+      // Weather senses reuse the weather tool's Irasutoya art (© Takashi Mifune)
+      // via img override — same files served at /images/weather/.
+      { en: "sunny", ja: ["はれ", "はれている"], img: "/images/weather/sunny.webp" },
+      { en: "cloudy", ja: ["くもり", "くもっている"], img: "/images/weather/cloudy.webp" },
+      { en: "windy", ja: ["かぜがつよい", "かぜがふいている"], img: "/images/weather/windy.webp" },
+      { en: "rainy", ja: ["あめ", "あめがふっている"], img: "/images/weather/rainy.webp" },
+      { en: "snowy", ja: ["ゆき", "ゆきがふっている"], img: "/images/weather/snowy.webp" },
       // cold/hot also exist in Taste (つめたい/あつい) and share the manifest key
       // by `en`; img override gives the weather sense its own illustration.
       // (Irasutoya illustration, © Takashi Mifune.)
       { en: "cold", ja: ["さむい"], img: "/images/vocab/weather-cold.webp" },
-      { en: "warm", ja: ["あたたかい"] },
+      { en: "warm", ja: ["あたたかい"], img: "/images/weather/warm.webp" },
       { en: "hot", ja: ["あつい"], img: "/images/vocab/weather-hot.webp" },
       { en: "humid", ja: ["むしあつい", "しめっている"] },
     ],

@@ -50,6 +50,10 @@ only — the folder-writing API isn't in Safari/Firefox.
 
 ## Vocab images — pick a real photo per word
 
+> **Shorthand:** when the project owner says "get pictures with the API" (or "the image
+> API"), it means **this** `tools/` workflow — the 3-step pipeline below
+> (`fetch-image-candidates` → `review-server` → `download-images`), not any other service.
+
 Gives every vocab word in [`src/data/vocab/words.ts`](../src/data/vocab/words.ts) a real
 photo. A 3-step pipeline; each step is resumable and skips work already done.
 

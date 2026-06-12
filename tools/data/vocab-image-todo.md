@@ -1,7 +1,7 @@
 # Vocab image checklist
 
-Tracks an asset for every word in `src/data/vocab/words.ts` (608 words). Three routes —
-tick a box when a word is handled. Counts as of the last review: **105 picked, 97 downloaded.**
+Tracks an asset for every word in `src/data/vocab/words.ts` (622 words). Three routes —
+tick a box when a word is handled. Counts as of 2026-06-12: **309 picked, ~193 downloaded; ~195 still undecided in the gallery.**
 
 - **Route A — Photo gallery:** `node tools/scripts/images/review-server.mjs` → http://localhost:4399
 - **Route B — Illustration:** grab from [Irasutoya](https://www.irasutoya.com/), then
@@ -31,7 +31,8 @@ Taste · Feelings — all complete. (Run `download-images.mjs` to pull the ~8 pi
 - [ ] classmates
 - [ ] friends
 
-### Body Parts
+### Body Parts → ILLUSTRATION route (moved 2026-06-12)
+Photo picks were cleared and parked as `{none}`; do these via `add-local-image.mjs` (Irasutoya).
 - [ ] hair
 - [ ] head
 - [ ] face
@@ -161,16 +162,16 @@ Taste · Feelings — all complete. (Run `download-images.mjs` to pull the ~8 pi
 - [ ] fall
 - [ ] winter
 
-### Weather
-- [ ] sunny
-- [ ] cloudy
-- [ ] windy
-- [ ] rainy
-- [ ] snowy
+### Weather — reuse the weather tool's art via `img:` override in words.ts (`/images/weather/`)
+- [x] sunny
+- [x] cloudy
+- [x] windy
+- [x] rainy
+- [x] snowy
 - [x] cold
-- [ ] warm
+- [x] warm
 - [x] hot
-- [ ] humid
+- [ ] humid *(no weather-tool asset — needs its own illustration)*
 
 ### Times of day (from Daily Routines)
 - [ ] morning
@@ -179,10 +180,10 @@ Taste · Feelings — all complete. (Run `download-images.mjs` to pull the ~8 pi
 - [ ] night
 
 ### School Subjects (concrete)
-- [ ] English
-- [ ] Japanese
-- [ ] math
-- [ ] science
+- [x] English
+- [x] Japanese
+- [x] math
+- [x] science
 - [ ] music
 - [ ] arts and crafts
 - [ ] P.E.
@@ -351,10 +352,10 @@ Taste · Feelings — all complete. (Run `download-images.mjs` to pull the ~8 pi
 
 ### Pronouns (from People)
 - [ ] I
-- [ ] you
-- [ ] she
-- [ ] he
-- [ ] we
+- [x] you
+- [x] she
+- [x] he
+- [x] we
 
 ### Personality
 - [x] active
@@ -381,16 +382,16 @@ Taste · Feelings — all complete. (Run `download-images.mjs` to pull the ~8 pi
 - [x] me *(family-tree diagram, ME circled — reroll later if you want a cleaner single figure)*
 
 ### Frequency
-- [ ] always
-- [ ] usually
-- [ ] sometimes
-- [ ] never
+- [x] always
+- [x] usually
+- [x] sometimes
+- [x] never
 
 ### Positions (prepositions — need a diagram)
-- [ ] by
-- [ ] in
-- [ ] on
-- [ ] under
+- [x] by
+- [x] in
+- [x] on
+- [x] under
 
 ### Directions
 - [ ] go
@@ -449,7 +450,7 @@ Taste · Feelings — all complete. (Run `download-images.mjs` to pull the ~8 pi
 - [ ] buy
 
 ### Verbs — 6th Grade
-- [ ] speak
+- [x] speak
 - [ ] live
 - [ ] make
 - [ ] wear
@@ -525,11 +526,11 @@ Taste · Feelings — all complete. (Run `download-images.mjs` to pull the ~8 pi
 - [ ] recycle
 
 ### School Subjects (abstract)
-- [ ] calligraphy
-- [ ] social studies
-- [ ] home economics
-- [ ] moral education
-- [ ] period for integrated studies
+- [x] calligraphy
+- [x] social studies
+- [x] home economics
+- [x] moral education
+- [x] period for integrated studies
 
 ### School Events (abstract / ceremony)
 - [ ] chorus contest
@@ -549,6 +550,12 @@ Taste · Feelings — all complete. (Run `download-images.mjs` to pull the ~8 pi
 ---
 
 ## Route C — Skip image (render in UI, no file)
+
+All words below are now marked `{none}` in selections (2026-06-12), so they no longer appear
+in the photo gallery. They still need their UI rendering built: colours → swatch tile, shapes →
+SVG, dates/months/days → number or Japanese text (e.g. `1月`). **Exception:** `orange` is left
+as a normal photo because the *fruit* "orange" shares its manifest key — the colour is handled
+at the UI layer instead.
 
 ### Colors → solid colour swatch tile
 - [ ] white
