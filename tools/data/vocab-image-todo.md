@@ -1,12 +1,24 @@
 # Vocab image checklist
 
 Tracks an asset for every word in `src/data/vocab/words.ts` (622 words). Three routes —
-tick a box when a word is handled. Counts as of 2026-06-12: **309 picked, ~193 downloaded; ~195 still undecided in the gallery.**
+tick a box when a word is handled.
+
+**Status as of 2026-06-13:**
+- **493** words have a downloaded photo/illustration (`src/data/vocab/images.ts`).
+- **8** weather words reuse the weather-tool art via `img:` override in `words.ts` (`/images/weather/`).
+- **74** Route C words now render in-UI (colours/shapes/months/dates/days) — see below; **done**.
+- **45** words still have no asset and show as a faint letter-monogram placeholder in the dictionary.
+  These are the remaining work — listed under **"Remaining placeholders"** at the bottom.
+
+All of this is now displayed by the **English Words Dictionary** page
+([`src/pages/games/english-words-dictionary.astro`](../../src/pages/games/english-words-dictionary.astro),
+route `/games/english-words-dictionary`, linked from the Tools section of `/game`). How each word
+renders is decided by [`src/data/vocab/display.ts`](../../src/data/vocab/display.ts).
 
 - **Route A — Photo gallery:** `node tools/scripts/images/review-server.mjs` → http://localhost:4399
 - **Route B — Illustration:** grab from [Irasutoya](https://www.irasutoya.com/), then
   `node tools/scripts/images/add-local-image.mjs "<word>" <file> [--page <url>]`
-- **Route C — Skip image:** render as SVG / colour swatch / number-text in the UI; no file.
+- **Route C — Skip image:** rendered in the UI by `display.ts` (colour swatch / shape SVG / kana text); no file.
 
 See [tools/README.md](../README.md) for full pipeline docs. Borderline words note an alt route in
 parentheses — move them if the first route looks bad.
@@ -551,39 +563,59 @@ Photo picks were cleared and parked as `{none}`; do these via `add-local-image.m
 
 ## Route C — Skip image (render in UI, no file)
 
-All words below are now marked `{none}` in selections (2026-06-12), so they no longer appear
-in the photo gallery. They still need their UI rendering built: colours → swatch tile, shapes →
-SVG, dates/months/days → number or Japanese text (e.g. `1月`). **Exception:** `orange` is left
-as a normal photo because the *fruit* "orange" shares its manifest key — the colour is handled
-at the UI layer instead.
+**DONE (2026-06-13)** — all words below are marked `{none}` in selections (no photo) and now
+render in-UI via [`src/data/vocab/display.ts`](../../src/data/vocab/display.ts): colours → swatch
+tile, shapes → outlined SVG, months → kanji (`一月`), dates → English ordinal (`1st`), days →
+kanji (`日曜日`). Visible on the dictionary page. **Exception:** `orange` is left as a normal photo
+because the *fruit* "orange" shares its manifest key — the colour is handled at the UI layer instead.
 
-### Colors → solid colour swatch tile
-- [ ] white
-- [ ] red
+### Colors → solid colour swatch tile  ✓ rendered by display.ts
+- [x] white
+- [x] red
 - [x] orange
-- [ ] yellow
-- [ ] green
-- [ ] pink
-- [ ] purple
-- [ ] brown
-- [ ] black
-- [ ] blue
-- [ ] light blue
-- [ ] yellow green
-- [ ] gold
-- [ ] silver
+- [x] yellow
+- [x] green
+- [x] pink
+- [x] purple
+- [x] brown
+- [x] black
+- [x] blue
+- [x] light blue
+- [x] yellow green
+- [x] gold
+- [x] silver
 
-### Shapes → simple SVG
-- [ ] circle
-- [ ] cross
-- [ ] diamond
-- [ ] heart
-- [ ] rectangle
-- [ ] square
-- [ ] star
-- [ ] triangle
+### Shapes → simple SVG  ✓ rendered by display.ts
+- [x] circle
+- [x] cross
+- [x] diamond
+- [x] heart
+- [x] rectangle
+- [x] square
+- [x] star
+- [x] triangle
 
-### Numbers / text — render as number or Japanese text, not an image
-- Dates: 1st–31st (31)
-- Months: January–December + one year (13)
-- Days: Sunday–Saturday + one week (8)
+### Numbers / text — render as number or Japanese text, not an image  ✓ rendered by display.ts
+- Dates: 1st–31st (31) → English ordinal text
+- Months: January–December + one year (13) → kanji (`一月` … `一年`)
+- Days: Sunday–Saturday + one week (8) → kanji (`日曜日` … `一週間`)
+
+---
+
+## Remaining placeholders (45) — no asset yet, show as a monogram in the dictionary
+
+**Need a targeted stock photo** (refetch with a custom query, then pick — see Route A):
+- Skip-foods (want a *specific* shot, not the generic result): `water` (drinking water), `rice`
+  (bowl of cooked rice), `sushi` (nigiri), `mushroom` (food context), `nut` (variety of nuts),
+  `lunch` (school lunch), `dinner` (dinner table), `chicken` (chicken meat)
+- School places (had no candidates): `school nurse`, `teachers`, `school principal`
+- `triangle` — the **musical instrument** (distinct from the shape; needs a photo)
+
+**Need an illustration** (Route B — `add-local-image.mjs`):
+- Body parts (15): hair, head, face, eye, ear, nose, mouth, shoulder, teeth, hand, arm, neck, knee, leg, toe
+- Pronoun: `I`
+- Verbs: `go`, `want`, `come` + past tense `ate, went, saw, had, made, enjoyed, played, watched`
+- `humid` (no weather-tool asset)
+- Annual events bare forms: `New Year`, `Dolls`, `Children` (note: the festival forms
+  *New Year's Day/Eve*, *Dolls' Festival*, *Children's Day* already have illustrations — these
+  bare entries look like duplicates/stubs in `words.ts`; confirm whether they should exist).

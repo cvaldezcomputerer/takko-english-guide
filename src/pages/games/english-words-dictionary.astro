@@ -1,0 +1,259 @@
+---
+/**
+ * English Words Dictionary — public tool listed on /game.
+ * Shows every vocab word (src/data/vocab/words.ts) grouped by category, with a
+ * photo, illustration, or in-UI visual (colour swatch / shape SVG / kana text).
+ * Click a card to hear the English word.
+ */
+import GameLayout from "../../layouts/GameLayout.astro";
+import T from "../../components/T.astro";
+import { categories, audioFor } from "../../data/vocab/words";
+import { visualFor } from "../../data/vocab/display";
+
+const SPEAKER = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 5V4L8 9H4z" fill="currentColor"/><path d="M16.5 8.5a4.5 4.5 0 0 1 0 7" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>`;
+
+const sections = categories.map((c) => ({
+  name: c.name,
+  words: c.words.map((w) => ({
+    en: w.en,
+    ja: w.ja[0],
+    audio: audioFor(w),
+    visual: visualFor(c.name, w),
+  })),
+}));
+const total = sections.reduce((n, s) => n + s.words.length, 0);
+---
+
+<GameLayout
+  showBackBar
+  title="English Words Dictionary — Takkotaco"
+  description="Picture dictionary of English vocabulary words for Japanese elementary school. Tap a word to hear it."
+>
+  <main class="dict">
+    <header class="dict-head">
+      <h1>
+        <T>
+          <span slot="en">English Words Dictionary</span>
+          <span slot="ja">えいご たんご じてん</span>
+        </T>
+      </h1>
+      <p class="dict-sub">
+        <T>
+          <span slot="en">Vocabulary words for Japanese elementary school. Tap a word to hear it.</span>
+          <span slot="ja">小学生のための英単語。タップすると音が出ます。</span>
+        </T>
+      </p>
+      <p class="dict-count">{total}</p>
+    </header>
+
+    {sections.map((section) => (
+      <section class="cat">
+        <h2>{section.name} <span class="cat-count">{section.words.length}</span></h2>
+        <div class="grid">
+          {section.words.map((w) => (
+            <button class="card" data-audio={w.audio} data-say={w.en} aria-label={`Play ${w.en}`}>
+              <span class="thumb">
+                {w.visual.kind === "image" && (
+                  <img src={w.visual.src} alt={w.en} loading="lazy" width="160" height="160" />
+                )}
+                {w.visual.kind === "color" && (
+                  <span class="swatch" style={`background:${w.visual.hex}`}></span>
+                )}
+                {w.visual.kind === "shape" && <span class="shape" set:html={w.visual.svg}></span>}
+                {w.visual.kind === "text" && <span class="bigtext">{w.visual.text}</span>}
+                {w.visual.kind === "monogram" && <span class="monogram">{w.visual.letter}</span>}
+                <span class="speaker" set:html={SPEAKER}></span>
+              </span>
+              <span class="label">
+                <span class="en">{w.en}</span>
+                <span class="ja">{w.ja}</span>
+              </span>
+            </button>
+          ))}
+        </div>
+      </section>
+    ))}
+  </main>
+</GameLayout>
+
+<script>
+  import { playFromEl } from "../../lib/speak";
+  // Tool pages have no navbar, so apply the saved language preference here.
+  try {
+    if (localStorage.getItem("site-lang") === "ja") document.body.classList.add("lang-ja");
+  } catch (e) {}
+  document.querySelectorAll<HTMLButtonElement>(".card").forEach((card) => {
+    card.addEventListener("click", () => playFromEl(card));
+  });
+</script>
+
+<style>
+  .dict {
+    width: min(92%, 1100px);
+    margin: 0 auto;
+    padding: 1.6rem 0 4rem;
+  }
+  .dict-head {
+    margin-bottom: 2rem;
+  }
+  .dict-head h1 {
+    font-size: 1.7rem;
+    margin: 0;
+    color: var(--color-primary);
+  }
+  .dict-sub {
+    color: #6a6555;
+    margin: 0.35rem 0 0;
+    font-size: 0.95rem;
+  }
+  .dict-count {
+    display: inline-block;
+    margin: 0.7rem 0 0;
+    padding: 0.1rem 0.6rem;
+    background: var(--color-white);
+    border: 1px solid #e6e1d6;
+    border-radius: 999px;
+    color: #8a8478;
+    font-size: 0.8rem;
+  }
+  .dict-count::after {
+    content: " words";
+  }
+  body.lang-ja .dict-count::after {
+    content: " ことば";
+  }
+
+  .cat {
+    margin-bottom: 2.5rem;
+  }
+  .cat h2 {
+    font-size: 1.05rem;
+    color: #4a4639;
+    border-bottom: 2px solid #e6e1d6;
+    padding-bottom: 0.4rem;
+    margin: 0 0 1rem;
+  }
+  .cat-count {
+    color: #b3ac9c;
+    font-size: 0.8rem;
+    font-weight: 500;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 0.9rem;
+  }
+
+  .card {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0;
+    background: var(--color-white);
+    border: 1px solid #e4dfd3;
+    border-radius: 10px;
+    overflow: hidden;
+    cursor: pointer;
+    font: inherit;
+    text-align: left;
+    transition: border-color 0.12s, transform 0.12s;
+  }
+  .card:hover {
+    border-color: #c9a24a;
+    transform: translateY(-2px);
+  }
+  .card:active {
+    transform: translateY(0);
+  }
+
+  .thumb {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 1 / 1;
+    background: #faf8f3;
+  }
+  .thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  /* colour swatch — inset ring keeps white/silver visible on the light card */
+  .swatch {
+    width: 72%;
+    height: 72%;
+    border-radius: 10px;
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.14);
+  }
+  .shape {
+    display: block;
+    width: 74%;
+    height: 74%;
+  }
+  .shape :global(svg) {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  .bigtext {
+    font-family: "M PLUS Rounded 1c", "Andika", sans-serif;
+    font-weight: 700;
+    font-size: 2rem;
+    color: #4a4639;
+    line-height: 1;
+    text-align: center;
+  }
+  .monogram {
+    font-family: "Andika", sans-serif;
+    font-weight: 700;
+    font-size: 2.4rem;
+    color: #cfc6b2;
+  }
+
+  .speaker {
+    position: absolute;
+    right: 6px;
+    bottom: 6px;
+    width: 22px;
+    height: 22px;
+    padding: 3px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.9);
+    color: #5a5343;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+  }
+  .speaker :global(svg) {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .label {
+    display: flex;
+    flex-direction: column;
+    padding: 0.5rem 0.6rem 0.6rem;
+  }
+  .label .en {
+    font-weight: 600;
+    color: #2b2b2b;
+    font-size: 0.95rem;
+  }
+  .label .ja {
+    color: #8a8478;
+    font-size: 0.8rem;
+  }
+  body.lang-ja .label .en {
+    color: #6a6555;
+    font-weight: 500;
+    font-size: 0.8rem;
+    order: 2;
+  }
+  body.lang-ja .label .ja {
+    color: #2b2b2b;
+    font-weight: 600;
+    font-size: 0.95rem;
+    order: 1;
+  }
+</style>

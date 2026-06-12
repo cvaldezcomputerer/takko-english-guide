@@ -541,6 +541,43 @@ const slots = Array.from({ length: 11 }, (_, i) => {
                   </span>
               </div>
           </a>
+
+          <!-- English Words Dictionary Tool Card -->
+          <a href="/games/english-words-dictionary" class="game-card">
+              <div class="card-image dict-bg">
+                  <div class="icon" aria-hidden="true">
+                    <svg viewBox="0 0 120 120" role="img" focusable="false">
+                      <path d="M60 32 C48 24 32 24 22 28 L22 90 C32 86 48 86 60 92 C72 86 88 86 98 90 L98 28 C88 24 72 24 60 32 Z" fill="#ffffff" stroke="#4a7c59" stroke-width="4" stroke-linejoin="round"/>
+                      <line x1="60" y1="32" x2="60" y2="92" stroke="#4a7c59" stroke-width="4"/>
+                      <line x1="30" y1="46" x2="50" y2="48" stroke="#c9a24a" stroke-width="3" stroke-linecap="round"/>
+                      <line x1="30" y1="58" x2="50" y2="60" stroke="#c9a24a" stroke-width="3" stroke-linecap="round"/>
+                      <line x1="70" y1="48" x2="90" y2="46" stroke="#c9a24a" stroke-width="3" stroke-linecap="round"/>
+                      <line x1="70" y1="60" x2="90" y2="58" stroke="#c9a24a" stroke-width="3" stroke-linecap="round"/>
+                    </svg>
+                  </div>
+              </div>
+              <div class="card-content">
+                  <h3>
+                    <T>
+                      <span slot="en">English Words Dictionary</span>
+                      <span slot="ja">えいご たんご じてん</span>
+                    </T>
+                  </h3>
+                  <p class="card-desc">
+                    <T>
+                      <span slot="en">A picture dictionary of English vocabulary words for Japanese elementary school. Tap a word to hear it.</span>
+                      <span slot="ja">小学生のための英単語の絵じてん。タップすると音が出ます。</span>
+                    </T>
+                  </p>
+                  <span class="play-btn">
+                    <T>
+                      <span slot="en">Open Tool</span>
+                      <span slot="ja">ツールを開く</span>
+                    </T>
+                    <i class="fas fa-arrow-right"></i>
+                  </span>
+              </div>
+          </a>
         </div>
       </section>
     </main>
@@ -703,6 +740,10 @@ const slots = Array.from({ length: 11 }, (_, i) => {
 
   .name-writer-bg {
     background: #eaf3ec;
+  }
+
+  .dict-bg {
+    background: #eef0e6;
   }
 
   .anarika-bg {

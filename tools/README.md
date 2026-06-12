@@ -109,6 +109,22 @@ audioFor(word); // "/audio/vocab/apple.mp3"   | undefined
 Both are backed by the generated `images.ts` / `audio.ts` manifests. Playback helpers live in
 [`src/scripts/speak.ts`](../src/scripts/speak.ts) (`playClip`, Mii-voice toggle).
 
+### Where the words are shown — English Words Dictionary
+
+The whole vocab set is displayed by [`src/pages/games/english-words-dictionary.astro`](../src/pages/games/english-words-dictionary.astro)
+(route `/games/english-words-dictionary`, listed in the Tools section of `/game`). Each card's
+visual is decided by [`src/data/vocab/display.ts`](../src/data/vocab/display.ts) → `visualFor()`:
+
+- **image** — a photo/illustration from the pipeline (`imageFor()`), or a weather `img:` override.
+- **color / shape** — words in the `Colors` / `Shapes` categories render as a CSS swatch or an
+  outlined SVG (no file). Category renders take priority over `imageFor`, so the *colour* "orange"
+  is a swatch while the *fruit* "orange" keeps its photo.
+- **text** — `Months` → kanji (`一月`), `Dates` → English ordinal (`1st`), `Days` → kanji (`日曜日`).
+- **monogram** — fallback letter placeholder for any word with no asset yet (see the
+  "Remaining placeholders" list in [`tools/data/vocab-image-todo.md`](data/vocab-image-todo.md)).
+
+So when a word is still a monogram, it just needs an asset via Route A/B above; nothing else to wire.
+
 ## Game sound effects — approve ElevenLabs clips for a few keys
 
 Most game sounds are synthesised procedurally in [`src/lib/sounds.ts`](../src/lib/sounds.ts)
