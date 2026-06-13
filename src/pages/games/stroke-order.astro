@@ -1,0 +1,558 @@
+---
+import GameLayout from '../../layouts/GameLayout.astro';
+import StrokeLetter from '../../components/StrokeLetter.astro';
+
+const CAPS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+const LOWERS = 'abcdefghijklmnopqrstuvwxyz'.split('');
+---
+
+<GameLayout
+  title="Letter Stroke Order — Takkotaco"
+  description="See how to write each English letter, capital and lowercase, one stroke at a time. Tap a letter to watch the stroke order with numbered strokes."
+  showBackBar={true}
+>
+  <main class="so-main">
+    <header class="so-page-head">
+      <h1 class="so-title">
+        Letter Stroke Order<span class="so-title-ja">アルファベットのかきじゅん</span>
+      </h1>
+      <p class="so-sub">
+        <span class="so-en">Tap a letter to see how to write it.</span>
+        <span class="so-ja">もじをタップすると、かきかたがみられます。</span>
+      </p>
+    </header>
+
+    <!-- Capitals -->
+    <section class="so-section" aria-label="Capital letters">
+      <h2 class="so-section-title">
+        <span class="so-en">Capitals</span>
+        <span class="so-ja">大文字（おおもじ）</span>
+      </h2>
+      <div class="so-grid">
+        {CAPS.map((L) => (
+          <button class="so-cell" type="button" data-letter={L} aria-label={`How to write capital ${L}`}>
+            <StrokeLetter letter={L} color="#55504a" />
+          </button>
+        ))}
+      </div>
+    </section>
+
+    <!-- Lowercase -->
+    <section class="so-section" aria-label="Lowercase letters">
+      <h2 class="so-section-title">
+        <span class="so-en">Lowercase</span>
+        <span class="so-ja">小文字（こもじ）</span>
+      </h2>
+      <div class="so-grid">
+        {LOWERS.map((L) => (
+          <button class="so-cell" type="button" data-letter={L} aria-label={`How to write lowercase ${L}`}>
+            <StrokeLetter letter={L} color="#55504a" />
+          </button>
+        ))}
+      </div>
+    </section>
+
+    <p class="so-note">
+      <span class="so-en">Stroke order can be different in each textbook. This shows one common way. Please follow your own textbook.</span>
+      <span class="so-ja">かきじゅんは きょうかしょによって ちがう ことが あります。これは よくある ひとつの かきかたです。じぶんの きょうかしょに あわせてね。</span>
+    </p>
+  </main>
+
+  <!-- Modal: the big animated letter -->
+  <div class="so-modal" id="so-modal" aria-hidden="true">
+    <div class="so-backdrop" data-close></div>
+    <div class="so-dialog" role="dialog" aria-modal="true" aria-labelledby="so-case-en">
+      <button class="btn btn--accent btn--icon btn--round btn--sm so-close" id="so-close" type="button" aria-label="Close (とじる)">
+        <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+
+      <header class="so-head">
+        <h2 class="so-case">
+          <span id="so-case-en" class="so-en"></span>
+          <span id="so-case-ja" class="so-ja"></span>
+        </h2>
+        <p class="so-count" id="so-count"></p>
+      </header>
+
+      <div class="so-stage" id="so-stage" aria-live="polite"></div>
+
+      <div class="so-controls">
+        <button class="btn btn--secondary so-playpause is-playing" id="so-playpause" type="button">
+          <span class="so-pp-icon" aria-hidden="true">
+            <svg class="so-ic-pause" viewBox="0 0 18 18" fill="currentColor">
+              <rect x="4" y="3" width="3.4" height="12" rx="1"/><rect x="10.6" y="3" width="3.4" height="12" rx="1"/>
+            </svg>
+            <svg class="so-ic-play" viewBox="0 0 18 18" fill="currentColor">
+              <path d="M5 3.5l9 5.5-9 5.5z"/>
+            </svg>
+          </span>
+          <span class="btn__label">
+            <span class="btn__en" id="so-pp-en">Pause</span>
+            <span class="btn__ja" id="so-pp-ja">とめる</span>
+          </span>
+        </button>
+
+        <button class="btn btn--primary btn--icon btn--round so-replay" id="so-replay" type="button" aria-label="Replay (もういちど)" title="Replay (もういちど)">
+          <svg viewBox="0 0 18 18" fill="none" aria-hidden="true">
+            <path d="M14.5 4.5A7 7 0 1 0 16 9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M14.5 1.5v3.2h-3.2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+
+        <div class="so-speed" role="group" aria-label="Speed (スピード)">
+          <button class="so-speed-btn is-selected" type="button" data-speed="normal">
+            <span class="so-en">Normal</span><span class="so-ja">ふつう</span>
+          </button>
+          <button class="so-speed-btn" type="button" data-speed="slow">
+            <span class="so-en">Slow</span><span class="so-ja">おそい</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</GameLayout>
+
+<script>
+  // anime.js powers the stroke sequence: a timeline draws each stroke in writing
+  // order, a pen rides along it, and a numbered badge pops at every stroke start.
+  // anime.js is imported ONLY here, so its weight ships on this page alone.
+  import { createTimeline, createMotionPath } from 'animejs';
+  import { letterStrokes } from '../../data/letter-strokes';
+
+  const SVGNS = 'http://www.w3.org/2000/svg';
+  const INK = '#3f7a55';    // the stroke being drawn (brand green)
+  const GHOST = '#e7ddca';  // faint full letter, shown underneath for reference
+  const MARK = '#e76f51';   // order badges + pen (accent orange)
+
+  // Capitals and lowercase use different vertical systems (see letter-strokes.ts),
+  // so each gets its own guide lines + pen weight.
+  type Metrics = { top: number; mid: number; base: number; desc: number; sw: number };
+  const CAP: Metrics = { top: 8, mid: 49.5, base: 91, desc: 91, sw: 11 };
+  const LOW: Metrics = { top: 10, mid: 42.7, base: 76, desc: 96, sw: 9 };
+
+  // Pen pace is ms-per-unit-length (so a long stem takes longer than a dot);
+  // `gap` is the pen-lift pause between strokes, `min` a floor for tiny strokes.
+  const SPEEDS = {
+    normal: { ms: 9, gap: 150, min: 300 },
+    slow: { ms: 17, gap: 280, min: 460 },
+  };
+  let speed: 'normal' | 'slow' = 'normal';
+  let currentLetter: string | null = null;
+  let timeline: ReturnType<typeof createTimeline> | null = null;
+
+  const isCap = (ch: string) => ch >= 'A' && ch <= 'Z';
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function el(name: string, attrs: Record<string, string | number>): SVGElement {
+    const n = document.createElementNS(SVGNS, name);
+    for (const k in attrs) n.setAttribute(k, String(attrs[k]));
+    return n;
+  }
+
+  function guide(y: number, color: string, dashed = false): SVGElement {
+    const l = el('line', { x1: 4, x2: 96, y1: y, y2: y, stroke: color, 'stroke-width': 1.2 });
+    if (dashed) l.setAttribute('stroke-dasharray', '4 5');
+    return l;
+  }
+
+  // Build the modal's big SVG for one letter: guide lines, a faint full letter,
+  // the drawable ink strokes, numbered badges, and a pen. Returns the moving bits.
+  function buildStage(letter: string) {
+    const stage = document.getElementById('so-stage')!;
+    const strokes = letterStrokes[letter] ?? [];
+    const cap = isCap(letter);
+    const M = cap ? CAP : LOW;
+
+    // Extra headroom up top so the pencil (which leans up-right from the writing
+    // point) isn't clipped when drawing the top of a letter.
+    const svg = el('svg', { viewBox: '0 -16 100 120', class: 'so-svg' });
+    svg.setAttribute('role', 'img');
+    svg.setAttribute('aria-label', `How to write ${cap ? 'capital' : 'lowercase'} ${letter}`);
+
+    svg.appendChild(guide(M.top, '#cdbfa4'));
+    svg.appendChild(guide(M.mid, '#cdbfa4', true));
+    svg.appendChild(guide(M.base, '#d98b80')); // soft red baseline
+    if (!cap) svg.appendChild(guide(M.desc, '#e3d8c2'));
+
+    // Ghost: the finished letter, faint, so kids see where each stroke is headed.
+    for (const d of strokes) {
+      svg.appendChild(el('path', {
+        d, fill: 'none', stroke: GHOST, 'stroke-width': M.sw,
+        'stroke-linecap': 'round', 'stroke-linejoin': 'round',
+      }));
+    }
+
+    // Drawable strokes (hidden up front via the dash trick from StrokeLetter:
+    // pathLength 1, dasharray "1 2", offset 1.05 keeps a round cap from showing
+    // a dot while a stroke is hidden).
+    const drawPaths: SVGPathElement[] = [];
+    for (const d of strokes) {
+      const p = el('path', {
+        d, fill: 'none', stroke: INK, 'stroke-width': M.sw,
+        'stroke-linecap': 'round', 'stroke-linejoin': 'round', pathLength: 1,
+      }) as SVGPathElement;
+      p.style.strokeDasharray = '1 2';
+      p.style.strokeDashoffset = '1.05';
+      svg.appendChild(p);
+      drawPaths.push(p);
+    }
+
+    stage.replaceChildren(svg); // attach first so getPointAtLength can measure
+
+    // Numbered badge at each stroke's start. Outer <g> holds the position so the
+    // inner <g> is free for anime to scale without clobbering the translate.
+    const badges: SVGGElement[] = [];
+    drawPaths.forEach((p, i) => {
+      const pt = p.getPointAtLength(0);
+      const pos = el('g', { transform: `translate(${pt.x} ${pt.y})` });
+      const inner = el('g', { class: 'so-badge' }) as SVGGElement;
+      inner.style.opacity = '0';
+      inner.appendChild(el('circle', { r: 6.6, fill: MARK }));
+      const t = el('text', {
+        x: 0, y: 0, 'text-anchor': 'middle', 'dominant-baseline': 'central',
+        fill: '#fff', 'font-size': 8, 'font-weight': 700, 'font-family': 'Andika, sans-serif',
+      });
+      t.textContent = String(i + 1);
+      inner.appendChild(t);
+      pos.appendChild(inner);
+      svg.appendChild(pos);
+      badges.push(inner);
+    });
+
+    // A little pencil rides along each stroke. Its tip is at this group's origin
+    // (0,0) and the body is drawn pointing straight up; the inner group leans it
+    // to a right-handed writing angle. anime translates the outer group so the
+    // tip follows the path point. (createMotionPath also offers rotate, but a
+    // fixed grip angle reads more naturally than the pencil spinning on curves.)
+    const pen = el('g', { class: 'so-pen' }) as SVGGElement;
+    pen.style.opacity = '0';
+    const pencil = el('g', { transform: 'rotate(30) scale(0.6)' });
+    pencil.appendChild(el('path', { d: 'M0 0 L-2.1 -4.2 L2.1 -4.2 Z', fill: '#3b3b3b' }));                 // graphite point
+    pencil.appendChild(el('path', { d: 'M-2.1 -4.2 L2.1 -4.2 L3 -7 L-3 -7 Z', fill: '#f2d6a2', stroke: '#c79b5c', 'stroke-width': 0.5 })); // sharpened wood
+    pencil.appendChild(el('rect', { x: -3, y: -24, width: 6, height: 17, fill: '#f3a712', stroke: '#cf8a1c', 'stroke-width': 0.5 }));       // body
+    pencil.appendChild(el('rect', { x: -3, y: -24, width: 1.8, height: 17, fill: '#000', 'fill-opacity': 0.12 }));                          // shaded edge
+    pencil.appendChild(el('rect', { x: -3, y: -26.6, width: 6, height: 2.6, fill: '#cfd3d8', stroke: '#a9adb3', 'stroke-width': 0.4 }));    // ferrule
+    pencil.appendChild(el('path', { d: 'M-3 -26.6 L3 -26.6 L3 -28.6 Q3 -30 1.5 -30 L-1.5 -30 Q-3 -30 -3 -28.6 Z', fill: '#e8736b' }));      // eraser
+    // Brand printed up the barrel (vertical text, like a real pencil).
+    const brand = el('text', {
+      x: 0, y: -15.5, transform: 'rotate(-90 0 -15.5)',
+      'text-anchor': 'middle', 'dominant-baseline': 'central',
+      fill: '#5a3d10', 'font-size': 2.3, 'font-weight': 700,
+      'font-family': 'Andika, sans-serif', 'letter-spacing': -0.1,
+    });
+    brand.textContent = 'TakkoTaco';
+    pencil.appendChild(brand);
+    pen.appendChild(pencil);
+    svg.appendChild(pen);
+
+    return { drawPaths, badges, pen };
+  }
+
+  function play(letter: string) {
+    timeline?.pause();
+    currentLetter = letter;
+    const { drawPaths, badges, pen } = buildStage(letter);
+
+    // Respect reduced-motion: show the finished letter + all numbers, no motion.
+    // With no timeline to control, the pause button has nothing to do.
+    if (reduceMotion) {
+      drawPaths.forEach((p) => { p.style.strokeDashoffset = '0'; });
+      badges.forEach((b) => { b.style.opacity = '1'; });
+      playpauseBtn.disabled = true;
+      return;
+    }
+    playpauseBtn.disabled = false;
+    setPlayPause('pause');
+
+    const S = SPEEDS[speed];
+    const tl = createTimeline({
+      defaults: { ease: 'inOutSine' },
+      // Run finished: nothing left to pause/resume, so park the button (greyed,
+      // showing the play icon). Replay is how you watch it again.
+      onComplete: () => { setPlayPause('resume'); playpauseBtn.disabled = true; },
+    });
+
+    // Absolute positions keep the three tweens per stroke (draw, badge, pen) in
+    // lockstep and make the inter-stroke gaps exact.
+    let t = 0;
+    drawPaths.forEach((p, i) => {
+      const dur = Math.max(p.getTotalLength() * S.ms, S.min);
+      const mp = createMotionPath(p);
+      tl.add(p, { strokeDashoffset: [1.05, 0], duration: dur }, t);
+      tl.add(badges[i], { opacity: [0, 1], scale: [0.2, 1], duration: 240, ease: 'outBack' }, t);
+      tl.set(pen, { opacity: 1 }, t);
+      tl.add(pen, { translateX: mp.translateX, translateY: mp.translateY, duration: dur }, t);
+      t += dur + S.gap;
+    });
+    tl.add(pen, { opacity: 0, duration: 200 }, t - S.gap + 80);
+
+    timeline = tl;
+  }
+
+  // ── Modal wiring ──────────────────────────────────────────────────────────
+  const modal = document.getElementById('so-modal')!;
+  const caseEn = document.getElementById('so-case-en')!;
+  const caseJa = document.getElementById('so-case-ja')!;
+  const countEl = document.getElementById('so-count')!;
+  const closeBtn = document.getElementById('so-close') as HTMLButtonElement;
+  const replayBtn = document.getElementById('so-replay') as HTMLButtonElement;
+  const playpauseBtn = document.getElementById('so-playpause') as HTMLButtonElement;
+  const ppEn = document.getElementById('so-pp-en')!;
+  const ppJa = document.getElementById('so-pp-ja')!;
+  let lastFocus: HTMLElement | null = null;
+
+  // Pause toggles between pausing a run and resuming a paused one. The
+  // `.is-playing` class swaps the pause/play icon (see CSS). Restarting a
+  // finished run is Replay's job, so this button has no "again" state.
+  function setPlayPause(state: 'pause' | 'resume') {
+    playpauseBtn.classList.toggle('is-playing', state === 'pause');
+    if (state === 'pause') { ppEn.textContent = 'Pause'; ppJa.textContent = 'とめる'; }
+    else { ppEn.textContent = 'Resume'; ppJa.textContent = 'つづき'; }
+  }
+
+  function openModal(letter: string) {
+    lastFocus = document.activeElement as HTMLElement;
+    const cap = isCap(letter);
+    const n = (letterStrokes[letter] ?? []).length;
+    caseEn.textContent = `${cap ? 'Capital' : 'Lowercase'} ${letter}`;
+    caseJa.textContent = `${cap ? '大文字' : '小文字'} ${letter}`;
+    countEl.textContent = `${n} stroke${n > 1 ? 's' : ''}・${n}かく`;
+
+    document.body.style.overflow = 'hidden';
+    modal.classList.add('is-open');
+    modal.setAttribute('aria-hidden', 'false');
+    closeBtn.focus();
+    // Build + animate after the modal is visible (geometry needs a laid-out SVG).
+    requestAnimationFrame(() => play(letter));
+  }
+
+  function closeModal() {
+    timeline?.pause();
+    modal.classList.remove('is-open');
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+    lastFocus?.focus();
+  }
+
+  document.querySelectorAll<HTMLButtonElement>('.so-cell').forEach((cell) => {
+    cell.addEventListener('click', () => openModal(cell.dataset.letter!));
+  });
+  closeBtn.addEventListener('click', closeModal);
+  modal.querySelector('[data-close]')!.addEventListener('click', closeModal);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal.classList.contains('is-open')) closeModal();
+  });
+  replayBtn.addEventListener('click', () => { if (currentLetter) play(currentLetter); });
+
+  playpauseBtn.addEventListener('click', () => {
+    if (!timeline) return;
+    if (timeline.paused) { timeline.play(); setPlayPause('pause'); }
+    else { timeline.pause(); setPlayPause('resume'); }
+  });
+
+  document.querySelectorAll<HTMLButtonElement>('.so-speed-btn').forEach((b) => {
+    b.addEventListener('click', () => {
+      speed = b.dataset.speed as 'normal' | 'slow';
+      document.querySelectorAll('.so-speed-btn').forEach((x) =>
+        x.classList.toggle('is-selected', x === b)
+      );
+      if (currentLetter) play(currentLetter);
+    });
+  });
+</script>
+
+<style>
+  .so-main {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: clamp(1.25rem, 4vw, 2.5rem) clamp(1rem, 4vw, 2rem) 3rem;
+    font-family: var(--font-body);
+    color: var(--color-text);
+  }
+
+  .so-page-head { text-align: center; }
+  /* EN and JA sit side by side (wrapping only if the row gets too narrow), so
+     the heading stays two lines tall instead of four. */
+  .so-title {
+    font-family: var(--font-main);
+    color: var(--color-primary);
+    font-size: clamp(1.6rem, 5vw, 2.6rem);
+    margin: 0 0 0.3rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: center;
+    gap: 0.1rem 0.7rem;
+  }
+  .so-title-ja {
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+    font-size: clamp(0.95rem, 2.6vw, 1.35rem);
+    font-weight: 700;
+    color: #6f9a7e;
+  }
+  .so-sub {
+    margin: 0;
+    color: #7a6f5c;
+    font-size: clamp(0.95rem, 2.4vw, 1.15rem);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: center;
+    gap: 0.1rem 0.5rem;
+  }
+
+  /* Bilingual text helper: muted Japanese companion. */
+  .so-ja { font-family: 'M PLUS Rounded 1c', sans-serif; color: #9a8d76; }
+
+  .so-section { margin-top: clamp(1.5rem, 4vw, 2.4rem); }
+  .so-section-title {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    margin: 0 0 0.8rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 3px dashed #d9cfb5;
+    font-family: var(--font-main);
+    color: var(--color-primary);
+    font-size: clamp(1.1rem, 3vw, 1.4rem);
+  }
+  .so-section-title .so-ja { font-size: 0.78em; }
+
+  .so-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(58px, 1fr));
+    gap: clamp(0.5rem, 1.5vw, 0.8rem);
+  }
+
+  .so-cell {
+    aspect-ratio: 1;
+    padding: 0.4rem;
+    background: var(--color-white);
+    border: 2px solid #efe7d6;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: border-color var(--transition-fast), transform 0.12s, box-shadow var(--transition-fast);
+  }
+  .so-cell:hover {
+    border-color: var(--color-primary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(74, 124, 89, 0.18);
+  }
+  .so-cell:focus-visible {
+    outline: 3px solid var(--color-secondary);
+    outline-offset: 2px;
+  }
+
+  .so-note {
+    margin: clamp(1.5rem, 4vw, 2.4rem) 0 0;
+    text-align: center;
+    color: #9a8d76;
+    font-size: clamp(0.82rem, 2.2vw, 0.95rem);
+    line-height: 1.5;
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+  }
+
+  /* ── Modal ── */
+  .so-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+  .so-modal.is-open { display: flex; }
+  .so-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(40, 32, 22, 0.55);
+  }
+  .so-dialog {
+    position: relative;
+    width: min(440px, 100%);
+    background: var(--color-white);
+    border: 2px solid #efe7d6;
+    border-radius: 22px;
+    padding: clamp(1.1rem, 4vw, 1.8rem);
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.25);
+    animation: so-pop 0.22s ease;
+  }
+  @keyframes so-pop {
+    from { transform: scale(0.92); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  /* Just the placement; the look comes from .btn.btn--ghost.btn--icon. */
+  .so-close { position: absolute; top: 0.7rem; right: 0.7rem; }
+
+  .so-head { text-align: center; margin-bottom: 0.6rem; }
+  .so-case {
+    margin: 0;
+    font-family: var(--font-main);
+    color: var(--color-primary);
+    font-size: clamp(1.2rem, 4vw, 1.5rem);
+    display: flex;
+    flex-direction: column;
+    line-height: 1.15;
+  }
+  .so-case .so-ja { font-size: 0.7em; }
+  .so-count { margin: 0.2rem 0 0; color: #9a8d76; font-size: 0.9rem; }
+
+  .so-stage {
+    margin: 0.4rem auto 0;
+    width: min(320px, 78vw);
+  }
+  .so-svg { display: block; width: 100%; height: auto; }
+
+  .so-controls {
+    margin-top: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem 1rem;
+  }
+  /* Buttons use the shared .btn system (see global.css). Only the pause/resume
+     icon swap is specific to this tool: show the pause bars while playing, the
+     play triangle once paused (.is-playing toggled in the script). */
+  .so-pp-icon { display: inline-flex; }
+  .so-playpause .so-ic-play { display: none; }
+  .so-playpause:not(.is-playing) .so-ic-pause { display: none; }
+  .so-playpause:not(.is-playing) .so-ic-play { display: block; }
+
+  /* Speed: a segmented toggle (one connected control, selected segment filled). */
+  .so-speed {
+    display: inline-flex;
+    padding: 3px;
+    background: #faf6ec;
+    border: 2px solid #efe7d6;
+    border-radius: var(--radius-pill);
+  }
+  .so-speed-btn {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 38px;
+    justify-content: center;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: clamp(0.8rem, 2.2vw, 0.95rem);
+    padding: 0.25rem 0.95rem;
+    border: 0;
+    border-radius: var(--radius-pill);
+    background: transparent;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    line-height: 1.05;
+    transition: background var(--transition-fast), color var(--transition-fast);
+  }
+  .so-speed-btn:hover { color: var(--color-primary); }
+  .so-speed-btn:focus-visible { outline: 3px solid var(--color-accent); outline-offset: 2px; }
+  .so-speed-btn.is-selected { background: var(--color-primary); color: #fff; }
+  .so-speed-btn .so-ja { font-size: 0.82em; opacity: 0.85; color: inherit; }
+</style>

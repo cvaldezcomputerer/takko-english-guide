@@ -3,6 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import Navbar from '../components/Navbar.astro';
 import T from '../components/T.astro';
 import StrokeLetter from '../components/StrokeLetter.astro';
+import StrokeWord from '../components/StrokeWord.astro';
 import Logo from '../components/Logo.astro';
 
 // Background side letters live in a hidden pool: all 26 letters + the logo. The
@@ -345,15 +346,8 @@ const slots = Array.from({ length: 11 }, (_, i) => {
         <div class="games-grid games-grid--tools">
           <!-- Name Writer Tool Card -->
           <a href="/games/name-writer" class="game-card">
-               <div class="card-image name-writer-bg">
-                  <div class="icon" aria-hidden="true">
-                    <svg viewBox="0 0 120 120" role="img" focusable="false">
-                      <line x1="20" y1="34" x2="100" y2="34" stroke="#c7b9a0" stroke-width="2.5"/>
-                      <line x1="20" y1="60" x2="100" y2="60" stroke="#c7b9a0" stroke-width="2.5" stroke-dasharray="5 6"/>
-                      <line x1="20" y1="86" x2="100" y2="86" stroke="#d94b3e" stroke-width="2.5"/>
-                      <text x="60" y="86" text-anchor="middle" font-size="46" fill="#4a7c59" font-family="'Andika', sans-serif">Aa</text>
-                    </svg>
-                  </div>
+               <div class="card-image name-writer-bg name-writer-sample" aria-hidden="true">
+                  <StrokeWord word="Cristian" />
               </div>
               <div class="card-content">
                   <h3>
@@ -366,6 +360,50 @@ const slots = Array.from({ length: 11 }, (_, i) => {
                     <T>
                       <span slot="en">Type your name in kana and see it in English letters on writing lines, ready to copy.</span>
                       <span slot="ja">ひらがなで名前を入力すると、書き写せるように英語で大きく表示します。</span>
+                    </T>
+                  </p>
+                  <span class="play-btn">
+                    <T>
+                      <span slot="en">Open Tool</span>
+                      <span slot="ja">ツールを開く</span>
+                    </T>
+                    <i class="fas fa-arrow-right"></i>
+                  </span>
+              </div>
+          </a>
+
+          <!-- Letter Stroke Order Tool Card -->
+          <a href="/games/stroke-order" class="game-card">
+               <div class="card-image stroke-order-bg">
+                  <div class="icon" aria-hidden="true">
+                    <svg viewBox="0 0 100 100" role="img" focusable="false">
+                      <line x1="8" y1="8" x2="92" y2="8" stroke="#cdbfa4" stroke-width="1.6"/>
+                      <line x1="8" y1="49.5" x2="92" y2="49.5" stroke="#cdbfa4" stroke-width="1.6" stroke-dasharray="5 6"/>
+                      <line x1="8" y1="91" x2="92" y2="91" stroke="#d98b80" stroke-width="1.6"/>
+                      <!-- faint full A underneath -->
+                      <path d="M 50,8 L 23,91" fill="none" stroke="#e7ddca" stroke-width="9" stroke-linecap="round"/>
+                      <path d="M 50,8 L 77,91" fill="none" stroke="#e7ddca" stroke-width="9" stroke-linecap="round"/>
+                      <path d="M 35,62 L 65,62" fill="none" stroke="#e7ddca" stroke-width="9" stroke-linecap="round"/>
+                      <!-- drawn so far: stroke 1 complete, stroke 2 about half-way -->
+                      <path d="M 50,8 L 23,91" fill="none" stroke="#3f7a55" stroke-width="9" stroke-linecap="round"/>
+                      <path d="M 50,8 L 77,91" fill="none" stroke="#3f7a55" stroke-width="9" stroke-linecap="round" pathLength="1" stroke-dasharray="0.55 1"/>
+                      <!-- pen tip at the in-progress point -->
+                      <circle cx="64.9" cy="53.7" r="4.6" fill="#e76f51"/>
+                      <circle cx="64.9" cy="53.7" r="1.9" fill="#fff"/>
+                    </svg>
+                  </div>
+              </div>
+              <div class="card-content">
+                  <h3>
+                    <T>
+                      <span slot="en">Letter Stroke Order</span>
+                      <span slot="ja">文字のかきじゅん</span>
+                    </T>
+                  </h3>
+                  <p class="card-desc">
+                    <T>
+                      <span slot="en">Tap any letter to watch how to write it, one stroke at a time.</span>
+                      <span slot="ja">文字をタップすると、書き順を一画ずつ見られます。</span>
                     </T>
                   </p>
                   <span class="play-btn">
@@ -740,6 +778,20 @@ const slots = Array.from({ length: 11 }, (_, i) => {
 
   .name-writer-bg {
     background: #eaf3ec;
+  }
+
+  .stroke-order-bg {
+    background: #eef6ef;
+  }
+
+  /* Name Writer card shows a sample name on writing lines (no square icon box). */
+  .name-writer-sample {
+    padding: 0 clamp(12px, 5%, 22px);
+  }
+  .name-writer-sample :global(.stroke-word) {
+    width: 100%;
+    height: auto;
+    max-height: 100%;
   }
 
   .dict-bg {

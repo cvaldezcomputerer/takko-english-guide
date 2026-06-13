@@ -159,6 +159,115 @@ select {
   --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.08);
 }
 
+/* ──────────────────────────────────────────────────────────────
+   Buttons — the site's standard button system. USE THESE going
+   forward instead of hand-rolling button CSS per page.
+
+   The look is the site "sticker" button: a solid 2px border with a
+   hard offset shadow that the button presses into on :active. Colors
+   come from four CSS vars (--btn-bg/fg/border/shadow) so a variant is
+   just four values; everything else (size, states, focus) is shared.
+
+   Usage:
+     <button class="btn btn--primary">Save</button>
+     <a class="btn btn--secondary btn--lg">Open</a>
+     <button class="btn btn--ghost btn--icon btn--round" aria-label="Close">×</button>
+   Bilingual label (EN over JA): wrap text in .btn__label.
+     <span class="btn__label"><span class="btn__en">Replay</span><span class="btn__ja">もういちど</span></span>
+
+   Hierarchy: --primary = main action, --accent = standout CTA,
+   --secondary = alternative action, --ghost = low-emphasis / icon.
+   ────────────────────────────────────────────────────────────── */
+.btn {
+  --btn-bg: var(--color-white);
+  --btn-fg: var(--color-text);
+  --btn-border: var(--color-secondary);
+  --btn-shadow: var(--color-secondary);
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;                 /* separation between icon and label */
+  min-height: 44px;            /* tap target (Apple HIG / a11y) */
+  padding: 0.5rem 1.25rem;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 1rem;
+  line-height: 1.15;
+  color: var(--btn-fg);
+  background: var(--btn-bg);
+  border: 2px solid var(--btn-border);
+  border-radius: var(--radius-button);
+  box-shadow: 3px 3px 0 var(--btn-shadow);
+  cursor: pointer;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.1s ease, box-shadow 0.1s ease,
+    background var(--transition-fast), color var(--transition-fast);
+}
+.btn:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 var(--btn-shadow);
+}
+.btn:active {
+  transform: translate(3px, 3px);   /* press the sticker onto its shadow */
+  box-shadow: 0 0 0 var(--btn-shadow);
+}
+.btn:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 2px;
+}
+.btn:disabled,
+.btn[aria-disabled='true'] {
+  opacity: 0.5;
+  cursor: default;
+  pointer-events: none;
+  transform: none;
+  box-shadow: 3px 3px 0 var(--btn-shadow);
+}
+.btn svg { flex: none; width: 1.15em; height: 1.15em; }
+
+/* Variants — each sets only the four color vars. */
+.btn--primary {
+  --btn-bg: var(--color-primary); --btn-fg: #fff;
+  --btn-border: var(--color-dark-teal); --btn-shadow: var(--color-dark-teal);
+}
+.btn--accent {
+  --btn-bg: var(--color-accent); --btn-fg: #fff;
+  --btn-border: var(--color-accent-dark); --btn-shadow: var(--color-accent-dark);
+}
+.btn--secondary {
+  --btn-bg: var(--color-white); --btn-fg: var(--color-primary);
+  --btn-border: var(--color-primary); --btn-shadow: var(--color-primary);
+}
+.btn--ghost {
+  --btn-bg: var(--color-white); --btn-fg: var(--color-text-muted);
+  --btn-border: var(--color-border); --btn-shadow: var(--color-border);
+}
+
+/* Sizes. */
+.btn--sm { min-height: 38px; padding: 0.35rem 0.85rem; font-size: 0.9rem; gap: 0.4rem; }
+.btn--lg { min-height: 52px; padding: 0.7rem 1.6rem; font-size: 1.15rem; }
+
+/* Icon-only: square footprint, no text padding. Pair with --round for a circle. */
+.btn--icon { padding: 0; width: 44px; min-width: 44px; }
+.btn--icon.btn--sm { width: 38px; min-width: 38px; }
+.btn--round { border-radius: var(--radius-round); }
+
+/* Stacked bilingual label (EN over JA). */
+.btn__label {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.1;
+}
+.btn__ja {
+  font-family: 'M PLUS Rounded 1c', sans-serif;
+  font-size: 0.72em;
+  font-weight: 700;
+  opacity: 0.82;     /* follows the button's text color */
+}
+
 .site-footer {
   display: flex;
   flex-direction: column;

@@ -1,0 +1,102 @@
+---
+/**
+ * StrokeWord — renders a whole word in the site's stroke letterforms sitting on
+ * a 4-line English writing guide, the same way the Name Writer tool draws it.
+ * Static (no JS): used for sample art like the Name Writer card thumbnail.
+ *
+ * Layout mirrors name-writer.astro's vertical system: lowercase lives in a
+ * 10/39/76/96 box (ascender / x-height / baseline / descender) and capitals are
+ * authored taller (8 -> 91), so they're scaled + shifted to share that baseline.
+ * Horizontal spacing uses a coarse per-glyph ink-width table (glyphs are roughly
+ * centered on x=50 in their 100-box), which is plenty for sample art.
+ *
+ *   <StrokeWord word="Cristian" />
+ */
+import { letterStrokes } from "../data/letter-strokes";
+
+interface Props {
+  word: string;
+  color?: string;
+  class?: string;
+}
+const { word, color = "#4a7c59", class: className = "" } = Astro.props;
+
+// Vertical guide system (matches the Name Writer tool).
+const ASC = 10, XH = 39, BASE_Y = 76, DESC = 96, VBH = 100;
+const PAD_X = 8, GAP = 6, SPACE_W = 24, STROKE = 6.5;
+const CAP_SCALE = (BASE_Y - ASC) / (91 - 8); // shrink caps onto the lowercase baseline
+const CAP_TY = BASE_Y - 91 * CAP_SCALE;
+const capStrokeW = STROKE / CAP_SCALE; // so caps land at ~STROKE weight after scaling
+
+// Approx ink width of each glyph in its own 100-unit box.
+const INK: Record<string, number> = {
+  A: 54, B: 41, C: 49, D: 44, E: 45, F: 45, G: 50, H: 48, I: 40, J: 60, K: 48,
+  L: 45, M: 66, N: 48, O: 52, P: 40, Q: 54, R: 42, S: 42, T: 56, U: 44, V: 56,
+  W: 80, X: 42, Y: 46, Z: 46,
+  a: 32, b: 33, c: 33, d: 33, e: 31, f: 24, g: 28, h: 27, i: 9, j: 23, k: 22,
+  l: 9, m: 60, n: 26, o: 34, p: 33, q: 33, r: 21, s: 27, t: 22, u: 26, v: 36,
+  w: 56, x: 34, y: 34, z: 33,
+};
+
+const isCap = (ch: string) => ch >= "A" && ch <= "Z";
+
+type Glyph = { strokes: string[]; tx: number; cap: boolean };
+const glyphs: Glyph[] = [];
+let penX = PAD_X;
+for (const ch of word) {
+  if (ch === " ") { penX += SPACE_W; continue; }
+  const key = letterStrokes[ch] ? ch : ch.toUpperCase();
+  const strokes = letterStrokes[key];
+  if (!strokes) continue;
+  const cap = isCap(key);
+  const w = (INK[key] ?? 30) * (cap ? CAP_SCALE : 1);
+  const cellCenter = penX + w / 2;
+  // Glyphs sit ~centered on x=50 in their box; nudge so that center lands mid-cell.
+  const tx = cellCenter - 50 * (cap ? CAP_SCALE : 1);
+  glyphs.push({ strokes, tx, cap });
+  penX += w + GAP;
+}
+const W = Math.max(penX - GAP + PAD_X, 60);
+
+const line = (y: number, c: string, dashed = false) => ({ y, c, dashed });
+const guides = [
+  line(ASC, "#c7b9a0"),
+  line(XH, "#c7b9a0", true),
+  line(BASE_Y, "#d94b3e"),
+  line(DESC, "#c7b9a0"),
+];
+---
+
+<svg
+  class:list={["stroke-word", className]}
+  viewBox={`0 0 ${W} ${VBH}`}
+  role="img"
+  aria-label={word}
+  xmlns="http://www.w3.org/2000/svg"
+>
+  {guides.map((g) => (
+    <line
+      x1="0" x2={W} y1={g.y} y2={g.y}
+      stroke={g.c} stroke-width="1.5"
+      stroke-dasharray={g.dashed ? "5 6" : undefined}
+    />
+  ))}
+  {glyphs.map((g) => (
+    <g transform={g.cap ? `translate(${g.tx} ${CAP_TY}) scale(${CAP_SCALE})` : `translate(${g.tx} 0)`}>
+      {g.strokes.map((d) => (
+        <path
+          d={d}
+          fill="none"
+          stroke={color}
+          stroke-width={g.cap ? capStrokeW : STROKE}
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      ))}
+    </g>
+  ))}
+</svg>
+
+<style>
+  .stroke-word { display: block; width: 100%; height: auto; }
+</style>
