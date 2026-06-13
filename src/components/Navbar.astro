@@ -69,6 +69,7 @@ import TrainAnimation from './TrainAnimation.astro';
         if (langText) {
           langText.textContent = isJa ? 'English' : '日本語';
         }
+        document.documentElement.lang = isJa ? 'ja' : 'en';
         if (isJa) {
           document.body.classList.add('lang-ja');
         } else {
