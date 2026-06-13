@@ -5,6 +5,7 @@ This site is used by Japanese students and their English teachers. UI text shoul
 ## Design Rules
 
 - No emojis.
+- No em dashes (—) in normal prose / mid-sentence writing (meta descriptions, body copy, alt text). Use commas, periods, colons, or parentheses. Em dashes are fine as structural separators (page titles like `Page — TakkoTaco`) and UI placeholder glyphs. Code/CSS comments are exempt.
 - Do not use gradients.
 - Prefer SVG assets.
 - If an image is needed, ask the user to provide one or generate one.
@@ -43,6 +44,18 @@ This bites us most often when a component accepts a `class` prop for layout plac
 **Fix:** give the element `width: max-content` so it sizes to its true content width.
 
 **The tell:** an element that should start fully off-screen (transform/animation) instead appears partway on-screen, and tweaking the transform values does nothing — because the box width itself is wrong.
+
+## SEO & Indexing
+
+The site has a baseline SEO setup that **new pages inherit automatically** — but only if you use the layouts correctly. Be mindful of this whenever you add a page or change `astro.config.mjs`.
+
+- **Always render pages through a layout.** `Layout.astro` (content pages) and `GameLayout.astro` (games/tools) both pull in `src/components/Seo.astro`, which emits the canonical tag, Open Graph + Twitter Card tags, and sitewide JSON-LD. A page that builds its own `<html>` without a layout gets **none** of this.
+- **Set a unique `title` and `description` per page.** The layout defaults exist only as a fallback. Game pages especially tend to share the default description — give each one its own. Bilingual (EN + JA) is good where it reads naturally; the audience is JP students.
+- **`site` must stay set** to `https://takkotaco.com` in `astro.config.mjs`. Canonical URLs, the sitemap, and absolute OG image URLs all break silently without it.
+- **The sitemap is auto-generated** by `@astrojs/sitemap` on every build (`dist/sitemap-index.xml`). Static pages are discovered automatically; **server-rendered pages (`prerender = false`) are not** — add those to `customPages` in the sitemap config by hand (the homepage `/` is already there).
+- **Internal/dev/preview pages must be hidden from search.** Pass `noindex` to the layout (e.g. `<Layout title="…" noindex>`) **and** add the route to `NOINDEX_ROUTES` in `astro.config.mjs` (keeps it out of the sitemap) **and** to `public/robots.txt`. All three, or the page leaks into search.
+- **Default share image** is `/images/hero/homepage-hero.jpg`. Pass `image="/path.jpg"` to a layout to override per page (use a ~1200×630 asset).
+- **After adding pages, run `npm run build`** and glance at `dist/sitemap-0.xml` to confirm the right pages are in (and dev/preview pages are out).
 
 ## Workflow Rules
 

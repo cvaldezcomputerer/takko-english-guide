@@ -1,15 +1,20 @@
 ---
 import "../styles/global.css";
+import Seo from "../components/Seo.astro";
 
 interface Props {
   title?: string;
   description?: string;
+  image?: string;
+  noindex?: boolean;
   showBackBar?: boolean;
 }
 
 const {
   title = "Takkotaco",
   description = "Takkotaco is the unofficial English website for Takko Machi.",
+  image,
+  noindex = false,
   showBackBar = false,
 } = Astro.props;
 ---
@@ -24,6 +29,7 @@ const {
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
     <meta name="description" content={description} />
+    <Seo title={title} description={description} image={image} noindex={noindex} />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

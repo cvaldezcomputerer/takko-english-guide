@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+
+# Internal API endpoints — no value to crawlers
+Disallow: /api/
+
+# Dev/preview pages (also carry a noindex meta tag)
+Disallow: /dev
+Disallow: /sound-preview
+Disallow: /vocab-preview
+Disallow: /train-preview
+
+Sitemap: https://takkotaco.com/sitemap-index.xml

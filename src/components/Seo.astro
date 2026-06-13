@@ -1,0 +1,78 @@
+---
+/**
+ * Centralised <head> SEO tags: canonical, Open Graph, Twitter Card,
+ * optional noindex, and sitewide JSON-LD. Used by both layouts so the
+ * markup stays in one place.
+ */
+interface Props {
+  title: string;
+  description: string;
+  /** Path or absolute URL for the share image. Defaults to the homepage hero. */
+  image?: string;
+  /** og:type — "website" for most pages, "article" for blog-style content. */
+  type?: string;
+  /** When true, emit a robots noindex tag (dev/preview pages). */
+  noindex?: boolean;
+}
+
+const {
+  title,
+  description,
+  image = '/images/hero/homepage-hero.jpg',
+  type = 'website',
+  noindex = false,
+} = Astro.props;
+
+// Astro.site is set in astro.config.mjs (https://takkotaco.com).
+// Canonical uses a trailing slash to match Astro's `directory` build output
+// and the generated sitemap (e.g. /contact/), keeping the signal consistent.
+const cleanPath = Astro.url.pathname.replace(/\/+$/, '');
+const canonicalPath = cleanPath === '' ? '/' : `${cleanPath}/`;
+const canonical = new URL(canonicalPath, Astro.site);
+const ogImage = new URL(image, Astro.site);
+
+const siteName = 'TakkoTaco';
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebSite',
+      '@id': new URL('/#website', Astro.site).href,
+      url: new URL('/', Astro.site).href,
+      name: siteName,
+      description:
+        'The unofficial English website for Takko Machi: English learning tools for students and an English guide to the town.',
+      inLanguage: ['en', 'ja'],
+    },
+    {
+      '@type': 'EducationalOrganization',
+      '@id': new URL('/#org', Astro.site).href,
+      name: siteName,
+      url: new URL('/', Astro.site).href,
+      logo: new URL('/images/logo-pixel.png', Astro.site).href,
+    },
+  ],
+};
+---
+
+<link rel="canonical" href={canonical.href} />
+{noindex && <meta name="robots" content="noindex, nofollow" />}
+
+<!-- Open Graph -->
+<meta property="og:type" content={type} />
+<meta property="og:site_name" content={siteName} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonical.href} />
+<meta property="og:image" content={ogImage.href} />
+<meta property="og:locale" content="en_US" />
+<meta property="og:locale:alternate" content="ja_JP" />
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={ogImage.href} />
+
+<script is:inline type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
